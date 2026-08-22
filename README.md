@@ -105,3 +105,8 @@ orchestrate/
 ```
 
 Markdown only — there is no code to execute.
+
+## License
+
+[MIT](LICENSE) — use it for anything, commercial or not. Attribution is the only
+condition, and it's a copy-paste line.
