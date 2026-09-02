@@ -13,25 +13,36 @@ before believing any row (§Recovery in the contract).
 
 ## Legend
 
-- `⬜ Not Started` · `🔄 In Progress` · `🧪 Ready for Smoke Test` (commits on branch,
-  validations green, awaiting USER verdict) · `❌ Smoke Failed` · `✅ Merged` ·
-  `⛔ Blocked` · `👤 User Action`
+- `⬜ Not Started` · `🔄 In Progress` · `🟢 Integrated` (reviewed, validations green,
+  merged to the integration branch; verified at its checkpoint) · `🧪 At Checkpoint`
+  (checkpoint reached, awaiting the USER's combined smoke verdict) · `❌ Smoke Failed` ·
+  `✅ Merged` · `⛔ Blocked` · `👤 User Action`
 
 ## Batches
 
-| # | Batch | Branch | Version | Status | Updated | Notes |
-|---|-------|--------|---------|--------|---------|-------|
+| # | Batch | Branch | Wave | Version | Status | Updated | Notes |
+|---|-------|--------|------|---------|--------|---------|-------|
 <!-- one row per batch from the plan's batch table, all ⬜ at scaffold time (Version "—"
-     if the repo doesn't version). Keep Notes DENSE at close-out: commit SHA, root cause,
-     reviewer arc (e.g. "two-round: D1 blocking → FIX VERIFIED"), accepted residuals,
-     validation results. The Notes column is the change's institutional memory. -->
+     if the repo doesn't version). Keep Notes DENSE at integration: commit SHA, root
+     cause, reviewer arc (e.g. "two-round: D1 blocking → FIX VERIFIED"), accepted
+     residuals, validation results. The Notes column is the change's institutional
+     memory. -->
+
+## Checkpoints
+
+| Checkpoint | After wave | Covers | Why here | Status | Verdict |
+|------------|------------|--------|----------|--------|---------|
+<!-- one row per checkpoint from the plan's wave map — intermediate rows only after
+     waves carrying hands-on batches, plus the mandatory final row. Status ⬜ until
+     reached, 🧪 while awaiting the user, then ✅/❌ per the verdict log. -->
 
 ## Smoke-test verdict log
 
-| Date | Batch | Verdict | User notes |
-|------|-------|---------|------------|
-<!-- record the user's VERBATIM words for every verdict — including any merge/push/release
-     authorization contained in the same message; that wording is the authorization record -->
+| Date | Checkpoint | Verdict | User notes |
+|------|------------|---------|------------|
+<!-- record the user's VERBATIM words for every checkpoint verdict — including any
+     merge/push/release authorization in the same message (that wording IS the
+     authorization record) and which batch(es) a partial fail indicts. -->
 
 ## Item → batch coverage audit
 
@@ -45,5 +56,6 @@ before believing any row (§Recovery in the contract).
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
-<!-- append one row per session: what happened (batches touched, reconciliations, reviewer
-     arcs) and exactly why work halted (smoke gate, ⛔, user input needed, COMPLETE) -->
+<!-- append one row per session: what happened (waves opened with base SHAs, batches
+     integrated, reconciliations, reviewer arcs, checkpoint close-outs with integration
+     SHAs) and exactly why work halted (checkpoint, ⛔, user input needed, COMPLETE) -->

@@ -3,23 +3,30 @@
 <!-- 2–4 sentences of context: what this change is, what prompted it, intended outcome. -->
 
 **Orchestration**: this change runs under [00-READBEFORE.md](00-READBEFORE.md) — that
-file is the contract; this one only locks scope and ordering.
+file is the contract; this one only locks scope, waves, and checkpoints.
 
 ## Batch table
 
-| # | Batch | Type | Branch | Files (fence) | Version |
-|---|-------|------|--------|---------------|---------|
-<!-- one row per batch; Type = fix / feature / chore. Fences must not overlap unless the
-     execution model explicitly handles the collision. Version "—" if the repo doesn't
-     version. -->
+| # | Batch | Type | Branch | Wave | Files (fence) | Smoke | Version |
+|---|-------|------|--------|------|---------------|-------|---------|
+<!-- one row per batch; Type = fix / feature / chore. Wave = the concurrent group it
+     runs in. Fences must be DISJOINT within a wave — reshape batches (seam batches,
+     splits, merges) until the safe waves are as wide as possible. Smoke = the covering
+     checkpoint (e.g. "C1"), suffixed "(hands-on)" for batches that need the user's
+     hands — those are the reason an intermediate checkpoint exists. Version "—" if the
+     repo doesn't version. -->
 
-## Ordering rationale
+## Wave map & checkpoints
 
-<!-- Why this order: dependencies, risk-first vs quick-wins-first, fence overlaps that
-     force sequence, and (if waves/stack) which batches group and why.
+<!-- One line per wave: members + WHY they are safe together (disjoint fences, no
+     dependency between them). One line per checkpoint: after which wave, which batches
+     it covers, and why it sits there — intermediate checkpoints exist ONLY for
+     hands-on risk; the final checkpoint is mandatory and covers everything since the
+     last one (with no hands-on work outside the final wave, it is the ONLY one). Then
+     any dependencies that force wave ordering.
      RULE: user-decision gates (UX mockup approvals, design picks) come FIRST —
-     resolved at planning time where possible, else the earliest batches. No mid-run
-     batch may stall waiting on the user for a gate the plan already knew about. -->
+     resolved at planning time where possible, else wave 1. No mid-run wave may stall
+     waiting on the user for a gate the plan already knew about. -->
 
 ## Per-batch specifications
 

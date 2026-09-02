@@ -1,8 +1,9 @@
 # B{{BATCH_NUM}} — {{BATCH_TITLE}} ({{BATCH_TYPE}}, {{BATCH_VERSION}})
 
-**Branch**: `{{BATCH_BRANCH}}`
-<!-- linear stack: append "(cut from B<prev> tip)"; waves: name the wave grouping -->
+**Branch**: `{{BATCH_BRANCH}}` (cut from the integration tip when the wave opens)
+**Wave**: {{BATCH_WAVE}}
 **Depends on**: {{BATCH_DEPS}}
+**Smoke gate**: {{BATCH_SMOKE_GATE}}
 **Files** (the fence — modify NOTHING else): {{BATCH_FILES}}
 **Spec**: [01-plan.md](01-plan.md) §B{{BATCH_NUM}} · **Reviewer pass required**
 
@@ -25,10 +26,13 @@
 
 ## Validation
 
-Run the validation commands in [00-READBEFORE.md](00-READBEFORE.md) — all green before 🧪.
+Run the validation commands in [00-READBEFORE.md](00-READBEFORE.md) — all green before
+the batch may integrate (🟢).
 
-## Smoke (user)
+## Smoke (checkpoint)
 
 <!-- Numbered steps the USER performs by hand, written against the smoke procedure in
-     00-READBEFORE.md. Each step states the expected outcome. Include setup preconditions
-     (accounts, hardware, test data) the user needs. -->
+     00-READBEFORE.md. Each step states the expected outcome. Include setup
+     preconditions (accounts, hardware, test data) the user needs. These steps are NOT
+     run after this batch alone: they are aggregated into the covering checkpoint's
+     combined script, hands-on batches first. -->

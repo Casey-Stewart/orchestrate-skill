@@ -1,57 +1,123 @@
-# Execution models
+# Execution model — the waved stack
 
-Chosen once at scaffold time, recorded with rationale in the ledger's READBEFORE (git
-model section) and PROGRESS preamble. Two facts from the plan's batch table drive the
-choice: do the file fences overlap, and does every close-out touch the same
-version/changelog files?
+One model, structured at scaffold time and recorded in the ledger's READBEFORE (git
+model section) and PROGRESS preamble: batches are grouped into **waves** that run
+concurrently, waves stack serially onto an **integration branch**, and the user
+smoke-tests only at planned **checkpoints**. Strict one-at-a-time sequencing is just
+the degenerate case (every wave width 1) — it is not a separate model.
 
-## Decision table
+## The three structures
 
-| Situation | Model |
-|---|---|
-| Default; fences overlap; or any doubt | **Strict sequential** |
-| Repo versions per batch, so every close-out touches the same version files | **Linear stack** |
-| Fences fully disjoint AND close-outs don't collide (or close-out deferred to the end) | **Stacked waves** — eligible, still needs the user's explicit waiver of the sequential gate |
+- **Wave** — a set of batches that run AT THE SAME TIME: one implementer per batch,
+  each in its own git worktree on its own branch. Two batches may share a wave only
+  if ALL hold:
+  1. Neither depends on the other, directly or transitively.
+  2. Their file fences are disjoint. Version files, the changelog, and the ledger
+     don't count against this — those are orchestrator-only, touched at integration,
+     never by implementers.
+  3. Neither carries an unresolved user gate (design approvals are settled at
+     planning time or scheduled as wave 1).
+- **Integration branch** — the scaffold branch `chore/<slug>-ledger` by default.
+  Reviewed batch branches merge into it serially; it is the only branch that ever
+  merges toward the default branch. Fence disjointness (plus PROGRESS living only on
+  the integration branch and each batch ticking only its own batch file) makes these
+  merges conflict-free by construction — an actual conflict means a fence was
+  violated: stop and reconcile, never hand-resolve silently.
+- **Checkpoint** — a planned STOP where the USER smoke-tests everything integrated
+  since the last checkpoint, in one combined session. Between checkpoints the run is
+  autonomous: implement → review → integrate → next wave, no user interaction.
 
-## Strict sequential (default)
+## Building the wave map (planning time)
 
-Each batch branches from the default branch only after every earlier batch is ✅. One
-branch, one review, one smoke, one merge per batch. Slowest cadence, zero merge
-conflicts by construction, and the user sees each change in isolation.
+The planner doesn't just discover concurrency — it ENGINEERS it:
 
-## Linear stack
+1. Draft the batches, then actively reshape fences for disjointness: pull a shared
+   file into its own small "seam" batch that runs in an early wave; merge two batches
+   that would fight over the same files; split a wide batch whose halves are
+   independent.
+2. Assign waves greedily: wave 1 = every batch with no dependencies, mutually
+   disjoint; wave N = every remaining batch whose dependencies all land by wave N-1,
+   mutually disjoint with its wave peers. A batch that fits several waves goes in the
+   earliest.
+3. Aim for the widest safe waves, not the largest batch count — 5 batches as "3
+   concurrent, then 2 concurrent" beats 5 back-to-back whenever the fences allow it.
+4. Record the map in the plan (Wave column + wave map section) with one line per wave
+   on WHY its members are safe together. The user's plan approval IS the standing
+   authorization to run each wave concurrently — no further waiver is needed mid-run.
 
-For repos where every batch close-out bumps the same version/changelog files — parallel
-branches from the default branch would all conflict there on merge.
+## Placing checkpoints (planning time)
 
-- Batch 00 = ledger scaffolding, committed on `chore/<slug>-ledger` — the stack base.
-- Each batch branch is cut from the PREVIOUS batch's tip; every batch carries its own
-  close-out commit (version bump + changelog + ledger flip).
-- The user smoke-tests — often ONE combined session over the whole stack — then
-  fast-forward merges the default branch up to the LAST PASSING batch tip.
-- A failing batch stops the ff there: fix-ups land on that batch's branch; later batches
-  rebase onto the fixed tip.
-- The reviewer diffs each batch against the PREVIOUS batch's tip, not the default branch.
+Manual smoke tests are scarce by design: the user tests at checkpoints, never per
+batch or per wave by default.
 
-## Stacked waves
+- Classify every batch **hands-on** or **machine-verifiable**. Hands-on ("scary")
+  means validations + code review genuinely cannot establish it works: visible UI/UX
+  behavior, auth/payment/external-service flows, data migrations, destructive or
+  hard-to-reverse operations, cross-cutting refactors of live paths — or anything the
+  user should see working before more code stacks on top of it.
+- Place ONE checkpoint after each wave that contains a hands-on batch.
+- Always end with a final checkpoint covering every batch not covered earlier. If the
+  only hands-on work sits in the last wave — or there is none — the final checkpoint
+  is the ONLY one.
+- The user confirms placement at plan approval and may add or remove checkpoints;
+  record their choice. Never insert an unplanned mid-run smoke gate unless a wave
+  surfaces something genuinely unforeseeable (record why in PROGRESS).
 
-File-disjoint batches run CONCURRENTLY: one implementer per batch, each in an isolated
-git worktree under the session scratchpad (never inside the repo; run the ledger's
-per-worktree setup; revert lockfile/derived-file churn before committing). Work
-integrates onto a `wave/N-<slug>` branch for ONE combined smoke and ONE merge.
+## Wave mechanics (run time)
 
-- Requires the user's explicit waiver of the sequential gate, recorded verbatim in
-  PROGRESS before the wave starts.
-- The plan marks which batches are file-disjoint and wave-safe; only those may share a
-  wave.
-- On a waiver, copy the freshest ledger state from the unmerged branch into the new
-  branch's first commit and accept the trivial single-file ledger merge later.
-- Close-outs happen once at wave integration (or per batch if version files don't
-  collide).
+1. **Open the wave**: from the integration tip, cut every member batch's branch;
+   create one worktree per batch under the session scratchpad (never inside the
+   repo); run the ledger's per-worktree setup; commit ONE PROGRESS flip on the
+   integration branch (member rows → 🔄, branches named, wave base SHA in the session
+   log). Spawn all implementers in a single message so they run concurrently.
+2. **Review as they land**: each finished batch gets its own independent read-only
+   reviewer immediately (diff three-dot against the integration branch, which
+   isolates the batch's own changes); don't wait for the wave's slowest batch. Fix
+   rounds per batch as usual, max 2 → ⛔.
+3. **Integrate serially**: each batch that passes review merges into the integration
+   branch (orchestrator only; row → 🟢). Version/changelog work happens here or at
+   the checkpoint per the ledger's cadence — implementers never touch either.
+4. **Close the wave** when every member is 🟢 or ⛔: remove the worktrees. A ⛔ batch
+   is left out of integration, its dependents stay ⬜-blocked, and it is surfaced at
+   the next STOP.
+5. **Checkpoint or continue**: if the wave map places a checkpoint here →
+   per-checkpoint close-out, covered rows 🟢 → 🧪, STOP with the combined smoke
+   script. Otherwise → open the next wave immediately, same session.
 
-## Changing model mid-change
+**Before handing over ANY checkpoint script, make the build identifiable.** Bump the
+version on the integration branch so it differs from the base branch's, and open the
+script with (a) the terminal command that prints the current branch, (b) the version
+she should see, and (c) a **canary** — one cheap step whose result is OPPOSITE on the
+base build, run FIRST, with "if it behaves the old way, stop and say so".
+A script whose every step passes on the base build cannot detect that it ran against
+the base build. This is not hypothetical: a pack that deferred its single bump to
+close-out handed over a script saying "confirm the version reads X" when the base
+branch also read X; the checkout had silently never happened, the user ran all twenty
+steps against the base, and reported the un-fixed defects as failures. Note which
+batch appeared to "pass" — the one whose steps deliberately exercise behaviour the fix
+must NOT disturb. Those steps pass on old code by design, so they are the ones most
+likely to disguise a wrong-tree run.
 
-Allowed with the user's explicit sign-off: record the switch + rationale in the PROGRESS
-preamble and a Session log row. In practice: a bug-review change
-started strict sequential and finished in waves; a UX fix pack ran a linear stack end to
-end because each of its seven batches shipped its own version.
+## Degenerate cases
+
+- Every fence overlaps → every wave has width 1 → the run is sequential, still with
+  minimal checkpoints. Nothing else changes.
+- The repo versions per batch → bumps happen serially at each integration merge, so
+  they never collide even inside a wave.
+- No sub-agent support → the orchestrator implements a wave's batches one at a time
+  in the main checkout (worktrees unnecessary); the wave map still decides what may
+  proceed without a checkpoint in between.
+
+## Changing the map mid-change
+
+Allowed with the user's explicit sign-off: record the change + rationale in the
+PROGRESS preamble and a Session log row. Typical causes: a ⛔ batch forces
+re-planning its dependents; a checkpoint failure reveals a batch was scarier than
+classified (add a checkpoint after its fix-up).
+
+## Legacy models
+
+Ledgers scaffolded before the waved stack may name **strict sequential**, **linear
+stack**, or **stacked waves** as their execution model, and typically smoke-gate
+every batch. Drive them under their OWN contract — never rewrite one onto this model
+without the user asking.

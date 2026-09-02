@@ -16,8 +16,13 @@
 2. **Interview** — ONE consolidated AskUserQuestion round covering only the gaps and the
    confirmations listed below.
 3. **Plan** — explore the codebase (sub-agents as needed), draft the batch table with
-   file fences, map every request item to a batch, pick the execution model per
-   `execution-models.md`, and get the plan approved by the user.
+   file fences, and map every request item to a batch. Then structure for throughput
+   per `execution-models.md`: reshape fences for disjointness (seam batches, splits,
+   merges), build the wave map (widest safe waves — "3 concurrent, then 2" beats 5
+   back-to-back), classify every batch hands-on vs machine-verifiable, and place the
+   smoke checkpoints (one after each hands-on wave + the mandatory final one — never
+   per batch). Get the plan, wave map, and checkpoints approved by the user in ONE
+   pass; that approval is the standing authorization for the concurrency.
 4. **Front-load user gates** — a batch that depends on a user design choice (UX
    layout, mockup, visual/copy pick — anything the user must SEE before code is
    written) must never sit mid-sequence where it stalls the autonomous run:
@@ -26,9 +31,10 @@
      the same interactive session, and bake the APPROVED design into the batch file.
      The user is present during planning; mid-run they may not be.
    - If a design genuinely cannot be mocked until earlier code exists, schedule that
-     batch as EARLY as its dependencies allow and mark the gate in the plan's batch
-     table (`👤 design approval`) so the user approves the stall's position along
-     with the plan.
+     batch as EARLY as its dependencies allow (wave 1 where possible) and mark the
+     gate in the plan's batch table (`👤 design approval`) so the user approves the
+     stall's position along with the plan. A gated batch never shares a wave with
+     work that would run past its unanswered question.
    - Never bury a known user gate in the middle of an otherwise-autonomous sequence.
 5. **Fill** — instantiate every file in `templates/` into
    `.agents/changes/{{CHANGE_ID}}/`, renaming `02-batch.md` to one
@@ -38,8 +44,8 @@
 6. **Self-check** — grep the new ledger directory for `{{` and for `<!--`: **zero hits**.
    Any hit is an unfilled slot; fix before committing.
 7. **Scaffold commit** — batch 00 = the ledger itself, committed on
-   `chore/{{CHANGE_SLUG}}-ledger` (which doubles as the stack base under a linear
-   stack). Never on the default branch.
+   `chore/{{CHANGE_SLUG}}-ledger`, which becomes the INTEGRATION BRANCH every wave
+   stacks onto. Never on the default branch.
 8. **STOP** — report the ledger path and batch table. Start batch 01 only if the user
    says so.
 
@@ -65,10 +71,11 @@ appear in the templates — check both directions when editing either.
 | `{{DATE}}` | template (PROGRESS, request) | today, YYYY-MM-DD |
 | `{{LEDGER_DIR}}` | template (READBEFORE) | `.agents/changes/{{CHANGE_ID}}` |
 | `{{MAIN_BRANCH}}` | template (READBEFORE) | detected: `git symbolic-ref refs/remotes/origin/HEAD` or current branch |
+| `{{INTEGRATION_BRANCH}}` | template (READBEFORE) | `chore/{{CHANGE_SLUG}}-ledger` unless the user overrides |
 | `{{BRANCH_PREFIXES}}` | template (READBEFORE) | detected from `git branch -a` history; default `fix/ feat/ chore/` |
 | `{{MERGE_POLICY}}` | template (READBEFORE) | interview #4 |
-| `{{EXECUTION_MODEL}}` | template (READBEFORE, PROGRESS) | interview #5 (recommended from the batch table) |
-| `{{EXECUTION_MODEL_RATIONALE}}` | template (READBEFORE, PROGRESS) | written at scaffold time: WHY this model, and its mechanics in 2–4 sentences |
+| `{{EXECUTION_MODEL}}` | template (READBEFORE, PROGRESS) | interview #5 — the confirmed wave map summary (waves + members + checkpoint positions, e.g. "Waved stack — W1: B01+B02+B03; W2: B04+B05. Checkpoints: C1 after W1 (B02 hands-on), C2 final") |
+| `{{EXECUTION_MODEL_RATIONALE}}` | template (READBEFORE, PROGRESS) | written at scaffold time: WHY these waves are safe together and why the checkpoints sit where they do, in 2–4 sentences |
 | `{{VALIDATION_COMMANDS}}` | template (READBEFORE) | interview #1 — fenced block, one command + comment per line, or literal `none` |
 | `{{VERSION_FILES}}` | template (READBEFORE) | interview #2 — or `none` |
 | `{{VERSION_BUMP_RULE}}` | template (READBEFORE) | interview #2 — cadence + per-batch vs per-change, or `none` |
@@ -86,7 +93,9 @@ appear in the templates — check both directions when editing either.
 | `{{BATCH_TYPE}}` | template (batch file) | `fix` / `feature` / `chore` |
 | `{{BATCH_VERSION}}` | template (batch file) | per the bump rule; `—` if the repo doesn't version |
 | `{{BATCH_BRANCH}}` | template (batch file) | `<prefix>/<batch-slug>` |
-| `{{BATCH_DEPS}}` | template (batch file) | batch numbers this batch needs merged first; `none` if independent |
+| `{{BATCH_DEPS}}` | template (batch file) | batch numbers this batch needs integrated first; `none` if independent |
+| `{{BATCH_WAVE}}` | template (batch file) | wave number from the plan's wave map |
+| `{{BATCH_SMOKE_GATE}}` | template (batch file) | `hands-on — checkpoint C<n> follows wave <w>` or `machine-verifiable — covered by the final checkpoint (C<n>)` |
 | `{{BATCH_FILES}}` | template (batch file) | the file fence from the plan's batch table |
 
 ## Detection heuristics (run before asking anything)
@@ -104,16 +113,30 @@ appear in the templates — check both directions when editing either.
 ## Interview (one AskUserQuestion round — confirmations + gaps only)
 
 1. **Validation commands** — present the detected list to confirm/edit; nothing detected
-   → ask, offering "none (the smoke gate carries all verification)".
+   → ask, offering "none (the checkpoint smoke tests carry all verification)".
 2. **Version + changelog** — bump per batch, per change, or never? Which files move in
    lockstep? Changelog convention (confirm the inferred ordering).
+   **Default to bumping at least once per CHECKPOINT, and say why when you ask.** A
+   single bump deferred to close-out leaves the integration branch sharing a version
+   with the branch it was cut from — so the smoke script's "confirm the version" step
+   cannot distinguish them and passes on the wrong build. That shipped: a user ran an
+   entire 20-step script against the base branch, reported the un-fixed defects as
+   failures, and caught it only by asking whether the changes were really in the
+   build. If the user still prefers one bump, say plainly that the checkpoint scripts
+   will then need a behavioural canary instead, and make sure they get one. A
+   changelog entry per checkpoint is NOT implied — one entry per change is usually
+   still right; it is the VERSION that must move.
 3. **Smoke procedure** — ALWAYS asked, free text: "How do you verify a change by hand in
-   this project?" (per-batch smoke scripts are written against the answer, including any
-   gotchas like "reload the extension, then refresh the page").
-4. **Merge policy** — default: the USER smoke-tests and merges; the orchestrator never
-   pushes. Confirm or adjust (PR flow, orchestrator ff-merge on recorded verdict).
-5. **Execution model** — present the recommendation from `execution-models.md` with its
-   rationale; confirm.
+   this project?" (checkpoint smoke scripts are written against the answer, including
+   any gotchas like "reload the extension, then refresh the page").
+4. **Merge policy** — default: work stacks on the integration branch; the USER
+   smoke-tests at checkpoints and merges; the orchestrator never pushes. Confirm or
+   adjust (PR flow, orchestrator ff-merge on recorded verdict).
+5. **Wave map + checkpoints** — present the computed wave map (which batches run
+   concurrently, and why that is safe) and the checkpoint placement (after which
+   waves, with the hands-on batches named) per `execution-models.md`; the user
+   confirms or adjusts. Fewest checkpoints wins: intermediate ones exist only for
+   hands-on risk, and the final one is mandatory.
 6. **ID prefix** — default: initials of the repo directory name
    (`inventory-sync-tool` → `IST`); confirm.
 7. **Distillation targets + prohibitions** — only if detection found no guardrails
