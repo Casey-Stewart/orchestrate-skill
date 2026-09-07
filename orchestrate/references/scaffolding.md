@@ -85,7 +85,7 @@ appear in the templates — check both directions when editing either.
 | `{{REPO_CONVENTIONS}}` | template (READBEFORE) | distilled from the project CLAUDE.md/docs — the BINDING subset, ≤25 lines, plus a pointer to the source doc; never a wholesale copy |
 | `{{EXTRA_PROHIBITIONS}}` | template (READBEFORE) | interview #7 / CLAUDE.md — repo-specific never-touch items; `(none beyond the above)` if empty |
 | `{{GUARDRAILS_REF}}` | template (READBEFORE ×3) | detected guardrails section (e.g. `` `CLAUDE.md` §Bug-Class Guardrails ``) or `the project guardrails doc (none yet — create a CLAUDE.md guardrails section at first distill)` |
-| `{{BACKLOG_FILE}}` | template (READBEFORE ×2) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
+| `{{BACKLOG_FILE}}` | template (READBEFORE ×3) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
 | `{{RELEASE_COMMAND}}` | template (READBEFORE) | detected build/release script or `none` |
 | `{{BATCH_NUM}}` | template (batch file) | per batch, two digits |
 | `{{BATCH_SLUG}}` | naming only | per batch, kebab-case |

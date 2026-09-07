@@ -20,7 +20,8 @@ Every change gets one directory, committed to the repo:
 ├── 00-READBEFORE.md     the contract: boot, git model, checkpoints, validations, recovery, algorithm
 ├── 01-plan.md           locked scope: batch table, wave map + checkpoints, per-batch specs, coverage
 ├── 02-batches-NN-*.md   one per batch: wave, file fence, spec, checklist, acceptance, smoke steps
-└── PROGRESS.md          live status + checkpoint tables, smoke verdicts, coverage audit, session log
+├── PROGRESS.md          live status + checkpoint tables, smoke verdicts, coverage audit, session log
+└── smoke-CN.html        the checkpoint smoke page as handed over (written at each checkpoint)
 ```
 
 The work then runs in **waves**: file-disjoint batches implemented concurrently, one
@@ -43,8 +44,12 @@ serially onto an **integration branch**. Four gates hold throughout:
 4. **Your smoke test — at checkpoints, not per batch.** Nothing is marked done on an
    agent's say-so, but your hands-on time is spent sparingly: checkpoints sit after
    waves carrying hands-on risk (visible UI, auth flows, migrations), plus one mandatory
-   final one. The run stops there with one combined smoke script and waits for your
-   verdict, recorded verbatim. Between checkpoints the run is autonomous.
+   final one. The run stops there with one combined smoke script — published as an
+   interactive **smoke page** you run the checkpoint from: a step-0 "prove you're on
+   the right build" gate, per-step Pass / Fail / Blocked / Works-but verdicts with
+   notes, a progress meter, and a copy-results button whose paste is your verdict
+   message — and waits for that verdict, recorded verbatim. Between checkpoints the
+   run is autonomous.
 
 If a session crashes mid-wave, the next one reconciles the ledger against git — branch
 exists? commits past the wave base? integrated? checklist ticked? — and resumes from
@@ -91,7 +96,7 @@ and it will pick the skill up.
 | Command | What it does |
 |---|---|
 | `/orchestrate new <description>` | Interview, plan the batches, scaffold the ledger, stop for your approval |
-| `/orchestrate continue` | Run to the next checkpoint: open the wave, implement its batches concurrently, review + integrate each as it lands, repeat — then stop with one combined smoke script |
+| `/orchestrate continue` | Run to the next checkpoint: open the wave, implement its batches concurrently, review + integrate each as it lands, repeat — then stop with one combined smoke page |
 | `/orchestrate status` | Read-only: reconcile every row against git and report what's actually true |
 | `/orchestrate close` | Record your checkpoint verdict; finish the change when the final checkpoint passes |
 
@@ -116,11 +121,13 @@ orchestrate/
 │   ├── protocol.md                 canonical spec, legacy interop, degraded environments
 │   ├── execution-models.md         the waved stack: wave map, checkpoints, integration
 │   ├── scaffolding.md              detection heuristics, interview, placeholder registry
-│   └── subagent-prompts.md         implementer / reviewer / fix-up prompt skeletons
+│   ├── subagent-prompts.md         implementer / reviewer / fix-up prompt skeletons
+│   ├── smoke-page.md               the checkpoint hand-over format: assembly, publishing, verdict triage
+│   └── smoke-page-template.html    the smoke page itself, with slots for the run-specific content
 └── templates/                      the five ledger files, with placeholders
 ```
 
-Markdown only — there is no code to execute.
+Markdown plus one self-contained HTML template — nothing executes on your machine.
 
 ## License
 

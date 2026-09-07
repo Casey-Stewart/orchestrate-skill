@@ -31,8 +31,17 @@ the batch may integrate (🟢).
 
 ## Smoke (checkpoint)
 
-<!-- Numbered steps the USER performs by hand, written against the smoke procedure in
-     00-READBEFORE.md. Each step states the expected outcome. Include setup
-     preconditions (accounts, hardware, test data) the user needs. These steps are NOT
-     run after this batch alone: they are aggregated into the covering checkpoint's
-     combined script, hands-on batches first. -->
+<!-- Steps the USER performs by hand, written against the smoke procedure in
+     00-READBEFORE.md. NOT run after this batch alone: they aggregate into the
+     covering checkpoint's combined smoke page (data-touching sections first), so
+     author each step in the page's field vocabulary:
+     - Do: one action, imperative, naming the exact UI ("Press Edit… on a supplier").
+     - Pass: the acceptance criterion — what the user sees when it works, kept apart
+       from Do.
+     - Aside (optional): warning or context ("Enter cancels here — click the button").
+     - Counting (optional): when Pass checks a number, define ONE unit in the user's
+       words ("One unit = one purchase order").
+     - Tag (optional): short hazard label ("Scanner safety").
+     Once per batch, if applicable: "You need" (test data / hardware / accounts),
+     "Order matters" (cross-step constraints), "Touches your data" (flag — these
+     sections run FIRST in the combined script). -->

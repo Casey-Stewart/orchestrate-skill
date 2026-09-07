@@ -100,8 +100,10 @@ on `chore/<slug>-ledger` (which becomes the integration branch) → STOP and rep
    first → unanswered 🧪 checkpoint → open the next wave (cut branches + worktrees,
    spawn ALL of the wave's implementers concurrently) → reviewer gate per batch as
    each lands → integrate reviewed batches serially → next wave, repeating until a
-   checkpoint → per-checkpoint close-out → STOP, printing the checkpoint's combined
-   smoke script. Build spawn prompts from
+   checkpoint → per-checkpoint close-out → STOP, delivering the checkpoint's combined
+   smoke script as an interactive smoke page per
+   [references/smoke-page.md](references/smoke-page.md) (plain text only when the
+   session cannot publish artifacts). Build spawn prompts from
    [references/subagent-prompts.md](references/subagent-prompts.md).
 
 ## Mode: status
@@ -116,7 +118,10 @@ recommended next action. Drift corrections happen in `continue`, not here.
 1. Record the user's verdict VERBATIM in the PROGRESS smoke-verdict log. A checkpoint
    pass flips every batch it covers 🧪→✅. A fail: triage the symptoms to the
    offending batch(es) → ❌ (the fix-up then runs via `continue`); batches the user
-   explicitly passed flip ✅; the rest stay 🧪 for the re-run.
+   explicitly passed flip ✅; the rest stay 🧪 for the re-run. Smoke-page verdicts
+   beyond pass/fail ([references/smoke-page.md](references/smoke-page.md)):
+   **works-but** → named backlog entry, never a failure; **blocked** → correct the
+   step and re-issue the page, or reclassify as a fail if the app lacks the behavior.
 2. Merge / push / release ONLY on the user's explicit authorization — their exact words
    are the record (a verdict message may carry the authorization; quote it).
 3. Final checkpoint ✅ → change-complete close-out per the contract: final coverage
@@ -143,5 +148,9 @@ recommended next action. Drift corrections happen in `continue`, not here.
   interview, placeholder registry, self-check
 - [references/subagent-prompts.md](references/subagent-prompts.md) — implementer /
   reviewer / fix-up prompt skeletons
+- [references/smoke-page.md](references/smoke-page.md) — the checkpoint hand-over
+  format: filling and publishing
+  [references/smoke-page-template.html](references/smoke-page-template.html),
+  verdict intake and triage
 - [templates/](templates/) — `00-request.md`, `00-READBEFORE.md`, `01-plan.md`,
   `02-batch.md` (one per batch), `PROGRESS.md`

@@ -4,6 +4,7 @@
 **Started**: {{DATE}}
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md)
+**Smoke page**: — (artifact URL, recorded at the first checkpoint hand-over)
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
 before believing any row (§Recovery in the contract).
 
@@ -42,7 +43,9 @@ before believing any row (§Recovery in the contract).
 |------|------------|---------|------------|
 <!-- record the user's VERBATIM words for every checkpoint verdict — including any
      merge/push/release authorization in the same message (that wording IS the
-     authorization record) and which batch(es) a partial fail indicts. -->
+     authorization record) and which batch(es) a partial fail indicts. The smoke
+     page's "Copy results as text" paste is the preferred form; works-but items
+     become backlog entries, not failures. -->
 
 ## Item → batch coverage audit
 

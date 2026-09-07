@@ -82,13 +82,15 @@ batch or per wave by default.
    the next STOP.
 5. **Checkpoint or continue**: if the wave map places a checkpoint here →
    per-checkpoint close-out, covered rows 🟢 → 🧪, STOP with the combined smoke
-   script. Otherwise → open the next wave immediately, same session.
+   script, delivered as the smoke page (`smoke-page.md`). Otherwise → open the next
+   wave immediately, same session.
 
 **Before handing over ANY checkpoint script, make the build identifiable.** Bump the
 version on the integration branch so it differs from the base branch's, and open the
 script with (a) the terminal command that prints the current branch, (b) the version
 she should see, and (c) a **canary** — one cheap step whose result is OPPOSITE on the
-base build, run FIRST, with "if it behaves the old way, stop and say so".
+base build, run FIRST, with "if it behaves the old way, stop and say so". On the smoke page this
+is Step 0 — the gate, a non-verdict section rendered before every verdict step.
 A script whose every step passes on the base build cannot detect that it ran against
 the base build. This is not hypothetical: a pack that deferred its single bump to
 close-out handed over a script saying "confirm the version reads X" when the base

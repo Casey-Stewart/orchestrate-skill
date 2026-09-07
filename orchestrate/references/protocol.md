@@ -18,6 +18,7 @@ is the audit trail of an AI-assisted change. Standard files (new scaffolds):
 | `01-plan.md` | Locked scope: batch table, wave map + checkpoints, per-batch specs, coverage audit |
 | `02-batches-NN-<slug>.md` | One per batch: wave, fence, verbatim spec, checklist, acceptance criteria, checkpoint smoke steps |
 | `PROGRESS.md` | The live ledger: status + checkpoint tables, verdict log, coverage audit, session log |
+| `smoke-<Cn>.html` | The combined checkpoint script as handed over — committed source of the smoke page, written at each checkpoint close-out |
 
 A scaffolded ledger is a **closed system**: every repo-specific fact (validation
 commands, version files, merge policy, wave map, checkpoint placement, smoke procedure)
@@ -91,6 +92,18 @@ the last. If no hands-on work sits outside the final wave, the final checkpoint 
 ONLY one. Between checkpoints the run is autonomous. A reached checkpoint is never
 skipped and never resolved without the user's verdict.
 
+The combined script is delivered as an interactive **smoke page** (`smoke-page.md`):
+one artifact per change, republished per checkpoint, with a step-0 build-identity
+gate, verdict buttons per step, and a copy-results-as-text button whose paste is the
+verdict message. Its filled source is committed to the ledger as `smoke-<Cn>.html`;
+the artifact URL is recorded in the PROGRESS preamble. Plain text is the fallback
+when the session cannot publish artifacts, and the batch files' smoke steps stay
+canonical either way. Verdicts are FOUR: **pass** · **fail** (triage → ❌) ·
+**blocked** (the step could not be performed as written — usually correct the STEP
+and re-ask; reclassify as fail only if the app lacks the behavior) · **works-but**
+(works as specified, the user wants it different — named backlog entry, never a
+failure, never blocks the pass).
+
 ## §Recovery — the reconcile table
 
 For each PROGRESS row not `✅`/`👤`, gather: branch exists? (`git rev-parse --verify`),
@@ -119,8 +132,9 @@ reconciliation in the PROGRESS Session log.
 1. Boot + reconcile.
 2. Any `❌`? On the integration branch, spawn ONE fix-up implementer with the user's
    failure notes verbatim + the indicted batch file(s) + the diff since the last
-   passed checkpoint; fix → validate → commit → rows back to 🧪 → STOP, reprinting
-   the checkpoint's combined smoke script.
+   passed checkpoint; fix → validate → commit → rows back to 🧪 → STOP, re-issuing
+   the checkpoint's smoke script (republish the smoke page with the affected steps
+   annotated — earlier verdicts survive; or reprint the text).
 3. Any `🧪`? A checkpoint is open — ask the user for its verdict (passed / failed /
    waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave with `⬜` batches whose deps are all 🟢/✅.
@@ -136,8 +150,9 @@ reconciliation in the PROGRESS Session log.
    next STOP).
 7. Integrate serially: merge each SHIP batch into the integration branch, apply the
    version/changelog cadence, flip its row 🟢, remove its worktree.
-8. Wave closed. Carries a checkpoint → per-checkpoint close-out → STOP, printing the
-   COMBINED smoke script (every covered batch's steps, hands-on batches first). No
+8. Wave closed. Carries a checkpoint → per-checkpoint close-out → STOP, delivering
+   the COMBINED smoke script (every covered batch's steps, hands-on batches first)
+   as the smoke page, text as fallback. No
    checkpoint → open the next wave in the SAME session. Default cadence: run to the
    next checkpoint, stopping early only at ⛔ or an unplanned user gate.
 
@@ -152,8 +167,9 @@ the STOP hand-off.
 
 **Per-checkpoint** (step 8): version bump + changelog per the cadence for everything
 integrated since the last checkpoint, covered rows `🟢` → `🧪`, checkpoint-table row,
-session-log row recording the checkpoint's integration SHA, commit on the integration
-branch, STOP with the combined smoke script.
+session-log row recording the checkpoint's integration SHA, the filled smoke page
+committed as `smoke-<Cn>.html`, commit on the integration branch, STOP with the
+combined smoke script (smoke page link + gate essentials in text).
 
 **Change-complete** (after the FINAL checkpoint passes and every batch is ✅):
 1. Final coverage audit — every request item → merged commit / intended-behavior
@@ -197,3 +213,6 @@ Never rewrite a legacy ledger into the new format — drive it under its own con
   hunk-mapping duty, before integration. Checkpoint placement is unchanged.
 - **No validation commands**: legal (contract says `none`); the checkpoint smoke tests
   carry all verification and every hand-over message must say so.
+- **No artifact publishing**: deliver the checkpoint script as plain text — gate
+  first, then each step's Do/Pass in the same section order. The batch files' smoke
+  steps are canonical either way.

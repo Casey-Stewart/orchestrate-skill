@@ -88,10 +88,31 @@ three lines say `none`, skip version/changelog work at close-out and say so.
 The user smoke-tests at the CHECKPOINTS in the plan's wave map — never per batch.
 Intermediate checkpoints exist only after waves carrying hands-on batches (marked in
 the batch table); the final checkpoint is mandatory and covers everything since the
-last one. At a checkpoint the orchestrator prints ONE combined script: every covered
-batch's smoke steps, hands-on batches first. How the user smoke-tests in this project:
+last one. At a checkpoint the orchestrator assembles ONE combined script — every
+covered batch's smoke steps, data-touching sections first, then the rest of the
+hands-on work, steps numbered continuously. How the user smoke-tests in this project:
 {{SMOKE_PROCEDURE}}. A reached checkpoint is never skipped and never resolved without
 the user's verdict.
+
+**Delivery.** When the driving session can publish artifacts, the script ships as an
+interactive smoke page: reuse the format of the newest `smoke-*.html` in this ledger
+(or the session's own smoke-page template), commit the filled page as
+`smoke-<Cn>.html`, publish it (first publish: `capabilities: {db: {}}`, favicon 🧪,
+URL recorded in the PROGRESS preamble; later checkpoints and re-issues republish that
+URL), and hand over the link PLUS the gate essentials in text. Otherwise print the
+full script as plain text. Either way the batch files' smoke steps are canonical, and
+every script OPENS with a non-verdict gate: the command that prints the current
+branch, the version the user must see, and a canary whose result is OPPOSITE on the
+base build — run first, "if it behaves the old way, stop and say so".
+
+**Verdicts are four**: **pass** · **fail** (did something else — triage to the
+offending batch(es) → ❌) · **blocked** (the step could not be performed as written —
+correct the STEP and re-ask, or reclassify as fail if the app lacks the behavior) ·
+**works-but** (works exactly as specified, the user wants it different → named
+{{BACKLOG_FILE}} entry — never a failure, never blocks the pass). The user's message
+carries the verdict — the page's "Copy results as text" paste is the preferred form,
+recorded verbatim. On re-issues never renumber existing steps (verdicts key on step
+numbers); annotate corrected steps instead.
 
 ## §Recovery — reconcile ledger vs git (orchestrator, every session)
 
@@ -126,7 +147,9 @@ reconciliation in the PROGRESS Session log.
 2. If any batch is `❌ Smoke Failed`: on `{{INTEGRATION_BRANCH}}`, spawn ONE fix-up
    implementer with the user's failure notes VERBATIM + the indicted batch file(s) +
    the diff since the last passed checkpoint; fix → validate → commit → rows back to
-   🧪 → STOP, reprinting the checkpoint's combined smoke script.
+   🧪 → STOP, re-issuing the checkpoint's smoke script per §Smoke checkpoints
+   (republish the page with the affected steps annotated — earlier verdicts survive;
+   or reprint the text).
 3. If any batch is `🧪`: a checkpoint is open — ask the user for its verdict (passed /
    failed / waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave that still has `⬜` batches whose deps are
@@ -152,8 +175,9 @@ reconciliation in the PROGRESS Session log.
    version/changelog cadence, flip the row `🟢`, remove the worktree.
 8. Wave closed. If the wave map places a checkpoint here: per-checkpoint close-out
    (version/changelog per cadence, covered rows `🟢` → `🧪`, checkpoint-table row,
-   session-log row with the checkpoint's integration SHA, commit) → STOP, printing
-   the checkpoint's COMBINED smoke script. Otherwise: go to step 4 and open the next
+   session-log row with the checkpoint's integration SHA, the filled smoke page as
+   `smoke-<Cn>.html`, commit) → STOP, delivering the checkpoint's COMBINED smoke
+   script per §Smoke checkpoints. Otherwise: go to step 4 and open the next
    wave in this SAME session. Default cadence: run until the next checkpoint — stop
    early only at `⛔` or an unplanned user gate.
 
