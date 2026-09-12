@@ -126,6 +126,13 @@ appear in the templates — check both directions when editing either.
    will then need a behavioural canary instead, and make sure they get one. A
    changelog entry per checkpoint is NOT implied — one entry per change is usually
    still right; it is the VERSION that must move.
+   **Ask WHICH COMPONENT moves, and default to PATCH for the checkpoint markers and
+   ONE MINOR for the release.** A checkpoint bump exists only to differ from the
+   branch it was cut from, so it is a marker, not a release. A pack that read
+   "bump per checkpoint" as a minor bump each time burned four minor versions on a
+   single change (0.11 → 0.12 → 0.13 → 0.14 against a base of 0.10.12) and had to
+   be renumbered to 0.11.0 at close-out. Patch markers (0.10.13, .14, .15) leave the
+   release number free and still satisfy step 0.
 3. **Smoke procedure** — ALWAYS asked, free text: "How do you verify a change by hand in
    this project?" (checkpoint smoke scripts are written against the answer, including
    any gotchas like "reload the extension, then refresh the page").

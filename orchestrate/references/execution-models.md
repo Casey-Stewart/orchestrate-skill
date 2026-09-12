@@ -100,6 +100,13 @@ batch appeared to "pass" — the one whose steps deliberately exercise behaviour
 must NOT disturb. Those steps pass on old code by design, so they are the ones most
 likely to disguise a wrong-tree run.
 
+**Bump the PATCH component for checkpoint markers; save the MINOR for the release.**
+The marker's only job is to differ from the base branch, so it costs a patch
+(0.10.13, .14, .15). Bumping the minor at each checkpoint burns a release number per
+checkpoint — one pack went 0.11 → 0.12 → 0.13 → 0.14 on a 0.10.12 base and was
+renumbered to a single 0.11.0 at close-out. The changelog is written against the
+release number, not the markers.
+
 ## Degenerate cases
 
 - Every fence overlaps → every wave has width 1 → the run is sequential, still with
