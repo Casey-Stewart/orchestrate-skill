@@ -33,9 +33,16 @@ First word of the arguments:
 
 1. Find ledgers: glob `**/PROGRESS.md` rooted at `<repo>/.agents/changes/` — dot-dirs
    often escape repo-root globs, so root the search INSIDE the directory; if that still
-   returns nothing, list the directory directly.
-2. Classify each ledger from its BATCHES-TABLE rows plus the Session log — never from
-   the Legend line or log prose (both quote every emoji):
+   returns nothing, list the directory directly. A repo may park closed ledgers in a
+   sibling archive dir (e.g. `.agents/archive/`) OUTSIDE this root — that is the point
+   of it; never widen the glob to sweep them back in.
+2. Classify by GREP, never by reading the file. A closed ledger's session log runs to
+   tens of thousands of characters and its statuses have rotted; a whole-directory read
+   costs six figures of tokens to learn one word per ledger. Grep each `PROGRESS.md`
+   for the change-COMPLETE marker and for open batch-row emoji, and read the BODY of
+   at most the ONE ledger you are about to act on. Classify from its BATCHES-TABLE rows
+   plus the Session log — never from the Legend line or log prose (both quote every
+   emoji):
    - **COMPLETE**: the Session log (or verdict log) carries an explicit change-COMPLETE
      marker — even if advisory `👤` rows remain (surface those as reminders).
    - **ACTIVE**: any batch row ⬜ 🔄 🟢 🧪 ❌ ⛔, and no COMPLETE marker.
