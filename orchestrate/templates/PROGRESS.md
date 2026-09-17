@@ -49,7 +49,7 @@ before believing any row (§Recovery in the contract).
 <!-- one row per checkpoint from the plan's wave map — intermediate rows only after
      waves carrying hands-on batches, plus the mandatory final row. Status ⬜ until
      reached, 🧪 while awaiting the user, then ✅/❌ per the verdict log. The Verdict cell
-     ends with the checkpoint's metrics token, completed at `close`:
+     ends with the checkpoint's metrics token:
      `m: pre-smoke=<agent steps passed>/<human steps> human-smoke-min=<minutes the user
      reports> escaped=<defects the user found that no gate caught>`, completed when the
      user's verdict is recorded. -->

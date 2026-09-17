@@ -352,8 +352,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    version/changelog per cadence, tip validation, QA runner pre-smoke with evidence,
    covered rows `🟢` → `🧪`, checkpoint-table row, session-log row with the checkpoint's
    integration SHA, `**State**: AT-CHECKPOINT C<n>`, the checkpoint row's token
-   `m: pre-smoke=<agent>/<human> human-smoke-min=<n> escaped=<n>` (completed at `close`
-   from the user's verdict), the filled smoke page as `smoke-<Cn>.html`, commit → STOP, delivering the checkpoint's COMBINED smoke script
+   `m: pre-smoke=<agent>/<human> human-smoke-min=<n> escaped=<n>` (completed when the
+   user's verdict is recorded), the filled smoke page as `smoke-<Cn>.html`, commit → STOP, delivering the checkpoint's COMBINED smoke script
    per §Smoke checkpoints. Otherwise: go to step 4 and open the next wave in this SAME
    session. Default cadence: run until the next checkpoint — stop early only at `⛔` or
    an unplanned user gate.

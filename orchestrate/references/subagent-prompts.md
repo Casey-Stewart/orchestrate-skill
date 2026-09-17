@@ -304,7 +304,7 @@ unmerged and the session STOPs with the three verdicts.
 - Gate order per batch: structured report present → fence check (mechanical) →
   failing-on-base (`fix` batches) → reviewer and gate agents in parallel, all fresh and
   read-only. Never spawn a reviewer before the fence check passes. S-weight batches: one
-  combined reviewer+hunter agent.
+  combined reviewer+gate agent (reviewer only when the contract names no gate agents).
 - Resume vs fresh: polish passes and the first fix round RESUME the same implementer
   (SendMessage, findings verbatim); a user-authorized third round is a FRESH implementer
   on the strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
