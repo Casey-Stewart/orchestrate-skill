@@ -62,6 +62,13 @@ batch or per wave by default.
 - The user confirms placement at plan approval and may add or remove checkpoints;
   record their choice. Never insert an unplanned mid-run smoke gate unless a wave
   surfaces something genuinely unforeseeable (record why in PROGRESS).
+- Tag every smoke step `Runner: agent` (performable in THIS repo's environment by a
+  runner the contract lists — CLI, HTTP, browser, screenshot) or `Runner: human`
+  (hardware, credentials, feel, another OS, live data — and anything "touches your
+  data" unless a disposable environment exists). Default human. At the checkpoint
+  close-out a QA runner performs the agent steps on the integration tip and records
+  evidence; the user's hands are spent only on the human steps. A repo whose contract
+  forbids running the app has no agent steps — say so rather than pretend.
 
 ## Wave mechanics (run time)
 

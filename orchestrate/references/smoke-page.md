@@ -39,7 +39,7 @@ under their own collections.
 | `{{STANDFIRST}}` | At hand-over: step and section counts, then "Your verdicts save to this page. When you're done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the chat." After a run: may be updated to summarize the result and any corrected steps. |
 | `{{FACTS_HTML}}` | `<div class="fact"><dt>…</dt><dd>…</dd></div>` items: **Branch**, **Version should read** (`0.13.1 <span class="was">0.13.0</span>` — new value, struck-through old), **Tip** (short SHA), **Suite** (e.g. `2249 / 2255 pass`), **Known failures** if any |
 | `{{GATE_BODY}}` | Step 0 — see below |
-| `{{SECTIONS_JS}}` | The sections array — schema is documented in the template |
+| `{{SECTIONS_JS}}` | The sections array — schema is documented in the template; steps the QA runner already performed carry `pre: {sha, env, evidence}` |
 | `{{CKPT_KEY}}` | Lowercase checkpoint id (`c1`, `c2`, …) — localStorage key, db collection, one per checkpoint |
 | `{{COPY_HEADER}}` | `C<n> smoke run — <change name> (<version>)` |
 
@@ -87,12 +87,28 @@ data`). Assembly is mechanical:
 - Where a `pass` checks a number, the step's `unit` defines ONE unit in the user's
   words ("One unit = one purchase order"). Ambiguous counts turn verdicts into prose.
 
+## Pre-verified steps
+
+Before the page is issued, the QA runner (`subagent-prompts.md`) performs every step
+tagged `Runner: agent` on the integration tip and writes `evidence/C<n>/step-NN.md`
+(command, exit, output tail or screenshot path, integration SHA, environment, verdict).
+Steps it PASSED get `pre: { sha, env, evidence }` in the sections array: the page shows
+them dimmed with a "Pre-verified by agent" tag and the evidence line, and they still take
+the operator's verdict — a human mark always replaces the agent's. A step it FAILED is
+not issued: it becomes a repair mini-batch first (never `❌`, which is the user's word).
+A step it COULD NOT RUN is issued as a human step with the reason in its `aside`.
+`pre` is dropped from any step whose covered files a later repair touched, and the
+runner re-runs it before the page is re-issued. The "Copy results" text reports
+untouched pre-verified steps as `pre-verified by agent @<sha>` and counts them apart
+from "not run".
+
 ## Hand-over and verdict intake
 
 The STOP message carries: the artifact link, the gate essentials **in text** (branch
 command, expected version, canary — so a page that fails to load can't cause a
-wrong-build run), the step/section counts, and "run it from the page; paste the
-copied results (or just tell me) when done."
+wrong-build run), the step/section counts split into human steps and pre-verified
+steps (with the evidence SHA), and "run it from the page; paste the copied results (or
+just tell me) when done — pre-verified steps are yours to skip or re-run."
 
 Verdicts are four, and they triage differently at `close`:
 
@@ -136,6 +152,6 @@ text.
 ## Fallback
 
 A session that cannot publish artifacts prints the full combined script as plain text
-(gate first, same section order, `Do`/`Pass` per step) — the current-protocol
-behavior. Either way the batch files' smoke steps are canonical; the page is the
+(gate first, same section order, `Do`/`Pass` per step, pre-verified steps marked
+`[pre-verified by agent @sha — evidence path]`) — the current-protocol behavior. Either way the batch files' smoke steps are canonical; the page is the
 delivery format, not the record.

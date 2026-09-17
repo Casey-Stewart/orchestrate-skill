@@ -353,6 +353,9 @@
   }
   .tag-data { color: var(--fail); }
   .tag-step { color: var(--accent); }
+  .tag-pre { color: var(--accent); border-style: dashed; }
+  .step.step-pre .step-do, .step.step-pre .step-pass { opacity: .72; }
+  .step-pre-note { font-size: .86em; opacity: .8; margin: 6px 0 0; }
 
   .section-lede {
     margin: 12px 0 0;
@@ -744,7 +747,7 @@
          order       — "Order matters" callout (cross-step constraints)
          need        — "You need" callout (test data / hardware / accounts)
          touchesData — true flags the section "Touches your data"
-       step: { n, do, pass, aside?, unit?, tag? }
+       step: { n, do, pass, aside?, unit?, tag?, pre? }
          do    — the action, imperative; one step, one action
          pass  — the acceptance criterion, kept apart from the instruction
                  because those are two different things to read
@@ -753,7 +756,13 @@
                  operator's words
          tag   — short hazard label rendered on the step (e.g. "Scanner
                  safety" for steps that exist because a barcode scanner is a
-                 keyboard that types a code and then presses Enter) */
+                 keyboard that types a code and then presses Enter)
+         pre   — the QA runner already performed this step on the integration
+                 tip before hand-over: { sha, env, evidence } (short SHA, the
+                 environment it ran in, the evidence path in the ledger). The
+                 step renders dimmed with a "Pre-verified by agent" tag and
+                 still takes the operator's verdict — theirs wins. Omit for
+                 human steps. */
 
   var SECTIONS = {{SECTIONS_JS}};
 
@@ -844,13 +853,22 @@
     var body = document.createElement("div");
     body.className = "step-body";
 
-    if (step.tag) {
+    if (step.tag || step.pre) {
       var tags = document.createElement("div");
       tags.className = "step-tags";
-      var t = document.createElement("span");
-      t.className = "tag tag-step";
-      t.textContent = step.tag;
-      tags.appendChild(t);
+      if (step.tag) {
+        var t = document.createElement("span");
+        t.className = "tag tag-step";
+        t.textContent = step.tag;
+        tags.appendChild(t);
+      }
+      if (step.pre) {
+        var tp = document.createElement("span");
+        tp.className = "tag tag-pre";
+        tp.textContent = "Pre-verified by agent";
+        tags.appendChild(tp);
+        wrap.className += " step-pre";
+      }
       body.appendChild(tags);
     }
 
@@ -876,6 +894,15 @@
       u.className = "step-unit";
       u.innerHTML = "<b>Counting:</b> " + step.unit;
       body.appendChild(u);
+    }
+
+    if (step.pre) {
+      var pn = document.createElement("p");
+      pn.className = "step-pre-note";
+      pn.innerHTML = "Already run by the QA runner on <code>" + step.pre.sha + "</code> (" +
+        step.pre.env + ") — evidence: <code>" + step.pre.evidence + "</code>. " +
+        "Run it again if you like; your verdict replaces the agent's.";
+      body.appendChild(pn);
     }
 
     // verdict controls
@@ -1091,14 +1118,14 @@
 
   document.getElementById("btn-copy").addEventListener("click", function () {
     var lines = ["{{COPY_HEADER}}", ""];
-    var c = { pass: 0, fail: 0, blocked: 0, change: 0, todo: 0 };
+    var c = { pass: 0, fail: 0, blocked: 0, change: 0, todo: 0, pre: 0 };
 
     SECTIONS.forEach(function (s) {
       lines.push("Section " + s.n + " — " + s.title);
       s.steps.forEach(function (st) {
         var r = local[st.n] || {};
-        var status = r.status || "not run";
-        if (r.status && c.hasOwnProperty(r.status)) c[r.status]++; else c.todo++;
+        var status = r.status || (st.pre ? "pre-verified by agent @" + st.pre.sha : "not run");
+        if (r.status && c.hasOwnProperty(r.status)) c[r.status]++; else if (st.pre) c.pre++; else c.todo++;
         var line = "  " + st.n + ". " +
           (r.status === "change" ? "WORKS, BUT" : status.toUpperCase());
         if (r.note && r.note.trim()) line += " — " + r.note.trim().replace(/\s+/g, " ");
@@ -1108,7 +1135,7 @@
     });
 
     lines.push("passed " + c.pass + " · failed " + c.fail + " · blocked " + c.blocked +
-      " · works-but " + c.change + " · not run " + c.todo + " of " + TOTAL);
+      " · works-but " + c.change + " · pre-verified only " + c.pre + " · not run " + c.todo + " of " + TOTAL);
 
     var text = lines.join("\n");
     var done = function () {
