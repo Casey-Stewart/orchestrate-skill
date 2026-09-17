@@ -7,14 +7,15 @@ file is the contract; this one only locks scope, waves, and checkpoints.
 
 ## Batch table
 
-| # | Batch | Type | Branch | Wave | Files (fence) | Smoke | Version |
-|---|-------|------|--------|------|---------------|-------|---------|
-<!-- one row per batch; Type = fix / feature / chore. Wave = the concurrent group it
-     runs in. Fences must be DISJOINT within a wave — reshape batches (seam batches,
-     splits, merges) until the safe waves are as wide as possible. Smoke = the covering
-     checkpoint (e.g. "C1"), suffixed "(hands-on)" for batches that need the user's
-     hands — those are the reason an intermediate checkpoint exists. Version "—" if the
-     repo doesn't version. -->
+| # | Batch | Type | Weight | Branch | Wave | Files (fence) | Smoke | Version |
+|---|-------|------|--------|--------|------|---------------|-------|---------|
+<!-- one row per batch; Type = fix / feature / chore. Weight = S (a handful of files, no
+     new behavior surface) / M / L (cross-cutting or hands-on) — it sets the gate shape
+     and reviewer tier. Wave = the concurrent group it runs in. Fences must be DISJOINT
+     within a wave — reshape batches (seam batches, splits, merges) until the safe waves
+     are as wide as possible. Smoke = the covering checkpoint (e.g. "C1"), suffixed
+     "(hands-on)" for batches that need the user's hands — those are the reason an
+     intermediate checkpoint exists. Version "—" if the repo doesn't version. -->
 
 ## Wave map & checkpoints
 
@@ -28,15 +29,26 @@ file is the contract; this one only locks scope, waves, and checkpoints.
      resolved at planning time where possible, else wave 1. No mid-run wave may stall
      waiting on the user for a gate the plan already knew about. -->
 
+## Backlog fold-ins
+
+<!-- Accepted at plan approval, one line each: `<id> — <backlog text, verbatim> → B<NN>`
+     (files ⊆ that batch's fence, machine-verifiable, one-line criterion, ≤2 per batch,
+     none on L batches). Items considered and rejected go in LOG.md, not here. "none"
+     if the sweep found nothing eligible or the user declined. -->
+
 ## Per-batch specifications
 
 <!-- ### B01 — <title>
-     One section per batch: verbatim request text for its items, exploration findings
-     (file:line facts, existing helpers to reuse), design decisions, edge cases. The
-     batch files quote from here — write it complete enough that an implementer with
-     zero other context can build from the batch file alone. -->
+     One section per batch: verbatim request text for its items (fold-ins marked with
+     their id), exploration findings (file:line facts, existing helpers to reuse),
+     design decisions, edge cases, the applicable guardrails (the subset of the
+     project's guardrail bullets this fence can violate). The batch files quote from
+     here — write it complete enough that an implementer with zero other context can
+     build from the batch file alone. -->
 
 ## Coverage audit (planning-time)
 
-<!-- Table: every request item → its batch. Zero unassigned items before the scaffold
-     commit. This table seeds PROGRESS.md's coverage audit. -->
+<!-- Table: every request item and accepted fold-in → its batch. Zero unassigned items
+     before the scaffold commit. This table seeds PROGRESS.md's coverage audit. End with
+     the pre-flight verdict line, verbatim: `Pre-flight: CLEAN` or `Pre-flight: N
+     blocking fixed, M advisory (see LOG.md)`. -->

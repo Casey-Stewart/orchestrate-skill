@@ -7,8 +7,9 @@
    git-native; the protocol cannot run without it.
 2. Dirty tree on the default branch → warn and let the user decide before creating
    anything.
-3. An ACTIVE ledger already in `.agents/changes/` → ask whether to finish it first. Two
-   concurrent ledgers are allowed only as the user's explicit choice.
+3. An ACTIVE ledger already in `.agents/changes/` or on a `*-ledger` branch (Discovery in
+   SKILL.md) → ask whether to finish it first. Two concurrent ledgers are allowed only as
+   the user's explicit choice.
 
 ## Procedure
 
@@ -16,14 +17,38 @@
 2. **Interview** — ONE consolidated AskUserQuestion round covering only the gaps and the
    confirmations listed below.
 3. **Plan** — explore the codebase (sub-agents as needed), draft the batch table with
-   file fences, and map every request item to a batch. Then structure for throughput
-   per `execution-models.md`: reshape fences for disjointness (seam batches, splits,
-   merges), build the wave map (widest safe waves — "3 concurrent, then 2" beats 5
-   back-to-back), classify every batch hands-on vs machine-verifiable, and place the
-   smoke checkpoints (one after each hands-on wave + the mandatory final one — never
-   per batch). Get the plan, wave map, and checkpoints approved by the user in ONE
-   pass; that approval is the standing authorization for the concurrency.
-4. **Front-load user gates** — a batch that depends on a user design choice (UX
+   file fences and a weight per batch (S / M / L), and map every request item to a
+   batch. Then structure for throughput per `execution-models.md`: reshape fences for
+   disjointness (seam batches, splits, merges), build the wave map (widest safe waves —
+   "3 concurrent, then 2" beats 5 back-to-back), classify every batch hands-on vs
+   machine-verifiable, tag every smoke step `Runner: agent | human` against the
+   detected runner set and the environment's prohibitions (default human; "touches
+   data" is human unless a disposable environment exists), and place the smoke
+   checkpoints (one after each hands-on wave + the mandatory final one — never per
+   batch). Pick the applicable guardrails per batch (the subset of the project's
+   guardrail bullets its fence can violate).
+4. **Backlog sweep** — read the repo's backlog / feature / bug files and propose
+   fold-ins. Eligible only if ALL hold: (a) the item's files are a SUBSET of one draft
+   batch's fence; (b) it is machine-verifiable or covered by that batch's existing
+   agent-runnable smoke steps — it never adds a human step and never changes the batch's
+   hands-on class; (c) a one-line acceptance criterion, no design decision, no
+   migration; (d) at most two per batch, none on an L-weight batch. Present the eligible
+   list (id or a proposed id, verbatim text, host batch, why cheap) for the user to pick
+   at PLAN APPROVAL — not a separate interview round. Items considered and rejected are
+   noted in LOG.md. An accepted fold-in becomes a request item (00-request.md decision
+   "folded from <file> <id> — approved <date>"; coverage rows tagged `backlog <id>`),
+   gets its own checklist item, acceptance criterion and smoke step in the host batch,
+   and its own commit. Only the ACCEPTED items receive an id in the repo's scheme
+   (`{{BACKLOG_ID_PREFIX}}`); the rest of the backlog is untouched.
+5. **Pre-flight** — spawn ONE fresh read-only sub-agent with the `subagent-prompts.md`
+   pre-flight skeleton over the draft request, plan and batch files (fold-ins included).
+   It checks coverage both ways, mechanical fence disjointness per wave, fence
+   completeness (grep census of every symbol / channel / table / literal each batch
+   touches, across tests, generated maps and docs), contradictions, criteria
+   testability, and hands-on / runner / weight plausibility. Fix every BLOCKING finding
+   before the plan goes to the user; record the verdict line in the plan's coverage
+   audit and the detail in LOG.md.
+6. **Front-load user gates** — a batch that depends on a user design choice (UX
    layout, mockup, visual/copy pick — anything the user must SEE before code is
    written) must never sit mid-sequence where it stalls the autonomous run:
    - Default: resolve it NOW, at planning time — produce the mockup/options (HTML
@@ -36,18 +61,22 @@
      stall's position along with the plan. A gated batch never shares a wave with
      work that would run past its unanswered question.
    - Never bury a known user gate in the middle of an otherwise-autonomous sequence.
-5. **Fill** — instantiate every file in `templates/` into
-   `.agents/changes/{{CHANGE_ID}}/`, renaming `02-batch.md` to one
+7. **Approve** — the user approves plan, wave map, checkpoints and fold-ins in ONE pass;
+   that approval is the standing authorization for the concurrency.
+8. **Fill** — instantiate every file in `templates/` into
+   `.agents/changes/{{CHANGE_ID}}/` (`LOG.md` included), renaming `02-batch.md` to one
    `02-batches-{{BATCH_NUM}}-{{BATCH_SLUG}}.md` per batch. Replace every `{{...}}`
    placeholder with its value and every `<!-- ... -->` instruction comment with real
-   content.
-6. **Self-check** — grep the new ledger directory for `{{` and for `<!--`: **zero hits**.
-   Any hit is an unfilled slot; fix before committing.
-7. **Scaffold commit** — batch 00 = the ledger itself, committed on
-   `chore/{{CHANGE_SLUG}}-ledger`, which becomes the INTEGRATION BRANCH every wave
-   stacks onto. Never on the default branch.
-8. **STOP** — report the ledger path and batch table. Start batch 01 only if the user
-   says so.
+   content. `evidence/` is created at the first checkpoint, not now.
+9. **Self-check** — grep the new ledger directory for `{{` and for `<!--`: **zero hits**.
+   `**State**: ACTIVE` present in PROGRESS; the pre-flight verdict line present in the
+   plan. Any hit is an unfilled slot; fix before committing.
+10. **Scaffold commit** — batch 00 = the ledger itself (plus the ids written onto
+    accepted fold-ins in the backlog file), committed on `chore/{{CHANGE_SLUG}}-ledger`,
+    which becomes the INTEGRATION BRANCH every wave stacks onto. Never on the default
+    branch.
+11. **STOP** — report the ledger path and batch table. Start wave 1 only if the user
+    says so.
 
 ## Naming
 
@@ -55,8 +84,11 @@
   `IST-20260713-ux-fix-pack`).
 - Batch files: `02-batches-{{BATCH_NUM}}-{{BATCH_SLUG}}.md`, `{{BATCH_NUM}}` two digits
   starting at `01` (`00` is reserved for ledger scaffolding).
+- Repair branches: `fix/<batch-slug>-c<n>-followup` (checkpoint failure),
+  `fix/<batch-slug>-tip` (red integration tip), `fix/<batch-slug>-presmoke-<step>`.
 - Ledger root is always repo-root `.agents/changes/` — it is the discovery anchor every
-  mode globs for. Override only on explicit user request.
+  mode globs for. Closed ledgers may move to the sibling `.agents/archive/`. Override
+  only on explicit user request.
 
 ## Placeholder registry (single source of truth)
 
@@ -65,55 +97,69 @@ appear in the templates — check both directions when editing either.
 
 | Placeholder | Where | Filled from |
 |---|---|---|
-| `{{CHANGE_ID}}` | template (READBEFORE, PROGRESS, plan) | computed: prefix + date + slug |
+| `{{CHANGE_ID}}` | template (READBEFORE, PROGRESS, plan, LOG) | computed: prefix + date + slug |
 | `{{CHANGE_SLUG}}` | naming only | short kebab-case name for the change |
 | `{{ID_PREFIX}}` | naming only | interview #6 (default: repo-name initials) |
-| `{{DATE}}` | template (PROGRESS, request) | today, YYYY-MM-DD |
+| `{{DATE}}` | template (PROGRESS, request, LOG) | today, YYYY-MM-DD |
 | `{{LEDGER_DIR}}` | template (READBEFORE) | `.agents/changes/{{CHANGE_ID}}` |
 | `{{MAIN_BRANCH}}` | template (READBEFORE) | detected: `git symbolic-ref refs/remotes/origin/HEAD` or current branch |
 | `{{INTEGRATION_BRANCH}}` | template (READBEFORE) | `chore/{{CHANGE_SLUG}}-ledger` unless the user overrides |
 | `{{BRANCH_PREFIXES}}` | template (READBEFORE) | detected from `git branch -a` history; default `fix/ feat/ chore/` |
-| `{{MERGE_POLICY}}` | template (READBEFORE) | interview #4 |
+| `{{MERGE_POLICY}}` | template (READBEFORE) | interview #4 (incl. whether batch commits survive — squash collapses per-fold-in reverts; say so) |
 | `{{EXECUTION_MODEL}}` | template (READBEFORE, PROGRESS) | interview #5 — the confirmed wave map summary (waves + members + checkpoint positions, e.g. "Waved stack — W1: B01+B02+B03; W2: B04+B05. Checkpoints: C1 after W1 (B02 hands-on), C2 final") |
 | `{{EXECUTION_MODEL_RATIONALE}}` | template (READBEFORE, PROGRESS) | written at scaffold time: WHY these waves are safe together and why the checkpoints sit where they do, in 2–4 sentences |
-| `{{VALIDATION_COMMANDS}}` | template (READBEFORE) | interview #1 — fenced block, one command + comment per line, or literal `none` |
+| `{{VALIDATION_COMMANDS}}` | template (READBEFORE) | interview #1 — fenced block, one command + comment per line, each in its QUIET form (totals line + failing test names; a repo-local quiet reporter if one exists), or literal `none` |
+| `{{MUTATION_RUNNER}}` | template (READBEFORE) | detected (Stryker / mutmut / cargo-mutants / PIT config) and confirmed in interview #1, with the command scoped to changed files; else `none` |
 | `{{VERSION_FILES}}` | template (READBEFORE) | interview #2 — or `none` |
-| `{{VERSION_BUMP_RULE}}` | template (READBEFORE) | interview #2 — cadence + per-batch vs per-change, or `none` |
+| `{{VERSION_BUMP_RULE}}` | template (READBEFORE) | interview #2 — cadence + per-batch vs per-change + which component moves, or `none` |
 | `{{CHANGELOG_RULE}}` | template (READBEFORE) | interview #2 — path, ordering (append bottom vs prepend), heading format, voice, or `none` |
 | `{{SMOKE_PROCEDURE}}` | template (READBEFORE) | interview #3 — always asked |
+| `{{AGENT_RUNNERS}}` | template (READBEFORE) | interview #3 — which runners an agent may use in THIS environment (`none` / CLI / HTTP / browser / screenshot), the disposable data environment if any, and the prohibitions that apply (e.g. "never launch the headed app") |
 | `{{WORKTREE_SETUP}}` | template (READBEFORE) | detected install/build step (`npm install`, `cargo fetch`, …) or `n/a` |
 | `{{REPO_CONVENTIONS}}` | template (READBEFORE) | distilled from the project CLAUDE.md/docs — the BINDING subset, ≤25 lines, plus a pointer to the source doc; never a wholesale copy |
 | `{{EXTRA_PROHIBITIONS}}` | template (READBEFORE) | interview #7 / CLAUDE.md — repo-specific never-touch items; `(none beyond the above)` if empty |
-| `{{GUARDRAILS_REF}}` | template (READBEFORE ×3) | detected guardrails section (e.g. `` `CLAUDE.md` §Bug-Class Guardrails ``) or `the project guardrails doc (none yet — create a CLAUDE.md guardrails section at first distill)` |
-| `{{BACKLOG_FILE}}` | template (READBEFORE ×3) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
+| `{{GUARDRAILS_REF}}` | template (READBEFORE, several) | detected guardrails section (e.g. `` `CLAUDE.md` §Bug-Class Guardrails ``) or `the project guardrails doc (none yet — create a CLAUDE.md guardrails section at first distill)` |
+| `{{GATE_AGENTS}}` | template (READBEFORE) | interview #7 — the read-only gate agents this ledger runs beside the reviewer (repo-local `.claude/agents/*.md` such as a test hunter, or the skill's generic test-hunter skeleton), with the testing guide / catalog each must read first; `reviewer only` when none |
+| `{{ROLE_TIERS}}` | template (READBEFORE) | interview #7 — model-agnostic wording per role, e.g. "implementers and gate agents: default; reviewer: at least the implementer's tier, most capable available for L batches and second attempts" |
+| `{{BACKLOG_FILE}}` | template (READBEFORE, several) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
+| `{{BACKLOG_ID_PREFIX}}` | template (READBEFORE) | detected id scheme in the backlog files (`SCAN-6`, `#3.5`, `BL-017` …) or `BL-` when none; only accepted fold-ins and new residual entries receive ids |
 | `{{RELEASE_COMMAND}}` | template (READBEFORE) | detected build/release script or `none` |
 | `{{BATCH_NUM}}` | template (batch file) | per batch, two digits |
 | `{{BATCH_SLUG}}` | naming only | per batch, kebab-case |
 | `{{BATCH_TITLE}}` | template (batch file) | per batch |
 | `{{BATCH_TYPE}}` | template (batch file) | `fix` / `feature` / `chore` |
+| `{{BATCH_WEIGHT}}` | template (batch file) | `S` (a handful of files, no new behavior surface) / `M` / `L` (cross-cutting or hands-on) — checked by pre-flight |
 | `{{BATCH_VERSION}}` | template (batch file) | per the bump rule; `—` if the repo doesn't version |
 | `{{BATCH_BRANCH}}` | template (batch file) | `<prefix>/<batch-slug>` |
 | `{{BATCH_DEPS}}` | template (batch file) | batch numbers this batch needs integrated first; `none` if independent |
 | `{{BATCH_WAVE}}` | template (batch file) | wave number from the plan's wave map |
 | `{{BATCH_SMOKE_GATE}}` | template (batch file) | `hands-on — checkpoint C<n> follows wave <w>` or `machine-verifiable — covered by the final checkpoint (C<n>)` |
 | `{{BATCH_FILES}}` | template (batch file) | the file fence from the plan's batch table |
+| `{{BATCH_GUARDRAILS}}` | template (batch file) | the applicable subset of the project's guardrail bullets for this fence (one line each), or `none apply` |
+| `{{BATCH_GATE}}` | template (batch file) | the gate shape for this weight: `failing-on-base + reviewer + <gate agents>` (fix, M/L), `reviewer + <gate agents>` (M/L), `one combined reviewer+hunter pass` (S) |
 
 ## Detection heuristics (run before asking anything)
 
 | Topic | Look at | Derive |
 |---|---|---|
 | Validation commands | `package.json` scripts (`lint`, `format:check`, `typecheck`, `check`, `test`, coverage); `justfile` / `Makefile` targets; `Cargo.toml` → `cargo fmt --check` + `clippy` + `test`; `pyproject.toml` → `ruff` / `pytest`; `go.mod` → `go vet` + `go test ./...` | candidate command list to confirm |
+| Quiet form | a repo-local reporter (`scripts/*reporter*`, `--test-reporter`), runner flags (`pytest -q`, `jest --silent`, `cargo test -q`, `go test` without `-v`), whether failing test NAMES appear in the summary | the quiet form of each command in `{{VALIDATION_COMMANDS}}` |
+| Mutation runner | `stryker.conf.*`, `[tool.mutmut]`, `cargo-mutants`, PIT plugin | `{{MUTATION_RUNNER}}` (scoped-to-changed-files command) or `none` |
 | Version + changelog | version fields in `package.json` / `manifest.json` / `Cargo.toml` / `pyproject.toml` / `VERSION`; if `CHANGELOG.md` exists, read the FIRST and LAST headings to infer oldest-first (append bottom) vs newest-first (prepend top) | candidate `{{VERSION_FILES}}` / `{{CHANGELOG_RULE}}` |
 | Default branch | `git symbolic-ref refs/remotes/origin/HEAD`, else `git branch --show-current` | `{{MAIN_BRANCH}}` |
 | Branch prefixes | `git branch -a` naming history | `{{BRANCH_PREFIXES}}` |
-| Conventions / prohibitions / guardrails / backlog | project `CLAUDE.md`, `CONTRIBUTING.md`, `.claude/` docs; files named `BACKLOG*`/`TODO*` | `{{REPO_CONVENTIONS}}`, `{{EXTRA_PROHIBITIONS}}`, `{{GUARDRAILS_REF}}`, `{{BACKLOG_FILE}}` |
+| Conventions / prohibitions / guardrails / backlog | project `CLAUDE.md`, `CONTRIBUTING.md`, `.claude/` docs; files named `BACKLOG*`/`TODO*`/`BUGS*`/`FEATURE*`; the id pattern their entries carry | `{{REPO_CONVENTIONS}}`, `{{EXTRA_PROHIBITIONS}}`, `{{GUARDRAILS_REF}}`, `{{BACKLOG_FILE}}`, `{{BACKLOG_ID_PREFIX}}` |
+| Gate agents + testing guide | `.claude/agents/*.md` whose `tools:` are read-only (Read/Grep/Glob) and whose description is review-shaped; `TESTING-GUIDE*`, `docs/testing*` | candidates for `{{GATE_AGENTS}}` and the catalog each reads first |
+| Runners + environment | OS and shell; whether the app can run headless here; CLI entrypoints; HTTP endpoints; browser tooling available to the session; CLAUDE.md prohibitions on launching the app or touching data; a fixture/disposable environment | `{{AGENT_RUNNERS}}` and the batch files' `Runner:` tags |
 | Release step | `build`/`release`/`package` scripts | `{{RELEASE_COMMAND}}` |
 | Monorepo | multiple `package.json` / workspace config | ask which package is in scope; constrain fences to it and filter validation commands (`pnpm --filter <pkg> …`) |
 
 ## Interview (one AskUserQuestion round — confirmations + gaps only)
 
-1. **Validation commands** — present the detected list to confirm/edit; nothing detected
-   → ask, offering "none (the checkpoint smoke tests carry all verification)".
+1. **Validation commands** — present the detected list in its quiet form to
+   confirm/edit; nothing detected → ask, offering "none (the checkpoint smoke tests carry
+   all verification)". Confirm the mutation runner if one was detected (default: named
+   but only run when a batch's gate calls for it).
 2. **Version + changelog** — bump per batch, per change, or never? Which files move in
    lockstep? Changelog convention (confirm the inferred ordering).
    **Default to bumping at least once per CHECKPOINT, and say why when you ask.** A
@@ -133,28 +179,44 @@ appear in the templates — check both directions when editing either.
    single change (0.11 → 0.12 → 0.13 → 0.14 against a base of 0.10.12) and had to
    be renumbered to 0.11.0 at close-out. Patch markers (0.10.13, .14, .15) leave the
    release number free and still satisfy step 0.
-3. **Smoke procedure** — ALWAYS asked, free text: "How do you verify a change by hand in
-   this project?" (checkpoint smoke scripts are written against the answer, including
-   any gotchas like "reload the extension, then refresh the page").
+3. **Smoke procedure + runners** — ALWAYS asked, free text: "How do you verify a change
+   by hand in this project?" (checkpoint smoke scripts are written against the answer,
+   including any gotchas like "reload the extension, then refresh the page"). Then:
+   which of the detected runners may an agent use here (none / CLI / HTTP / browser /
+   screenshot), is there a disposable data environment, and what must an agent never
+   do (launch the headed app, touch live data)? Default when unsure: every step human.
 4. **Merge policy** — default: work stacks on the integration branch; the USER
    smoke-tests at checkpoints and merges; the orchestrator never pushes. Confirm or
-   adjust (PR flow, orchestrator ff-merge on recorded verdict).
-5. **Wave map + checkpoints** — present the computed wave map (which batches run
-   concurrently, and why that is safe) and the checkpoint placement (after which
-   waves, with the hands-on batches named) per `execution-models.md`; the user
-   confirms or adjusts. Fewest checkpoints wins: intermediate ones exist only for
-   hands-on risk, and the final one is mandatory.
+   adjust (PR flow, orchestrator ff-merge on recorded verdict, squash — note that squash
+   collapses per-fold-in commits, so surgical reverts stop being available).
+5. **Wave map + checkpoints + weights** — present the computed wave map (which batches
+   run concurrently, and why that is safe), the checkpoint placement (after which
+   waves, with the hands-on batches named) per `execution-models.md`, and each batch's
+   weight; the user confirms or adjusts. Fewest checkpoints wins: intermediate ones
+   exist only for hands-on risk, and the final one is mandatory.
 6. **ID prefix** — default: initials of the repo directory name
-   (`inventory-sync-tool` → `IST`); confirm.
-7. **Distillation targets + prohibitions** — only if detection found no guardrails
-   section or backlog file: create them at first close-out? (default yes). Any
-   never-touch files beyond the standard prohibitions?
+   (`inventory-sync-tool` → `IST`); confirm. Confirm the backlog id scheme.
+7. **Gates, tiers, distillation targets, prohibitions** — offer the detected gate agents
+   and the tier wording; only if detection found no guardrails section or backlog file:
+   create them at first close-out? (default yes). Any never-touch files beyond the
+   standard prohibitions?
+
+**Defaults for a repo's FIRST ledger under this contract** (the pilot): always on —
+the mechanical fence check, failing-on-base, plan pre-flight, the backlog sweep, the
+metrics token. Offered but default OFF — gate agents beside the reviewer, agent
+pre-smoke (runners `none`), the convergence pass. Say so in the interview: "on for the
+next ledger once this one's metrics token has shown review time, false stops and human
+smoke minutes." The contract records which gates this ledger runs, so a driving session
+never guesses.
 
 Batch it: topics 1–7 fit in one AskUserQuestion call (4 questions max per call → merge
 related topics, e.g. 2+6 and 4+7, or run two calls back-to-back if genuinely needed).
+Fold-in picks are NOT interview questions — they ride plan approval (procedure step 7).
 
 ## Baking rule
 
 Interview answers are written INTO the generated `00-READBEFORE.md` — never referenced
 back to this skill. The skill's references exist for the skill's benefit; each ledger
-must be drivable by a session that has never seen this skill.
+must be drivable by a session that has never seen this skill: State line, LOG.md,
+`NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are all explained
+inside the ledger's own files.
