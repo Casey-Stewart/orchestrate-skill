@@ -61,8 +61,9 @@ batch or per wave by default.
   only hands-on work sits in the last wave — or there is none — the final checkpoint
   is the ONLY one.
 - The user confirms placement at plan approval and may add or remove checkpoints;
-  record their choice. Never insert an unplanned mid-run smoke gate unless a wave
-  surfaces something genuinely unforeseeable (record why in PROGRESS).
+  record their choice. Never insert an unplanned mid-run smoke gate on your own; if a
+  wave surfaces something genuinely unforeseeable, propose one at the next STOP and
+  record the user's words in PROGRESS.
 - Tag every smoke step `Runner: agent` (performable in THIS repo's environment by a
   runner the contract lists — CLI, HTTP, browser, screenshot) or `Runner: human`
   (hardware, credentials, feel, another OS, live data — and anything "touches your

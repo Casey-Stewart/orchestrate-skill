@@ -298,8 +298,8 @@ the reverted merge; then dry run → merge → tip validation. **Trial merge** (
 if green" verdict): the dry run first (`git merge-tree --write-tree <tip> <branch>`; a
 conflict is STOP AND INVESTIGATE), then `git commit-tree <tree> -p <tip> -m trial`, check
 that commit out in a temporary worktree (`git worktree add <scratchpad>/wt-trial
-<commit>`), run the validations there, remove the worktree; green → merge for real, red →
-no merge.
+<commit>`; a stale `wt-trial` from a crashed trial is removed first), run the validations
+there, remove the worktree; green → merge for real, red → no merge.
 
 If the triage between batches is uncertain, say so in the prompt and widen the fence to
 the candidate batches' fences combined — never the whole repo. A checkpoint fix-up
