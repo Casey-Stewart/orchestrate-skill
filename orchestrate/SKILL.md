@@ -156,7 +156,7 @@ for `{{` and `<!--` — zero hits; `**State**: ACTIVE` present) → scaffold com
 ## Mode: status
 
 Strictly read-only (no edits, no branch changes, no checkout switch): discovery →
-reconcile every non-✅/👤 row against git per the contract's §Recovery table → print a
+reconcile every row that is not ✅/👤/⛔ (dropped) against git per the contract's §Recovery table → print a
 claim-vs-git-vs-verdict table, the checkpoint(s) awaiting the user, branch-only ledgers,
 and the recommended next action. Drift corrections happen in `continue`, not here.
 

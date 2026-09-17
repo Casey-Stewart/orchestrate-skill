@@ -85,7 +85,9 @@
 - Batch files: `02-batches-{{BATCH_NUM}}-{{BATCH_SLUG}}.md`, `{{BATCH_NUM}}` two digits
   starting at `01` (`00` is reserved for ledger scaffolding).
 - Repair branches: `fix/<batch-slug>-c<n>-followup` (checkpoint failure),
-  `fix/<batch-slug>-tip` (red integration tip), `fix/<batch-slug>-presmoke-<step>`.
+  `fix/<batch-slug>-tip` (red integration tip), `fix/<batch-slug>-presmoke-<step>`,
+  `fix/<batch-slug>-revert` (user-ordered revert of a merge); NEEDS_FENCE continuations:
+  `<batch-branch>-w<n+1>`.
 - Ledger root is always repo-root `.agents/changes/` — it is the discovery anchor every
   mode globs for. Closed ledgers may move to the sibling `.agents/archive/`. Override
   only on explicit user request.

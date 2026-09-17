@@ -240,8 +240,8 @@ final line in the plan's coverage audit.
 
 ```
 You verify that change [CHANGE_ID] in [REPO_PATH] converged with its plan. Read-only.
-Integration tip: [INTEGRATION_SHA]. Full diff: `git diff [SCAFFOLD_SHA]..[INTEGRATION_SHA]
--- . ':(exclude)[LEDGER_DIR]'`.
+Integration tip: [INTEGRATION_SHA]. Full diff: `git diff [BASE_SHA]..[INTEGRATION_SHA]
+-- . ':(exclude)[LEDGER_DIR]'` ([BASE_SHA] = the **Base** line of the PROGRESS preamble).
 
 PLAN ITEMS with acceptance criteria: [ITEM TABLE + CRITERIA TEXT]
 
@@ -257,9 +257,11 @@ with `CONVERGED` or `N NOT CONVERGED`. ≤60 lines.
 ## Fix-up implementer (repair mini-batch)
 
 Every repair — a user-reported checkpoint failure (`❌`), a red integration tip after a
-merge, or a failed pre-smoke step — runs as a mini-batch on its own branch cut from the
-integration tip, and goes through the fence check, a fresh reviewer, the merge-tree dry
-run, the merge and tip validation like any batch.
+merge, a failed pre-smoke step, or a user-ordered revert (`fix/<batch>-revert`) — runs
+as a mini-batch on its own branch cut from the integration tip, and goes through the
+fence check, a fresh reviewer, the merge-tree dry run, the merge and tip validation like
+any batch. A revert is exempt from failing-on-base: its proof is a green tip after the
+merge plus the reviewer confirming the diff is the exact inverse of the reverted merge.
 
 ```
 You are fixing [a smoke-test failure from checkpoint [CN] | a red integration tip after

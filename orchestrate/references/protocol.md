@@ -98,11 +98,8 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
   finding open (<severity>)`. Both stay out of integration; once the wave's other members
   are gated and integrated the session stops instead of opening the next wave, quotes the
   open finding WITH its failure scenario, and names three verdicts for the
-  user: fix again (an authorized third round: a FRESH implementer on the strong tier with
-  both rounds' findings + the current diff, then a fresh re-review) / ship with the
-  residual (user's words verbatim; residual → severity-tagged backlog entry + a checkpoint
-  smoke step exercising it — a green suite alone is weak grounds) / drop. Verdicts are
-  recorded verbatim in the verdict log and consumed by step 2 of the session algorithm.
+  user: fix again / ship with the residual / drop (a green suite alone is weak grounds
+  for shipping) — meanings, recording and consumption per step 2's table.
 
 ## Status legend
 
@@ -135,9 +132,12 @@ claims; **git is truth**. Reconcile before believing any row.
   tip → green: `🟢`; red: tip stays non-green, no further merges, repair mini-batch.
 - **Repairs are mini-batches**: a red tip (`fix/<batch>-tip`), a failed pre-smoke step
   (`fix/<batch>-presmoke-<step>`), a user-reported checkpoint failure
-  (`fix/<batch>-c<n>-followup`) all run on their own branch cut from the tip, through the
+  (`fix/<batch>-c<n>-followup`), a user-ordered revert (`fix/<batch>-revert`) all run on
+  their own branch cut from the tip, through the
   fence check, a fresh reviewer, the dry run, merge and tip validation. A repair is a
-  `fix` batch for step 6b: it must carry a test that fails on the pre-repair tip. Never a
+  `fix` batch for step 6b: it must carry a test that fails on the pre-repair tip (a
+  revert is exempt — its proof is a green tip after the merge and a reviewer confirming
+  the diff is the exact inverse). Never a
   direct commit on the integration branch.
 - Never commit to the default branch; never push. Default policy: the USER
   smoke-tests at checkpoints and merges the default branch up to the checkpoint's
@@ -171,7 +171,11 @@ the implementer, whose only batch-file edit is its Files line on its own branch.
 the batch's other items are gated and integrated now; the deferred item is recorded in
 Notes + session log as `deferred to W<n+1>: <item> (<path>)` and runs as a continuation
 of the same batch in the next wave (branch `<batch-branch>-w<n+1>`, fence extended then);
-a recorded deferral does not hold the wave open. A true overlap goes to the STOP hand-off. The fence check's allowed set is the plan's fence ∪ recorded extensions
+a recorded deferral does not hold the wave open. At that wave's open the row flips back
+to 🔄 with its Branch cell pointing at `<batch-branch>-w<n+1>`; the checkpoint after wave
+n covers the batch's other items and the deferred item's smoke steps ride the next
+checkpoint; with no later wave, the continuation is a final wave on its own; the row
+returns to 🟢 when the continuation integrates. A true overlap goes to the STOP hand-off. The fence check's allowed set is the plan's fence ∪ recorded extensions
 ∪ the batch's own file — never the implementer's Files line alone.
 
 ## Smoke checkpoints
@@ -207,7 +211,11 @@ canonical either way. Verdicts are FOUR: **pass** · **fail** (triage → ❌) �
 **blocked** (the step could not be performed as written — usually correct the STEP
 and re-ask; reclassify as fail only if the app lacks the behavior) · **works-but**
 (works as specified, the user wants it different — named backlog entry, never a
-failure, never blocks the pass).
+failure, never blocks the pass). **Verdict intake**: a checkpoint PASS flips every
+covered row 🧪→✅; a FAIL indicts batch(es) → ❌ (rows the user explicitly passed → ✅,
+the rest stay 🧪 for the re-run); *waive* is the user's recorded decision to treat the
+checkpoint as passed without running it; every verdict is quoted verbatim in the
+verdict log.
 
 ## §Recovery — the reconcile table
 
@@ -233,7 +241,7 @@ state inside the batch file on that branch (`git show <branch>:./<path>`, from t
 | ❌ | fix-up branch ahead, not integrated | Resume / gate it per the 🔄 rows |
 | ❌ | fix-up integrated, tip green | Covered rows → 🧪, re-issue the page with affected steps annotated |
 | ❌ | fix-up integrated, tip red | Repair mini-batch on the tip first |
-| ⛔ (either kind), `❌ (fix-up capped)`, or Notes `tip repair capped:` / `pre-smoke repair capped:` without a later `verdict … spent` | any | Awaiting the user's verdict (fix again / ship with the residual / drop) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
+| ⛔ (either kind), `❌ (fix-up capped)`, or a Notes `… capped:` marker not followed by a later `verdict … spent` (a marker re-written after a spent line counts as awaiting) | any | Awaiting the user's verdict (fix again / ship with the residual / drop) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
 
 Prune worktrees of integrated batches (`git worktree remove`). Log every
 reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
@@ -242,38 +250,36 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
 
 1. Boot + reconcile + resume-time validation (validation commands, quiet form, on the
    integration tip; red → step 2 first).
-2. Repairs first, as mini-batches. Any `❌`? Spawn ONE fix-up implementer on
-   `fix/<batch>-c<n>-followup` cut from the tip with the user's failure notes verbatim +
-   the indicted batch file(s) + the diff since the last passed checkpoint: fence check →
-   fresh reviewer (spec = failure report + acceptance criteria) → dry run → merge → tip
-   validation → rows back to 🧪 → STOP, re-issuing the checkpoint's script (republish the
-   page with the affected steps annotated — earlier verdicts survive; or reprint the
-   text). Twice-failed fix-up → `❌ (fix-up capped)`, unmerged, STOP with the three
-   verdicts. A red tip with no checkpoint reached (resume-time validation, or after a
-   merge): the same mini-batch on `fix/<batch>-tip` (`<batch>` = the last batch merged
-   before the red) with the failing output as the spec; once green, return to step 7 or
-   step 4 — no 🧪, no STOP. A `-tip` or `-presmoke` repair failing review twice NEVER
-   writes `❌`: rows keep their status, the tip stays red (no merges) or the step is
-   issued as a HUMAN step carrying the failure note, the failure is written to the
-   affected batch's Notes as `tip repair capped: <branch>` or `pre-smoke repair capped:
-   step NN, <branch>` (the phrases §Recovery keys on) + LOG, STOP with the three verdicts.
-   **Recorded verdicts** (verdict log, Checkpoint column `B<NN>`) on a ⛔ batch or a
-   capped repair are consumed exactly once: the consuming session appends `verdict <date>
-   spent → <what it did>` to the row's Notes. *Fix again* → an authorized third round: a
-   FRESH implementer on the strong tier — on the batch's own branch (row → 🔄 for the
-   round) or on the capped repair's own branch — with both rounds' findings + the current
-   diff, then a fresh re-review; a further `FIX FIRST` returns it to ⛔/capped and asks
-   again, never a loop. *Ship with the residual* — batch: integrate per the integration
-   procedure; residual → severity-tagged backlog entry + one `Runner: human` smoke step
-   the orchestrator authors into the batch file's Smoke section (next checkpoint page, or
-   a re-issue of the passed one if none remains). Capped tip repair: merge it only if the
-   tip then validates green (the open finding is the residual); otherwise it stays red and
-   the question stands. Capped pre-smoke repair: the human step stands; residual →
-   backlog. *Drop* — batch: `⛔ (dropped)`; its request items become named backlog
-   entries; its ⬜ dependents are re-planned or dropped on the user's words, asked at the
-   same STOP. Capped tip repair: a reviewed revert mini-batch of the offending merge
-   (`fix/<batch>-revert`), that batch → `⛔ (dropped)` with its items in the backlog.
-   Capped pre-smoke repair: the human step stands; residual → backlog.
+2. Repairs first, as mini-batches (Git model).
+   - **Checkpoint failure** (`❌`): ONE fix-up implementer on `fix/<batch>-c<n>-followup`
+     cut from the tip, with the user's failure notes verbatim + the indicted batch
+     file(s) + the diff since the last passed checkpoint (the Base SHA before the first):
+     fence check → fresh reviewer (spec = failure report + acceptance criteria) → dry run
+     → merge → tip validation → rows back to 🧪 → STOP, re-issuing the checkpoint's
+     script (republish with the affected steps annotated — earlier verdicts survive; or
+     reprint the text). Failing review twice → `❌ (fix-up capped)`, left unmerged.
+   - **Red tip with no checkpoint reached** (resume-time validation, or after a merge):
+     the same mini-batch on `fix/<batch>-tip` (`<batch>` = the last batch merged before
+     the red) with the failing output as the spec; once green, return to step 7 or step 4
+     — no 🧪, no STOP. Failing review twice → rows keep their status, the tip stays red.
+   - **Failed pre-smoke step**: `fix/<batch>-presmoke-<step>`; failing review twice → the
+     step is issued as a HUMAN step carrying the failure note.
+   - **Capping** never writes `❌` for a `-tip`/`-presmoke` repair. Every capped repair
+     writes `tip repair capped: <branch>` / `pre-smoke repair capped: step NN, <branch>` /
+     `fix-up capped: <branch>` into the affected batch's Notes (the phrases §Recovery keys
+     on) + LOG, and the session STOPs naming three verdicts. Verdicts are recorded
+     verbatim in the verdict log (Checkpoint column `B<NN>`) and consumed EXACTLY ONCE:
+     the consuming session appends `verdict <date> spent → <what it did>` to Notes, and
+     whenever a repair returns to the capped state it re-writes its `… capped:` marker
+     after that line. After a spent *fix again*, the re-ask offers only ship / drop — no
+     fourth round.
+
+   | Subject | fix again | ship with the residual | drop |
+   |---|---|---|---|
+   | ⛔ batch | authorized third round: a FRESH implementer on the strong tier, on the batch branch (row → 🔄), both rounds' findings + the current diff, then a fresh re-review; `FIX FIRST` again → ⛔ | integrate per the integration procedure; residual → severity-tagged backlog entry + one `Runner: human` smoke step the orchestrator authors into the batch file's Smoke section AFTER the merge, on the integration branch (next checkpoint page, or a re-issue of the passed one) | `⛔ (dropped)`; items → backlog; its ⬜ dependents re-planned or dropped on the user's words, asked at the same STOP |
+   | capped `-tip` repair | third round on the repair's own branch; `FIX FIRST` again → capped, marker re-written | merge only if the tip then validates green (the open finding → backlog + smoke step); still red → stays capped, marker re-written, ask again | reviewed revert mini-batch `fix/<batch>-revert` of the offending merge; that batch → `⛔ (dropped)`, items → backlog |
+   | capped `-presmoke` repair | as above | the human step stands; residual → backlog | as ship; the repair branch is deleted |
+   | `❌ (fix-up capped)` | third round on the fix-up's own branch; `FIX FIRST` again → capped | merge only if the tip validates green; indicted rows → 🧪; re-issue with the failing step annotated as a known residual (backlog) | reviewed `fix/<batch>-revert` of the indicted batch's merge; that batch → `⛔ (dropped)`; the rest → 🧪 for the re-issue |
 3. Any `🧪`? A checkpoint is open — ask the user for its verdict (passed / failed /
    waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave with `⬜` batches whose deps are all 🟢/✅.
