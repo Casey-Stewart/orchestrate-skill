@@ -85,7 +85,8 @@ First word of the arguments:
 - Only batches the plan marked mutually file-disjoint and dependency-free share a
   wave; the user's plan approval is the standing authorization for that concurrency.
   Deviating from the locked wave map needs the user's explicit words, recorded
-  verbatim in PROGRESS. A mid-wave fence extension is allowed only when it keeps the
+  verbatim in PROGRESS (sole standing exception: a recorded `NEEDS_FENCE` deferral
+  moving the final checkpoint). A mid-wave fence extension is allowed only when it keeps the
   wave disjoint (protocol §Fence changes) and is recorded in PROGRESS.
 - The wave-open PROGRESS commit on the integration branch (member rows → 🔄, wave base
   SHA logged, State line) is the crash marker reconciliation keys on.

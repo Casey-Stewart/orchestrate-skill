@@ -113,7 +113,8 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
   `{{INTEGRATION_BRANCH}}`.
 - The wave map and checkpoint placement in [01-plan.md](01-plan.md) are LOCKED: plan
   approval authorized the concurrency; deviations need the user's explicit words,
-  recorded verbatim in PROGRESS. A wave opens only when every earlier wave's members are
+  recorded verbatim in PROGRESS (sole standing exception: a recorded `NEEDS_FENCE`
+  deferral moving the final checkpoint — §Fence changes). A wave opens only when every earlier wave's members are
   `🟢`/`✅`, `⛔ (dropped)` or `👤` (dependents of those held `⬜`), the tip is green, and no
   reached checkpoint is unanswered; a `⛔` still awaiting a verdict stops the session
   before this point.
@@ -191,7 +192,8 @@ three lines say `none`, skip version/changelog work at close-out and say so.
 
 ## Smoke checkpoints
 
-The user smoke-tests at the CHECKPOINTS in the plan's wave map — never per batch.
+The user smoke-tests at the CHECKPOINTS in the checkpoint table (the plan's wave map,
+as moved by any recorded deferral) — never per batch.
 Intermediate checkpoints exist only after waves carrying hands-on batches (marked in
 the batch table); the final checkpoint is mandatory and covers everything since the
 last one. At a checkpoint the orchestrator assembles ONE combined script — every
@@ -263,13 +265,15 @@ Rows are matched top to bottom; the first match wins.
 | Ledger says | Git shows | Verdict |
 |---|---|---|
 | any row whose Notes end in a spent *fix again* (`third round on <branch> @<sha>`) | no commit after `@<sha>` | Crashed before the third round landed → re-spawn the FRESH strong-tier implementer per step 2's table |
-| any row whose Notes end in a spent *fix again* | commits after `@<sha>` | Third round landed → worktree dirty: re-spawn the FRESH strong-tier implementer at the open findings; clean: fence check, then the fresh re-review with both rounds' findings |
-| 🔄 | Notes record `R<k> SHIP @<sha>` (no `asks=`) for the current tip | Reviewed, crashed before the merge → integrate now, no re-review |
+| any row whose Notes end in a spent *fix again* | commits after `@<sha>`, branch not yet an ancestor of `{{INTEGRATION_BRANCH}}` | Third round landed → worktree dirty: re-spawn the FRESH strong-tier implementer at the open findings; clean: fence check, then the fresh re-review with both rounds' findings |
+| any row whose Notes carry a `… capped:` marker not followed by a later `verdict … spent` (a marker re-written after a spent line counts as awaiting) | any | Awaiting the user's verdict on that repair (fix again / ship with the residual / drop; ship / drop only after a spent *fix again*) — do not re-gate, do not re-spawn; a recorded verdict is consumed by step 2 |
+| 🔄 | Notes record `R<k> SHIP @<sha>` (no `asks=` on that line) for the current tip | Reviewed, crashed before the merge → integrate now, no re-review |
 | 🔄 | Notes record `R<k> SHIP @<sha> asks=<n>` for the current tip, worktree clean | Shipped with ASKs, crashed before the polish → polish pass (ASK list in LOG.md), then its mechanical close |
 | 🔄 | Notes record `R<k> SHIP @<sha> asks=<n>`, commits after `@<sha>`, worktree clean, every `polish:` item ticked | Polish landed, crashed before its close → 6a + validations on the tip; `git diff --name-only <sha>..HEAD` touches only test/doc/prose paths → integrate; a production file → fix-diff-only re-review by a fresh reviewer |
+| 🔄 | Notes end in `R<k> FIX FIRST @<sha>` for the current tip | Round in flight, fix not landed → resume the implementer (fresh) with that round's findings from LOG.md; not a round |
 | 🔄 | branch missing, or no commits past the wave base | Implementer never landed → re-spawn it (fresh worktree) |
-| 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items; a recorded deferral is not a partial checklist) | Resume the implementer — a fresh agent, the original is gone — at the first unticked item (recreate the worktree if gone) |
-| 🔄 | commits ahead, checklist fully ticked, validations green | Crashed before the gate → fence check, then the reviewer gate now |
+| 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items; a recorded deferral is not a partial checklist) | Resume the implementer — a fresh agent, the original is gone — at the first unticked item (recreate the worktree if gone; a `SHIP … asks=` line with no `polish:` items yet → the ASK list in LOG.md) |
+| 🔄 | commits ahead, checklist fully ticked | validations green → crashed before the gate → fence check, then the reviewer gate now; red → resume the implementer (fresh) with the failing output, not a round |
 | 🔄 | branch already an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
 | 🟢 | branch NOT an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
 | 🟢 | branch ancestor of `{{INTEGRATION_BRANCH}}` | Correct state — waits for its covering checkpoint |
@@ -277,10 +281,10 @@ Rows are matched top to bottom; the first match wins.
 | 🧪 | `{{INTEGRATION_BRANCH}}` ancestor of `{{MAIN_BRANCH}}` | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
 | 🧪 | integration branch not merged | Correct state → ask the user for the checkpoint verdict |
 | ❌ (not fix-up capped) | no branch named by the latest `fix-up pending:` Notes line | Fix-up never started → spawn it on that branch |
-| ❌ (not fix-up capped) | that branch ahead, not integrated | Resume / gate it per the 🔄 rows |
+| ❌ (not fix-up capped) | that branch ahead, not integrated | Resume / gate it per the 🔄 rows (a `SHIP` there continues step 2's fix-up flow: → 🧪 → re-issue, never 🟢) |
 | ❌ (not fix-up capped) | that branch integrated, tip green | Covered rows → 🧪, re-issue the page with affected steps annotated |
 | ❌ (not fix-up capped) | that branch integrated, tip red | Repair mini-batch on the tip first |
-| ⛔ (either kind), `❌ (fix-up capped)`, or a Notes `… capped:` marker not followed by a later `verdict … spent` (a marker re-written after a spent line counts as awaiting) | any | Awaiting the user's verdict (fix again / ship with the residual / drop; ship / drop only after a spent *fix again*) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
+| ⛔ (either kind) or `❌ (fix-up capped)` | any | Awaiting the user's verdict (fix again / ship with the residual / drop; ship / drop only after a spent *fix again*) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
 
 Prune worktrees of integrated batches (`git worktree remove`). Log every
 reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).

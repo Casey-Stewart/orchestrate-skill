@@ -144,7 +144,9 @@ release number, not the markers.
 ## Changing the map mid-change
 
 Allowed with the user's explicit sign-off: record the change + rationale in the
-PROGRESS preamble and a Session log row. Typical causes: a ⛔ batch forces
+PROGRESS preamble and a Session log row. Sole standing exception: a recorded
+`NEEDS_FENCE` deferral with no later wave moves the final checkpoint after the
+continuation (protocol §Fence changes). Typical causes: a ⛔ batch forces
 re-planning its dependents; a checkpoint failure reveals a batch was scarier than
 classified (add a checkpoint after its fix-up).
 
