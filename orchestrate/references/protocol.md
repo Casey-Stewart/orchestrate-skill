@@ -13,36 +13,82 @@ is the audit trail of an AI-assisted change. Standard files (new scaffolds):
 
 | File | Purpose |
 |---|---|
-| `00-request.md` | The user's verbatim ask + clarifying decisions + item→batch map |
-| `00-READBEFORE.md` | The contract: boot sequence, git model, checkpoints, validations, recovery, session algorithm |
-| `01-plan.md` | Locked scope: batch table, wave map + checkpoints, per-batch specs, coverage audit |
-| `02-batches-NN-<slug>.md` | One per batch: wave, fence, verbatim spec, checklist, acceptance criteria, checkpoint smoke steps |
-| `PROGRESS.md` | The live ledger: status + checkpoint tables, verdict log, coverage audit, session log |
+| `00-request.md` | The user's verbatim ask + clarifying decisions (incl. accepted backlog fold-ins) + item→batch map |
+| `00-READBEFORE.md` | The contract: boot sequence, roles/gates/tiers, git model, fence changes, checkpoints, validations, recovery, session algorithm |
+| `01-plan.md` | Locked scope: batch table (weight, wave, fence, smoke, version), wave map + checkpoints, pre-flight verdict, per-batch specs, coverage audit |
+| `02-batches-NN-<slug>.md` | One per batch: wave, weight, fence, applicable guardrails, verbatim spec, checklist, acceptance criteria, tagged smoke steps |
+| `PROGRESS.md` | The live ledger: `**State**` line, status + checkpoint tables, verdict log, coverage audit, one-line session log |
+| `LOG.md` | Append-only narrative (reviewer arcs, root causes, reconciliations, in-run learnings), anchored per session/batch; read on demand, never at boot |
+| `evidence/C<n>/` | QA-runner evidence per pre-verified smoke step (command, exit, output tail / screenshot path, integration SHA, environment) |
 | `smoke-<Cn>.html` | The combined checkpoint script as handed over — committed source of the smoke page, written at each checkpoint close-out |
 
 A scaffolded ledger is a **closed system**: every repo-specific fact (validation
-commands, version files, merge policy, wave map, checkpoint placement, smoke procedure)
-is baked into its READBEFORE and plan at scaffold time. A session without this skill can
-drive the change by reading the ledger alone — that property is the point; never
-generate a ledger that references this skill.
+commands, version files, merge policy, wave map, checkpoint placement, smoke procedure,
+gate agents, runners, tiers) is baked into its READBEFORE and plan at scaffold time. A
+session without this skill can drive the change by reading the ledger alone — that
+property is the point; never generate a ledger that references this skill. Closed
+ledgers may be parked in a sibling `.agents/archive/` directory; discovery never globs it.
 
-## Roles
+## Roles, gates, tiers
 
-- **Orchestrator** — the main session. Owns PROGRESS, branches, worktrees, integration
-  merges, close-outs, and all user communication. The ONLY role that edits version
-  files, the changelog, or PROGRESS.
+- **Orchestrator** — the main session. Owns PROGRESS, LOG, `evidence/`, branches,
+  worktrees, integration merges, close-outs, and all user communication. The ONLY role
+  that edits version files, the changelog, PROGRESS or LOG. Never switches the main
+  checkout: reads any branch with `git show <branch>:./<path>` (keep the `./` — Git Bash
+  on Windows mangles `branch:path`), writes through an integration worktree under the
+  session scratchpad.
 - **Implementer** — a sub-agent given one batch. Codes inside the file fence in the
-  batch's isolated worktree, ticks the batch checklist, commits on the batch branch.
-  Wave siblings run concurrently. Spawned with a fully self-contained prompt
-  (`subagent-prompts.md`).
-- **Reviewer** — ONE independent read-only sub-agent per batch, even inside a wave.
-  Maps every diff hunk to a batch item (unmapped = scope creep = reject), verifies
-  acceptance criteria, runs validations, checks project guardrails. Verdict
-  vocabulary: `SHIP` / `FIX FIRST` / `NEEDS A CLOSER LOOK`. Max 2 rounds, then the
-  batch is ⛔.
+  batch's isolated worktree, ticks the batch checklist, commits on the batch branch (one
+  commit per fold-in item). Wave siblings run concurrently. Reports in the fixed shape:
+  line 1 `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`; an evidence block (each
+  validation command, exit code, last ~10 lines; SHAs; checklist n/m); ≤40 lines of
+  prose. `NEEDS_FENCE` / `BLOCKED` use Expected / Found / Why it matters / How to proceed.
+- **Reviewer** — ONE fresh read-only sub-agent per batch per round, never the
+  implementer, never reused. Maps every hunk to a batch item (unmapped = scope creep =
+  reject; the batch file's ticks are exempt), verifies acceptance criteria, runs
+  validations, checks guardrails, confirms failing-on-base cells and doc sweeps. Line-1
+  verdict: `SHIP` (no P0/P1; may carry ASKs) / `FIX FIRST` (P0 or P1 with a concrete
+  failure scenario) / `NEEDS A CLOSER LOOK` (names what would confirm it).
+- **Gate agents** — optional read-only agents the contract names (e.g. a test hunter
+  asking "what production mutation keeps this test green?"), run by the ORCHESTRATOR in
+  parallel with the reviewer over the batch's new/changed tests. Implementers never
+  spawn them. A gate finding needing a production change is a P1; test-only → ASK.
+- **QA runner** — one sub-agent executing the agent-runnable smoke steps at a checkpoint
+  close-out, writing `evidence/C<n>/`.
+- **Plan pre-flight** (scaffold time) and **convergence** (change-complete) — one fresh
+  read-only sub-agent each; see `scaffolding.md` and §Two close-outs.
+- **Tiers** — the contract words them model-agnostically: the reviewer never runs on a
+  less capable model than the implementer; L-weight reviews and second-attempt
+  implementers use the most capable model the session can spawn; tiers unavailable →
+  default, gate shape unchanged. Reconcile, status and discovery stay in-session over raw
+  git output — never delegated to a cheaper model.
 
 Neither sub-agent role has the planning session's context — every prompt is built from
-the ledger files and complete in itself.
+the ledger files and complete in itself. Every report entering the orchestrator's
+context is capped (~40 lines + findings); the fence check and tip validation return one
+line each on success.
+
+## Severity and round accounting
+
+- **P0** — wrong behavior / violated criterion or guardrail, concrete scenario. Blocking.
+- **P1** — should fix, concrete scenario, needs a production change. Blocking.
+- **ASK** — in-fence, about the batch's OWN artifacts (its new tests' strength, smoke-step
+  prose, comments, a doc sweep it owns), no production behavior change. Rides under
+  `SHIP` as a list. Polish pass: resume the same implementer; it appends `- [ ] polish:`
+  items to its checklist, does them, commits; closes mechanically (fence check +
+  validations; polish commits touch only test/doc/prose paths — a production file touched
+  → fix-diff-only re-review by a fresh reviewer). Never a round.
+- Only `FIX FIRST` rounds count toward the cap of two. Fence bounces, evidence resubmits,
+  polish passes, scoped re-reviews and `NEEDS A CLOSER LOOK` checks never do.
+- Round 1: resume the SAME implementer with the findings verbatim. Round 2: a FRESH
+  implementer on the strong tier with both rounds' findings + the current diff; the
+  re-review verifies the fixes and scans only the fix diff. Reviewers are fresh every
+  round. An agent gone after a crash → fresh, at the first unticked item.
+- After the second `FIX FIRST`: `⛔ defective` (finding open, not green) or `⛔ green,
+  residual finding open (<severity>)`. Both stay out of integration; the session stops
+  early and names three verdicts for the user: fix again (third round) / ship with the
+  residual (user's words verbatim; residual → severity-tagged backlog entry + a checkpoint
+  smoke step exercising it — a green suite alone is weak grounds) / drop.
 
 ## Status legend
 
@@ -50,37 +96,61 @@ the ledger files and complete in itself.
 |---|---|
 | ⬜ Not Started | No commits on its branch |
 | 🔄 In Progress | Wave opened (branch cut, row flipped), implementation ongoing |
-| 🟢 Integrated | Reviewed, validations green, merged into the integration branch; verified at its covering checkpoint |
+| 🟢 Integrated | Reviewed, validations green on the worktree AND the integration tip, merged; verified at its covering checkpoint |
 | 🧪 At Checkpoint | A planned checkpoint is reached — awaiting the USER's combined smoke verdict |
-| ❌ Smoke Failed | User reported a checkpoint failure triaged to this batch — the fix-up is the next session's FIRST job |
+| ❌ Smoke Failed | The USER reported a checkpoint failure triaged to this batch — the fix-up mini-batch is the next session's FIRST job. Never written for an agent-found failure |
 | ✅ Merged | In the default branch (verify with git, not the table) |
-| ⛔ Blocked | Reviewer rejected twice, or an external blocker — left out of integration; needs user direction |
+| ⛔ Blocked | Reviewer rejected twice (`defective`, or `green, residual finding open`), or an external blocker — left out of integration; needs the user's verdict |
 | 👤 User Action | Waiting on something only the user can do (credentials, hardware, approvals) |
 
-Statuses are claims; **git is truth**. Reconcile before believing any row.
+PROGRESS also carries `**State**: ACTIVE | AT-CHECKPOINT C<n> | USER-BLOCKED | COMPLETE`,
+updated at every wave open, checkpoint close-out and change-complete. Statuses are
+claims; **git is truth**. Reconcile before believing any row.
 
 ## Git model (generic defaults)
 
 - An **integration branch** (default: the scaffold branch `chore/<slug>-ledger`)
   accumulates the change. One branch per batch, cut from the integration tip when the
   batch's wave opens; wave members run concurrently, each implementer in an isolated
-  worktree under the session scratchpad. The orchestrator merges REVIEWED batches
-  back into the integration branch serially — fence disjointness makes those merges
-  conflict-free; a real conflict means a fence was violated (stop and reconcile,
-  never hand-resolve silently).
+  worktree under the session scratchpad.
+- **Integration procedure, per batch**: `git merge-tree --write-tree <integration>
+  <batch>` dry run — a conflict is STOP AND INVESTIGATE (fence violation, unrecorded
+  extension, or a ledger file edited on both sides; git reports the conflict, not the
+  cause), never hand-resolved silently → merge → validation commands on the integration
+  tip → green: `🟢`; red: tip stays non-green, no further merges, repair mini-batch.
+- **Repairs are mini-batches**: a red tip, a failed pre-smoke step, a user-reported
+  checkpoint failure all run on `fix/<batch>-<reason>` cut from the tip, through the
+  fence check, a fresh reviewer, the dry run, merge and tip validation. Never a direct
+  commit on the integration branch.
 - Never commit to the default branch; never push. Default policy: the USER
   smoke-tests at checkpoints and merges the default branch up to the checkpoint's
   integration commit. A scaffold-time interview may set a different policy (PR flow,
-  orchestrator ff-merge on a recorded verdict); the ledger's contract states
+  orchestrator ff-merge on a recorded verdict, squash); the ledger's contract states
   whichever governs.
 - Wave open = ONE PROGRESS commit on the integration branch (member rows → 🔄,
-  branches named, wave base SHA logged). That commit is the crash marker recovery
-  keys on. PROGRESS is edited only on the integration branch; implementers tick only
-  their own batch file on their own branch.
+  branches named, wave base SHA logged, State line). That commit is the crash marker
+  recovery keys on. PROGRESS, LOG and `evidence/` are edited only on the integration
+  branch by the orchestrator; implementers edit only their own batch file on their own
+  branch, and only its ticks, `polish:` appends and the Files line under a recorded
+  extension.
 - Waves and checkpoints come from the plan's locked wave map; plan approval is the
   standing authorization for the concurrency. Deviating from the map needs the user's
-  explicit words, recorded verbatim in PROGRESS.
+  explicit words, recorded verbatim in PROGRESS. A wave opens only when every earlier
+  wave is integrated, the tip is green, and no reached checkpoint is unanswered.
 - Never `--no-verify`, never force-push, never rewrite history.
+
+### §Fence changes (mid-wave)
+
+An implementer needing a path outside its fence does not touch it: it finishes what it
+can, commits, reports `NEEDS_FENCE: <paths> — <item> — <why>`. Mechanical test: the path
+is absent from the fence of EVERY same-wave sibling regardless of status (a sibling
+already 🟢 is the dangerous case) and from every extension recorded this wave; ledger,
+version and changelog files never qualify. Pass → record "fence +<path> (B<NN>, item,
+reason, date)" in the row's Notes and the session log on the integration branch; resume
+the implementer, whose only batch-file edit is its Files line on its own branch. Fail →
+defer to the next wave (dependency recorded) or, for a true overlap, put the question in
+the STOP hand-off. The fence check's allowed set is the plan's fence ∪ recorded extensions
+∪ the batch's own file — never the implementer's Files line alone.
 
 ## Smoke checkpoints
 
@@ -91,6 +161,17 @@ review cannot prove), plus one mandatory final checkpoint covering everything si
 the last. If no hands-on work sits outside the final wave, the final checkpoint is the
 ONLY one. Between checkpoints the run is autonomous. A reached checkpoint is never
 skipped and never resolved without the user's verdict.
+
+**Runners.** Every smoke step carries `Runner: agent` (executable in THIS ledger's
+environment by a runner the contract lists — CLI, HTTP, browser, screenshot) or
+`Runner: human` (hardware, credentials, feel, another OS, anything unlisted). Steps
+flagged "Touches your data" are human unless the contract names a disposable fixture
+environment. Default human. At close-out the QA runner executes the agent steps on the
+integration tip and writes `evidence/C<n>/` (command, exit, tail or screenshot, SHA,
+environment); the page shows them as pre-verified, collapsed, re-runnable. A failing
+agent step keeps rows 🟢, goes to Notes + evidence, and is fixed by a repair mini-batch
+before the hand-over — never `❌`. A pre-verified label is invalidated for any step whose
+covered files a later repair touched.
 
 The combined script is delivered as an interactive **smoke page** (`smoke-page.md`):
 one artifact per change, republished per checkpoint, with a step-0 build-identity
@@ -111,50 +192,70 @@ integrated? (`git merge-base --is-ancestor <branch> <integration>`), shipped?
 (`git merge-base --is-ancestor <integration> <default>`), commits ahead
 (`git log <integration>..<branch> --oneline`), dirty trees (`git status --porcelain`
 in the main checkout AND each worktree from `git worktree list`), and the checklist
-state inside the batch file on that branch (`git show <branch>:<path>`).
+state inside the batch file on that branch (`git show <branch>:./<path>`).
 
 | Ledger says | Git shows | Verdict |
 |---|---|---|
 | 🔄 | branch missing, or no commits past the wave base | Implementer never landed → re-spawn it (fresh worktree) |
-| 🔄 | dirty worktree, or commits ahead + partial checklist | Resume the implementer at the first unticked item (recreate the worktree if gone) |
-| 🔄 | commits ahead, checklist fully ticked, validations green | Crashed before review → run the reviewer gate now |
-| 🟢 | branch NOT an ancestor of the integration branch | Crashed between review and merge → integrate now |
+| 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items) | Resume the implementer at the first unticked item (recreate the worktree if gone) |
+| 🔄 | commits ahead, checklist fully ticked, validations green | Crashed before the gate → fence check, then the reviewer gate now |
+| 🔄 | branch already an ancestor of the integration branch | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
+| 🟢 | branch NOT an ancestor of the integration branch | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
 | 🟢 | branch ancestor of the integration branch | Correct state — waits for its covering checkpoint |
+| 🟢 (all members of a checkpoint-carrying wave) | checkpoint row not 🧪/✅ | Close-out unfinished → finish it (tip validation → pre-smoke → page → 🧪); never open the next wave |
 | 🧪 | integration branch ancestor of the default branch | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
 | 🧪 | integration branch not merged | Correct state → ask the user for the checkpoint verdict |
-| ❌ | any | Fix-up pass is this session's FIRST job |
+| ❌ | no `fix/<batch>-c<n>-followup` branch | Fix-up never started → spawn it |
+| ❌ | fix-up branch ahead, not integrated | Resume / gate it per the 🔄 rows |
+| ❌ | fix-up integrated, tip green | Covered rows → 🧪, re-issue the page with affected steps annotated |
+| ❌ | fix-up integrated, tip red | Repair mini-batch on the tip first |
 
 Prune worktrees of integrated batches (`git worktree remove`). Log every
-reconciliation in the PROGRESS Session log.
+reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
 
 ## §Session algorithm ("continue")
 
-1. Boot + reconcile.
-2. Any `❌`? On the integration branch, spawn ONE fix-up implementer with the user's
-   failure notes verbatim + the indicted batch file(s) + the diff since the last
-   passed checkpoint; fix → validate → commit → rows back to 🧪 → STOP, re-issuing
-   the checkpoint's smoke script (republish the smoke page with the affected steps
-   annotated — earlier verdicts survive; or reprint the text).
+1. Boot + reconcile + resume-time validation (validation commands, quiet form, on the
+   integration tip; red → step 2 first).
+2. Any `❌` (or a red tip)? Spawn ONE fix-up implementer on `fix/<batch>-c<n>-followup`
+   cut from the tip with the user's failure notes verbatim (or the failing output) + the
+   indicted batch file(s) + the diff since the last passed checkpoint. Mini-batch: fence
+   check → fresh reviewer (spec = failure report + acceptance criteria) → dry run → merge
+   → tip validation → rows back to 🧪 → STOP, re-issuing the checkpoint's script
+   (republish the page with the affected steps annotated — earlier verdicts survive; or
+   reprint the text). Twice-failed fix-up → `❌ (fix-up capped)`, unmerged, STOP with the
+   three verdicts.
 3. Any `🧪`? A checkpoint is open — ask the user for its verdict (passed / failed /
    waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave with `⬜` batches whose deps are all 🟢/✅.
    From the integration tip, cut every member branch, create every worktree (run the
-   ledger's per-worktree setup), commit the wave-open PROGRESS flip.
+   ledger's per-worktree setup), commit the wave-open PROGRESS flip (State: ACTIVE).
 5. Spawn ALL of the wave's implementers concurrently, one per batch, each pinned to
-   its worktree. Prompts are SELF-CONTAINED (spec text, fence, acceptance criteria,
-   validation commands, conventions, prohibitions, checklist-ticking instruction).
-6. Reviewer gate per batch, as each implementer reports — don't wait for the wave's
-   slowest: hunk→item mapping, acceptance criteria vs the diff (three-dot against the
-   integration branch), validations, guardrails. Defects → implementer pass. Max 2
-   rounds → ⛔ (left out of integration; dependents stay blocked; surfaced at the
-   next STOP).
-7. Integrate serially: merge each SHIP batch into the integration branch, apply the
-   version/changelog cadence, flip its row 🟢, remove its worktree.
+   its worktree, on the tier its weight calls for. Prompts are SELF-CONTAINED (spec text,
+   fence, acceptance criteria, applicable guardrails, validation commands, conventions,
+   prohibitions, report shape, checklist-ticking and self-fence-check instructions).
+6. Gate per batch, as each implementer reports — don't wait for the wave's slowest.
+   Report lacking status line + evidence → resume for it (not a round). Then:
+   6a fence check (clean worktree; `git diff --name-status -M <integration>...HEAD`; every
+   path, both rename endpoints, in plan fence ∪ recorded extensions ∪ own batch file;
+   batch file only ticks / `polish:` appends / recorded Files change) — fail → no reviewer,
+   `NEEDS_FENCE` → §Fence changes, else resume to revert; 6b failing-on-base for `fix`
+   batches (temporary worktree at the wave base + the batch's test-only files; assertion
+   failure proves it, all-pass = P0, cannot-run = inconclusive → duty (e)); 6c reviewer +
+   gate agents in parallel (hunk→item mapping, acceptance criteria vs the three-dot diff,
+   validations, guardrails, failing-on-base cells, doc sweeps; S-weight → one combined
+   pass); verdict handling per §Severity and round accounting. After the second
+   `FIX FIRST` → ⛔ (defective / green-residual), left out of integration, dependents
+   blocked, STOP with the three verdicts.
+7. Integrate serially per the integration procedure (dry run → merge → tip validation →
+   🟢), apply the version/changelog cadence, remove the worktree, write Notes (SHA,
+   reviewer arc, tier, residuals) ending with the metrics token
+   `m: rounds=<n> asks=<n> fence-bounces=<n> gate=<findings/prod> tip-red=<0|1>`.
 8. Wave closed. Carries a checkpoint → per-checkpoint close-out → STOP, delivering
-   the COMBINED smoke script (every covered batch's steps, hands-on batches first)
-   as the smoke page, text as fallback. No
-   checkpoint → open the next wave in the SAME session. Default cadence: run to the
-   next checkpoint, stopping early only at ⛔ or an unplanned user gate.
+   the COMBINED smoke script (every covered batch's steps, data-touching first) as the
+   smoke page, text as fallback. No checkpoint → open the next wave in the SAME session.
+   Default cadence: run to the next checkpoint, stopping early only at ⛔ or an unplanned
+   user gate.
 
 **User gates are front-loaded**: design/UX approvals the plan can foresee are resolved
 at planning time (mockup shown, pick recorded, approved design baked into the batch
@@ -166,29 +267,43 @@ the STOP hand-off.
 ## Two distinct close-outs
 
 **Per-checkpoint** (step 8): version bump + changelog per the cadence for everything
-integrated since the last checkpoint, covered rows `🟢` → `🧪`, checkpoint-table row,
-session-log row recording the checkpoint's integration SHA, the filled smoke page
-committed as `smoke-<Cn>.html`, commit on the integration branch, STOP with the
-combined smoke script (smoke page link + gate essentials in text).
+integrated since the last checkpoint, tip validation, QA-runner pre-smoke with
+evidence (a failing agent step → repair mini-batch first), covered rows `🟢` → `🧪`,
+checkpoint-table row, session-log row recording the checkpoint's integration SHA,
+`State: AT-CHECKPOINT C<n>`, the filled smoke page committed as `smoke-<Cn>.html`,
+commit on the integration branch, STOP with the combined smoke script (smoke page link
++ gate essentials in text; pre-verified steps marked, with the evidence SHA).
 
 **Change-complete** (after the FINAL checkpoint passes and every batch is ✅):
-1. Final coverage audit — every request item → merged commit / intended-behavior
-   resolution / named backlog entry. Zero unaccounted.
-2. **Distillation loop**: new bug CLASSES discovered by this change → one-line guardrail
-   bullets in the project's always-loaded doc (a CLAUDE.md guardrails section; create it
-   if missing). Residuals and deferrals → named backlog entries. Durable lessons belong
-   in repo files every future session loads — not in any one session's memory.
-3. Release command, only on explicit user authorization.
-4. Session-log row marked COMPLETE; propose deleting merged branches.
+1. **Convergence pass** — one read-only sub-agent classifies every plan item against the
+   integration tip (`implemented / partial / contradicts / unrequested`, from the
+   acceptance criteria + the full diff since the scaffold commit, ledger dir excluded);
+   anything but `implemented` → named backlog entry or a convergence mini-batch the user
+   is asked about. Never close on PROGRESS claims alone.
+2. Final coverage audit — every request item, fold-ins included → merged commit /
+   intended-behavior resolution / named backlog entry. Zero unaccounted. Fold-ins are
+   REMOVED from the backlog file in the close-out commit; residuals added get ids in the
+   repo's id scheme.
+3. **Distillation loop**: new bug CLASSES discovered by this change → ONE-LINE guardrail
+   bullets in the project's always-loaded doc, each pointing at the test or mechanism doc
+   that enforces it (prefer adding the test now). Repo-wide rules stay in the always-loaded
+   section; area-specific ones go to the area's doc and are pulled into batch files per
+   fence. Past ~8 KB / ~120 lines, PROPOSE retirements (test / linked doc / merge) for the
+   user to accept — never delete unasked. Harvest in-run learnings from LOG.md. Durable
+   lessons belong in repo files every future session loads — not in any one session's
+   memory.
+4. Release command, only on explicit user authorization.
+5. Session-log row marked COMPLETE and `State: COMPLETE`; propose deleting merged
+   branches and `git mv` of the ledger into `.agents/archive/`.
 
 **A COMPLETE ledger is never resumed.** On "continue" with nothing active: reconcile,
 report completion, and point at the backlog for follow-ups. Do not fabricate a batch.
 
-Classify a ledger from its BATCHES-TABLE rows plus the Session log — never from the
-Legend line or log prose (both quote every emoji). An explicit change-COMPLETE marker
-in the Session/verdict log outranks leftover advisory rows: a lingering `👤` item
-(e.g. "rotate the deploy credential") makes the ledger a reminder to
-surface, not a change to resume.
+Classify a ledger from its `**State**` line when present; otherwise from its
+BATCHES-TABLE rows plus the Session log — never from the Legend line or log prose (both
+quote every emoji). An explicit change-COMPLETE marker outranks leftover advisory rows:
+a lingering `👤` item (e.g. "rotate the deploy credential") makes the ledger a reminder
+to surface, not a change to resume.
 
 ## Legacy ledger recognition (interop)
 
@@ -197,6 +312,7 @@ Recognition rules:
 
 | Variant | How to recognize | How to drive |
 |---|---|---|
+| Pre-2026-09-17 waved scaffold | Has checkpoints and 🟢 but no `**State**` line, no LOG.md, no runner tags, "two rounds then ⛔" without ASK | Drive as written under its own contract; classify by rows; do not add the new gates |
 | Contract under another name | `02-batches-00-READBEFORE.md` or `03-tasks-00-READBEFORE.md` | Same contract — follow it as-is |
 | Contract absent | Only `01-plan.md` + `PROGRESS.md` (± request file) | Protocol lives in the plan's orchestration section + the PROGRESS preamble; this file fills gaps; ASK before acting on anything ambiguous |
 | Per-batch smoke scaffolds | Contract has no checkpoints or 🟢 status; every batch ends 🧪; model named strict sequential / linear stack / stacked waves | Earlier skill versions: drive as written — smoke and merge each batch under its own algorithm |
@@ -211,8 +327,11 @@ Never rewrite a legacy ledger into the new format — drive it under its own con
   time in the main checkout (worktrees unnecessary). The reviewer gate still runs per
   batch — a separate adversarial pass over each finished diff, with the same
   hunk-mapping duty, before integration. Checkpoint placement is unchanged.
+- **No gate agents named**: the reviewer alone carries duties (a)–(f).
+- **No runners** (or the environment forbids running the app): every smoke step is
+  human; no pre-smoke, no `evidence/`; the hand-over says so.
 - **No validation commands**: legal (contract says `none`); the checkpoint smoke tests
   carry all verification and every hand-over message must say so.
 - **No artifact publishing**: deliver the checkpoint script as plain text — gate
-  first, then each step's Do/Pass in the same section order. The batch files' smoke
-  steps are canonical either way.
+  first, then each step's Do/Pass in the same section order, pre-verified steps marked
+  in text. The batch files' smoke steps are canonical either way.

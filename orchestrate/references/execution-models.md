@@ -68,22 +68,34 @@ batch or per wave by default.
 1. **Open the wave**: from the integration tip, cut every member batch's branch;
    create one worktree per batch under the session scratchpad (never inside the
    repo); run the ledger's per-worktree setup; commit ONE PROGRESS flip on the
-   integration branch (member rows → 🔄, branches named, wave base SHA in the session
-   log). Spawn all implementers in a single message so they run concurrently.
-2. **Review as they land**: each finished batch gets its own independent read-only
-   reviewer immediately (diff three-dot against the integration branch, which
-   isolates the batch's own changes); don't wait for the wave's slowest batch. Fix
-   rounds per batch as usual, max 2 → ⛔.
-3. **Integrate serially**: each batch that passes review merges into the integration
-   branch (orchestrator only; row → 🟢). Version/changelog work happens here or at
-   the checkpoint per the ledger's cadence — implementers never touch either.
+   integration branch through the integration worktree (member rows → 🔄, branches
+   named, wave base SHA in the session log, `**State**: ACTIVE`). Spawn all
+   implementers in a single message so they run concurrently. The main checkout is
+   never switched.
+2. **Gate as they land**: each finished batch, in order — structured report present →
+   mechanical fence check (clean worktree; `git diff --name-status -M` three-dot against
+   the integration branch; every path in plan fence ∪ recorded extensions ∪ own batch
+   file) → failing-on-base for `fix` batches → ONE fresh read-only reviewer plus the
+   contract's gate agents in parallel; don't wait for the wave's slowest batch. `SHIP`
+   with ASKs → polish pass (not a round); `FIX FIRST` → round 1 resumes the implementer,
+   round 2 is a fresh one on the strong tier; after the second `FIX FIRST` → ⛔.
+3. **Integrate serially**: per batch, `git merge-tree --write-tree` dry run (a conflict is
+   stop-and-investigate: fence violation, unrecorded extension, or a ledger file edited
+   on both sides — never hand-resolved silently) → merge → validation commands on the
+   integration tip → `🟢`. A red tip stops further merges until a repair mini-batch
+   lands. Version/changelog work happens here or at the checkpoint per the ledger's
+   cadence — implementers never touch either.
 4. **Close the wave** when every member is 🟢 or ⛔: remove the worktrees. A ⛔ batch
    is left out of integration, its dependents stay ⬜-blocked, and it is surfaced at
-   the next STOP.
+   the next STOP with three verdicts (fix again / ship with the residual / drop).
 5. **Checkpoint or continue**: if the wave map places a checkpoint here →
-   per-checkpoint close-out, covered rows 🟢 → 🧪, STOP with the combined smoke
-   script, delivered as the smoke page (`smoke-page.md`). Otherwise → open the next
-   wave immediately, same session.
+   per-checkpoint close-out (tip validation, QA-runner pre-smoke of the agent-tagged
+   steps with `evidence/C<n>/`, covered rows 🟢 → 🧪, `**State**: AT-CHECKPOINT`), STOP
+   with the combined smoke script, delivered as the smoke page (`smoke-page.md`).
+   Otherwise → open the next wave immediately, same session.
+
+**Every `continue` starts with resume-time validation** on the integration tip (quiet
+form); a red tip is repaired before any wave opens, whatever PROGRESS claims.
 
 **Before handing over ANY checkpoint script, make the build identifiable.** Bump the
 version on the integration branch so it differs from the base branch's, and open the
@@ -123,6 +135,14 @@ Allowed with the user's explicit sign-off: record the change + rationale in the
 PROGRESS preamble and a Session log row. Typical causes: a ⛔ batch forces
 re-planning its dependents; a checkpoint failure reveals a batch was scarier than
 classified (add a checkpoint after its fix-up).
+
+**Fence extensions** are the one mid-wave change the orchestrator may make alone, because
+they keep the invariant plan approval rested on: a `NEEDS_FENCE` path is granted only if
+it is absent from every same-wave sibling's fence (including siblings already integrated
+this wave) and from every extension already recorded; it is recorded in PROGRESS on the
+integration branch, and the implementer updates its own Files line on its branch. A path
+a sibling owns waits for the next wave; two batches needing the same region is a plan
+error that goes to the user at the STOP.
 
 ## Legacy models
 
