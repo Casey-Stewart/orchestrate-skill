@@ -99,7 +99,7 @@ batch or per wave by default.
    does not hold it): remove the worktrees. A ⛔ batch
    is left out of integration, its dependents stay ⬜-blocked, and it is surfaced at
    the next STOP with three verdicts (fix again / ship with the residual / drop).
-5. **Checkpoint or continue**: if the wave map places a checkpoint here →
+5. **Checkpoint or continue**: if the checkpoint table places a checkpoint here →
    per-checkpoint close-out (tip validation, QA-runner pre-smoke of the agent-tagged
    steps with `evidence/C<n>/`, covered rows 🟢 → 🧪, `**State**: AT-CHECKPOINT`), STOP
    with the combined smoke script, delivered as the smoke page (`smoke-page.md`).

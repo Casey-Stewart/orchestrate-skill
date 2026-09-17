@@ -166,7 +166,8 @@ and the recommended next action. Drift corrections happen in `continue`, not her
    pass flips every batch it covers 🧪→✅. A fail: triage the symptoms to the
    offending batch(es) → ❌ and write `fix-up pending: fix/<batch>-c<n>-followup[-<k>]` to
    each indicted row's Notes, suffixing when the name exists (the fix-up mini-batch then
-   runs via `continue`); batches the
+   runs via `continue`; a row whose earlier fix-up is still unmerged gets no second line —
+   the new report rides that fix-up as additional failure notes); batches the
    user explicitly passed flip ✅; the rest stay 🧪 for the re-run. Smoke-page verdicts
    beyond pass/fail ([references/smoke-page.md](references/smoke-page.md)):
    **works-but** → named backlog entry, never a failure; **blocked** → correct the
