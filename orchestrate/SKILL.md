@@ -37,17 +37,19 @@ First word of the arguments:
    INSIDE the directory; if that still returns nothing, list the directory directly. A
    repo may park closed ledgers in a sibling archive dir (e.g. `.agents/archive/`) OUTSIDE
    this root — that is the point of it; never widen the glob to sweep them back in. An
-   empty ledger directory is ignored.
+   empty ledger directory is ignored. If the checkout is not on the default branch, also
+   list `.agents/changes/` ON the default branch (`git ls-tree -r --name-only <default> --
+   .agents/changes/`) — a ledger the user merged silently lives there.
 2. Find ledgers that exist only on BRANCHES — scaffold commits live on the integration
    branch, never on the default branch, so a checkout on `main` may show none of the
    active work: `git for-each-ref --format='%(refname:short)' 'refs/heads/**/*-ledger'
    'refs/remotes/**/*-ledger'` (the `**/` matters — branches are `chore/<slug>-ledger`),
    falling back to `git ls-tree -r --name-only <branch> -- .agents/changes/` over every
-   head when the contract names a non-default integration branch. Skip branches that
+   head when the glob finds nothing (an integration branch may be named otherwise). Skip branches that
    are already ancestors of the default branch (`git merge-base --is-ancestor <branch>
    <default>` — their ledgers are on the default branch or in the archive), and skip
    ids that exist under `.agents/archive/`. Read anything on a branch with
-   `git show <branch>:./<path>` (keep the `./`). Report branch-only ledgers as "ACTIVE
+   `git show <branch>:./<path>` (keep the `./`; run it from the repo root). Report branch-only ledgers as "ACTIVE
    on <branch>; checkout is on <current>". Never switch the main checkout and never copy
    ledger files into another branch's tree.
 3. Classify by GREP, never by reading the file. First the preamble's `**State**:` line

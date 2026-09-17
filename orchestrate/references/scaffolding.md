@@ -136,7 +136,8 @@ appear in the templates — check both directions when editing either.
 | `{{BATCH_SMOKE_GATE}}` | template (batch file) | `hands-on — checkpoint C<n> follows wave <w>` or `machine-verifiable — covered by the final checkpoint (C<n>)` |
 | `{{BATCH_FILES}}` | template (batch file) | the file fence from the plan's batch table |
 | `{{BATCH_GUARDRAILS}}` | template (batch file) | the applicable subset of the project's guardrail bullets for this fence (one line each), or `none apply` |
-| `{{BATCH_GATE}}` | template (batch file) | the gate shape for this weight: `failing-on-base + reviewer + <gate agents>` (fix, M/L), `reviewer + <gate agents>` (M/L), `one combined reviewer+hunter pass` (S) |
+| `{{BATCH_GATE}}` | template (batch file) | the gate shape for this weight: `failing-on-base + reviewer + <gate agents>` (fix, M/L), `reviewer + <gate agents>` (M/L), `failing-on-base + one combined reviewer+hunter pass` (fix, S), `one combined reviewer+hunter pass` (S) |
+| `{{CONVERGENCE}}` | template (READBEFORE) | interview #7 — `on` (a read-only convergence sub-agent runs at change-complete) or `off — the coverage audit is built from PROGRESS rows + git`; default off for a repo's first ledger |
 
 ## Detection heuristics (run before asking anything)
 
@@ -196,8 +197,8 @@ appear in the templates — check both directions when editing either.
    exist only for hands-on risk, and the final one is mandatory.
 6. **ID prefix** — default: initials of the repo directory name
    (`inventory-sync-tool` → `IST`); confirm. Confirm the backlog id scheme.
-7. **Gates, tiers, distillation targets, prohibitions** — offer the detected gate agents
-   and the tier wording; only if detection found no guardrails section or backlog file:
+7. **Gates, tiers, distillation targets, prohibitions** — offer the detected gate agents,
+   the convergence toggle, and the tier wording; only if detection found no guardrails section or backlog file:
    create them at first close-out? (default yes). Any never-touch files beyond the
    standard prohibitions?
 

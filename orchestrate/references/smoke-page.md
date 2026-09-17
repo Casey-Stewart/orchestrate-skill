@@ -37,7 +37,7 @@ under their own collections.
 | `{{EYEBROW}}` | `Checkpoint C<n> · batches B<xx>–B<yy>` |
 | `{{HEADLINE}}` | The change, plainly: `<what this pack does> — smoke run` |
 | `{{STANDFIRST}}` | At hand-over: step and section counts, then "Your verdicts save to this page. When you're done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the chat." After a run: may be updated to summarize the result and any corrected steps. |
-| `{{FACTS_HTML}}` | `<div class="fact"><dt>…</dt><dd>…</dd></div>` items: **Branch**, **Version should read** (`0.13.1 <span class="was">0.13.0</span>` — new value, struck-through old), **Tip** (short SHA), **Suite** (e.g. `2249 / 2255 pass`), **Known failures** if any |
+| `{{FACTS_HTML}}` | `<div class="fact"><dt>…</dt><dd>…</dd></div>` items: **Branch**, **Version should read** (`0.13.1 <span class="was">0.13.0</span>` — new value, struck-through old), **Tip** (short SHA), **Suite** (e.g. `2249 / 2255 pass`, from the validation run on the integration tip, never a worktree), **Known failures** if any |
 | `{{GATE_BODY}}` | Step 0 — see below |
 | `{{SECTIONS_JS}}` | The sections array — schema is documented in the template; steps the QA runner already performed carry `pre: {sha, env, evidence}` |
 | `{{CKPT_KEY}}` | Lowercase checkpoint id (`c1`, `c2`, …) — localStorage key, db collection, one per checkpoint |

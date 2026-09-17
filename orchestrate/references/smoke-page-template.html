@@ -1068,8 +1068,13 @@
     document.getElementById("t-fail").textContent = c.fail;
     document.getElementById("t-block").textContent = c.blocked;
     document.getElementById("t-change").textContent = c.change;
+    // Untouched pre-verified steps are not "to do": the QA runner already ran them.
+    var preOnly = 0;
+    SECTIONS.forEach(function (s) { s.steps.forEach(function (st) {
+      if (st.pre && !(local[st.n] && local[st.n].status)) preOnly++;
+    }); });
     document.getElementById("t-todo").textContent =
-      TOTAL - c.pass - c.fail - c.blocked - c.change;
+      TOTAL - c.pass - c.fail - c.blocked - c.change - preOnly;
     document.getElementById("t-total").textContent = TOTAL;
 
     document.getElementById("m-pass").style.width   = (c.pass    / TOTAL * 100) + "%";
@@ -1081,7 +1086,7 @@
       var done = 0, bad = 0;
       s.steps.forEach(function (st) {
         var r = local[st.n];
-        if (r && r.status) done++;
+        if ((r && r.status) || st.pre) done++;
         // A change request is NOT a bad outcome — the step passed. Only a
         // real fail or a step the user could not perform reddens the section.
         if (r && (r.status === "fail" || r.status === "blocked")) bad++;
@@ -1107,7 +1112,7 @@
       var s = SECTIONS[i];
       for (var j = 0; j < s.steps.length; j++) {
         var n = s.steps[j].n;
-        if (!local[n] || !local[n].status) {
+        if ((!local[n] || !local[n].status) && !s.steps[j].pre) {
           var el = document.getElementById("step-" + n);
           if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
           return;
@@ -1124,10 +1129,10 @@
       lines.push("Section " + s.n + " — " + s.title);
       s.steps.forEach(function (st) {
         var r = local[st.n] || {};
-        var status = r.status || (st.pre ? "pre-verified by agent @" + st.pre.sha : "not run");
+        var status = r.status ? (r.status === "change" ? "WORKS, BUT" : r.status.toUpperCase())
+          : (st.pre ? "pre-verified by agent @" + st.pre.sha : "NOT RUN");
         if (r.status && c.hasOwnProperty(r.status)) c[r.status]++; else if (st.pre) c.pre++; else c.todo++;
-        var line = "  " + st.n + ". " +
-          (r.status === "change" ? "WORKS, BUT" : status.toUpperCase());
+        var line = "  " + st.n + ". " + status;
         if (r.note && r.note.trim()) line += " — " + r.note.trim().replace(/\s+/g, " ");
         lines.push(line);
       });

@@ -35,7 +35,9 @@ before believing any row (§Recovery in the contract).
      if the repo doesn't version). Notes are DENSE but SHORT (≈300 chars): integration
      SHA, reviewer arc ("R1 FIX FIRST P1 → R2 SHIP"), tier used, fence extensions
      ("fence +path (item, reason, date)"), accepted residuals, then the metrics token
-     `m: rounds=<n> asks=<n> fence-bounces=<n> gate=<findings/prod> tip-red=<0|1>`.
+     `m: rounds=<FIX FIRST rounds> asks=<ASK items closed by polish> fence-bounces=<times
+     the fence check sent the implementer back> gate=<gate-agent findings>/<of which
+     needed a production change> tip-red=<1 if tip validation went red after this merge>`.
      Anything longer goes in LOG.md under a heading this cell names. -->
 
 ## Checkpoints
@@ -44,8 +46,10 @@ before believing any row (§Recovery in the contract).
 |------------|------------|--------|----------|--------|---------|
 <!-- one row per checkpoint from the plan's wave map — intermediate rows only after
      waves carrying hands-on batches, plus the mandatory final row. Status ⬜ until
-     reached, 🧪 while awaiting the user, then ✅/❌ per the verdict log. In Verdict,
-     also note the pre-smoke result: "agent 6/6 pass @<sha>, human 9 steps". -->
+     reached, 🧪 while awaiting the user, then ✅/❌ per the verdict log. The Verdict cell
+     ends with the checkpoint's metrics token, completed at `close`:
+     `m: pre-smoke=<agent steps passed>/<human steps> human-smoke-min=<minutes the user
+     reports> escaped=<defects the user found that no gate caught>`. -->
 
 ## Smoke-test verdict log
 

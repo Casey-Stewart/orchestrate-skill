@@ -21,8 +21,9 @@ the degenerate case (every wave width 1) — it is not a separate model.
   Reviewed batch branches merge into it serially; it is the only branch that ever
   merges toward the default branch. Fence disjointness (plus PROGRESS living only on
   the integration branch and each batch ticking only its own batch file) makes these
-  merges conflict-free by construction — an actual conflict means a fence was
-  violated: stop and reconcile, never hand-resolve silently.
+  merges conflict-free by construction — a conflict is stop-and-investigate (a fence
+  violation, an unrecorded fence extension, or a ledger file edited on both sides), never
+  hand-resolved silently.
 - **Checkpoint** — a planned STOP where the USER smoke-tests everything integrated
   since the last checkpoint, in one combined session. Between checkpoints the run is
   autonomous: implement → review → integrate → next wave, no user interaction.
@@ -84,8 +85,9 @@ batch or per wave by default.
    the integration branch; every path in plan fence ∪ recorded extensions ∪ own batch
    file) → failing-on-base for `fix` batches → ONE fresh read-only reviewer plus the
    contract's gate agents in parallel; don't wait for the wave's slowest batch. `SHIP`
-   with ASKs → polish pass (not a round); `FIX FIRST` → round 1 resumes the implementer,
-   round 2 is a fresh one on the strong tier; after the second `FIX FIRST` → ⛔.
+   with ASKs → polish pass (not a round); `FIX FIRST` → round 1 resumes the implementer;
+   the second `FIX FIRST` → ⛔ and STOP; a user-authorized third round is a fresh
+   implementer on the strong tier.
 3. **Integrate serially**: per batch, `git merge-tree --write-tree` dry run (a conflict is
    stop-and-investigate: fence violation, unrecorded extension, or a ledger file edited
    on both sides — never hand-resolved silently) → merge → validation commands on the

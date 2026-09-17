@@ -104,7 +104,10 @@ finished? — and resumes from the real state rather than the claimed one.
 ## Install
 
 Clone the repo and point your Claude Code skills folder at it, so the checked-out repo
-IS the deployed skill and there is nothing to keep in sync:
+IS the deployed skill and there is nothing to keep in sync. If `~/.claude/skills/orchestrate`
+already exists from a copy install, move it out of `skills/` first (keep it as a
+rollback) — a link created inside it would nest a second `SKILL.md` and register a
+duplicate skill:
 
 macOS / Linux:
 

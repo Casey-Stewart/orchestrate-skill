@@ -19,7 +19,10 @@ sessions.
    `git show <branch>:./<path>` (the `./` is required — Git Bash on Windows mangles
    `branch:path` otherwise) and write to the ledger through an integration worktree
    (`git worktree add <scratchpad>/wt-int {{INTEGRATION_BRANCH}}`), using the main checkout
-   only if it already has `{{INTEGRATION_BRANCH}}` checked out.
+   only if it already has `{{INTEGRATION_BRANCH}}` checked out. Run `git show` from the
+   repo or worktree ROOT (the `./` path is cwd-relative). Reuse an integration worktree
+   that `git worktree list` already shows; if its directory is gone, `git worktree prune`
+   first — never two worktrees on one branch.
 3. **Reconcile** (§Recovery below) before believing any PROGRESS row.
 4. **Resume-time validation**: run the validation commands (quiet form) on the integration
    tip. Red → the first job is a repair mini-batch (§Session algorithm step 2), whatever
@@ -43,7 +46,11 @@ request or any external document.
 - **Reviewer** — ONE fresh read-only sub-agent per batch per round, never the implementer,
   never reused. Verdict on line 1: `SHIP` (no P0/P1; may carry ASKs) · `FIX FIRST` (a P0
   or P1 with a concrete failure scenario) · `NEEDS A CLOSER LOOK` (names what would confirm
-  it). Report capped like the implementer's.
+  it). Report capped like the implementer's. Finding classes: **P0** — wrong behavior, a
+  violated criterion or guardrail, concrete scenario (blocking); **P1** — should fix,
+  needs a production change, concrete scenario (blocking); **ASK** — in-fence, about the
+  batch's OWN artifacts (its new tests' strength, smoke-step prose, comments, a doc sweep
+  it owns), no production behavior change (non-blocking; closes as a polish pass).
 - **Gate agents** (read-only, run by the ORCHESTRATOR at the reviewer gate, in parallel
   with the reviewer): {{GATE_AGENTS}}. Implementers NEVER spawn a gate agent themselves —
   a self-spawned one stalls the implementer uncommitted.
@@ -73,7 +80,8 @@ findings list); the fence check and tip validation return one line each on succe
 - Wave open = ONE PROGRESS commit on `{{INTEGRATION_BRANCH}}` (member rows → `🔄`,
   branches named, wave base SHA in the session log, `**State**` line updated) — the crash
   marker §Recovery keys on. PROGRESS, LOG and `evidence/` are edited ONLY on the
-  integration branch, by the orchestrator, through the integration worktree; implementers
+  integration branch, by the orchestrator, through the integration worktree (the QA runner
+  writes `evidence/` files there; the orchestrator commits them); implementers
   touch only their own batch file, on their own branch, and only its checklist ticks,
   appended `- [ ] polish:` lines, and its Files line under a recorded fence extension.
 - **Integration procedure, per batch**: `git merge-tree --write-tree {{INTEGRATION_BRANCH}}
@@ -83,8 +91,9 @@ findings list); the fence check and tip validation return one line each on succe
   integration tip → green: flip `🟢`; red: the tip stays non-green, no further merges,
   repair via a mini-batch (below).
 - **Repairs are mini-batches.** Every repair — a red tip after a merge, a failed
-  pre-smoke step, a user-reported checkpoint failure — runs on `fix/<batch>-<reason>`
-  cut from the integration tip, through the fence check, a fresh reviewer, the dry run,
+  pre-smoke step, a user-reported checkpoint failure — runs on its own branch cut from
+  the integration tip — `fix/<batch>-c<n>-followup` (checkpoint failure),
+  `fix/<batch>-tip` (red tip), `fix/<batch>-presmoke-<step>` — through the fence check, a fresh reviewer, the dry run,
   the merge and tip validation like any batch. Never a direct commit on
   `{{INTEGRATION_BRANCH}}`.
 - The wave map and checkpoint placement in [01-plan.md](01-plan.md) are LOCKED: plan
@@ -208,7 +217,7 @@ git merge-base --is-ancestor <branch> {{INTEGRATION_BRANCH}} && echo INTEGRATED
 git merge-base --is-ancestor {{INTEGRATION_BRANCH}} {{MAIN_BRANCH}} && echo SHIPPED
 git log {{INTEGRATION_BRANCH}}..<branch> --oneline                     # commits ahead
 git worktree list && git status --porcelain                            # dirt (check each wave worktree)
-git show <branch>:./{{LEDGER_DIR}}/02-batches-NN-<slug>.md             # checklist state (keep the ./)
+git show <branch>:./{{LEDGER_DIR}}/02-batches-NN-<slug>.md             # checklist state (keep the ./; run from the root)
 ```
 
 | Ledger says | Git shows | Verdict |
@@ -233,15 +242,18 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
 ## §Session algorithm ("continue")
 
 1. Boot + reconcile + resume-time validation (above).
-2. If any batch is `❌ Smoke Failed` (or the tip is red): spawn ONE fix-up implementer on
-   `fix/<batch>-c<n>-followup` cut from the integration tip, with the user's failure notes
-   VERBATIM (or the failing validation output) + the indicted batch file(s) + the diff
-   since the last passed checkpoint. It is a mini-batch: fence check → fresh reviewer
-   (spec = the failure report + the batch's acceptance criteria) → dry run → merge → tip
-   validation → rows back to 🧪 → STOP, re-issuing the checkpoint's script per §Smoke
-   checkpoints (republish the page with the affected steps annotated — earlier verdicts
-   survive; or reprint the text). A fix-up failing review twice is `❌ (fix-up capped)`,
-   left unmerged, and the STOP names the three verdicts in step 6.
+2. Repairs first, as mini-batches (Git model). **Checkpoint failure** (`❌`): spawn ONE
+   fix-up implementer on `fix/<batch>-c<n>-followup` cut from the integration tip, with
+   the user's failure notes VERBATIM + the indicted batch file(s) + the diff since the
+   last passed checkpoint; fence check → fresh reviewer (spec = the failure report + the
+   batch's acceptance criteria) → dry run → merge → tip validation → rows back to 🧪 →
+   STOP, re-issuing the checkpoint's script per §Smoke checkpoints (republish the page
+   with the affected steps annotated — earlier verdicts survive; or reprint the text). A
+   fix-up failing review twice is `❌ (fix-up capped)`, left unmerged, and the STOP names
+   the three verdicts in step 6. **Red tip with no checkpoint reached** (resume-time
+   validation, or after a merge): the same mini-batch on `fix/<batch>-tip` with the
+   failing output as the spec; once it integrates and the tip is green, return to step 7
+   (remaining merges) or step 4 — no 🧪, no STOP.
 3. If any batch is `🧪`: a checkpoint is open — ask the user for its verdict (passed /
    failed / waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave that still has `⬜` batches whose deps are
@@ -277,8 +289,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      to a batch item — unmapped hunks are scope creep → reject (the batch file's ticks are
      exempt); (b) check each acceptance criterion against the diff; (c) run the
      validation commands; (d) check the diff against {{GUARDRAILS_REF}} and the batch
-     file's applicable guardrails; (e) for every re-pointed or new test, confirm a cell
-     FAILS on the un-fixed code; (f) confirm every doc/comment sweep the batch file names
+     file's applicable guardrails; (e) confirm the failing-on-base result from 6b and, when
+     no gate agent runs, name the mutation each new or re-pointed test would survive; (f) confirm every doc/comment sweep the batch file names
      happened in the same commit. Gate agents run over the batch's new/changed tests
      (skipped when none changed); a gate finding that needs a production change is a P1,
      a test-only finding is an ASK. S-weight batches: one combined reviewer+gate pass.
@@ -287,15 +299,17 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      closes mechanically (6a + validations on the polished tip; polish commits touch only
      test/doc/prose paths — a production file touched → a fix-diff-only re-review by a
      fresh reviewer). Not a round. `FIX FIRST` → resume the SAME implementer with the
-     findings verbatim (round 1); a finding surviving its fix → a FRESH implementer on the
-     strong tier with both rounds' findings (round 2); the re-review verifies the fixes
-     and scans only the fix diff. `NEEDS A CLOSER LOOK` → run the confirming check the
+     findings verbatim, then a fresh re-review that verifies the fixes and scans only the
+     fix diff. `NEEDS A CLOSER LOOK` → run the confirming check the
      reviewer named (or have the implementer add the probe) → `FIX FIRST` or `SHIP`; not a
-     round. Only `FIX FIRST` rounds count; after the second, set `⛔ defective` (not green)
-     or `⛔ green, residual finding open (<severity>)`, leave the batch OUT of integration
-     (dependents stay blocked), and STOP naming three verdicts for the user: fix again
-     (third round) / ship with the residual (recorded verbatim, residual → severity-tagged
-     {{BACKLOG_FILE}} entry + a checkpoint smoke step exercising it) / drop.
+     round. Only `FIX FIRST` rounds count; the SECOND `FIX FIRST` sets `⛔ defective` (not
+     green) or `⛔ green, residual finding open (<severity>)`, leaves the batch OUT of
+     integration (dependents stay blocked), and STOPs — quoting the open finding WITH its
+     failure scenario and naming three verdicts for the user: fix again (an authorized
+     third round: a FRESH implementer on the strong tier with both rounds' findings + the
+     current diff, then a fresh re-review) / ship with the residual (the user's words
+     recorded verbatim; residual → severity-tagged {{BACKLOG_FILE}} entry + a checkpoint
+     smoke step exercising it) / drop.
 7. Integrate serially, per the integration procedure: dry run → merge → tip validation →
    `🟢`, apply the version/changelog cadence, remove the worktree, write the row's Notes
    (SHA, reviewer arc, tier, residuals) ending with the metrics token
@@ -304,8 +318,9 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
 8. Wave closed. If the wave map places a checkpoint here: per-checkpoint close-out —
    version/changelog per cadence, tip validation, QA runner pre-smoke with evidence,
    covered rows `🟢` → `🧪`, checkpoint-table row, session-log row with the checkpoint's
-   integration SHA, `**State**: AT-CHECKPOINT C<n>`, the filled smoke page as
-   `smoke-<Cn>.html`, commit → STOP, delivering the checkpoint's COMBINED smoke script
+   integration SHA, `**State**: AT-CHECKPOINT C<n>`, the checkpoint row's token
+   `m: pre-smoke=<agent>/<human> human-smoke-min=<n> escaped=<n>` (completed at `close`
+   from the user's verdict), the filled smoke page as `smoke-<Cn>.html`, commit → STOP, delivering the checkpoint's COMBINED smoke script
    per §Smoke checkpoints. Otherwise: go to step 4 and open the next wave in this SAME
    session. Default cadence: run until the next checkpoint — stop early only at `⛔` or
    an unplanned user gate.
@@ -319,15 +334,17 @@ time), never mid-sequence.
 
 ## Change-complete close-out (after the FINAL checkpoint passes)
 
-- **Convergence pass**: one read-only sub-agent reads the integration tip against every
-  plan item (acceptance criteria + the full diff from the scaffold commit, ledger dir
-  excluded) and classifies each `implemented / partial / contradicts / unrequested`.
-  Anything but `implemented` becomes a named {{BACKLOG_FILE}} entry or a convergence
-  mini-batch the user is asked about — never closed on PROGRESS claims alone.
+- **Convergence pass** — {{CONVERGENCE}}. When on: one read-only sub-agent reads the
+  integration tip against every plan item (acceptance criteria + the full diff from the
+  scaffold commit, ledger dir excluded) and classifies each `implemented / partial /
+  contradicts / unrequested`; anything but `implemented` becomes a named {{BACKLOG_FILE}}
+  entry or a convergence mini-batch the user is asked about. When off: the coverage audit
+  is built from PROGRESS rows + git, and the hand-over says so.
 - Final coverage audit in PROGRESS: every request item (fold-ins included) maps to a
   merged commit, an intended-behavior resolution, or a named entry in {{BACKLOG_FILE}} —
   zero unaccounted. Fold-ins are REMOVED from {{BACKLOG_FILE}} in the close-out commit
-  (the ledger row and commit message carry provenance); residuals added get ids in the
+  (the ledger row and commit message carry provenance); a partially done fold-in is
+  edited in place there with a pointer to this ledger; residuals added get ids in the
   {{BACKLOG_ID_PREFIX}} scheme.
 - Distill: any NEW bug class this change uncovered → ONE-LINE guardrail bullet in
   {{GUARDRAILS_REF}} naming the class and pointing at the test or mechanism doc that

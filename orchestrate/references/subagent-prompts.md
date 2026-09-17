@@ -72,9 +72,10 @@ Same REPORT shape.
 
 **Fix round 1** (after a `FIX FIRST`): resume the SAME implementer with the reviewer's
 findings verbatim and "fix each, tick nothing new, run validations, commit, same REPORT
-shape". **Fix round 2** (a finding survived its fix): a FRESH implementer on the strong
-tier, given the full implementer skeleton + both rounds' findings + `git diff
-[INTEGRATION_BRANCH]...HEAD`, told "you own this batch now".
+shape". **Authorized third round** (the user chose "fix again" after `⛔`): a FRESH
+implementer on the strong tier, given the full implementer skeleton + both rounds'
+findings + `git diff [INTEGRATION_BRANCH]...HEAD`, told "you own this batch now", then a
+fresh re-review.
 
 ## Reviewer (the gate — read-only)
 
@@ -104,9 +105,9 @@ DUTIES, in order:
 4. Check the diff against the project guardrails: [GUARDRAILS SECTION TEXT — or "none
    recorded; apply general correctness scrutiny to async/lifecycle/state boundaries"]
    and the batch's applicable guardrails: [APPLICABLE GUARDRAILS].
-5. For every new or re-pointed test, name the production mutation that would still
-   pass it; for a `fix` batch confirm at least one cell FAILS on the un-fixed code
-   (the orchestrator's failing-on-base result: [FAILING_ON_BASE_RESULT]).
+5. Confirm the orchestrator's failing-on-base result ([FAILING_ON_BASE_RESULT]) is
+   consistent with the diff. [IF NO GATE AGENT RUNS FOR THIS BATCH: also, for every new
+   or re-pointed test, name the production mutation that would still pass it.]
 6. Confirm every doc/comment sweep the batch file names happened in the same commit.
 
 OUTPUT (fixed shape):
@@ -135,11 +136,11 @@ mark it FIX VERIFIED or NOT FIXED. Then re-scan only what changed since round 1
 **Scoped re-review** (a polish commit touched a production file): a fresh reviewer given
 only `git diff [PRE_POLISH_SHA]..HEAD`, the ASK list, and duties 1, 2 and 4. Not a round.
 
-Only `FIX FIRST` rounds count toward the cap of two. After a second `FIX FIRST` the
-orchestrator sets `⛔ defective` or `⛔ green, residual finding open (<severity>)`,
-records the findings in PROGRESS Notes (detail in LOG.md), leaves the batch OUT of the
-integration branch, and surfaces it at the next STOP with three verdicts for the user:
-fix again / ship with the residual / drop.
+Only `FIX FIRST` rounds count toward the cap of two. The SECOND `FIX FIRST` makes the
+orchestrator set `⛔ defective` or `⛔ green, residual finding open (<severity>)`, record
+the findings in PROGRESS Notes (detail in LOG.md), leave the batch OUT of the integration
+branch, and STOP — quoting the open finding with its failure scenario and offering three
+verdicts: fix again (the authorized third round above) / ship with the residual / drop.
 
 ## Test hunter (optional gate agent — read-only)
 
@@ -164,7 +165,8 @@ whose mutation stays green. No hunches. Look especially for fixtures handed stra
 the code under test where production should FETCH them, and guards never fed the input
 shape their real channel delivers. Flag any shape not in the catalog as NEW CLASS.
 
-OUTPUT: per finding — test file:line, catalog class or NEW CLASS, the exact mutation that
+OUTPUT: line 1 exactly `CLEAN` or `FINDINGS <n>`; then per finding — test file:line,
+catalog class or NEW CLASS, the exact mutation that
 stays green, the positive assertion to add, and whether closing it needs a PRODUCTION
 change (→ P1) or a test-only change (→ ASK). Rank by risk. If nothing is found, list
 what you checked and which mutations you tried — never a bare "looks fine". ≤40 lines
@@ -181,7 +183,8 @@ You are the QA RUNNER for checkpoint C[N] of [CHANGE_ID] in [REPO_PATH], on the
 integration tip [INTEGRATION_SHA] in the integration worktree [WT_INT_PATH]. You run
 only the smoke steps tagged `Runner: agent`; you never perform a `Runner: human` step
 and never touch data outside [DISPOSABLE_ENV or "none — steps touching data are human"].
-Runners available: [AGENT_RUNNERS]. Environment: [ENVIRONMENT BLOCK FROM THE READBEFORE].
+Runners available: [AGENT_RUNNERS]. Environment and prohibitions: [THE RUNNERS LINE AND
+THE RELEVANT HARD PROHIBITIONS FROM THE READBEFORE].
 
 STEPS (verbatim from the batch files, with their Do / Pass text):
 [AGENT-TAGGED STEPS]
@@ -296,8 +299,8 @@ twice is `❌ (fix-up capped)`: left unmerged, surfaced at the STOP with the thr
   read-only. Never spawn a reviewer before the fence check passes. S-weight batches: one
   combined reviewer+hunter agent.
 - Resume vs fresh: polish passes and the first fix round RESUME the same implementer
-  (SendMessage, findings verbatim); the second fix round is a FRESH implementer on the
-  strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
+  (SendMessage, findings verbatim); a user-authorized third round is a FRESH implementer
+  on the strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
   fresh at the first unticked item.
 - Tiers: the reviewer never runs on a less capable model than the implementer; L-weight
   reviews and second-attempt implementers on the most capable model available; record
