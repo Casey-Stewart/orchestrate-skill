@@ -76,8 +76,8 @@ fence-bounces=<times the fence check sent the implementer back> gate=<gate-agent
 findings>/<of which needed a production change> tip-red=<1 if tip validation went red
 after this merge>`; each checkpoint row's Verdict cell ends with `m: pre-smoke=<agent
 steps passed>/<human steps> human-smoke-min=<minutes the user reports> escaped=<defects
-the user found that no gate caught>`, completed when the user's checkpoint verdict is
-recorded.
+the user found that no gate caught>`, completed when the user's final verdict on that
+checkpoint is recorded (`escaped` counts every fail across re-runs).
 
 ## Severity and round accounting
 
@@ -114,7 +114,8 @@ recorded.
 | 🧪 At Checkpoint | A planned checkpoint is reached — awaiting the USER's combined smoke verdict |
 | ❌ Smoke Failed | The USER reported a checkpoint failure triaged to this batch — the fix-up mini-batch is the next session's FIRST job. Never written for an agent-found failure |
 | ✅ Passed | Its checkpoint passed; merged toward the default branch per the merge policy (verify with git, not the table) |
-| ⛔ Blocked | Reviewer rejected twice (`defective`, or `green, residual finding open`), or an external blocker — left out of integration; needs the user's verdict |
+| ⛔ Blocked | Reviewer rejected twice (`defective`, or `green, residual finding open`), or an external blocker — left out of integration; needs the user's verdict. `⛔ (dropped)` = the user dropped it; its items live in the backlog |
+| ❌ (fix-up capped) | A checkpoint fix-up failed review twice — left unmerged; needs the user's verdict |
 | 👤 User Action | Waiting on something only the user can do (credentials, hardware, approvals) |
 
 PROGRESS also carries `**State**: ACTIVE | AT-CHECKPOINT C<n> | USER-BLOCKED | COMPLETE`,
@@ -153,8 +154,9 @@ claims; **git is truth**. Reconcile before believing any row.
 - Waves and checkpoints come from the plan's locked wave map; plan approval is the
   standing authorization for the concurrency. Deviating from the map needs the user's
   explicit words, recorded verbatim in PROGRESS. A wave opens only when every earlier
-  wave's members are 🟢/✅ — or ⛔/👤 with the user's verdict recorded and their
-  dependents held ⬜ — the tip is green, and no reached checkpoint is unanswered.
+  wave's members are 🟢/✅, `⛔ (dropped)` or 👤 (dependents of those held ⬜), the tip is
+  green, and no reached checkpoint is unanswered; a ⛔ still awaiting a verdict stops the
+  session before this point.
 - Never `--no-verify`, never force-push, never rewrite history.
 
 ### §Fence changes (mid-wave)
@@ -166,8 +168,10 @@ already 🟢 is the dangerous case) and from every extension recorded this wave;
 version and changelog files never qualify. Pass → record "fence +<path> (B<NN>, item,
 reason, date)" in the row's Notes and the session log on the integration branch; resume
 the implementer, whose only batch-file edit is its Files line on its own branch. Fail →
-defer to the next wave (dependency recorded) or, for a true overlap, put the question in
-the STOP hand-off. The fence check's allowed set is the plan's fence ∪ recorded extensions
+the batch's other items are gated and integrated now; the deferred item is recorded in
+Notes + session log as `deferred to W<n+1>: <item> (<path>)` and runs as a continuation
+of the same batch in the next wave (branch `<batch-branch>-w<n+1>`, fence extended then);
+a recorded deferral does not hold the wave open. A true overlap goes to the STOP hand-off. The fence check's allowed set is the plan's fence ∪ recorded extensions
 ∪ the batch's own file — never the implementer's Files line alone.
 
 ## Smoke checkpoints
@@ -207,7 +211,7 @@ failure, never blocks the pass).
 
 ## §Recovery — the reconcile table
 
-For each PROGRESS row not `✅`/`👤`, gather: branch exists? (`git rev-parse --verify`),
+For each PROGRESS row not `✅`/`👤`/`⛔ (dropped)`, gather: branch exists? (`git rev-parse --verify`),
 integrated? (`git merge-base --is-ancestor <branch> <integration>`), shipped?
 (`git merge-base --is-ancestor <integration> <default>`), commits ahead
 (`git log <integration>..<branch> --oneline`), dirty trees (`git status --porcelain`
@@ -217,19 +221,19 @@ state inside the batch file on that branch (`git show <branch>:./<path>`, from t
 | Ledger says | Git shows | Verdict |
 |---|---|---|
 | 🔄 | branch missing, or no commits past the wave base | Implementer never landed → re-spawn it (fresh worktree) |
-| 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items) | Resume the implementer — a fresh agent, the original is gone — at the first unticked item (recreate the worktree if gone) |
+| 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items; a recorded deferral is not a partial checklist) | Resume the implementer — a fresh agent, the original is gone — at the first unticked item (recreate the worktree if gone) |
 | 🔄 | commits ahead, checklist fully ticked, validations green | Crashed before the gate → fence check, then the reviewer gate now |
 | 🔄 | branch already an ancestor of the integration branch | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
 | 🟢 | branch NOT an ancestor of the integration branch | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
 | 🟢 | branch ancestor of the integration branch | Correct state — waits for its covering checkpoint |
-| 🟢 (all members of a checkpoint-carrying wave, or ⛔/👤 with a recorded verdict) | checkpoint row not 🧪/✅ | Close-out unfinished → finish it (tip validation → pre-smoke → page → 🧪); never open the next wave |
+| 🟢 (every member of a checkpoint-carrying wave is 🟢, ⛔ or 👤 — verdict or not) | checkpoint row not 🧪/✅ | Close-out unfinished → finish it (tip validation → pre-smoke → page → 🧪); never open the next wave |
 | 🧪 | integration branch ancestor of the default branch | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
 | 🧪 | integration branch not merged | Correct state → ask the user for the checkpoint verdict |
 | ❌ | no `fix/<batch>-c<n>-followup` branch | Fix-up never started → spawn it |
 | ❌ | fix-up branch ahead, not integrated | Resume / gate it per the 🔄 rows |
 | ❌ | fix-up integrated, tip green | Covered rows → 🧪, re-issue the page with affected steps annotated |
 | ❌ | fix-up integrated, tip red | Repair mini-batch on the tip first |
-| ⛔ (either kind), `❌ (fix-up capped)`, or Notes "tip/pre-smoke repair capped" | any | Awaiting the user's verdict (fix again / ship with the residual / drop) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
+| ⛔ (either kind), `❌ (fix-up capped)`, or Notes `tip repair capped:` / `pre-smoke repair capped:` without a later `verdict … spent` | any | Awaiting the user's verdict (fix again / ship with the residual / drop) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
 
 Prune worktrees of integrated batches (`git worktree remove`). Log every
 reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
@@ -250,15 +254,26 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    before the red) with the failing output as the spec; once green, return to step 7 or
    step 4 — no 🧪, no STOP. A `-tip` or `-presmoke` repair failing review twice NEVER
    writes `❌`: rows keep their status, the tip stays red (no merges) or the step is
-   issued as a HUMAN step carrying the failure note, the failure goes to Notes + LOG,
-   STOP with the three verdicts. **Recorded verdicts** on a ⛔ batch or a capped repair
-   (from the verdict log): *fix again* → an authorized third round — a FRESH implementer
-   on the strong tier, on the batch's own branch (or a new repair branch), with both
-   rounds' findings + the current diff, then a fresh re-review; a further `FIX FIRST`
-   leaves it ⛔ and asks again, never a loop. *Ship with the residual* → integrate per
-   the integration procedure; residual → severity-tagged backlog entry + a checkpoint
-   smoke step. *Drop* → `⛔ (dropped)`; its request items become named backlog entries;
-   its dependents wait for the user's re-plan words.
+   issued as a HUMAN step carrying the failure note, the failure is written to the
+   affected batch's Notes as `tip repair capped: <branch>` or `pre-smoke repair capped:
+   step NN, <branch>` (the phrases §Recovery keys on) + LOG, STOP with the three verdicts.
+   **Recorded verdicts** (verdict log, Checkpoint column `B<NN>`) on a ⛔ batch or a
+   capped repair are consumed exactly once: the consuming session appends `verdict <date>
+   spent → <what it did>` to the row's Notes. *Fix again* → an authorized third round: a
+   FRESH implementer on the strong tier — on the batch's own branch (row → 🔄 for the
+   round) or on the capped repair's own branch — with both rounds' findings + the current
+   diff, then a fresh re-review; a further `FIX FIRST` returns it to ⛔/capped and asks
+   again, never a loop. *Ship with the residual* — batch: integrate per the integration
+   procedure; residual → severity-tagged backlog entry + one `Runner: human` smoke step
+   the orchestrator authors into the batch file's Smoke section (next checkpoint page, or
+   a re-issue of the passed one if none remains). Capped tip repair: merge it only if the
+   tip then validates green (the open finding is the residual); otherwise it stays red and
+   the question stands. Capped pre-smoke repair: the human step stands; residual →
+   backlog. *Drop* — batch: `⛔ (dropped)`; its request items become named backlog
+   entries; its ⬜ dependents are re-planned or dropped on the user's words, asked at the
+   same STOP. Capped tip repair: a reviewed revert mini-batch of the offending merge
+   (`fix/<batch>-revert`), that batch → `⛔ (dropped)` with its items in the backlog.
+   Capped pre-smoke repair: the human step stands; residual → backlog.
 3. Any `🧪`? A checkpoint is open — ask the user for its verdict (passed / failed /
    waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave with `⬜` batches whose deps are all 🟢/✅.
@@ -274,7 +289,7 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    path, both rename endpoints, in plan fence ∪ recorded extensions ∪ own batch file;
    batch file only ticks / `polish:` appends / recorded Files change) — fail → no reviewer,
    `NEEDS_FENCE` → §Fence changes, else resume to revert; 6b failing-on-base for `fix`
-   batches (temporary worktree at the wave base + the batch's test-only files; assertion
+   batches and repairs (temporary worktree at the branch's base + the batch's test-only files; assertion
    failure proves it, all-pass = P0, cannot-run = inconclusive → duty (e)); 6c reviewer +
    gate agents in parallel (hunk→item mapping, acceptance criteria vs the three-dot diff,
    validations, guardrails, failing-on-base cells — an inconclusive 6b means the reviewer
@@ -311,11 +326,12 @@ human-smoke-min=<n> escaped=<n>` (completed when the user's verdict is recorded)
 commit on the integration branch, STOP with the combined smoke script (smoke page link
 + gate essentials in text; pre-verified steps marked, with the evidence SHA).
 
-**Change-complete** (after the FINAL checkpoint passes and every batch is ✅):
+**Change-complete** (after the FINAL checkpoint passes and every batch is ✅ or
+`⛔ (dropped)`):
 1. **Convergence pass** (when the contract turns it on; otherwise the coverage audit is
    built from PROGRESS rows + git and the hand-over says so) — one read-only sub-agent
    classifies every plan item against the integration tip (`implemented / partial / contradicts / unrequested`, from the
-   acceptance criteria + the full diff since the scaffold commit — the SHA in the session log's first row — ledger dir excluded);
+   acceptance criteria + the full diff since the ledger's **Base** SHA in the PROGRESS preamble, ledger dir excluded);
    anything but `implemented` → named backlog entry or a convergence mini-batch the user
    is asked about. Never close on PROGRESS claims alone.
 2. Final coverage audit — every request item, fold-ins included → merged commit /

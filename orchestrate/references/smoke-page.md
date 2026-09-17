@@ -95,7 +95,8 @@ tagged `Runner: agent` on the integration tip and writes `evidence/C<n>/step-NN.
 Steps it PASSED get `pre: { sha, env, evidence }` in the sections array: the page shows
 them dimmed with a "Pre-verified by agent" tag and the evidence line, and they still take
 the operator's verdict — a human mark always replaces the agent's. A step it FAILED is
-not issued: it becomes a repair mini-batch first (never `❌`, which is the user's word).
+not issued until a repair mini-batch has landed (never `❌`, which is the user's word); if
+that repair is capped, the step is issued as a human step carrying the failure note.
 A step it COULD NOT RUN is issued as a human step with the reason in its `aside`.
 `pre` is dropped from any step whose covered files a later repair touched, and the
 runner re-runs it before the page is re-issued. The "Copy results" text reports

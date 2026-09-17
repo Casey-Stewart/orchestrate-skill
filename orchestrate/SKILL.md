@@ -90,7 +90,8 @@ First word of the arguments:
 - The wave-open PROGRESS commit on the integration branch (member rows → 🔄, wave base
   SHA logged, State line) is the crash marker reconciliation keys on.
 - Every `continue` begins with validation on the integration tip; a red tip is repaired
-  before any wave opens.
+  before any wave opens (unless a capped tip repair is awaiting the user's verdict — then
+  ask, never re-spawn).
 - Smoke gates are planned CHECKPOINTS — after waves carrying hands-on risk, plus one
   mandatory final — never per batch by default. A reached checkpoint belongs to the
   USER: never flip ✅ without their verdict; never open the next wave past an
@@ -171,7 +172,8 @@ and the recommended next action. Drift corrections happen in `continue`, not her
 2. Merge / push / release ONLY on the user's explicit authorization — their exact words
    are the record (a verdict message may carry the authorization; quote it). Verdicts on
    a ⛔ batch or a capped repair (fix again / ship with the residual / drop) are recorded
-   the same way, verbatim, and consumed by `continue`.
+   the same way, verbatim, in the verdict log (Checkpoint column = `B<NN>`), and consumed
+   by `continue`.
 3. Final checkpoint ✅ → change-complete close-out per the contract: convergence pass
    (when the contract turns it on, a fresh read-only sub-agent classifies every item
    against the tip; otherwise the audit comes from PROGRESS + git and says so), final coverage

@@ -1,7 +1,8 @@
 # Progress
 
 **Identifier**: {{CHANGE_ID}}
-**Started**: {{DATE}}
+**Started**: {{DATE}} · **Base**: {{BASE_SHA}} (the default-branch commit the ledger
+branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
 **State**: ACTIVE
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
@@ -26,7 +27,8 @@ before believing any row (§Recovery in the contract).
   `❌ Smoke Failed` (the USER failed a reached checkpoint — never an agent-found failure) ·
   `✅ Passed` (its checkpoint passed; merged toward the default branch per the merge
   policy — verify with git) · `⛔ Blocked` (`defective`, or `green, residual finding
-  open`; awaiting the user's verdict) ·
+  open`; awaiting the user's verdict; `⛔ (dropped)` once the user drops it) ·
+  `❌ (fix-up capped)` (a checkpoint fix-up failed review twice; awaiting the verdict) ·
   `👤 User Action`
 
 ## Batches
@@ -58,7 +60,8 @@ before believing any row (§Recovery in the contract).
 
 | Date | Checkpoint | Verdict | User notes |
 |------|------------|---------|------------|
-<!-- record the user's VERBATIM words for every checkpoint verdict — including any
+<!-- record the user's VERBATIM words for every checkpoint verdict — and for every
+     verdict on a ⛔ batch or a capped repair (Checkpoint column = `B<NN>`) — including any
      merge/push/release authorization in the same message (that wording IS the
      authorization record) and which batch(es) a partial fail indicts. Verbatim quotes are
      exempt from every length cap. The smoke page's "Copy results as text" paste is the
@@ -78,9 +81,8 @@ before believing any row (§Recovery in the contract).
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
-<!-- the FIRST row is the scaffold: it carries the scaffold commit SHA (the convergence
-     diff and the first checkpoint's "since" point start there). Then append one row per
-     session, ≤200 characters: waves opened with base SHAs, batches
+<!-- the FIRST row is the scaffold session. Then append one row per session, ≤200
+     characters: waves opened with base SHAs, batches
      integrated, reconciliations, checkpoint close-outs with integration SHAs, and
      exactly why work halted (checkpoint, ⛔, user input needed, COMPLETE). Narrative
      goes in LOG.md under a heading named here. -->

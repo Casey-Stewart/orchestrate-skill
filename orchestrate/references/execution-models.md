@@ -95,7 +95,8 @@ batch or per wave by default.
    integration tip → `🟢`. A red tip stops further merges until a repair mini-batch
    lands. Version/changelog work happens here or at the checkpoint per the ledger's
    cadence — implementers never touch either.
-4. **Close the wave** when every member is 🟢 or ⛔: remove the worktrees. A ⛔ batch
+4. **Close the wave** when every member is 🟢, ⛔ or 👤 (a recorded NEEDS_FENCE deferral
+   does not hold it): remove the worktrees. A ⛔ batch
    is left out of integration, its dependents stay ⬜-blocked, and it is surfaced at
    the next STOP with three verdicts (fix again / ship with the residual / drop).
 5. **Checkpoint or continue**: if the wave map places a checkpoint here →
@@ -105,7 +106,8 @@ batch or per wave by default.
    Otherwise → open the next wave immediately, same session.
 
 **Every `continue` starts with resume-time validation** on the integration tip (quiet
-form); a red tip is repaired before any wave opens, whatever PROGRESS claims.
+form); a red tip is repaired before any wave opens, whatever PROGRESS claims — unless a
+capped tip repair is awaiting the user's verdict, in which case the session asks.
 
 **Before handing over ANY checkpoint script, make the build identifiable.** Bump the
 version on the integration branch so it differs from the base branch's, and open the

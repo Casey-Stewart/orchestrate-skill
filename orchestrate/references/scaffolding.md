@@ -101,6 +101,7 @@ appear in the templates — check both directions when editing either.
 | `{{CHANGE_SLUG}}` | naming only | short kebab-case name for the change |
 | `{{ID_PREFIX}}` | naming only | interview #6 (default: repo-name initials) |
 | `{{DATE}}` | template (PROGRESS, request, LOG) | today, YYYY-MM-DD |
+| `{{BASE_SHA}}` | template (PROGRESS) | `git rev-parse HEAD` on the branch the ledger branch is cut from, taken at fill time BEFORE the scaffold commit (the scaffold commit cannot contain its own SHA) |
 | `{{LEDGER_DIR}}` | template (READBEFORE) | `.agents/changes/{{CHANGE_ID}}` |
 | `{{MAIN_BRANCH}}` | template (READBEFORE) | detected: `git symbolic-ref refs/remotes/origin/HEAD` or current branch |
 | `{{INTEGRATION_BRANCH}}` | template (READBEFORE) | `chore/{{CHANGE_SLUG}}-ledger` unless the user overrides |

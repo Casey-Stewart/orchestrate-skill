@@ -273,8 +273,8 @@ THE FAILURE REPORT (verbatim — this is the spec):
 THE BATCH: [FULL TEXT OF THE BATCH FILE]
 THE DIFF UNDER REPAIR: [for a checkpoint failure: `git diff [LAST_CHECKPOINT_SHA]..HEAD`,
 everything the checkpoint's smoke test exercised — [LAST_CHECKPOINT_SHA] = the previous
-checkpoint's integration commit from the session log, or the scaffold commit (session
-log's first row) before the first | for a red tip: the merge that turned it red,
+checkpoint's integration commit from the session log, or the ledger's Base SHA (PROGRESS
+preamble) before the first | for a red tip: the merge that turned it red,
 `git diff [PRE_MERGE_SHA]..HEAD` | for a failed pre-smoke step: the step's covered files].
 
 [CONTRACT EXCERPTS — same block as the implementer prompt; fence = the indicted batch's
@@ -293,7 +293,7 @@ If the triage between batches is uncertain, say so in the prompt and widen the f
 the candidate batches' fences combined — never the whole repo. A checkpoint fix-up
 (`-c<n>-followup`) failing review twice is `❌ (fix-up capped)`; a `-tip` or `-presmoke`
 repair failing twice NEVER writes `❌` — rows keep their status, the tip stays red or the
-step stays un-issued, the failure goes to Notes + LOG. Either way the repair is left
+step is issued as a human step carrying the failure note, the failure goes to Notes + LOG. Either way the repair is left
 unmerged and the session STOPs with the three verdicts.
 
 ## Spawning rules (orchestrator)
