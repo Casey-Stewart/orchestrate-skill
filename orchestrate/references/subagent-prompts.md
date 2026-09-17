@@ -271,16 +271,19 @@ THE FAILURE REPORT (verbatim — this is the spec):
 [USER'S WORDS | FAILING VALIDATION OUTPUT | QA RUNNER EVIDENCE]
 
 THE BATCH: [FULL TEXT OF THE BATCH FILE]
-THE SHIPPED DIFF: run `git diff [LAST_CHECKPOINT_SHA]..HEAD` to see everything the
-checkpoint's smoke test exercised ([LAST_CHECKPOINT_SHA] = the previous checkpoint's
-integration commit from the session log, or the scaffold commit before the first).
+THE DIFF UNDER REPAIR: [for a checkpoint failure: `git diff [LAST_CHECKPOINT_SHA]..HEAD`,
+everything the checkpoint's smoke test exercised — [LAST_CHECKPOINT_SHA] = the previous
+checkpoint's integration commit from the session log, or the scaffold commit (session
+log's first row) before the first | for a red tip: the merge that turned it red,
+`git diff [PRE_MERGE_SHA]..HEAD` | for a failed pre-smoke step: the step's covered files].
 
 [CONTRACT EXCERPTS — same block as the implementer prompt; fence = the indicted batch's
 fence, widened only as the orchestrator recorded]
 
 DO: trace the failure to its root cause in the shipped code paths; fix it inside the
-fence; add or re-point the test that fails on the un-fixed code; run the validation
-commands; commit "fix: batch [NN] follow-up — [symptom]".
+fence; add or re-point the test that fails on the un-fixed code (this repair is a `fix`
+batch — the orchestrator runs failing-on-base against it); run the validation commands;
+commit "fix: batch [NN] repair — [symptom]".
 
 REPORT: same fixed shape as the implementer (status line, evidence block, ≤40 lines:
 root cause, the fix, and what the user's checkpoint re-run should now check).

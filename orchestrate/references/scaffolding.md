@@ -136,7 +136,7 @@ appear in the templates — check both directions when editing either.
 | `{{BATCH_SMOKE_GATE}}` | template (batch file) | `hands-on — checkpoint C<n> follows wave <w>` or `machine-verifiable — covered by the final checkpoint (C<n>)` |
 | `{{BATCH_FILES}}` | template (batch file) | the file fence from the plan's batch table |
 | `{{BATCH_GUARDRAILS}}` | template (batch file) | the applicable subset of the project's guardrail bullets for this fence (one line each), or `none apply` |
-| `{{BATCH_GATE}}` | template (batch file) | the gate shape for this weight: `failing-on-base + reviewer + <gate agents>` (fix, M/L), `reviewer + <gate agents>` (M/L), `failing-on-base + one combined reviewer+hunter pass` (fix, S), `one combined reviewer+hunter pass` (S) |
+| `{{BATCH_GATE}}` | template (batch file) | the gate shape for this weight: `failing-on-base + reviewer + <gate agents>` (fix, M/L), `reviewer + <gate agents>` (M/L), `failing-on-base + one combined reviewer+gate pass` (fix, S), `one combined reviewer+gate pass` (S) — "reviewer only" wherever the contract names no gate agents |
 | `{{CONVERGENCE}}` | template (READBEFORE) | interview #7 — `on` (a read-only convergence sub-agent runs at change-complete) or `off — the coverage audit is built from PROGRESS rows + git`; default off for a repo's first ledger |
 
 ## Detection heuristics (run before asking anything)

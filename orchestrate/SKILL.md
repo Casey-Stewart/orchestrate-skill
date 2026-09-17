@@ -169,7 +169,9 @@ and the recommended next action. Drift corrections happen in `continue`, not her
    **works-but** → named backlog entry, never a failure; **blocked** → correct the
    step and re-issue the page, or reclassify as a fail if the app lacks the behavior.
 2. Merge / push / release ONLY on the user's explicit authorization — their exact words
-   are the record (a verdict message may carry the authorization; quote it).
+   are the record (a verdict message may carry the authorization; quote it). Verdicts on
+   a ⛔ batch or a capped repair (fix again / ship with the residual / drop) are recorded
+   the same way, verbatim, and consumed by `continue`.
 3. Final checkpoint ✅ → change-complete close-out per the contract: convergence pass
    (when the contract turns it on, a fresh read-only sub-agent classifies every item
    against the tip; otherwise the audit comes from PROGRESS + git and says so), final coverage

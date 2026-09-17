@@ -24,7 +24,9 @@ before believing any row (§Recovery in the contract).
   the worktree AND the integration tip, merged; verified at its checkpoint) ·
   `🧪 At Checkpoint` (checkpoint reached, awaiting the USER's combined smoke verdict) ·
   `❌ Smoke Failed` (the USER failed a reached checkpoint — never an agent-found failure) ·
-  `✅ Merged` · `⛔ Blocked` (`defective`, or `green, residual finding open`) ·
+  `✅ Passed` (its checkpoint passed; merged toward the default branch per the merge
+  policy — verify with git) · `⛔ Blocked` (`defective`, or `green, residual finding
+  open`; awaiting the user's verdict) ·
   `👤 User Action`
 
 ## Batches
@@ -49,7 +51,8 @@ before believing any row (§Recovery in the contract).
      reached, 🧪 while awaiting the user, then ✅/❌ per the verdict log. The Verdict cell
      ends with the checkpoint's metrics token, completed at `close`:
      `m: pre-smoke=<agent steps passed>/<human steps> human-smoke-min=<minutes the user
-     reports> escaped=<defects the user found that no gate caught>`. -->
+     reports> escaped=<defects the user found that no gate caught>`, completed when the
+     user's verdict is recorded. -->
 
 ## Smoke-test verdict log
 
@@ -75,7 +78,9 @@ before believing any row (§Recovery in the contract).
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
-<!-- append one row per session, ≤200 characters: waves opened with base SHAs, batches
+<!-- the FIRST row is the scaffold: it carries the scaffold commit SHA (the convergence
+     diff and the first checkpoint's "since" point start there). Then append one row per
+     session, ≤200 characters: waves opened with base SHAs, batches
      integrated, reconciliations, checkpoint close-outs with integration SHAs, and
      exactly why work halted (checkpoint, ⛔, user input needed, COMPLETE). Narrative
      goes in LOG.md under a heading named here. -->
