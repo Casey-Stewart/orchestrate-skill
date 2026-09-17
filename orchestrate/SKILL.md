@@ -43,10 +43,13 @@ First word of the arguments:
    active work: `git for-each-ref --format='%(refname:short)' 'refs/heads/**/*-ledger'
    'refs/remotes/**/*-ledger'` (the `**/` matters — branches are `chore/<slug>-ledger`),
    falling back to `git ls-tree -r --name-only <branch> -- .agents/changes/` over every
-   head when the contract names a non-default integration branch. Read anything on a
-   branch with `git show <branch>:./<path>` (keep the `./`). Report branch-only ledgers
-   as "ACTIVE on <branch>; checkout is on <current>". Never switch the main checkout and
-   never copy ledger files into another branch's tree.
+   head when the contract names a non-default integration branch. Skip branches that
+   are already ancestors of the default branch (`git merge-base --is-ancestor <branch>
+   <default>` — their ledgers are on the default branch or in the archive), and skip
+   ids that exist under `.agents/archive/`. Read anything on a branch with
+   `git show <branch>:./<path>` (keep the `./`). Report branch-only ledgers as "ACTIVE
+   on <branch>; checkout is on <current>". Never switch the main checkout and never copy
+   ledger files into another branch's tree.
 3. Classify by GREP, never by reading the file. First the preamble's `**State**:` line
    (`ACTIVE | AT-CHECKPOINT C<n> | USER-BLOCKED | COMPLETE`); ledgers without one (older
    scaffolds) are classified from their BATCHES-TABLE rows plus the Session log — never

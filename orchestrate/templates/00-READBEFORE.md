@@ -216,15 +216,15 @@ git show <branch>:./{{LEDGER_DIR}}/02-batches-NN-<slug>.md             # checkli
 | 🔄 | branch missing, or no commits past the wave base | Implementer never landed → re-spawn it (fresh worktree) |
 | 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items) | Resume the implementer at the first unticked item (recreate the worktree if gone) |
 | 🔄 | commits ahead, checklist fully ticked, validations green | Crashed before the gate → fence check, then the reviewer gate now |
-| 🔄 | branch already an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between merge and flip → run tip validation, then flip 🟢 (red → repair mini-batch) |
+| 🔄 | branch already an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
 | 🟢 | branch NOT an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
 | 🟢 | branch ancestor of `{{INTEGRATION_BRANCH}}` | Correct state — waits for its covering checkpoint |
-| 🟢 (all members of a wave that carries a checkpoint) | checkpoint row not 🧪/✅ | Close-out unfinished → finish it (tip validation → pre-smoke → page → 🧪); never open the next wave |
+| 🟢 (all members of a checkpoint-carrying wave) | checkpoint row not 🧪/✅ | Close-out unfinished → finish it (tip validation → pre-smoke → page → 🧪); never open the next wave |
 | 🧪 | `{{INTEGRATION_BRANCH}}` ancestor of `{{MAIN_BRANCH}}` | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
 | 🧪 | integration branch not merged | Correct state → ask the user for the checkpoint verdict |
-| ❌ | no `fix/<batch>-c<n>-followup` branch | Fix-up never started → spawn it (step 2) |
-| ❌ | fix-up branch ahead, not integrated | Resume / gate it per the 🔄 rows above |
-| ❌ | fix-up integrated, tip green | Flip covered rows 🧪, re-issue the page with the affected steps annotated |
+| ❌ | no `fix/<batch>-c<n>-followup` branch | Fix-up never started → spawn it |
+| ❌ | fix-up branch ahead, not integrated | Resume / gate it per the 🔄 rows |
+| ❌ | fix-up integrated, tip green | Covered rows → 🧪, re-issue the page with affected steps annotated |
 | ❌ | fix-up integrated, tip red | Repair mini-batch on the tip first |
 
 Prune worktrees of integrated batches (`git worktree remove`). Log every
