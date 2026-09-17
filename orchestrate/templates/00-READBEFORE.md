@@ -58,12 +58,21 @@ request or any external document.
   checkpoint close-out and writes evidence. Runners available in this repo:
   {{AGENT_RUNNERS}}.
 - **Tiers**: {{ROLE_TIERS}}. The reviewer never runs on a less capable model than the
-  implementer; L-weight reviews and second-attempt implementers use the most capable
-  model the session can spawn; if tiers are unavailable, use the default and keep the gate
+  implementer; L-weight reviews and the fresh implementer of an authorized third round
+  use the most capable model the session can spawn (the "strong tier"); if tiers are
+  unavailable, use the default and keep the gate
   shape. Record the tier used in the row's Notes.
 
 Every sub-agent report entering the orchestrator's context is capped (~40 lines + a
 findings list); the fence check and tip validation return one line each on success.
+
+**Metrics** (the pilot's measurement, readable from the ledger alone). Every batch row's
+Notes end with `m: rounds=<FIX FIRST rounds> asks=<ASK items closed by a polish pass>
+fence-bounces=<times the fence check sent the implementer back> gate=<gate-agent
+findings>/<of which needed a production change> tip-red=<1 if tip validation went red
+after this merge>`. Every checkpoint row's Verdict cell ends with `m: pre-smoke=<agent
+steps passed>/<human steps> human-smoke-min=<minutes the user reports> escaped=<defects
+the user found that no gate caught>`, completed at `close`.
 
 ## Git model (locked)
 
@@ -252,8 +261,12 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    fix-up failing review twice is `❌ (fix-up capped)`, left unmerged, and the STOP names
    the three verdicts in step 6. **Red tip with no checkpoint reached** (resume-time
    validation, or after a merge): the same mini-batch on `fix/<batch>-tip` with the
-   failing output as the spec; once it integrates and the tip is green, return to step 7
-   (remaining merges) or step 4 — no 🧪, no STOP.
+   failing output as the spec (`<batch>` = the last batch merged before the red); once it
+   integrates and the tip is green, return to step 7 (remaining merges) or step 4 — no 🧪,
+   no STOP. A `-tip` or `-presmoke` repair failing review twice NEVER writes `❌`: rows
+   keep their status, the tip stays red (no further merges) or the step stays un-issued,
+   the failure goes to Notes + LOG, and the session STOPs with the three verdicts of
+   step 6.
 3. If any batch is `🧪`: a checkpoint is open — ask the user for its verdict (passed /
    failed / waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave that still has `⬜` batches whose deps are
@@ -289,8 +302,10 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      to a batch item — unmapped hunks are scope creep → reject (the batch file's ticks are
      exempt); (b) check each acceptance criterion against the diff; (c) run the
      validation commands; (d) check the diff against {{GUARDRAILS_REF}} and the batch
-     file's applicable guardrails; (e) confirm the failing-on-base result from 6b and, when
-     no gate agent runs, name the mutation each new or re-pointed test would survive; (f) confirm every doc/comment sweep the batch file names
+     file's applicable guardrails; (e) confirm the failing-on-base result from 6b — an
+     INCONCLUSIVE run means the reviewer establishes from the test text which changed
+     cell fails on the un-fixed code, or says none does — and, when no gate agent runs,
+     name the mutation each new or re-pointed test would survive; (f) confirm every doc/comment sweep the batch file names
      happened in the same commit. Gate agents run over the batch's new/changed tests
      (skipped when none changed); a gate finding that needs a production change is a P1,
      a test-only finding is an ASK. S-weight batches: one combined reviewer+gate pass.
@@ -304,8 +319,9 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      reviewer named (or have the implementer add the probe) → `FIX FIRST` or `SHIP`; not a
      round. Only `FIX FIRST` rounds count; the SECOND `FIX FIRST` sets `⛔ defective` (not
      green) or `⛔ green, residual finding open (<severity>)`, leaves the batch OUT of
-     integration (dependents stay blocked), and STOPs — quoting the open finding WITH its
-     failure scenario and naming three verdicts for the user: fix again (an authorized
+     integration (dependents stay blocked), and — once the wave's other members are gated
+     and integrated — STOPs instead of opening the next wave, quoting the open finding
+     WITH its failure scenario and naming three verdicts for the user: fix again (an authorized
      third round: a FRESH implementer on the strong tier with both rounds' findings + the
      current diff, then a fresh re-review) / ship with the residual (the user's words
      recorded verbatim; residual → severity-tagged {{BACKLOG_FILE}} entry + a checkpoint

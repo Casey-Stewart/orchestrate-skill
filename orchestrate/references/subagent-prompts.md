@@ -106,7 +106,8 @@ DUTIES, in order:
    recorded; apply general correctness scrutiny to async/lifecycle/state boundaries"]
    and the batch's applicable guardrails: [APPLICABLE GUARDRAILS].
 5. Confirm the orchestrator's failing-on-base result ([FAILING_ON_BASE_RESULT]) is
-   consistent with the diff. [IF NO GATE AGENT RUNS FOR THIS BATCH: also, for every new
+   consistent with the diff; if it is INCONCLUSIVE, establish from the test text which
+   changed cell fails on the un-fixed code, or say that none does. [IF NO GATE AGENT RUNS FOR THIS BATCH: also, for every new
    or re-pointed test, name the production mutation that would still pass it.]
 6. Confirm every doc/comment sweep the batch file names happened in the same commit.
 
@@ -286,8 +287,11 @@ root cause, the fix, and what the user's checkpoint re-run should now check).
 ```
 
 If the triage between batches is uncertain, say so in the prompt and widen the fence to
-the candidate batches' fences combined — never the whole repo. A fix-up failing review
-twice is `❌ (fix-up capped)`: left unmerged, surfaced at the STOP with the three verdicts.
+the candidate batches' fences combined — never the whole repo. A checkpoint fix-up
+(`-c<n>-followup`) failing review twice is `❌ (fix-up capped)`; a `-tip` or `-presmoke`
+repair failing twice NEVER writes `❌` — rows keep their status, the tip stays red or the
+step stays un-issued, the failure goes to Notes + LOG. Either way the repair is left
+unmerged and the session STOPs with the three verdicts.
 
 ## Spawning rules (orchestrator)
 
@@ -303,7 +307,8 @@ twice is `❌ (fix-up capped)`: left unmerged, surfaced at the STOP with the thr
   on the strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
   fresh at the first unticked item.
 - Tiers: the reviewer never runs on a less capable model than the implementer; L-weight
-  reviews and second-attempt implementers on the most capable model available; record
+  reviews and the fresh implementer of an authorized third round on the most capable
+  model available (the strong tier); record
   the tier in the row's Notes. Reconcile, status and discovery are never delegated.
 - Paste, don't point: the batch text and contract excerpts go INTO the prompt verbatim.
 - Every report is capped (~40 lines + findings); anything longer belongs in a commit

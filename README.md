@@ -65,8 +65,9 @@ serially onto an **integration branch**. The gates, in the order a batch meets t
    **smoke page** with a step-0 "prove you're on the right build" gate, per-step Pass /
    Fail / Blocked / Works-but verdicts, and a copy-results button whose paste is your
    verdict — and waits for that verdict, recorded verbatim.
-6. **Convergence before close.** After the final checkpoint passes, a read-only sub-agent
-   classifies every plan item against the actual code (implemented / partial /
+6. **Convergence before close.** After the final checkpoint passes, and when the ledger's
+   contract has it switched on, a read-only sub-agent classifies every plan item against
+   the actual code (implemented / partial /
    contradicts / unrequested) before the change is declared complete, and new bug classes
    are distilled into one-line guardrails that point at the test enforcing them.
 

@@ -59,8 +59,9 @@ ledgers may be parked in a sibling `.agents/archive/` directory; discovery never
 - **Plan pre-flight** (scaffold time) and **convergence** (change-complete) — one fresh
   read-only sub-agent each; see `scaffolding.md` and §Two close-outs.
 - **Tiers** — the contract words them model-agnostically: the reviewer never runs on a
-  less capable model than the implementer; L-weight reviews and second-attempt
-  implementers use the most capable model the session can spawn; tiers unavailable →
+  less capable model than the implementer; L-weight reviews and the fresh implementer of
+  an authorized third round use the most capable model the session can spawn (the
+  "strong tier"); tiers unavailable →
   default, gate shape unchanged. Reconcile, status and discovery stay in-session over raw
   git output — never delegated to a cheaper model.
 
@@ -68,6 +69,14 @@ Neither sub-agent role has the planning session's context — every prompt is bu
 the ledger files and complete in itself. Every report entering the orchestrator's
 context is capped (~40 lines + findings); the fence check and tip validation return one
 line each on success.
+
+**Metrics** (the pilot's measurement, readable from the ledger alone). Batch row Notes
+end with `m: rounds=<FIX FIRST rounds> asks=<ASK items closed by a polish pass>
+fence-bounces=<times the fence check sent the implementer back> gate=<gate-agent
+findings>/<of which needed a production change> tip-red=<1 if tip validation went red
+after this merge>`; each checkpoint row's Verdict cell ends with `m: pre-smoke=<agent
+steps passed>/<human steps> human-smoke-min=<minutes the user reports> escaped=<defects
+the user found that no gate caught>`, completed at `close`.
 
 ## Severity and round accounting
 
@@ -85,8 +94,9 @@ line each on success.
   verifies the fixes and scans only the fix diff. Reviewers are fresh every round. An
   agent gone after a crash → fresh, at the first unticked item.
 - The SECOND `FIX FIRST`: `⛔ defective` (finding open, not green) or `⛔ green, residual
-  finding open (<severity>)`. Both stay out of integration; the session stops early,
-  quotes the open finding WITH its failure scenario, and names three verdicts for the
+  finding open (<severity>)`. Both stay out of integration; once the wave's other members
+  are gated and integrated the session stops instead of opening the next wave, quotes the
+  open finding WITH its failure scenario, and names three verdicts for the
   user: fix again (an authorized third round: a FRESH implementer on the strong tier with
   both rounds' findings + the current diff, then a fresh re-review) / ship with the
   residual (user's words verbatim; residual → severity-tagged backlog entry + a checkpoint
@@ -229,8 +239,11 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    page with the affected steps annotated — earlier verdicts survive; or reprint the
    text). Twice-failed fix-up → `❌ (fix-up capped)`, unmerged, STOP with the three
    verdicts. A red tip with no checkpoint reached (resume-time validation, or after a
-   merge): the same mini-batch on `fix/<batch>-tip` with the failing output as the spec;
-   once green, return to step 7 or step 4 — no 🧪, no STOP.
+   merge): the same mini-batch on `fix/<batch>-tip` (`<batch>` = the last batch merged
+   before the red) with the failing output as the spec; once green, return to step 7 or
+   step 4 — no 🧪, no STOP. A `-tip` or `-presmoke` repair failing review twice NEVER
+   writes `❌`: rows keep their status, the tip stays red (no merges) or the step stays
+   un-issued, the failure goes to Notes + LOG, STOP with the three verdicts.
 3. Any `🧪`? A checkpoint is open — ask the user for its verdict (passed / failed /
    waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave with `⬜` batches whose deps are all 🟢/✅.
@@ -249,7 +262,8 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    batches (temporary worktree at the wave base + the batch's test-only files; assertion
    failure proves it, all-pass = P0, cannot-run = inconclusive → duty (e)); 6c reviewer +
    gate agents in parallel (hunk→item mapping, acceptance criteria vs the three-dot diff,
-   validations, guardrails, failing-on-base cells, doc sweeps; S-weight → one combined
+   validations, guardrails, failing-on-base cells — an inconclusive 6b means the reviewer
+   establishes one from the test text — doc sweeps; S-weight → one combined
    pass); verdict handling per §Severity and round accounting. After the second
    `FIX FIRST` → ⛔ (defective / green-residual), left out of integration, dependents
    blocked, STOP with the three verdicts.

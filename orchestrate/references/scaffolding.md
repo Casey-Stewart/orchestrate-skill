@@ -120,7 +120,7 @@ appear in the templates — check both directions when editing either.
 | `{{EXTRA_PROHIBITIONS}}` | template (READBEFORE) | interview #7 / CLAUDE.md — repo-specific never-touch items; `(none beyond the above)` if empty |
 | `{{GUARDRAILS_REF}}` | template (READBEFORE, several) | detected guardrails section (e.g. `` `CLAUDE.md` §Bug-Class Guardrails ``) or `the project guardrails doc (none yet — create a CLAUDE.md guardrails section at first distill)` |
 | `{{GATE_AGENTS}}` | template (READBEFORE) | interview #7 — the read-only gate agents this ledger runs beside the reviewer (repo-local `.claude/agents/*.md` such as a test hunter, or the skill's generic test-hunter skeleton), with the testing guide / catalog each must read first; `reviewer only` when none |
-| `{{ROLE_TIERS}}` | template (READBEFORE) | interview #7 — model-agnostic wording per role, e.g. "implementers and gate agents: default; reviewer: at least the implementer's tier, most capable available for L batches and second attempts" |
+| `{{ROLE_TIERS}}` | template (READBEFORE) | interview #7 — model-agnostic wording per role, e.g. "implementers and gate agents: default; reviewer: at least the implementer's tier, most capable available for L batches and the fresh implementer of an authorized third round" |
 | `{{BACKLOG_FILE}}` | template (READBEFORE, several) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
 | `{{BACKLOG_ID_PREFIX}}` | template (READBEFORE) | detected id scheme in the backlog files (`SCAN-6`, `#3.5`, `BL-017` …) or `BL-` when none; only accepted fold-ins and new residual entries receive ids |
 | `{{RELEASE_COMMAND}}` | template (READBEFORE) | detected build/release script or `none` |

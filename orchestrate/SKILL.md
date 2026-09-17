@@ -171,7 +171,8 @@ and the recommended next action. Drift corrections happen in `continue`, not her
 2. Merge / push / release ONLY on the user's explicit authorization — their exact words
    are the record (a verdict message may carry the authorization; quote it).
 3. Final checkpoint ✅ → change-complete close-out per the contract: convergence pass
-   (a fresh read-only sub-agent classifies every item against the tip), final coverage
+   (when the contract turns it on, a fresh read-only sub-agent classifies every item
+   against the tip; otherwise the audit comes from PROGRESS + git and says so), final coverage
    audit (zero unaccounted items; fold-ins removed from the backlog), distillation (new
    bug classes → one-line guardrails with pointers; propose retirements past the size
    threshold, never delete unasked; harvest LOG.md learnings), optional release command,

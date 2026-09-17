@@ -68,7 +68,8 @@ before believing any row (§Recovery in the contract).
 <!-- one row per user item from 00-request.md; Source = "request" or "backlog <id>" for
      an accepted fold-in. The final pass must show ZERO unaccounted items: each row ends
      as a merged commit SHA, an intended-behavior resolution, or a named backlog entry,
-     and carries the convergence class (implemented / partial / contradicts). -->
+     and carries the convergence class (implemented / partial / contradicts — from the
+     convergence pass when the contract has it on, else from PROGRESS + git). -->
 
 ## Session log
 

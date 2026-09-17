@@ -86,8 +86,9 @@ batch or per wave by default.
    file) → failing-on-base for `fix` batches → ONE fresh read-only reviewer plus the
    contract's gate agents in parallel; don't wait for the wave's slowest batch. `SHIP`
    with ASKs → polish pass (not a round); `FIX FIRST` → round 1 resumes the implementer;
-   the second `FIX FIRST` → ⛔ and STOP; a user-authorized third round is a fresh
-   implementer on the strong tier.
+   the second `FIX FIRST` → ⛔, and once the wave's other members are gated and
+   integrated the session STOPs instead of opening the next wave; a user-authorized
+   third round is a fresh implementer on the strong tier.
 3. **Integrate serially**: per batch, `git merge-tree --write-tree` dry run (a conflict is
    stop-and-investigate: fence violation, unrecorded extension, or a ledger file edited
    on both sides — never hand-resolved silently) → merge → validation commands on the
