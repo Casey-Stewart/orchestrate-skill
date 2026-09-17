@@ -36,7 +36,9 @@ before believing any row (§Recovery in the contract).
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
 <!-- one row per batch from the plan's batch table, all ⬜ at scaffold time (Version "—"
-     if the repo doesn't version). Notes are DENSE but SHORT (≈300 chars): integration
+     if the repo doesn't version). Notes are DENSE but SHORT (≈300 chars of prose; keyed
+     lines — `… capped:` markers, `verdict … spent`, `fix-up pending:`, `deferred to`,
+     `R<k> <verdict> @<sha>`, the metrics token — are exempt and never move to LOG): integration
      SHA, reviewer arc ("R1 FIX FIRST P1 → R2 SHIP"), tier used, fence extensions
      ("fence +path (item, reason, date)"), accepted residuals, then the metrics token
      `m: rounds=<FIX FIRST rounds> asks=<ASK items closed by polish> fence-bounces=<times

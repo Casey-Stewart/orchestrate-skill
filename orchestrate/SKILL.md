@@ -164,7 +164,9 @@ and the recommended next action. Drift corrections happen in `continue`, not her
 
 1. Record the user's verdict VERBATIM in the PROGRESS smoke-verdict log. A checkpoint
    pass flips every batch it covers 🧪→✅. A fail: triage the symptoms to the
-   offending batch(es) → ❌ (the fix-up mini-batch then runs via `continue`); batches the
+   offending batch(es) → ❌ and write `fix-up pending: fix/<batch>-c<n>-followup[-<k>]` to
+   each indicted row's Notes, suffixing when the name exists (the fix-up mini-batch then
+   runs via `continue`); batches the
    user explicitly passed flip ✅; the rest stay 🧪 for the re-run. Smoke-page verdicts
    beyond pass/fail ([references/smoke-page.md](references/smoke-page.md)):
    **works-but** → named backlog entry, never a failure; **blocked** → correct the

@@ -291,6 +291,14 @@ REPORT: same fixed shape as the implementer (status line, evidence block, ≤40 
 root cause, the fix, and what the user's checkpoint re-run should now check).
 ```
 
+**Revert variant** (`fix/<batch>-revert`, a user-ordered drop): no implementer. The
+orchestrator itself runs `git revert -m 1 <merge-sha>` on the revert branch and spawns
+ONLY a fresh reviewer whose single duty is to confirm the diff is the exact inverse of
+the reverted merge; then dry run → merge → tip validation. **Trial merge** (a "merge only
+if green" verdict): `git commit-tree $(git merge-tree --write-tree <tip> <branch>) -p
+<tip> -m trial`, check that commit out in a temporary worktree, run the validations
+there; green → merge for real, red → no merge.
+
 If the triage between batches is uncertain, say so in the prompt and widen the fence to
 the candidate batches' fences combined — never the whole repo. A checkpoint fix-up
 (`-c<n>-followup`) failing review twice is `❌ (fix-up capped)`; a `-tip` or `-presmoke`
