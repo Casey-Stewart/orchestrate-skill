@@ -79,9 +79,15 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
 
 ## Git model (locked)
 
-- Default branch: `{{MAIN_BRANCH}}`. Integration branch: `{{INTEGRATION_BRANCH}}` —
+- Default branch (protected local ref): `{{MAIN_BRANCH}}`. Integration branch: `{{INTEGRATION_BRANCH}}` —
   every reviewed batch merges into it, and it is the ONLY branch that ever merges
   toward `{{MAIN_BRANCH}}`.
+- Shipment source: `{{SHIPMENT_SOURCE}}`. Shipment ref: `{{SHIPMENT_REF}}` — the
+  confirmed default branch on that source. `local` means a local merge counts;
+  `remote <name>` means a merge on that remote counts. These are locked facts,
+  distinct from permission to merge/push. Remote-tracking refs are cached evidence,
+  never a substitute for the recorded source. Resolve shipment as described in
+  §Recovery; do not re-detect these facts from the current checkout.
 - One branch per batch, named in the batch file (branch prefixes in this repo:
   {{BRANCH_PREFIXES}}), cut from the integration tip when the batch's wave opens.
   Wave members run CONCURRENTLY: one implementer per batch, each in an isolated git
@@ -216,16 +222,33 @@ close-out resumes — it is NEVER `❌`, which means the USER reached the checkp
 failed it. A pre-verified label is invalidated for any step whose covered files a later
 repair touched; the QA runner re-runs it before the page is re-issued.
 
-**Delivery.** When the driving session can publish artifacts, the script ships as an
-interactive smoke page: reuse the format of the newest `smoke-*.html` in this ledger
-(or the session's own smoke-page template; with neither — a first checkpoint driven
-without a template — print plain text: the gate first, then each step's Do / Pass in
-section order, pre-verified steps marked), commit the filled page as
-`smoke-<Cn>.html`, publish it (first publish: `capabilities: {db: {}}`, favicon 🧪,
-URL recorded in the PROGRESS preamble; later checkpoints and re-issues republish that
-URL), and hand over the link PLUS the gate essentials in text. Otherwise print the
-full script as plain text. Either way the batch files' smoke steps are canonical, and
-every script OPENS with a non-verdict gate: the command that prints the current
+**Delivery.** The batch files' smoke steps are canonical. Use the newest committed
+`smoke-*.html` in this ledger as the page's format and delivery base (or the session's
+own template), update it for this checkpoint, and commit it as `smoke-<Cn>.html`.
+A `smoke-<Cn>.json` sidecar beside the page is the page's source: change the sidecar
+and regenerate, commit both, and never hand-edit one of them alone.
+Before editing a re-issue, preserve the last issued sidecar as a temporary baseline
+and compare against it during regeneration. Keep existing step numbers and order;
+append new steps after them with numbers above the previous maximum. Never decrease
+revisions; changes to instructions or shared section context require increases for
+the affected steps.
+Deliver it through the driving runtime's available HTML preview, file hand-over, or
+publishing tools; reuse the existing hosted URL when the runtime can update it.
+Record the CURRENT delivery location in PROGRESS's `Smoke page` field: URL,
+ledger-relative HTML path, or `plain text`. When switching delivery, retain the
+previous hosted URL in LOG for future reuse; never present an outdated hosted page
+as the current run. Include the gate essentials in text with every page hand-over.
+
+No particular publisher or cloud verdict store is required. Without a usable HTML
+delivery route or page/template, print the FULL combined script: gate first, then
+each step's Do / Pass in section order, with pre-verification and carried-over results
+identified. If a page was prepared, keep its committed audit copy even when delivering
+text. Browser-local saving works without cloud synchronization where browser storage
+is available. Keep storage isolated by change and checkpoint; switching runtimes,
+hosts, or browsers does not transfer saved marks automatically. Use the recorded user
+verdicts and the new hand-over's results; missing stored marks are not passes.
+
+Every script OPENS with a non-verdict gate: the command that prints the current
 branch, the version the user must see, and a canary whose result is OPPOSITE on the
 base build — run first, "if it behaves the old way, stop and say so".
 
@@ -238,6 +261,32 @@ carries the verdict — the page's "Copy results as text" paste is the preferred
 recorded verbatim. On re-issues never renumber existing steps (verdicts key on step
 numbers); annotate corrected steps instead.
 
+On page re-issues, set `BUILD_SHA` to the tested integration SHA (before the page commit).
+Each step's `revision` starts at 1; increment it only when the step's instructions,
+criterion or covered behavior changes, and retain it on subsequent re-issues. Save
+`buildSha` and `stepRevision` with human verdicts. Preserve earlier verdicts and notes:
+unchanged steps are labeled carried-over, affected steps require re-running or current
+agent pre-verification. Copy results with that distinction and the current build SHA;
+an old verdict on an affected step is not a fresh pass or failure. Selecting a verdict
+again after a re-run records the new build/revision; editing its note does not. In plain
+text, likewise identify carried-over results and affected steps still awaiting a verdict.
+
+Agent evidence carries `pre: {sha, stepRevision, env, evidence}`: record the revision
+actually tested and retain it with the original SHA until a new successful run. A
+revision mismatch or missing evidence metadata requires re-verification, even on the
+same build. Matching revisions from an earlier build remain applicable and are labeled
+carried-over. Validate `BUILD_SHA` as a full hexadecimal Git object ID (40 or 64
+characters) before loading saved verdicts or enabling input/copy; an invalid identity
+must visibly stop the page without touching saved records.
+
+Timestamp each human verdict, clear, and note edit locally as `at`, advancing beyond
+the step's previous/observed timestamp. If a page store is available, persist that same
+timestamp to it.
+Only a strictly newer snapshot may replace an existing record; preserve verdict,
+note, build identity, and revision together. Defer newer remote records while a note
+is being edited and reconcile on blur. An unchanged snapshot must not rewrite local
+storage; older/equal or untimed snapshots must not erase a newer local result.
+
 **Verdict intake.** A checkpoint PASS flips every covered row `🧪`→`✅`. A FAIL indicts
 batch(es) → `❌`, and the intake writes `fix-up pending: fix/<batch>-c<n>-followup[-<k>]`
 into each indicted row's Notes (suffix `-2`, `-3`… when the name already exists) — the
@@ -249,12 +298,36 @@ quoted verbatim in the verdict log.
 
 ## §Recovery — reconcile ledger vs git (orchestrator, every session)
 
+Resolve shipment before inferring a silent merge. Use the locked default and shipment
+fields above, never the current branch, `init.defaultBranch`, or a guessed `main`/`master`.
+Missing, contradictory or renamed targets are AMBIGUOUS: ask for a recorded correction,
+never silently rewrite this contract or substitute another ref. The integration branch
+must be distinct from the default and shipment branches.
+
+Resolve the integration branch's full local ref to `<integration-sha>`. Resolve
+`<shipment-sha>` from the recorded source:
+
+- `local`: `git rev-parse --verify {{SHIPMENT_REF}}^{commit}`. This needs no remote;
+  an unpushed local merge counts under this policy.
+- `remote <name>`: read `git ls-remote --exit-code <name> {{SHIPMENT_REF}}` now and
+  take the SHA of the exact matching ref. Verify that object exists locally as a
+  commit before testing ancestry. A cached `refs/remotes/...` value alone does not
+  establish current upstream state. A failed query, missing ref or missing object
+  leaves shipment unknown; do not fetch or update remote metadata automatically.
+
+Use these captured SHAs for the shipment test; exit 0 means contained, 1 means not
+contained, any other error means unknown. Different local/remote tips do not matter
+when the recorded source is clear. Unknown shipment never flips rows or authorizes
+cleanup. Target ambiguity blocks actions depending on that target; independent
+read-only discovery/status may continue. Record the source, ref and SHAs with an
+inferred shipment. Existing merge/push permissions still apply.
+
 For each PROGRESS row not `✅`/`👤`/`⛔ (dropped)`:
 
 ```sh
 git rev-parse --verify <branch>                                        # exists?
 git merge-base --is-ancestor <branch> {{INTEGRATION_BRANCH}} && echo INTEGRATED
-git merge-base --is-ancestor {{INTEGRATION_BRANCH}} {{MAIN_BRANCH}} && echo SHIPPED
+git merge-base --is-ancestor <integration-sha> <shipment-sha>          # only after source resolution above
 git log {{INTEGRATION_BRANCH}}..<branch> --oneline                     # commits ahead
 git worktree list && git status --porcelain                            # dirt (check each wave worktree)
 git show <branch>:./{{LEDGER_DIR}}/02-batches-NN-<slug>.md             # checklist state (keep the ./; run from the root)
@@ -267,6 +340,8 @@ Rows are matched top to bottom; the first match wins.
 | any row whose Notes end in a spent *fix again* (`third round on <branch> @<sha>`) | no commit after `@<sha>`, branch not yet an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed before the third round landed → re-spawn the FRESH strong-tier implementer per step 2's table |
 | any row whose Notes end in a spent *fix again* | commits after `@<sha>`, branch not yet an ancestor of `{{INTEGRATION_BRANCH}}` | Third round landed → worktree dirty: re-spawn the FRESH strong-tier implementer at the open findings; clean: fence check, then the fresh re-review with both rounds' findings |
 | any row whose Notes carry a `… capped:` marker not followed by a later `verdict … spent` (a marker re-written after a spent line counts as awaiting) | any | Awaiting the user's verdict on that repair (fix again / ship with the residual / drop; ship / drop only after a spent *fix again*) — do not re-gate, do not re-spawn; a recorded verdict is consumed by step 2 |
+| any row whose Notes carry a `… repair pending:` marker (`tip repair pending:` / `pre-smoke repair pending:`) with no later spent *ship* / *drop* verdict (those retire it unmerged) | any | In-flight repair — branch missing: spawn it on the named branch; no commit after the marker's `@<sha>`: never started → resume the implementer on that branch (fresh worktree); commits after `@<sha>` but not integrated: resume / gate it per the 🔄 rows on that branch (never a same-named new one); integrated: tip validation (a pre-smoke repair also re-runs its step), remove the marker, then continue per step 2 (tip: back to step 7 or 4; pre-smoke: resume the close-out) |
+| 🔄, Notes carry `polish discarded: @<sha>` | branch not an ancestor of `{{INTEGRATION_BRANCH}}` | Discard in flight → branch tree differs from `@<sha>`: finish the revert (ONE commit spanning `@<sha>..HEAD`; never a reset); tree identical (`git diff @<sha> <tip>` empty): integrate now (dry run → merge → tip validation); the marker stays as the record |
 | 🔄 | Notes record `R<k> SHIP @<sha>` (no `asks=` on that line) for the current tip | Reviewed, crashed before the merge → integrate now, no re-review |
 | 🔄 | Notes record `R<k> SHIP @<sha> asks=<n>` for the current tip, worktree clean | Shipped with ASKs, crashed before the polish → polish pass (ASK list in LOG.md), then its mechanical close |
 | 🔄 | Notes record `R<k> SHIP @<sha> asks=<n>`, commits after `@<sha>`, worktree clean, every `polish:` item ticked (at least one appended) | Polish landed, crashed before its close → 6a + validations on the tip; `git diff --name-only <sha>..HEAD` touches only test/doc/prose paths → integrate; a production file → fix-diff-only re-review by a fresh reviewer |
@@ -275,16 +350,19 @@ Rows are matched top to bottom; the first match wins.
 | 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items; a recorded deferral is not a partial checklist) | Resume the implementer — a fresh agent, the original is gone — at the first unticked item (recreate the worktree if gone; a `SHIP … asks=` line with no `polish:` items yet → the ASK list in LOG.md) |
 | 🔄 | commits ahead, checklist fully ticked | validations green → crashed before the gate → fence check, then the reviewer gate now (latest `R<k>` line is `FIX FIRST @<sha>` → the round-<k+1> re-review, recorded `R<k+1>`: verifies that round's findings from LOG.md, scans `git diff <sha>..HEAD`); red → resume the implementer (fresh) with the failing output, not a round |
 | 🔄 | branch already an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
+| 🟢 (every member of a checkpoint-carrying wave is 🟢, ⛔ or 👤 — verdict or not) | checkpoint row not 🧪/✅ | Close-out unfinished → integrate any 🟢 member whose branch is not yet an ancestor of `{{INTEGRATION_BRANCH}}` (dry run → merge → tip validation), then finish the close-out (tip validation → pre-smoke → page → 🧪); never open the next wave |
 | 🟢 | branch NOT an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
 | 🟢 | branch ancestor of `{{INTEGRATION_BRANCH}}` | Correct state — waits for its covering checkpoint |
-| 🟢 (every member of a checkpoint-carrying wave is 🟢, ⛔ or 👤 — verdict or not) | checkpoint row not 🧪/✅ | Close-out unfinished → finish it (tip validation → pre-smoke → page → 🧪); never open the next wave |
-| 🧪 | `{{INTEGRATION_BRANCH}}` ancestor of `{{MAIN_BRANCH}}` | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
-| 🧪 | integration branch not merged | Correct state → ask the user for the checkpoint verdict |
+| 🧪 | shipment check confirms integration tip contained in the recorded shipment target | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
+| 🧪 | shipment unknown or target ambiguous | Do not infer a pass or propose cleanup; resolve the target/evidence or ask the user for the checkpoint verdict |
+| 🧪 | shipment check confirms integration tip not contained | Correct state → ask the user for the checkpoint verdict |
 | ❌ (not fix-up capped) | no branch named by the latest `fix-up pending:` Notes line | Fix-up never started → spawn it on that branch |
 | ❌ (not fix-up capped) | that branch ahead, not integrated | Resume / gate it per the 🔄 rows (a `SHIP` there continues step 2's fix-up flow: → 🧪 → re-issue, never 🟢) |
 | ❌ (not fix-up capped) | that branch integrated, tip green | Covered rows → 🧪, re-issue the page with affected steps annotated |
 | ❌ (not fix-up capped) | that branch integrated, tip red | Repair mini-batch on the tip first |
 | ⛔ (either kind) or `❌ (fix-up capped)` | any | Awaiting the user's verdict (fix again / ship with the residual / drop; ship / drop only after a spent *fix again*) — do not re-gate, do not re-spawn; dependents stay ⬜; a recorded verdict is consumed by step 2 |
+| ⬜ | a branch with the batch's planned name already exists | Wave-open crashed before its flip (or a name collision) → nothing to reconcile now; step 4's idempotent cut adopts or stops when this wave opens |
+| ⬜ | no such branch | Correct state — waits for its wave |
 
 Prune worktrees of integrated batches (`git worktree remove`). Log every
 reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
@@ -314,6 +392,12 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      (no further merges).
    - **Failed pre-smoke step** (step 8): `fix/<batch>-presmoke-<step>`; failing review
      twice → the step is issued as a HUMAN step carrying the failure note.
+   - **Pending markers**: spawning a `-tip`/`-presmoke` repair writes `tip repair
+     pending: <branch> @<sha>` / `pre-smoke repair pending: step NN, <branch> @<sha>`
+     (`@<sha>` = the tip the branch was cut from) into the affected batch's Notes in the
+     same commit (the phrases §Recovery keys on, like `fix-up pending:`); the marker is
+     removed in the commit that records the repair's merge, and a consumed *ship* /
+     *drop* verdict retires it unmerged (the spent line supersedes it).
    - **Capping** never writes `❌` for a `-tip`/`-presmoke` repair. Every capped repair
      writes `tip repair capped: <branch>` / `pre-smoke repair capped: step NN, <branch>` /
      `fix-up capped: <branch>` into the affected batch's Notes (the phrases §Recovery keys
@@ -330,8 +414,11 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      integration procedure), then `git commit-tree <tree> -p <tip> -m trial`, check that
      commit out in a temporary worktree (`git worktree add <scratchpad>/wt-trial
      <commit>`; a stale `wt-trial` from a crashed trial is removed first), run the
-     validations there, remove the worktree; green → merge for real;
-     red → no merge.
+     ledger's per-worktree setup there ({{WORKTREE_SETUP}}; skip only if `n/a`), then
+     run the validations and remove the worktree; green → merge for real; red → no
+     merge. A setup failure blocks the trial and the merge as an environment problem,
+     not a red validation result; resolve setup and retry the trial before deciding
+     whether to merge.
 
    | Subject | fix again | ship with the residual | drop |
    |---|---|---|---|
@@ -345,6 +432,11 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    deferral) whose deps are all `🟢`/`✅`. From the integration tip: cut every member's branch, create every
    worktree (setup: {{WORKTREE_SETUP}}), then commit the wave-open PROGRESS flip
    (rows → 🔄, wave base SHA in the session log, `**State**: ACTIVE`).
+   The cut is idempotent: a member branch that already exists with its tip equal to the
+   current integration tip is adopted from a crashed open — its worktree, if any, removed
+   and recreated (fresh setup); a member branch in any other state → STOP AND INVESTIGATE
+   (name collision, or a stale base from an earlier crashed open — re-cut only on the
+   user's word; never delete unasked).
 5. Spawn ALL of the wave's implementers CONCURRENTLY (one per batch, in a single
    message, each pinned to its worktree, on the tier the batch's weight calls for).
    Every prompt must be SELF-CONTAINED: the spec text + codebase facts from the batch
@@ -364,10 +456,11 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      recorded Files change. Anything else → no reviewer; `NEEDS_FENCE` → §Fence changes,
      otherwise resume the implementer to revert. Not a round.
    - **6b Failing-on-base (mechanical, `fix` batches and repairs).** In a temporary
-     worktree at the branch's base, copy over the batch's TEST-ONLY files and run its changed tests: an
+     worktree at the branch's base, run {{WORKTREE_SETUP}} there (skip only if `n/a`),
+     then copy over the batch's TEST-ONLY files and run its changed tests: an
      assertion failure on the named behavior proves the regression test; every test
-     PASSING on the base is a P0 (the fix is unproven); a run that cannot execute is
-     inconclusive → reviewer duty (e).
+     PASSING on the base is a P0 (the fix is unproven); a setup failure or a run that
+     cannot execute is inconclusive → reviewer duty (e).
    - **6c Reviewer + gate agents, in parallel, all fresh and read-only.** The reviewer
      gets the batch file + the diff (`git diff {{INTEGRATION_BRANCH}}...HEAD` in the batch's
      worktree — three-dot isolates the batch's own changes) and must (a) map every hunk
@@ -387,7 +480,19 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      list; it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
      closes mechanically (6a + validations on the polished tip; polish commits touch only
      test/doc/prose paths — a production file touched → a fix-diff-only re-review by a
-     fresh reviewer). Not a round. `FIX FIRST` → resume the SAME implementer with the
+     fresh reviewer). Not a round.
+     The scoped re-review's verdict is recorded like any other (`R<k> <verdict> @<sha>`,
+     findings in LOG.md; an R-line after the `SHIP … asks=` line is polish-phase and never
+     counts toward the cap — nor toward the SECOND-`FIX FIRST` rule below): its `SHIP` → the
+     close completes; its `FIX FIRST` → resume the implementer to revert the offending
+     production hunks or redo the polish within test/doc/prose (an ASK never licenses a
+     production behavior change), then a fresh scoped re-review of the new diff; a SECOND
+     polish-phase `FIX FIRST` discards the polish — write `polish discarded: @<sha>` (the
+     pre-polish `SHIP` tip) into the row's Notes first (the marker §Recovery keys on; it is
+     the recorded authorization), then ONE revert commit spanning `@<sha>..HEAD` (never a
+     reset — no history rewriting; `git diff @<sha> HEAD` must come back empty), integrate
+     that reviewed tree, unclosed ASKs → {{BACKLOG_FILE}} entries; polish never
+     turns a batch `⛔`. `FIX FIRST` → resume the SAME implementer with the
      findings verbatim, then a fresh re-review that verifies the fixes and scans only the
      fix diff. `NEEDS A CLOSER LOOK` → run the confirming check the
      reviewer named (or have the implementer add the probe) → `FIX FIRST` or `SHIP`; not a
@@ -408,7 +513,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    covered rows `🟢` → `🧪`, checkpoint-table row, session-log row with the checkpoint's
    integration SHA, `**State**: AT-CHECKPOINT C<n>`, the checkpoint row's token
    `m: pre-smoke=<agent>/<human> human-smoke-min=<n> escaped=<n>` (completed when the
-   user's verdict is recorded), the filled smoke page as `smoke-<Cn>.html`, commit → STOP, delivering the checkpoint's COMBINED smoke script
+   user's verdict is recorded), the filled smoke page as `smoke-<Cn>.html` when a page
+   was prepared, commit → STOP, delivering the checkpoint's COMBINED smoke script
    per §Smoke checkpoints. Otherwise: go to step 4 and open the next wave in this SAME
    session. Default cadence: run until the next checkpoint — stop early only at `⛔` or
    an unplanned user gate.

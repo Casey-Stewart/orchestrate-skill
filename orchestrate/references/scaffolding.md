@@ -5,9 +5,9 @@
 1. **Git repo required.** Not a repo → STOP and offer `git init` (+ an initial commit)
    with the user's consent. Crash markers, the reconcile table, and "git is truth" are
    git-native; the protocol cannot run without it.
-2. Dirty tree on the default branch → warn and let the user decide before creating
-   anything.
-3. An ACTIVE ledger already in `.agents/changes/` or on a `*-ledger` branch (Discovery in
+2. Resolve and confirm the default branch in interview #4 before creating anything;
+   a dirty tree on that branch → warn and let the user decide.
+3. An ACTIVE ledger already in `.agents/changes/` or on any branch (Discovery in
    SKILL.md) → ask whether to finish it first. Two concurrent ledgers are allowed only as
    the user's explicit choice.
 
@@ -68,6 +68,8 @@
    `02-batches-{{BATCH_NUM}}-{{BATCH_SLUG}}.md` per batch. Replace every `{{...}}`
    placeholder with its value and every `<!-- ... -->` instruction comment with real
    content. `evidence/` is created at the first checkpoint, not now.
+   Keep the generated delivery contract runtime-neutral: use the committed smoke HTML
+   and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
 9. **Self-check** — grep the new ledger directory for `{{` and for `<!--`: **zero hits**.
    `**State**: ACTIVE` present in PROGRESS; the pre-flight verdict line present in the
    plan. Any hit is an unfilled slot; fix before committing.
@@ -105,7 +107,9 @@ appear in the templates — check both directions when editing either.
 | `{{DATE}}` | template (PROGRESS, request, LOG) | today, YYYY-MM-DD |
 | `{{BASE_SHA}}` | template (PROGRESS) | `git rev-parse HEAD` on the branch the ledger branch is cut from, taken at fill time BEFORE the scaffold commit (the scaffold commit cannot contain its own SHA) |
 | `{{LEDGER_DIR}}` | template (READBEFORE) | `.agents/changes/{{CHANGE_ID}}` |
-| `{{MAIN_BRANCH}}` | template (READBEFORE) | detected: `git symbolic-ref refs/remotes/origin/HEAD` or current branch |
+| `{{MAIN_BRANCH}}` | template (READBEFORE) | interview #4 — confirmed default branch as a full local ref (`refs/heads/main`); detection supplies a candidate only |
+| `{{SHIPMENT_SOURCE}}` | template (READBEFORE) | interview #4 — `local` or `remote <remote-name>`; whether a local merge or a merge on that remote counts as shipped |
+| `{{SHIPMENT_REF}}` | template (READBEFORE) | interview #4 — full `refs/heads/<name>` on the confirmed shipment source; never a remote-tracking cache ref |
 | `{{INTEGRATION_BRANCH}}` | template (READBEFORE) | `chore/{{CHANGE_SLUG}}-ledger` unless the user overrides |
 | `{{BRANCH_PREFIXES}}` | template (READBEFORE) | detected from `git branch -a` history; default `fix/ feat/ chore/` |
 | `{{MERGE_POLICY}}` | template (READBEFORE) | interview #4 (incl. whether batch commits survive — squash collapses per-fold-in reverts; say so) |
@@ -150,13 +154,20 @@ appear in the templates — check both directions when editing either.
 | Quiet form | a repo-local reporter (`scripts/*reporter*`, `--test-reporter`), runner flags (`pytest -q`, `jest --silent`, `cargo test -q`, `go test` without `-v`), whether failing test NAMES appear in the summary | the quiet form of each command in `{{VALIDATION_COMMANDS}}` |
 | Mutation runner | `stryker.conf.*`, `[tool.mutmut]`, `cargo-mutants`, PIT plugin | `{{MUTATION_RUNNER}}` (scoped-to-changed-files command) or `none` |
 | Version + changelog | version fields in `package.json` / `manifest.json` / `Cargo.toml` / `pyproject.toml` / `VERSION`; if `CHANGELOG.md` exists, read the FIRST and LAST headings to infer oldest-first (append bottom) vs newest-first (prepend top) | candidate `{{VERSION_FILES}}` / `{{CHANGELOG_RULE}}` |
-| Default branch | `git symbolic-ref refs/remotes/origin/HEAD`, else `git branch --show-current` | `{{MAIN_BRANCH}}` |
+| Default branch + shipment target | `git symbolic-ref --quiet refs/remotes/origin/HEAD` (or the relevant remote's HEAD), repo merge-policy docs, `git for-each-ref --format='%(refname) %(symref)' refs/heads/ refs/remotes/` | candidates only; confirm `{{MAIN_BRANCH}}`, `{{SHIPMENT_SOURCE}}`, `{{SHIPMENT_REF}}` in interview #4 |
 | Branch prefixes | `git branch -a` naming history | `{{BRANCH_PREFIXES}}` |
 | Conventions / prohibitions / guardrails / backlog | project `CLAUDE.md`, `CONTRIBUTING.md`, `.claude/` docs; files named `BACKLOG*`/`TODO*`/`BUGS*`/`FEATURE*`; the id pattern their entries carry | `{{REPO_CONVENTIONS}}`, `{{EXTRA_PROHIBITIONS}}`, `{{GUARDRAILS_REF}}`, `{{BACKLOG_FILE}}`, `{{BACKLOG_ID_PREFIX}}` |
 | Gate agents + testing guide | `.claude/agents/*.md` whose `tools:` are read-only (Read/Grep/Glob) and whose description is review-shaped; `TESTING-GUIDE*`, `docs/testing*` | candidates for `{{GATE_AGENTS}}` and the catalog each reads first |
 | Runners + environment | OS and shell; whether the app can run headless here; CLI entrypoints; HTTP endpoints; browser tooling available to the session; CLAUDE.md prohibitions on launching the app or touching data; a fixture/disposable environment | `{{AGENT_RUNNERS}}` and the batch files' `Runner:` tags |
 | Release step | `build`/`release`/`package` scripts | `{{RELEASE_COMMAND}}` |
 | Monorepo | multiple `package.json` / workspace config | ask which package is in scope; constrain fences to it and filter validation commands (`pnpm --filter <pkg> …`) |
+
+`origin/HEAD` is a cached hint, not authority; validate its target exists and present
+the candidate for confirmation. Neither the current checkout nor `init.defaultBranch`
+identifies this repo's default. Missing/stale hints, both `main` and `master`, other
+remotes or a local-only repo → ask in #4, never guess. `git remote set-head origin -a`
+is an optional repair hint for a missing/stale remote HEAD, not part of read-only
+detection. Do not run it or fetch automatically.
 
 ## Interview (one AskUserQuestion round — confirmations + gaps only)
 
@@ -189,7 +200,16 @@ appear in the templates — check both directions when editing either.
    which of the detected runners may an agent use here (none / CLI / HTTP / browser /
    screenshot), is there a disposable data environment, and what must an agent never
    do (launch the headed app, touch live data)? Default when unsure: every step human.
-4. **Merge policy** — default: work stacks on the integration branch; the USER
+4. **Default branch + merge policy** — confirm the actual default branch as a full
+   local ref (`{{MAIN_BRANCH}}`, protected even if no local copy currently exists).
+   Confirm whether shipment means a merge into that LOCAL branch or into its branch
+   on a named REMOTE; record `{{SHIPMENT_SOURCE}}` and the full `{{SHIPMENT_REF}}` on
+   that source. Confirm that it is the declared default on that source, not another
+   feature branch. Verify the chosen source/ref exists and resolves to a commit; the
+   integration branch must be distinct from the default and shipment branches.
+   A remote-tracking ref is only a cache; for remote shipment, record the actual
+   remote name and its `refs/heads/<name>`, not `refs/remotes/...`. Local-only repos
+   need no remote or push. Default: work stacks on the integration branch; the USER
    smoke-tests at checkpoints and merges; the orchestrator never pushes. Confirm or
    adjust (PR flow, orchestrator ff-merge on recorded verdict, squash — note that squash
    collapses per-fold-in commits, so surgical reverts stop being available).
@@ -213,8 +233,10 @@ next ledger once this one's metrics token has shown review time, false stops and
 smoke minutes." The contract records which gates this ledger runs, so a driving session
 never guesses.
 
-Batch it: topics 1–7 fit in one AskUserQuestion call (4 questions max per call → merge
-related topics, e.g. 2+6 and 4+7, or run two calls back-to-back if genuinely needed).
+Batch it: topics 1–7 fit in one AskUserQuestion call only merged down to its 4-question
+cap — 1+3 (automated + by-hand verification), 2+6 (repo conventions) and 4+7 (git + gate
+policy) leave exactly four: {1+3, 2+6, 4+7, 5}; genuinely unmergeable → two calls
+back-to-back.
 Fold-in picks are NOT interview questions — they ride plan approval (procedure step 7).
 
 ## Baking rule

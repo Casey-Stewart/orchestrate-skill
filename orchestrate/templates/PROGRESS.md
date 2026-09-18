@@ -7,7 +7,7 @@ branch was cut from — the "since" point for the first checkpoint's diff and fo
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
-**Smoke page**: — (artifact URL, recorded at the first checkpoint hand-over)
+**Smoke page**: — (current delivery: URL, ledger-relative HTML path, or `plain text`; update at each hand-over)
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
 before believing any row (§Recovery in the contract).
 
@@ -22,7 +22,7 @@ before believing any row (§Recovery in the contract).
 ## Legend
 
 - `⬜ Not Started` · `🔄 In Progress` · `🟢 Integrated` (reviewed, validations green on
-  the worktree AND the integration tip, merged; verified at its checkpoint) ·
+  the worktree AND the integration tip, merged; awaiting its covering checkpoint) ·
   `🧪 At Checkpoint` (checkpoint reached, awaiting the USER's combined smoke verdict) ·
   `❌ Smoke Failed` (the USER failed a reached checkpoint — never an agent-found failure) ·
   `✅ Passed` (its checkpoint passed; merged toward the default branch per the merge
@@ -37,7 +37,7 @@ before believing any row (§Recovery in the contract).
 |---|-------|--------|------|---------|--------|---------|-------|
 <!-- one row per batch from the plan's batch table, all ⬜ at scaffold time (Version "—"
      if the repo doesn't version). Notes are DENSE but SHORT (≈300 chars of prose; keyed
-     lines — `… capped:` markers, `verdict … spent`, `fix-up pending:`, `deferred to`,
+     lines — `… capped:`, `… repair pending:` and `polish discarded:` markers, `verdict … spent`, `fix-up pending:`, `deferred to`,
      `R<k> <verdict> @<sha>[ asks=<n>]`, the metrics token — are exempt and never move to LOG): integration
      SHA, reviewer arc ("R1 FIX FIRST P1 → R2 SHIP"), tier used, fence extensions
      ("fence +path (item, reason, date)"), accepted residuals, then the metrics token

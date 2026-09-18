@@ -136,6 +136,12 @@ mark it FIX VERIFIED or NOT FIXED. Then re-scan only what changed since round 1
 
 **Scoped re-review** (a polish commit touched a production file): a fresh reviewer given
 only `git diff [PRE_POLISH_SHA]..HEAD`, the ASK list, and duties 1, 2 and 4. Not a round.
+Its verdict is recorded like any other (`R<k> <verdict> @<sha>`) and never counts toward
+the cap. `FIX FIRST` → the implementer reverts the offending production hunks or redoes
+the polish within test/doc/prose, then a fresh scoped re-review of the new diff; a SECOND
+polish-phase `FIX FIRST` discards the polish — the orchestrator writes `polish discarded:
+@[PRE_POLISH_SHA]` into the row's Notes, reverts back to that reviewed tree in ONE commit
+(never a reset), and integrates it; unclosed ASKs → backlog.
 
 Only `FIX FIRST` rounds count toward the cap of two. The SECOND `FIX FIRST` makes the
 orchestrator set `⛔ defective` or `⛔ green, residual finding open (<severity>)`, record
@@ -187,13 +193,15 @@ and never touch data outside [DISPOSABLE_ENV or "none — steps touching data ar
 Runners available: [AGENT_RUNNERS]. Environment and prohibitions: [THE RUNNERS LINE AND
 THE RELEVANT HARD PROHIBITIONS FROM THE READBEFORE].
 
-STEPS (verbatim from the batch files, with their Do / Pass text):
+STEPS (verbatim from the batch files, with Do / Pass text and the page's step numbers
+and revisions, initially 1):
 [AGENT-TAGGED STEPS]
 
 For each step: perform Do exactly, judge Pass literally, and write
 [LEDGER_DIR]/evidence/C[N]/step-[NN].md containing: the step text, the commands run,
 exit codes, output tail (≤20 lines) or the screenshot path, the integration SHA, the
-environment, a verdict PASS | FAIL | COULD-NOT-RUN with one line of reason. Do not edit
+step revision actually tested, the environment, a verdict PASS | FAIL | COULD-NOT-RUN
+with one line of reason. Do not edit
 anything else. Do not fix anything.
 
 REPORT: one line per step — `step NN: PASS|FAIL|COULD-NOT-RUN — <reason>` — then ≤20
@@ -298,8 +306,11 @@ the reverted merge; then dry run → merge → tip validation. **Trial merge** (
 if green" verdict): the dry run first (`git merge-tree --write-tree <tip> <branch>`; a
 conflict is STOP AND INVESTIGATE), then `git commit-tree <tree> -p <tip> -m trial`, check
 that commit out in a temporary worktree (`git worktree add <scratchpad>/wt-trial
-<commit>`; a stale `wt-trial` from a crashed trial is removed first), run the validations
-there, remove the worktree; green → merge for real, red → no merge.
+<commit>`; a stale `wt-trial` from a crashed trial is removed first), run the ledger's
+per-worktree setup there (skip only if `n/a`), then run the validations and remove the
+worktree; green → merge for real, red → no merge. A setup failure blocks the trial and
+the merge as an environment problem, not a red validation result; resolve setup and
+retry the trial before deciding whether to merge.
 
 If the triage between batches is uncertain, say so in the prompt and widen the fence to
 the candidate batches' fences combined — never the whole repo. A checkpoint fix-up

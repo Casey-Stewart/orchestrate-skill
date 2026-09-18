@@ -687,12 +687,16 @@
       <span class="m-change" id="m-change" style="width:0%"></span>
       <span class="m-fail"   id="m-fail"   style="width:0%"></span>
       <span class="m-block"  id="m-block"  style="width:0%"></span>
+      <span id="m-carried" style="width:0%;background:var(--ink-faint)"></span>
     </div>
     <p class="tally">
       <span class="k-pass">passed <b id="t-pass">0</b></span>
       <span class="k-fail">failed <b id="t-fail">0</b></span>
       <span class="k-block">blocked <b id="t-block">0</b></span>
       <span class="k-change">works, but <b id="t-change">0</b></span>
+      <span>carried over <b id="t-carried">0</b></span>
+      <span>re-run <b id="t-rerun">0</b></span>
+      <span>pre-verified <b id="t-pre">0</b></span>
       <span>unmarked <b id="t-todo">—</b></span>
       <span>of <b id="t-total">—</b></span>
     </p>
@@ -704,12 +708,16 @@
     <h2>Sections</h2>
     <nav class="rail-nav" id="rail"></nav>
     <div class="rail-actions">
-      <button class="btn" id="btn-next" type="button">Jump to first unmarked</button>
+      <button class="btn" id="btn-next" type="button">Jump to next step to run</button>
     </div>
     <p class="store-note" id="store-note">Checking for saved verdicts…</p>
   </aside>
 
   <main>
+    <section class="gate" id="run-error" role="alert" hidden>
+      <h3>This smoke page needs correction</h3>
+      <p id="run-error-text"></p>
+    </section>
     <section class="gate" id="s0">
 {{GATE_BODY}}
     </section>
@@ -747,10 +755,13 @@
          order       — "Order matters" callout (cross-step constraints)
          need        — "You need" callout (test data / hardware / accounts)
          touchesData — true flags the section "Touches your data"
-       step: { n, do, pass, aside?, unit?, tag?, pre? }
+       step: { n, do, pass, revision?, aside?, unit?, tag?, pre? }
          do    — the action, imperative; one step, one action
          pass  — the acceptance criterion, kept apart from the instruction
                  because those are two different things to read
+         revision — positive integer, initially 1 (default). Increment when this
+                 step's instructions, criterion or covered behavior changes.
+                 Keep it unchanged across re-issues that do not affect this step.
          aside — warning or context ("Enter cancels here — click the button")
          unit  — where a count is involved, define ONE unit in the
                  operator's words
@@ -758,13 +769,30 @@
                  safety" for steps that exist because a barcode scanner is a
                  keyboard that types a code and then presses Enter)
          pre   — the QA runner already performed this step on the integration
-                 tip before hand-over: { sha, env, evidence } (short SHA, the
-                 environment it ran in, the evidence path in the ledger). The
-                 step renders dimmed with a "Pre-verified by agent" tag and
-                 still takes the operator's verdict — theirs wins. Omit for
-                 human steps. */
+                 tip before hand-over: { sha, stepRevision, env, evidence }.
+                 sha is full or abbreviated to at least 7 hex characters;
+                 stepRevision is the step's revision when the runner PASSED it.
+                 Keep both with the original evidence on re-issue; only replace
+                 them after a new run. Matching revisions may carry evidence from
+                 an earlier build, labeled as such. Missing/mismatched revisions
+                 require re-verification. Omit pre for human steps. */
 
   var SECTIONS = {{SECTIONS_JS}};
+  var BUILD_SHA = "{{BUILD_SHA}}";
+
+  // Stop before reading storage, connecting to the store, or enabling verdicts.
+  // An unfilled slot must never become a shared identity across different builds.
+  if (!isFullSha(BUILD_SHA)) {
+    document.getElementById("run-error").hidden = false;
+    document.getElementById("run-error-text").textContent =
+      "This page has no valid build identity. Ask for a corrected smoke page before running these steps. Your saved verdicts have not been changed.";
+    document.getElementById("s0").hidden = true;
+    document.getElementById("btn-copy").disabled = true;
+    document.getElementById("btn-next").disabled = true;
+    setStoreNote("Run unavailable — this smoke page needs correction.", "off");
+    return;
+  }
+  BUILD_SHA = BUILD_SHA.toLowerCase();
 
   var TOTAL = SECTIONS.reduce(function (a, s) { return a + s.steps.length; }, 0);
 
@@ -789,11 +817,38 @@
      One document per step in `{{CKPT_KEY}}-steps`, so a tick is a single
      small write with no read-modify-write race, and the whole run reads back
      as one collection listing. `db` may be null — the page is fully usable
-     without it, it just stops remembering. */
+     without it, it saves only in this browser when localStorage is available. */
 
   var db = null;
-  var local = {};           // n -> {status, note}
+  var local = {};           // n -> {status, note, buildSha, stepRevision, at}
   var noteTimers = {};
+  var pendingRemote = {};   // newer whole records deferred while a note has focus
+
+  function recordTime(rec) {
+    if (!rec || typeof rec.at !== "string") return -Infinity;
+    var time = Date.parse(rec.at);
+    return isFinite(time) && new Date(time).toISOString() === rec.at ? time : -Infinity;
+  }
+
+  function stamp(n) {
+    // Advance even for rapid edits, a clock rollback, or an observed future update.
+    local[n].at = new Date(Math.max(Date.now(), recordTime(local[n]) + 1,
+      recordTime(pendingRemote[n]) + 1)).toISOString();
+  }
+
+  function cancelNoteWrite(n) {
+    clearTimeout(noteTimers[n]);
+    delete noteTimers[n];
+  }
+
+  function applyRemote(n, rec) {
+    // Equal timestamps (including echoes) keep the local record. Untimed data can
+    // populate an empty browser, but cannot replace an existing record.
+    if (local[n] && recordTime(rec) <= recordTime(local[n])) return false;
+    cancelNoteWrite(n);
+    local[n] = rec;
+    return true;
+  }
 
   function loadLocal() {
     try {
@@ -810,13 +865,15 @@
 
   function persist(n) {
     var rec = local[n];
-    if (!db) return;
+    if (!db || !rec) return;
     var body = {
       n: n,
       section: sectionOf(n),
       status: rec && rec.status ? rec.status : "",
       note: rec && rec.note ? rec.note : "",
-      at: new Date().toISOString()
+      buildSha: rec && rec.buildSha ? rec.buildSha : "",
+      stepRevision: rec && rec.stepRevision ? rec.stepRevision : "",
+      at: rec.at || ""
     };
     db.doc("{{CKPT_KEY}}-steps/" + n).set(body).catch(function (e) {
       setStoreNote("Not saving to the page right now (" + (e && e.code ? e.code : "error") + "). Your marks are kept in this browser.", "off");
@@ -829,6 +886,66 @@
       for (var j = 0; j < s.steps.length; j++) if (s.steps[j].n === n) return s.n;
     }
     return 0;
+  }
+
+  function stepOf(n) {
+    for (var i = 0; i < SECTIONS.length; i++) {
+      for (var j = 0; j < SECTIONS[i].steps.length; j++) {
+        if (SECTIONS[i].steps[j].n === n) return SECTIONS[i].steps[j];
+      }
+    }
+    return null;
+  }
+
+  function revisionOf(step) { return String(step.revision || 1); }
+
+  function isFullSha(sha) {
+    return typeof sha === "string" && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(sha);
+  }
+
+  function sameBuild(sha) { return isFullSha(sha) && sha.toLowerCase() === BUILD_SHA; }
+
+  function preState(step) {
+    var pre = step.pre;
+    if (!pre) return "none";
+    if (typeof pre.sha !== "string" || !/^[0-9a-f]{7,64}$/i.test(pre.sha) ||
+        pre.sha.length > BUILD_SHA.length || String(pre.stepRevision) !== revisionOf(step) ||
+        typeof pre.env !== "string" || !pre.env.trim() ||
+        typeof pre.evidence !== "string" || !pre.evidence.trim()) return "stale";
+    return BUILD_SHA.slice(0, pre.sha.length) === pre.sha.toLowerCase() ? "current" : "carried";
+  }
+
+  function preLabel(step) {
+    return "pre-verified by agent @" + step.pre.sha +
+      (preState(step) === "carried" ? " (carried over; unchanged step)" : "");
+  }
+
+  function stepState(step) {
+    var rec = local[step.n] || {};
+    var marked = STATES.indexOf(rec.status) !== -1;
+    // A saved verdict remains applicable only while the step's revision matches.
+    // Missing provenance is never silently assigned to the current build/revision.
+    var applicable = marked && isFullSha(rec.buildSha) && rec.stepRevision === revisionOf(step);
+    var agent = preState(step);
+    var kind = applicable ? (sameBuild(rec.buildSha) ? "current" : "carried")
+      : agent === "current" || agent === "carried" ? "pre"
+      : marked || agent === "stale" ? "rerun" : "todo";
+    return { record: rec, marked: marked, kind: kind };
+  }
+
+  function carriedLabel(rec) {
+    var label = rec.status === "change" ? "WORKS, BUT" : rec.status.toUpperCase();
+    return label + " (carried over from build " + (rec.buildSha || "unknown") + ")";
+  }
+
+  function counts() {
+    var c = { pass: 0, fail: 0, blocked: 0, change: 0, carried: 0, rerun: 0, pre: 0, todo: 0 };
+    SECTIONS.forEach(function (s) { s.steps.forEach(function (step) {
+      var state = stepState(step);
+      if (state.kind === "current") c[state.record.status]++;
+      else c[state.kind]++;
+    }); });
+    return c;
   }
 
   function setStoreNote(text, cls) {
@@ -853,6 +970,7 @@
     var body = document.createElement("div");
     body.className = "step-body";
 
+    var agent = preState(step);
     if (step.tag || step.pre) {
       var tags = document.createElement("div");
       tags.className = "step-tags";
@@ -864,10 +982,11 @@
       }
       if (step.pre) {
         var tp = document.createElement("span");
-        tp.className = "tag tag-pre";
-        tp.textContent = "Pre-verified by agent";
+        tp.className = agent === "stale" ? "tag tag-step" : "tag tag-pre";
+        tp.textContent = agent === "stale" ? "Agent evidence needs re-verification"
+          : agent === "carried" ? "Pre-verified by agent — carried over" : "Pre-verified by agent";
         tags.appendChild(tp);
-        wrap.className += " step-pre";
+        if (agent !== "stale") wrap.className += " step-pre";
       }
       body.appendChild(tags);
     }
@@ -899,9 +1018,11 @@
     if (step.pre) {
       var pn = document.createElement("p");
       pn.className = "step-pre-note";
-      pn.innerHTML = "Already run by the QA runner on <code>" + step.pre.sha + "</code> (" +
-        step.pre.env + ") — evidence: <code>" + step.pre.evidence + "</code>. " +
-        "Run it again if you like; your verdict replaces the agent's.";
+      pn.textContent = agent === "stale"
+        ? "Earlier agent evidence @" + (step.pre.sha || "unknown") +
+          " is incomplete or belongs to another step revision; it does not count as verification."
+        : preLabel(step) + " (" + step.pre.env + ") — evidence: " + step.pre.evidence +
+          ". Run it again if you like; your verdict replaces the agent's.";
       body.appendChild(pn);
     }
 
@@ -932,6 +1053,11 @@
 
     body.appendChild(v);
 
+    var history = document.createElement("p");
+    history.className = "step-aside step-history";
+    history.hidden = true;
+    body.appendChild(history);
+
     // note — shown once a verdict exists, required in spirit for fail/blocked
     var nw = document.createElement("div");
     nw.className = "note-wrap";
@@ -945,9 +1071,25 @@
     ta.addEventListener("input", function () {
       local[step.n] = local[step.n] || { status: "" };
       local[step.n].note = ta.value;
+      stamp(step.n);
       saveLocal();
-      clearTimeout(noteTimers[step.n]);
-      noteTimers[step.n] = setTimeout(function () { persist(step.n); }, 700);
+      cancelNoteWrite(step.n);
+      noteTimers[step.n] = setTimeout(function () {
+        delete noteTimers[step.n];
+        persist(step.n);
+      }, 700);
+    });
+    ta.addEventListener("blur", function () {
+      var rec = pendingRemote[step.n];
+      delete pendingRemote[step.n];
+      if (rec && applyRemote(step.n, rec)) {
+        saveLocal();
+        paintStep(step.n, true);
+        paintTotals();
+        setStoreNote("Newer results from the page applied.", "live");
+      } else if (rec) {
+        setStoreNote("Your newer edit was kept; the earlier page update was ignored.", "live");
+      }
     });
     nw.appendChild(lab);
     nw.appendChild(ta);
@@ -1017,26 +1159,43 @@
   /* ----------------------------------------------------------------- state */
 
   function mark(n, status) {
+    var step = stepOf(n);
+    if (!step) return;
     var cur = local[n] || { status: "", note: "" };
-    cur.status = cur.status === status ? "" : status;   // pressing again clears
+    // Re-selecting an old verdict confirms a re-run; only a current verdict toggles off.
+    var current = sameBuild(cur.buildSha) && cur.stepRevision === revisionOf(step);
+    cur.status = current && cur.status === status ? "" : status;
+    cur.buildSha = BUILD_SHA;
+    cur.stepRevision = revisionOf(step);
     local[n] = cur;
+    stamp(n);
+    cancelNoteWrite(n);
     saveLocal();
     persist(n);
     paintStep(n);
     paintTotals();
   }
 
-  function paintStep(n) {
+  function paintStep(n, forceNote) {
     var el = document.getElementById("step-" + n);
     if (!el) return;
-    var rec = local[n] || { status: "", note: "" };
+    var state = stepState(stepOf(n));
+    var rec = state.record;
+    var applicable = state.kind === "current" || state.kind === "carried";
 
-    el.setAttribute("data-status", rec.status || "");
+    el.setAttribute("data-status", applicable ? rec.status : "");
 
     var btns = el.querySelectorAll(".vbtn");
     for (var i = 0; i < btns.length; i++) {
-      btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-state") === rec.status ? "true" : "false");
+      btns[i].setAttribute("aria-pressed", applicable && btns[i].getAttribute("data-state") === rec.status ? "true" : "false");
     }
+
+    var history = el.querySelector(".step-history");
+    history.hidden = !state.marked || state.kind === "current";
+    history.textContent = history.hidden ? "" : carriedLabel(rec) + ". " +
+      (state.kind === "carried" ? "Step unchanged; kept without re-running. Select a verdict after re-running to record a new result."
+        : state.kind === "pre" ? "Agent evidence applies to this step revision; see its build and evidence above."
+        : "Step changed or its earlier build/revision is unknown. Run it again and select a verdict.");
 
     var nw = el.querySelector(".note-wrap");
     var ta = el.querySelector("textarea");
@@ -1054,42 +1213,38 @@
         ? "It works as described. Describe the change you want."
         : "What happened instead?";
     }
-    if (ta && document.activeElement !== ta && ta.value !== (rec.note || "")) ta.value = rec.note || "";
+    if (ta && (forceNote || document.activeElement !== ta) && ta.value !== (rec.note || "")) ta.value = rec.note || "";
   }
 
   function paintTotals() {
-    var c = { pass: 0, fail: 0, blocked: 0, change: 0 };
-    Object.keys(local).forEach(function (k) {
-      var st = local[k] && local[k].status;
-      if (st && c.hasOwnProperty(st)) c[st]++;
-    });
+    var c = counts();
 
     document.getElementById("t-pass").textContent = c.pass;
     document.getElementById("t-fail").textContent = c.fail;
     document.getElementById("t-block").textContent = c.blocked;
     document.getElementById("t-change").textContent = c.change;
-    // Untouched pre-verified steps are not "to do": the QA runner already ran them.
-    var preOnly = 0;
-    SECTIONS.forEach(function (s) { s.steps.forEach(function (st) {
-      if (st.pre && !(local[st.n] && local[st.n].status)) preOnly++;
-    }); });
-    document.getElementById("t-todo").textContent =
-      TOTAL - c.pass - c.fail - c.blocked - c.change - preOnly;
+    document.getElementById("t-carried").textContent = c.carried;
+    document.getElementById("t-rerun").textContent = c.rerun;
+    document.getElementById("t-pre").textContent = c.pre;
+    document.getElementById("t-todo").textContent = c.todo;
     document.getElementById("t-total").textContent = TOTAL;
 
-    document.getElementById("m-pass").style.width   = (c.pass    / TOTAL * 100) + "%";
-    document.getElementById("m-change").style.width = (c.change  / TOTAL * 100) + "%";
-    document.getElementById("m-fail").style.width   = (c.fail    / TOTAL * 100) + "%";
-    document.getElementById("m-block").style.width  = (c.blocked / TOTAL * 100) + "%";
+    var total = TOTAL || 1;
+    document.getElementById("m-pass").style.width   = (c.pass    / total * 100) + "%";
+    document.getElementById("m-change").style.width = (c.change  / total * 100) + "%";
+    document.getElementById("m-fail").style.width   = (c.fail    / total * 100) + "%";
+    document.getElementById("m-block").style.width  = (c.blocked / total * 100) + "%";
+    document.getElementById("m-carried").style.width = (c.carried / total * 100) + "%";
 
     SECTIONS.forEach(function (s) {
       var done = 0, bad = 0;
       s.steps.forEach(function (st) {
-        var r = local[st.n];
-        if ((r && r.status) || st.pre) done++;
+        var state = stepState(st);
+        var applicable = state.kind === "current" || state.kind === "carried";
+        if (applicable || state.kind === "pre") done++;
         // A change request is NOT a bad outcome — the step passed. Only a
         // real fail or a step the user could not perform reddens the section.
-        if (r && (r.status === "fail" || r.status === "blocked")) bad++;
+        if (applicable && (state.record.status === "fail" || state.record.status === "blocked")) bad++;
       });
       var el = document.getElementById("rc-" + s.n);
       if (!el) return;
@@ -1112,7 +1267,8 @@
       var s = SECTIONS[i];
       for (var j = 0; j < s.steps.length; j++) {
         var n = s.steps[j].n;
-        if ((!local[n] || !local[n].status) && !s.steps[j].pre) {
+        var kind = stepState(s.steps[j]).kind;
+        if (kind === "todo" || kind === "rerun") {
           var el = document.getElementById("step-" + n);
           if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
           return;
@@ -1122,16 +1278,23 @@
   });
 
   document.getElementById("btn-copy").addEventListener("click", function () {
-    var lines = ["{{COPY_HEADER}}", ""];
-    var c = { pass: 0, fail: 0, blocked: 0, change: 0, todo: 0, pre: 0 };
+    var lines = ["{{COPY_HEADER}}", "Current build: " + BUILD_SHA, ""];
+    var c = counts();
 
     SECTIONS.forEach(function (s) {
       lines.push("Section " + s.n + " — " + s.title);
       s.steps.forEach(function (st) {
-        var r = local[st.n] || {};
-        var status = r.status ? (r.status === "change" ? "WORKS, BUT" : r.status.toUpperCase())
-          : (st.pre ? "pre-verified by agent @" + st.pre.sha : "NOT RUN");
-        if (r.status && c.hasOwnProperty(r.status)) c[r.status]++; else if (st.pre) c.pre++; else c.todo++;
+        var state = stepState(st);
+        var r = state.record;
+        var status = state.kind === "current" ? (r.status === "change" ? "WORKS, BUT" : r.status.toUpperCase())
+          : state.kind === "carried" ? carriedLabel(r) + " — unchanged step"
+          : state.kind === "rerun" ? "NOT RE-RUN" +
+            (state.marked ? " — previous " + carriedLabel(r) : "") +
+            (preState(st) === "stale" ? "; agent evidence @" + (st.pre.sha || "unknown") + " is stale or incomplete" : "") +
+            "; re-run required"
+          : state.kind === "pre" ? preLabel(st) +
+            (state.marked ? "; previous " + carriedLabel(r) + " has an earlier or unknown build/revision" : "")
+          : "NOT RUN";
         var line = "  " + st.n + ". " + status;
         if (r.note && r.note.trim()) line += " — " + r.note.trim().replace(/\s+/g, " ");
         lines.push(line);
@@ -1139,8 +1302,9 @@
       lines.push("");
     });
 
-    lines.push("passed " + c.pass + " · failed " + c.fail + " · blocked " + c.blocked +
-      " · works-but " + c.change + " · pre-verified only " + c.pre + " · not run " + c.todo + " of " + TOTAL);
+    lines.push("Current-build verdicts: passed " + c.pass + " · failed " + c.fail + " · blocked " + c.blocked +
+      " · works-but " + c.change + " · carried over (unchanged) " + c.carried +
+      " · needs re-run " + c.rerun + " · pre-verified only " + c.pre + " · not run " + c.todo + " of " + TOTAL);
 
     var text = lines.join("\n");
     var done = function () {
@@ -1182,23 +1346,38 @@
       }
       db = ns;
       db.collection("{{CKPT_KEY}}-steps").onSnapshot(function (snap) {
-        var seen = false;
+        var changed = false, retained = false, deferred = false;
         snap.docs.forEach(function (d) {
           var v = d.data() || {};
           var n = Number(v.n != null ? v.n : d.id);
-          if (!n) return;
-          seen = true;
-          var cur = local[n] || {};
-          var ta = document.getElementById("note-" + n);
-          var typing = ta && document.activeElement === ta;
-          local[n] = {
+          if (!stepOf(n)) return;
+          var rec = {
             status: v.status || "",
-            note: typing ? (cur.note || "") : (v.note || "")
+            note: v.note || "",
+            buildSha: v.buildSha || "",
+            stepRevision: v.stepRevision || "",
+            at: v.at || ""
           };
+          var cur = local[n];
+          if (cur && recordTime(rec) <= recordTime(cur)) {
+            if (recordTime(rec) < recordTime(cur)) retained = true;
+            return;
+          }
+          var ta = document.getElementById("note-" + n);
+          if (ta && document.activeElement === ta) {
+            // Never combine a remote verdict/provenance with the active local note.
+            // On blur the newer whole record wins, unless typing advanced local time.
+            if (!pendingRemote[n] || recordTime(rec) > recordTime(pendingRemote[n])) pendingRemote[n] = rec;
+            cancelNoteWrite(n);
+            deferred = true;
+            return;
+          }
+          if (applyRemote(n, rec)) changed = true;
         });
-        saveLocal();
-        paintAll();
-        setStoreNote(seen ? "Verdicts saved to this page." : "Ready — your verdicts save to this page.", "live");
+        if (changed) { saveLocal(); paintAll(); }
+        setStoreNote(deferred ? "A page update is waiting until you finish editing this note."
+          : retained ? "Newer results kept in this browser; an older page update was ignored."
+          : "Connected to the page's store.", "live");
       }, function (e) {
         setStoreNote("Saving to this browser only (" + (e && e.code ? e.code : "error") + ").", "off");
       });

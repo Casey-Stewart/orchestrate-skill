@@ -1,0 +1,284 @@
+#!/usr/bin/env node
+// Fill the frozen smoke-page template from a checkpoint's data sidecar.
+//
+//   node build-smoke-page.mjs <smoke-Cn.json> <smoke-Cn.html> [--previous <old.json>]
+//     [--template <path>] [--reset-verdicts]
+//
+// The template is the settled design: fill its `{{...}}` slots and append a sidecar
+// fingerprint. The same sidecar and template always produce the same bytes.
+// Re-issues compare against the last issued sidecar to protect the step numbers
+// and revisions that give carried verdicts their meaning.
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { isDeepStrictEqual, parseArgs } from "node:util";
+
+const DEFAULT_TEMPLATE = resolve(
+  dirname(fileURLToPath(import.meta.url)), "../references/smoke-page-template.html");
+
+export function buildSmokePage(data, template, { previous, resetVerdicts = false } = {}) {
+  const slots = renderSlots(data);
+  if (previous !== undefined) validateReissue(data, validate(previous), resetVerdicts);
+  else if (resetVerdicts) throw new Error("resetting verdicts requires a previous sidecar");
+  const out = template.replace(/\{\{([A-Z_]+)\}\}/g, (_, name) => {
+    if (!(name in slots)) throw new Error(`template wants a slot the sidecar cannot fill: {{${name}}}`);
+    return slots[name];
+  });
+  // The documented self-check, enforced rather than remembered.
+  if (out.includes("{{")) throw new Error("self-check failed: an unfilled `{{` survived the fill");
+  return out + sidecarStamp(data);
+}
+
+function sidecarFingerprint(data) {
+  // Ignore object-key order/JSON formatting, but retain array order and values.
+  const canonical = JSON.stringify(data, (_, value) =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))
+      : value);
+  return createHash("sha256").update(canonical).digest("hex");
+}
+
+function sidecarStamp(data) { return `\n<!-- smoke-sidecar-sha256:${sidecarFingerprint(data)} -->\n`; }
+
+export function renderSlots(data) {
+  const d = validate(data);
+  const steps = d.sections.reduce((n, s) => n + s.steps.length, 0);
+  const cn = `C${d.checkpoint}`;
+
+  const facts = [];
+  fact(facts, "Branch", code(d.branch));
+  if (d.version) {
+    fact(facts, "Version should read", d.version.was
+      ? `${esc(d.version.now)} <span class="was">${esc(d.version.was)}</span>`
+      : esc(d.version.now));
+  }
+  fact(facts, "Tip", code(d.buildSha.slice(0, 7)));
+  if (d.suite) fact(facts, "Suite", esc(d.suite));
+  if (d.knownFailures) fact(facts, "Known failures", esc(d.knownFailures));
+  for (const extra of d.facts || []) fact(facts, esc(extra.dt), extra.dd);
+
+  // Slots land in three different languages. `headline`, `eyebrow`, `standfirst`,
+  // the facts and the gate are authored AS HTML and stay raw; a plain name like the
+  // change title is escaped for the context it is dropped into, because "Fix "Save as""
+  // is an ordinary change name and an unescaped one lands as a SyntaxError that
+  // disables every control on the page.
+  return {
+    PAGE_TITLE: esc(d.pageTitle || `${d.change} Smoke Run`),   // <title> — text, no markup
+    EYEBROW: d.eyebrow || `Checkpoint ${cn} · batches ${esc(d.batches)}`,
+    HEADLINE: d.headline || `${esc(d.change)} — smoke run`,
+    // After a run the driver may replace this with a result summary; before one it
+    // has to tell the user how many steps there are and how to send them back.
+    STANDFIRST: d.standfirst || `${steps} steps in ${d.sections.length} sections. `
+      + "When you're done — or as soon as something fails — press "
+      + "<strong>Copy results as text</strong> and paste it into the chat.",
+    FACTS_HTML: facts.join("\n"),
+    GATE_BODY: renderGate(d.gate),
+    SECTIONS_JS: embed(d.sections),
+    CKPT_KEY: d.ckptKey,                                       // charset-checked in validate()
+    BUILD_SHA: d.buildSha,                                     // hex-checked in validate()
+    COPY_HEADER: jsString(d.copyHeader                         // a JS string literal
+      || `${cn} smoke run — ${d.change}${d.version ? ` (${d.version.now})` : ""}`)
+  };
+}
+
+function renderGate(gate) {
+  const lines = [
+    '<p class="gate-eyebrow">Before anything else</p>',
+    "<h3>Step 0 — prove you are on the right build</h3>"
+  ];
+  if (gate.intro) lines.push(`<p>${gate.intro}</p>`);
+  for (const command of gate.commands || []) lines.push(`<pre><code>${esc(command)}</code></pre>`);
+  lines.push('<ol class="gate-checks">');
+  for (const check of gate.checks) lines.push(`  <li>${check}</li>`);
+  lines.push("</ol>");
+  return lines.join("\n");
+}
+
+// HTML parses script contents before JavaScript does. Escape every '<' in data:
+// closing tags can end the block early, while `<!-- <script>` can hide its end.
+// JSON decoding restores the original text and authored HTML at runtime.
+function scriptJson(value, space) {
+  return JSON.stringify(value, null, space)
+    .replace(/</g, "\\u003c")
+    .replace(/[\u2028\u2029]/g, c => "\\u" + c.charCodeAt(0).toString(16));
+}
+
+function embed(sections) {
+  return scriptJson(sections, 2);
+}
+
+function fact(out, dt, dd) { out.push(`<div class="fact"><dt>${dt}</dt><dd>${dd}</dd></div>`); }
+function code(value) { return `<code>${esc(value)}</code>`; }
+function esc(value) { return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+// The template supplies the surrounding quotes; retain the escaped string body.
+function jsString(value) {
+  return scriptJson(String(value)).slice(1, -1);
+}
+
+function number(value, what) {
+  if (!Number.isInteger(value) || value < 1) throw new Error(`${what} must be a positive integer`);
+}
+
+function validate(d) {
+  const missing = ["change", "checkpoint", "batches", "branch", "buildSha", "ckptKey", "gate", "sections"]
+    .filter(key => d[key] === undefined || d[key] === "");
+  if (missing.length) throw new Error(`sidecar is missing: ${missing.join(", ")}`);
+  // The page refuses to run on an unfilled or malformed identity; fail here instead,
+  // where the message can name the file, rather than shipping a page that stops the user.
+  if (!/^[0-9a-fA-F]{40}$|^[0-9a-fA-F]{64}$/.test(d.buildSha)) {
+    throw new Error(`buildSha must be a full 40- or 64-character Git object ID, got "${d.buildSha}"`);
+  }
+  // CKPT_KEY lands in four JS strings AND in a block comment, where no escaping saves
+  // a stray `*/`; it is a storage key, so require one that is safe everywhere.
+  if (typeof d.ckptKey !== "string") {
+    throw new Error("ckptKey must be a nonempty string");
+  }
+  if (!/^[A-Za-z0-9._-]+$/.test(d.ckptKey)) {
+    throw new Error(`ckptKey must be letters, digits, dot, dash or underscore, got "${d.ckptKey}"`);
+  }
+  if (!Array.isArray(d.sections) || !d.sections.length) throw new Error("sidecar has no sections");
+  if (!Array.isArray(d.gate.checks) || !d.gate.checks.length) throw new Error("the step-0 gate has no checks");
+
+  const seenSections = new Set(), seenSteps = new Map();
+  for (const section of d.sections) {
+    // Section and step numbers become DOM ids and storage keys, where `1` and `"1"`
+    // are the same thing — so they must be real integers before uniqueness means
+    // anything. Two steps the page cannot tell apart share one verdict.
+    number(section.n, `section number ${JSON.stringify(section.n)}`);
+    if (seenSections.has(section.n)) throw new Error(`section number ${section.n} is used twice`);
+    seenSections.add(section.n);
+    if (!Array.isArray(section.steps) || !section.steps.length) {
+      throw new Error(`section ${section.n} has no steps`);
+    }
+    for (const step of section.steps) {
+      number(step.n, `step number ${JSON.stringify(step.n)}`);
+      if (seenSteps.has(step.n)) throw new Error(`step number ${step.n} is used twice (sections ${seenSteps.get(step.n)} and ${section.n})`);
+      seenSteps.set(step.n, section.n);
+      if (!step.do || !step.pass) throw new Error(`step ${step.n} needs both \`do\` and \`pass\``);
+      if (step.revision !== undefined) number(step.revision, `step ${step.n}: revision ${JSON.stringify(step.revision)}`);
+      if (step.pre) {
+        if (!step.pre.stepRevision) throw new Error(`step ${step.n} carries agent evidence with no stepRevision`);
+        // The page files evidence it cannot match as unknown provenance, which reads
+        // as "run it again" — better to fail here than to ship a step that lies quietly.
+        if (!/^[0-9a-fA-F]{7,64}$/.test(step.pre.sha || "")) {
+          throw new Error(`step ${step.n}: pre.sha must be at least 7 hex characters, got "${step.pre.sha}"`);
+        }
+      }
+    }
+  }
+  return d;
+}
+
+function validateReissue(current, previous, resetVerdicts) {
+  if (current.checkpoint !== previous.checkpoint) {
+    throw new Error("previous sidecar belongs to a different checkpoint");
+  }
+  if (current.ckptKey !== previous.ckptKey && !resetVerdicts) {
+    throw new Error("ckptKey changed; keep it stable, or use --reset-verdicts for a user-requested clean sheet");
+  }
+  if (resetVerdicts && current.ckptKey === previous.ckptKey) {
+    throw new Error("--reset-verdicts requires a new ckptKey");
+  }
+
+  const flatten = data => data.sections.flatMap(section =>
+    section.steps.map(step => ({ step, section })));
+  const before = flatten(previous), after = flatten(current);
+  // The old sequence is a prefix, even across section boundaries. Adding to an
+  // earlier section would insert work before already-issued steps, not append it.
+  for (let i = 0; i < before.length; i++) {
+    if (after[i]?.step.n !== before[i].step.n) {
+      throw new Error(`existing step ${before[i].step.n} must keep its number and position; new steps append after all existing steps`);
+    }
+  }
+  let highest = Math.max(...before.map(({ step }) => step.n));
+  for (const { step } of after.slice(before.length)) {
+    if (step.n <= highest) {
+      throw new Error(`new step ${step.n} must append with a number greater than ${highest}`);
+    }
+    highest = step.n;
+  }
+
+  // Ignore evidence metadata: a new agent run does not change the instructions.
+  // Include section context (need/order/lede/title/etc.), since changing a shared
+  // prerequisite changes what every step in that section asks the user to test.
+  const instructions = ({ step, section }) => {
+    const { n, revision, pre, ...content } = step;
+    const { n: sectionNumber, steps, ...context } = section;
+    return { content, context };
+  };
+  for (let i = 0; i < before.length; i++) {
+    const oldRevision = before[i].step.revision ?? 1;
+    const newRevision = after[i].step.revision ?? 1;
+    const n = before[i].step.n;
+    if (newRevision < oldRevision) {
+      throw new Error(`step ${n}: revision cannot decrease from ${oldRevision} to ${newRevision}`);
+    }
+    if (newRevision === oldRevision && !isDeepStrictEqual(instructions(before[i]), instructions(after[i]))) {
+      throw new Error(`step ${n}: instructions or section context changed; increment revision above ${oldRevision}`);
+    }
+  }
+}
+
+function sameFile(left, right) {
+  if (resolve(left) === resolve(right)) return true;
+  if (!existsSync(left) || !existsSync(right)) return false;
+  const a = statSync(left), b = statSync(right);
+  return a.dev === b.dev && a.ino === b.ino;
+}
+
+// `file://` + a Windows path is not the URL Node reports, so compare through the URL API.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  let args;
+  try {
+    args = parseArgs({ allowPositionals: true, options: {
+      template: { type: "string", default: DEFAULT_TEMPLATE },
+      previous: { type: "string" },
+      "reset-verdicts": { type: "boolean", default: false }
+    } });
+    if (args.positionals.length !== 2) throw new Error("expected a sidecar and an output path");
+  } catch (e) {
+    console.error(e.message);
+    console.error("usage: build-smoke-page.mjs <smoke-Cn.json> <smoke-Cn.html> [--previous <old.json>] [--template <path>] [--reset-verdicts]");
+    process.exit(2);
+  }
+  const [sidecar, out] = args.positionals;
+  const { template, previous, "reset-verdicts": resetVerdicts } = args.values;
+  try {
+    if (previous && sameFile(sidecar, previous)) {
+      throw new Error("--previous must be a separate snapshot of the last issued sidecar, not the edited input");
+    }
+    for (const input of [sidecar, template, previous].filter(Boolean)) {
+      if (sameFile(out, input)) throw new Error("output must not overwrite an input or the previous sidecar");
+    }
+    const data = JSON.parse(readFileSync(sidecar, "utf8"));
+    const previousData = previous ? JSON.parse(readFileSync(previous, "utf8")) : undefined;
+    const templateText = readFileSync(template, "utf8");
+    const html = buildSmokePage(data, templateText, {
+      previous: previousData,
+      resetVerdicts
+    });
+    if (existsSync(out)) {
+      const existing = readFileSync(out, "utf8");
+      // Git may normalize committed HTML to CRLF on checkout. That must not
+      // invalidate its fingerprint or make an identical rebuild need a baseline.
+      const sameHTML = (a, b) => a.replace(/\r\n/g, "\n") === b.replace(/\r\n/g, "\n");
+      if (previous) {
+        const fingerprint = existing.match(/\r?\n<!-- smoke-sidecar-sha256:([a-f0-9]{64}) -->\s*$/)?.[1];
+        // Legacy pages have no stamp. Accept their baseline only if it reproduces
+        // the old page exactly with the supplied template, before adding a stamp.
+        const matches = fingerprint ? fingerprint === sidecarFingerprint(previousData)
+          : sameHTML(existing + sidecarStamp(previousData), buildSmokePage(previousData, templateText));
+        if (!matches) throw new Error("--previous does not match the last issued page; use its exact sidecar snapshot (and the original template for an unstamped page)");
+      } else if (!sameHTML(existing, html) && !sameHTML(existing + sidecarStamp(data), html)) {
+        throw new Error("reissuing an existing page requires --previous <last-issued.json>; identical rebuilds need no snapshot");
+      }
+    }
+    writeFileSync(out, html);
+    console.log(`${out}: ${html.length} bytes, 0 unfilled slots`);
+  } catch (e) {
+    console.error(`${sidecar}: ${e.message}`);
+    process.exit(1);
+  }
+}

@@ -148,9 +148,11 @@ sidebar doesn't open", "continue" — and it routes to the right mode.
   aren't required — without them the orchestrator implements a wave's batches one at a
   time in the main checkout and still runs the review as a separate adversarial pass per
   batch. Checkpoint placement is unchanged.
-- The smoke page is published as a claude.ai artifact (private by default). Its content
-  is the checkpoint script — feature names and steps — so if that must not leave your
-  machine, use the plain-text fallback the contract describes.
+- Generated ledger contracts use runtime-neutral smoke delivery: reuse the committed
+  HTML through available preview/file/publishing tools, or deliver the full script as
+  plain text. Cloud verdict storage is optional. Claude artifact publishing instructions
+  stay in the skill reference; another agent runtime can follow the ledger's contract
+  without Claude APIs. Local HTML or plain text works without publishing a hosted page.
 
 ## What's in here
 
@@ -164,10 +166,26 @@ orchestrate/
 │   ├── subagent-prompts.md         implementer / reviewer / test hunter / QA runner / pre-flight / convergence / fix-up skeletons
 │   ├── smoke-page.md               the checkpoint hand-over format: assembly, pre-verified steps, publishing, verdict triage
 │   └── smoke-page-template.html    the smoke page itself, with slots for the run-specific content
-└── templates/                      the six ledger files, with placeholders
+├── templates/                      the six ledger files, with placeholders
+└── tools/
+    └── build-smoke-page.mjs        fills the template from a checkpoint's `smoke-<Cn>.json` sidecar
 ```
 
-Markdown plus one self-contained HTML template — nothing executes on your machine.
+Markdown, one self-contained HTML template, and one optional Node script that fills it —
+nothing runs against your app, and a page can still be filled by hand without it.
+
+Tests use Node's built-in test runner: `node --test tests/smoke-page.test.cjs tests/git-contract.test.cjs tests/build-smoke-page.test.cjs`.
+The smoke-page tests run the template's JavaScript with a minimal DOM and artifact-store
+adapter, including checkpoint re-issues and verdict provenance. The Git-contract tests
+require Git on PATH and create disposable local repos and bare remotes with isolated
+configuration; no network service is needed, and temporary repos are removed afterward.
+They verify F5's Git assumptions about discovery, shipment evidence and ledger history,
+not whether an agent follows the prose. Keep their command recipes aligned with the
+documented rules when editing either; prose changes do not automatically change the tests.
+The builder tests fill the shipped template from a sidecar and check the result against
+the slot table: every slot filled, the same bytes each run, and rejection of invalid
+inputs. Reissue tests cover stable step identities, appending new steps, revision
+increases, and refusing a stale baseline without overwriting the issued page.
 
 ## License
 

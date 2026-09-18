@@ -37,21 +37,47 @@ First word of the arguments:
    INSIDE the directory; if that still returns nothing, list the directory directly. A
    repo may park closed ledgers in a sibling archive dir (e.g. `.agents/archive/`) OUTSIDE
    this root — that is the point of it; never widen the glob to sweep them back in. An
-   empty ledger directory is ignored. If the checkout is not on the default branch, also
-   list `.agents/changes/` ON the default branch (`git ls-tree -r --name-only <default> --
-   .agents/changes/`) — a ledger the user merged silently lives there.
+   empty ledger directory is ignored.
 2. Find ledgers that exist only on BRANCHES — scaffold commits live on the integration
    branch, never on the default branch, so a checkout on `main` may show none of the
-   active work: `git for-each-ref --format='%(refname:short)' 'refs/heads/**/*-ledger'
-   'refs/remotes/**/*-ledger'` (the `**/` matters — branches are `chore/<slug>-ledger`),
-   falling back to `git ls-tree -r --name-only <branch> -- .agents/changes/` over every
-   head when the glob finds nothing (an integration branch may be named otherwise). Skip branches that
-   are already ancestors of the default branch (`git merge-base --is-ancestor <branch>
-   <default>` — their ledgers are on the default branch or in the archive), and skip
-   ids that exist under `.agents/archive/`. Read anything on a branch with
-   `git show <branch>:./<path>` (keep the `./`; run it from the repo root). Report branch-only ledgers as "ACTIVE
-   on <branch>; checkout is on <current>". Never switch the main checkout and never copy
-   ledger files into another branch's tree.
+   active work. Enumerate ALL local and remote-tracking branches with
+   `git for-each-ref --format='%(refname) %(symref)' refs/heads/ refs/remotes/`.
+   Skip ONLY symbolic refs (a nonempty `symref`, e.g. `refs/remotes/origin/HEAD`). For
+   EVERY remaining ref, run `git ls-tree -r --name-only <ref> -- .agents/changes/` and find
+   its `PROGRESS.md` files. Branch names never gate this probe: conventional
+   `chore/<slug>-ledger`, shallow `foo-ledger`, and custom names are all candidates,
+   even when another branch has already yielded a ledger. Skip ids under
+   `.agents/archive/`. Use full refs for Git reads to avoid local/remote name collisions.
+   There is no default-branch or ancestry pre-filter: even a merged ref can carry an
+   unfinished ledger. Group copies of the same ledger id across the checkout and refs;
+   list their branch locations together, not as separate active changes. Read only
+   each candidate's contract fields needed for ownership and merge targets (legacy
+   equivalents per protocol.md).
+   Read branch files with `git show <ref>:./<path>` (keep the `./`; run from the repo
+   root). Compare LEDGER versions, not whole branch tips: obtain the last ledger-changing
+   commit with `git log -1 --format=%H <ref> -- .agents/changes/<id>/`. Its ledger-subtree
+   tree id must equal the candidate ref's tree id at that path (use `git rev-parse
+   <ref>:./.agents/changes/<id>` for each). That commit being an ancestor of the
+   owning integration tip or resolved shipment target proves the committed copy is
+   older there; unrelated later branch commits do not invalidate that proof. Unknown
+   provenance, newer/conflicting ledger commits, or uncommitted ledger edits in an
+   associated worktree remain visible, never silently superseded.
+   Resolve ownership first: use the declared integration branch's current contract.
+   A recorded target correction there supersedes proven older ledger copies; their
+   old target values do not create a new ambiguity. Unresolved ownership or target
+   conflicts, divergent local/remote integration refs, or conflicting working-tree
+   ledger edits are AMBIGUOUS.
+   Resolve the owning contract's shipment target per its §Recovery, then inspect only
+   this candidate's id there: an explicit COMPLETE marker in `.agents/changes/<id>/`
+   or its presence in `.agents/archive/<id>/` supersedes proven older ledger copies.
+   If the integration branch was deleted, use the candidate's recorded target for
+   this check; a missing owner alone cannot resurrect a proven completed/archive copy.
+   Ancestry alone never establishes COMPLETE or archived. Missing target evidence
+   leaves the candidate visible; it cannot justify dropping it or inferring shipment.
+   Reconcile active work only under its owning contract.
+   Report branch-only ledgers with their classified state and "on <branch>; checkout
+   is on <current>".
+   Never switch the main checkout and never copy ledger files into another branch's tree.
 3. Classify by GREP, never by reading the file. First the preamble's `**State**:` line
    (`ACTIVE | AT-CHECKPOINT C<n> | USER-BLOCKED | COMPLETE`); ledgers without one (older
    scaffolds) are classified from their BATCHES-TABLE rows plus the Session log — never
@@ -150,8 +176,9 @@ for `{{` and `<!--` — zero hits; `**State**: ACTIVE` present) → scaffold com
    next wave, repeating until a checkpoint → per-checkpoint close-out (tip validation,
    QA-runner pre-smoke with evidence, page) → STOP, delivering the checkpoint's combined
    smoke script as an interactive smoke page per
-   [references/smoke-page.md](references/smoke-page.md) (plain text only when the
-   session cannot publish artifacts). Build spawn prompts from
+   [references/smoke-page.md](references/smoke-page.md) using available HTML delivery
+   tools, or the full plain-text script when no usable HTML delivery is available.
+   Build spawn prompts from
    [references/subagent-prompts.md](references/subagent-prompts.md).
 
 ## Mode: status
