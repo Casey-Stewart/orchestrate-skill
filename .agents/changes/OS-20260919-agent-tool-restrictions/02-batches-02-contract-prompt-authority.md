@@ -147,6 +147,10 @@ first two assertions fail.
       `git status --porcelain`; revert anything outside the fence — especially any
       accidental edit under `.agents/`.
 - [x] Commit on `fix/contract-prompt-authority` — `fix: make the spawn prompt authoritative over the contract at boot (batch 02)`.
+- [x] polish: pin the implementer paragraph exactly (assertion strength — reviewer ASK 1),
+      and assert no other passage in the template reinstates a boot-time full read.
+- [x] polish: guard every filled ledger contract by glob over `.agents/archive/*` and
+      `.agents/changes/*` instead of one hardcoded path (coverage gap — reviewer ASK 2).
 
 ## Acceptance criteria
 
