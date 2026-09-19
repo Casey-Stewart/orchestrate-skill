@@ -365,3 +365,60 @@ agent". That is vacuously true today, since no skeleton names a `subagent_type` 
 makes it load-bearing: if an unknown `subagent_type` *errors* rather than falling back,
 this README sentence becomes false the moment B03 lands. B03's implementer must establish
 the actual behaviour and either document the real fallback or flag the README line.
+
+### B01 — polish pass and scoped re-review
+
+Polish commit `c72368f`, suite 192 → **194** (ASK 1's directory test plus the body-size
+ceiling). All four ASKs answered with no frontmatter touched — the orchestrator verified
+that independently (`git diff -M -- .claude/ | grep -E '^[+-](name|tools|description|model):'`
+empty, and the four `tools:` lines still byte-exact on the polished tip) before any
+reviewer saw it.
+
+Because the polish edited two definition bodies — B01's production artifacts — the
+contract's scoped fix-diff-only re-review was required. A fresh read-only reviewer got the
+polish diff alone plus the ASK list and duties 1, 2 and 4. Verdict **`R2 SHIP @c72368f`**,
+recorded as polish-phase and counting toward no cap.
+
+It confirmed the polish is prose and citation only: ASK 4's deletion leaves the
+hunk-mapping duty intact verbatim, and ASK 3's replacement quotes are exact against the
+reference file. Worth recording — the implementer found the batch file's *other* citation
+was wrong too: `:217` was off by one (real 218) and `:222` starts the sentence whose path
+lands on 223. Both were planning-time errors, and both are now gone in favour of quoted
+phrases, which is what makes them survive B03's edit to that very file next wave.
+
+**The optional item was taken, with a rationale instead of a number.** The body-length
+ceiling caps each definition at 4096 bytes against current sizes of 865–1214 — 3.4x
+headroom — and its comment pre-empts the reflex that rots such ceilings: "Tripping it
+means rewrite the body, not raise the number." The re-reviewer assessed it sound for
+exactly that reason: the assertion prints the offending file and its real size, so a
+future failure diagnoses itself.
+
+**Did the strictness actually close ASK 2's hole?** The re-reviewer reasoned it through
+rather than asserting it: `tools:Read, Glob, Grep, Bash` now fails the `:[ \t]+` regex; a
+legally quoted `description: "Runs: the steps"` still passes because the guard's
+`[^"'\n]*` cannot cross a quote; and the `assert.ok(field, …)` on *every* non-blank line
+is what does the real work, killing block scalars and wrapped continuation lines — the
+wider version of the same hole.
+
+**Four new ASKs from the scoped pass, deliberately NOT spun into another polish round.**
+The contract completes the close on a scoped `SHIP`, and chasing ASKs across unbounded
+rounds is a treadmill. They go to `BACKLOG.md` at close-out:
+
+- **BL-004** — the unquoted-`: ` guard still accepts three YAML-invalid forms
+  (`description: Runs the steps:`, an unterminated quote, `description: a "b: c" d`).
+  These fail-closed on `tools:`, which is asserted literally equal to a fixed string, so
+  they can only misparse `description:` — but the end state is the same one ASK 2 named:
+  YAML errors on the whole document, no definition loads, the reviewer inherits
+  everything. Reached by parse failure rather than a missing key.
+- **BL-005** — `readdirSync` is non-recursive, so `.claude/agents/subdir/orchestrator.md`
+  escapes the directory whitelist if this Claude Code build loads nested definitions.
+- **BL-006** — the size assertion says "bytes" but measures LF-normalized UTF-16 length;
+  with em-dashes present, qa-runner reports ~1195 against 1214 on disk. Cosmetic.
+- **BL-007** — bookkeeping: no `- [ ] polish:` line was appended for the body-length
+  ceiling, so the ledger does not record that optional item as taken.
+
+One observation from the re-reviewer worth keeping, because it looks like an
+inconsistency and is not: ASK 3 *added* skeleton quotes to `qa-runner.md` while ASK 4
+*deleted* a skeleton restatement from `reviewer.md`. The distinction holds — qa-runner
+cites the skeleton as the authority for its unusual tools line, whereas reviewer was
+re-issuing a duty the spawn prompt already issues on every spawn.
