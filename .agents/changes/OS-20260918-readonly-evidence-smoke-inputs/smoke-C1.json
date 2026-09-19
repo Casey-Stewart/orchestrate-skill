@@ -3,7 +3,7 @@
   "checkpoint": 1,
   "batches": "B01–B03",
   "branch": "codex/readonly-evidence-smoke-inputs-ledger",
-  "buildSha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "buildSha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
   "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1",
   "pageTitle": "C1 smoke run",
   "standfirst": "Two human checks and nine automated checks. Run Step 0 first. When done—or as soon as something fails—press <strong>Copy results as text</strong> and paste it into the task.",
@@ -13,7 +13,7 @@
       "Set-Location -LiteralPath 'C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int'\ngit branch --show-current\ngit rev-parse HEAD\nnode '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs' ."
     ],
     "checks": [
-      "Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.",
+      "Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>49dfe07c09111197b8739aac2df0cea43c985cdf</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.",
       "Canary must report <strong>PASS</strong>: the current builder rejects a changed workbook byte and preserves the old HTML; the starting <code>f918fe39762c70edb9a3424e54eaa208fd7c5727</code> builder accepts or ignores that same change. If it behaves the old way, stop and report it."
     ]
   },
@@ -58,14 +58,26 @@
           "do": "Run the Git-evidence disposable scenarios through the production helper and its fixed CLI commands.",
           "pass": "All cases pass; evidence retains explicit source/ref/SHAs and contained/not-contained/unknown ancestry. Repository and remote state remain unchanged.",
           "aside": "Runner: agent. Generated isolated Git repositories come from the committed tests/support/git-fixture.cjs; no manual repository construction.",
-          "revision": 1
+          "revision": 1,
+          "pre": {
+            "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+            "stepRevision": 1,
+            "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+            "evidence": "evidence/C1/step-03.md"
+          }
         },
         {
           "n": 4,
           "do": "Run the production fence API/CLI scenarios using disposable repositories and authoritative integration-ledger fixtures.",
           "pass": "PASS/VIOLATION/UNKNOWN, both rename endpoints, worktree cleanliness, structural batch edits and unknown authority are enforced without writes.",
           "aside": "Runner: agent. The implemented checker is a tested deliverable; this ledger used its frozen manual conductor gates.",
-          "revision": 1
+          "revision": 1,
+          "pre": {
+            "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+            "stepRevision": 1,
+            "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+            "evidence": "evidence/C1/step-04.md"
+          }
         }
       ]
     },
@@ -83,7 +95,13 @@
             "orders-original",
             "orders-requirements",
             "orders-validator"
-          ]
+          ],
+          "pre": {
+            "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+            "stepRevision": 1,
+            "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+            "evidence": "evidence/C1/step-05.md"
+          }
         },
         {
           "n": 6,
@@ -96,7 +114,13 @@
             "orders-requirements",
             "orders-generator",
             "orders-validator"
-          ]
+          ],
+          "pre": {
+            "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+            "stepRevision": 1,
+            "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+            "evidence": "evidence/C1/step-06.md"
+          }
         },
         {
           "n": 7,
@@ -118,7 +142,13 @@
             "text-crlf",
             "demo-workbook",
             "demo-requirements"
-          ]
+          ],
+          "pre": {
+            "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+            "stepRevision": 1,
+            "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+            "evidence": "evidence/C1/step-07.md"
+          }
         }
       ]
     },
@@ -137,7 +167,13 @@
             "discovery-control",
             "discovery-sentinel",
             "discovery-directions"
-          ]
+          ],
+          "pre": {
+            "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+            "stepRevision": 1,
+            "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+            "evidence": "evidence/C1/step-08.md"
+          }
         },
         {
           "n": 9,
@@ -148,7 +184,13 @@
           "inputs": [
             "text-lf",
             "text-crlf"
-          ]
+          ],
+          "pre": {
+            "sha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+            "stepRevision": 1,
+            "env": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) at http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs.",
+            "evidence": "evidence/C1/step-09.md"
+          }
         },
         {
           "n": 10,
@@ -170,7 +212,13 @@
             "text-crlf",
             "demo-workbook",
             "demo-requirements"
-          ]
+          ],
+          "pre": {
+            "sha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+            "stepRevision": 1,
+            "env": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) at http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs.",
+            "evidence": "evidence/C1/step-10.md"
+          }
         },
         {
           "n": 11,
@@ -184,7 +232,13 @@
             "demo-workbook",
             "demo-requirements",
             "text-lf"
-          ]
+          ],
+          "pre": {
+            "sha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+            "stepRevision": 1,
+            "env": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) at http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs.",
+            "evidence": "evidence/C1/step-11.md"
+          }
         }
       ]
     }

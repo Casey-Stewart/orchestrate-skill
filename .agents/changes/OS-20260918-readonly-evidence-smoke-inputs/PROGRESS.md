@@ -2,13 +2,17 @@
 
 **Identifier**: OS-20260918-readonly-evidence-smoke-inputs
 **Started**: 2026-09-18 · **Base**: f918fe39762c70edb9a3424e54eaa208fd7c5727
-**State**: ACTIVE
+**State**: AT-CHECKPOINT C1
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
-**Smoke page**: —
+**Smoke page**: smoke-C1.html (ledger-relative, with smoke-C1-demo-before.html and smoke-C1-demo-after.html)
 **Rule**: statuses here are claims; **git is truth**.
 
-W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 B03 is reviewed, polished, integrated and green. C1 initial QA completed: eight agent steps PASS and step10 FAIL for note-entry instructions; step11 is a diagnostic runtime PASS. A reviewed pre-smoke repair is opening; no checkpoint verdict has been requested.
+W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly
+authorized third round. W2 B03 is reviewed, polished, integrated and green. The C1 pre-smoke
+step-10 failure is repaired, reviewed, gated and integrated. All nine agent steps and the
+step-0 gate now pass at tested SHA 49dfe07c09111197b8739aac2df0cea43c985cdf. C1 is ISSUED
+and awaits the user's verdict on the two human steps; no verdict is inferred.
 
 ## Plan approval and integration worktree
 
@@ -47,15 +51,15 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
-| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🟢 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🧪 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
+| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🧪 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🧪 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
 | Checkpoint | After wave | Covers | Why here | Status | Verdict |
 |---|---|---|---|---|---|
-| C1 | 2 | B01, B02, B03 | Final; W2 owns hands-on smoke-page/input delivery | ⬜ | — |
+| C1 | 2 | B01, B02, B03 | Final; W2 owns hands-on smoke-page/input delivery | 🧪 | awaiting user; issued 2026-09-19 @49dfe07c09111197b8739aac2df0cea43c985cdf m: pre-smoke=9/2 human-smoke-min=? escaped=? |
 
 ## Smoke-test verdict log
 
@@ -67,12 +71,12 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
-| 1a checker behavior and tests | request | B01 | — | 🟢 |
-| 1b gate wiring and authority | request | B03 | — | 🟢 |
-| 2a Git helper and actual-helper scenarios | request | B01 | — | 🟢 |
-| 2b evidence-only workflow use | request | B03 | — | 🟢 |
-| 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🟢 |
-| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | 🟢 |
+| 1a checker behavior and tests | request | B01 | — | 🧪 |
+| 1b gate wiring and authority | request | B03 | — | 🧪 |
+| 2a Git helper and actual-helper scenarios | request | B01 | — | 🧪 |
+| 2b evidence-only workflow use | request | B03 | — | 🧪 |
+| 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🧪 |
+| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | 🧪 |
 | Starting protocol freeze, scheduling/cap and historical baseline evidence | run requirement | B00 conductor | — | baked and source provenance verified at scaffold |
 
 ## Session log
@@ -84,6 +88,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | 2026-09-18 | Approved baseline exception consumed; W1 opened; B02 integrated96f48ed and validated65/65; B01 candidatefac37a5 validated156/156 but reached R2 FIX FIRST | B01 second-round cap; waiting for fix again / ship with residual / drop. W2 unopened; C1 not reached |
 | 2026-09-19 | Reconciled: pre-smoke repair fix/B03-presmoke-10 in flight, reviewed SHIP @f2c2cee asks=2, worktree DIRTY with an uncommitted crashed polish draft and two unticked polish items; tip green (Node exit 0, diff check exit 0); resumed a FRESH polish implementer per the dirty-worktree Recovery row | Polish pass in flight; C1 not reissued, no verdict requested |
 | 2026-09-19 | Polish closed @af57f93 (6/6 ticked); conductor 6a fence PASS, six reviewed pages byte-identical to f2c2cee, 6b re-proved on base 9b40054 (exit 1, 6/7 fail by assertion), mutations A and C now fail; polished tip 187/187 + diff check + 7/7 regression; merge-tree 2db7fc98 conflict-free; merged f4815225 and tip revalidated 187/187 + 7/7 | C1 close-out next: re-run the invalidated pre-smoke steps, rebuild the pages at the tested SHA, then STOP for the user's C1 verdict |
+| 2026-09-19 | C1 close-out: advanced all three page build identities to tested SHA 49dfe07, rebuilt every page through the reviewed builder, re-ran the invalidated pre-smoke items (gate, 9, 10, 11) — all PASS, including the step 10 that failed before — recorded carried-over evidence for steps 3-8, and issued C1 | STOP at checkpoint C1: the user's verdict on human steps 1 and 2 is required |
 
 ## Continue authorization and reconciliation — 2026-09-18
 
@@ -223,3 +228,70 @@ invalidated (the step-0 gate plus 9, 10, 11 — steps 3-8 carry over at revision
 the repair touched none of their covered files), advance buildSha to the tested
 integration SHA, rebuild all three pages through the reviewed builder from their
 sidecars, flip the covered rows 🟢 -> 🧪, then STOP with the combined script.
+
+## C1 issued — 2026-09-19
+
+Tested SHA 49dfe07c09111197b8739aac2df0cea43c985cdf: recursive discovery 6 suites,
+187/187, 0 skipped, Node exit 0; `git diff --check` exit 0; explicit ledger regression
+7/7; worktree clean. That is the SHA stamped into all three pages, and the page commit
+follows it, as the frozen delivery rule requires.
+
+Build identity advanced from 6c84b930aa4297283f94ce9eeacdff44d2b22ba4 in all three
+sidecars and their gate prose. Before and After keep an identical buildSha and ckptKey
+because they demonstrate a reissue on the SAME build, with the After page's step 1 held
+at revision 2 against Before's revision 1 — that asymmetry is what makes the changed step
+ask to be re-run. Every page was regenerated through the reviewed builder from its
+sidecar with the last committed sidecar as `--previous`; none was hand-edited. Each page
+was then rebuilt a second time under a temporary name and compared byte-for-byte, proving
+the delivered bytes are exactly what the sidecar produces and that the QA runner altered
+nothing.
+
+Pre-smoke re-verification. The repair rewrote delivery prose in all six page/sidecar
+files, so under §Smoke checkpoints every pre-verified label whose covered files it touched
+was invalidated and re-run by a fresh QA runner: the step-0 gate, step 9, step 10 and
+step 11 — all PASS. Steps 3-8 cover the Git evidence helpers, fence checks, literal-python
+workbook semantics, reproduction, fresh-checkout byte preservation and recursive discovery;
+the prose-only repair touched none of their covered files, so their revision-1 evidence at
+6c84b930 stands and the page renders them "carried over (unchanged step)" rather than
+claiming a fresh run. Steps 1 and 2 remain human and unmarked.
+
+Step 10 failed at the previous issue, so it was re-verified against the live rendered
+runtime rather than the static file. From a clean slate the QA runner executed the
+corrected route literally: mark demo step 1 Pass (the step-1 note stays hidden — the
+original defect's behavior, now off the instructed path); on demo step 2 select
+"Works, but", at which point the note field becomes genuinely visible (576x62, hit-tested
+at its center); type "keep this note"; then select Pass, after which the field stays
+visible and keeps the note. The After page then shows step 1 with no current verdict and
+visible history reading "Run it again and select a verdict", while Copy results as text
+exports verbatim `1. NOT RE-RUN — previous PASS (carried over from build 49dfe07c…);
+re-run required` and `2. PASS — keep this note`. The After introduction's claim — that the
+rerun wording is what is visible while NOT RE-RUN is the export's wording — was checked
+against observed behavior and holds. Demonstration marks were cleared through the pages'
+own controls; the real C1 page reloads unmarked, 11 of 11.
+
+Limits recorded rather than glossed. The Browser pane was hidden for much of the run: some
+screenshots timed out and the After-page screenshots came back blank, so most rendered
+observations came from the live DOM of the same tab — innerText, computed styles,
+hit-testing and geometry — never from the static file. Two Before-page screenshots did
+render. Clipboard read is denied to the page origin, so the exported text was captured by
+a pass-through wrapper installed on navigator.clipboard.writeText before the real button
+press; the page's own code and the text it builds were untouched. The step-10 link checker
+hardcodes port 8765 and consumes whatever link inventory sits in its scratch directory, so
+a fresh 108-anchor inventory was captured from the live DOM instead of reusing the previous
+build's file — reusing it would have silently validated the new build against the old
+build's link list. A serve-checkpoint.mjs process from the previous QA run was already
+listening on 8765; it was verified to serve current on-disk bytes and left running, since
+it is not this session's to kill.
+
+No main merge and no push. Nothing is inferred about the user's verdict: the covered rows
+are 🧪, not ✅, and the checkpoint's human-smoke-min and escaped metrics stay open until the
+verdict is recorded.
+
+### Residual noted for the user, nothing changed
+
+Clearing a demo verdict leaves the note text in the demo record (the note field stays
+visible because its condition includes an existing note), and the page offers no control
+to delete its storage key: after clearing both verdicts and emptying the note through the
+field, the key still holds two inert empty records. Cosmetic, isolated to the demo storage
+key, and identical to the previous run's end state. It is recorded here rather than fixed,
+because fixing it would be a production change no gate has authorized.

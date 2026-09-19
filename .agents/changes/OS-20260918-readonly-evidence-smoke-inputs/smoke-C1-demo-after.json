@@ -3,7 +3,7 @@
   "checkpoint": 1,
   "batches": "B03 demonstration",
   "branch": "codex/readonly-evidence-smoke-inputs-ledger",
-  "buildSha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "buildSha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
   "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1-demo",
   "pageTitle": "C1 input reissue — After",
   "headline": "Input reissue demonstration — After",
@@ -12,7 +12,7 @@
     "intro": "This is a disposable demonstration using the same tested build and a separate browser storage key.",
     "commands": [],
     "checks": [
-      "Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. Return to the real C1 page to record your checkpoint verdict."
+      "Tested source commit: <code>49dfe07c09111197b8739aac2df0cea43c985cdf</code>. Return to the real C1 page to record your checkpoint verdict."
     ]
   },
   "inputs": [

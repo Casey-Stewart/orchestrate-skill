@@ -683,3 +683,72 @@ demo step 2 revisions, as the repair fence already recorded. buildSha advances f
 commit, and all three pages are rebuilt through the reviewed builder from their sidecars
 with explicit inputRoot and the last issued sidecar as `--previous`; no page is
 hand-edited.
+
+## C1-issued
+
+Close-out at tested SHA 49dfe07c09111197b8739aac2df0cea43c985cdf (6 suites, 187/187,
+0 skipped, Node exit 0; `git diff --check` exit 0; ledger regression 7/7; tree clean).
+
+Build identity. All three sidecars moved off 6c84b930aa4297283f94ce9eeacdff44d2b22ba4:
+the `buildSha` field plus the tested-commit sentence in each gate, six string
+replacements in total. Before and After deliberately keep the SAME buildSha and ckptKey
+as each other — they exist to demonstrate a reissue on one build — while After holds
+step 1 at revision 2 against Before's revision 1, which is the mechanism that renders
+the changed step as needing a re-run. Main step 2 and both demo step 2 revisions were
+already advanced 1 -> 2 by the repair itself.
+
+Regeneration order, and a false alarm worth recording. The first rebuild pass produced
+all three pages from their updated sidecars with the committed sidecars as `--previous`;
+the delta was exactly the build identity, four changed lines per HTML (the SHA
+references plus the sidecar fingerprint stamp). A verification rebuild into a scratch
+directory then reported all three pages as DIFFERING — that was a conductor error, not a
+real difference: the builder derives `inputRoot` from the output's directory, so building
+outside the ledger correctly refused for missing inputs and wrote nothing, and the
+comparison was against absent files. Rebuilding under a temporary name INSIDE the ledger
+showed all three byte-identical, which is the real result and also proves the QA runner
+altered no page.
+
+Adding the `pre` blocks then hit the builder's reissue guard legitimately: the on-disk
+HTML matched the intermediate sidecar rather than the committed snapshot, so `--previous
+<committed>` no longer matched the existing page. Rather than fabricate an intermediate
+snapshot, the committed page was restored with `git checkout --` and rebuilt once from
+the final sidecar, so the whole delta — build identity and pre-verification blocks
+together — is validated against the committed baseline in a single transition. Final page
+169680 bytes, 0 unfilled slots.
+
+Pre-verification blocks. Steps 3-8 carry `pre.sha` 6c84b930… with their original
+environment string and `evidence/C1/step-0N.md`; because that is not a prefix of the
+current BUILD_SHA the page labels them "carried over (unchanged step)" on its own, which
+is exactly the frozen rule's intent — the page states the distinction, the conductor does
+not assert it in prose. Steps 9, 10 and 11 carry 49dfe07c… and render as current. Steps 1
+and 2 have no `pre` at all: they are human. A semantic diff against the committed sidecar
+confirmed the only changes are the build identity and those nine `pre` blocks. The
+rendered page contains six references to the carried SHA and five to the current one.
+
+QA runner results. Gate PASS: on a disposable temp copy, flipping one bit of the last
+byte of evidence/C1/inputs/issue-001/orders.xlsx (e5544604… -> 5833d64b…) makes the
+current builder exit 1 with "SHA-256 mismatch for raw file bytes" and leave the prior HTML
+byte-identical, while the starting f918fe39… builder with its own template accepts the
+same tampered package and writes 56469 bytes — the required opposite behavior on the base
+build. Step 9 PASS: LF->CRLF on the `text-lf` input changes raw size 79 -> 82 and the
+builder rejects on size BEFORE writing (the probe page stayed byte-equal); re-issuing at a
+new path with new hash/size is still refused until all four referencing steps (7, 9, 10,
+11) are bumped, and bumping only the first still failed, naming step 9. Step 10 PASS: 14
+declared input/evidence files and 2 linked pages served exact bytes, the checker asserting
+HEAD == buildSha, plus the literal instruction route executed in the live runtime as
+recorded in PROGRESS. Step 11 PASS: holding demo step 1 at revision 1 is refused with
+"step 1: … increment revision above 1" and the probe page unchanged, while the revision-2
+After sidecar builds; demo step 2 is deep-equal across sidecars and every
+evidence/C1/inputs digest is unchanged.
+
+Evidence written by the runner and committed by the conductor: evidence/C1/step-00-gate.md
+(new), step-09.md, step-10.md and step-11.md (overwriting the earlier build's records) and
+reverify-summary.json (new), which states the re-run reason, the carried-over set and the
+human set explicitly. Bulk captures stayed outside the repository under the session
+scratchpad.
+
+Rows B01, B02 and B03 flip 🟢 -> 🧪 and every request-item coverage row follows; the C1
+checkpoint row becomes 🧪 with `m: pre-smoke=9/2 human-smoke-min=? escaped=?`, the two
+open values completed when the user's verdict is recorded. State is AT-CHECKPOINT C1. The
+session STOPs here: a reached checkpoint belongs to the user, and no verdict is inferred.
+No main merge, no push.

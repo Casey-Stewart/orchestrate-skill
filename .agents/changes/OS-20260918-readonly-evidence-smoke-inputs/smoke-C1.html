@@ -680,7 +680,7 @@
 
     <dl class="facts">
 <div class="fact"><dt>Branch</dt><dd><code>codex/readonly-evidence-smoke-inputs-ledger</code></dd></div>
-<div class="fact"><dt>Tip</dt><dd><code>6c84b93</code></dd></div>
+<div class="fact"><dt>Tip</dt><dd><code>49dfe07</code></dd></div>
     </dl>
   </div>
 
@@ -730,7 +730,7 @@ git branch --show-current
 git rev-parse HEAD
 node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs' .</code></pre>
 <ol class="gate-checks">
-  <li>Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.</li>
+  <li>Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>49dfe07c09111197b8739aac2df0cea43c985cdf</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.</li>
   <li>Canary must report <strong>PASS</strong>: the current builder rejects a changed workbook byte and preserves the old HTML; the starting <code>f918fe39762c70edb9a3424e54eaa208fd7c5727</code> builder accepts or ignores that same change. If it behaves the old way, stop and report it.</li>
 </ol>
     </section>
@@ -951,14 +951,26 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
         "do": "Run the Git-evidence disposable scenarios through the production helper and its fixed CLI commands.",
         "pass": "All cases pass; evidence retains explicit source/ref/SHAs and contained/not-contained/unknown ancestry. Repository and remote state remain unchanged.",
         "aside": "Runner: agent. Generated isolated Git repositories come from the committed tests/support/git-fixture.cjs; no manual repository construction.",
-        "revision": 1
+        "revision": 1,
+        "pre": {
+          "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+          "stepRevision": 1,
+          "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+          "evidence": "evidence/C1/step-03.md"
+        }
       },
       {
         "n": 4,
         "do": "Run the production fence API/CLI scenarios using disposable repositories and authoritative integration-ledger fixtures.",
         "pass": "PASS/VIOLATION/UNKNOWN, both rename endpoints, worktree cleanliness, structural batch edits and unknown authority are enforced without writes.",
         "aside": "Runner: agent. The implemented checker is a tested deliverable; this ledger used its frozen manual conductor gates.",
-        "revision": 1
+        "revision": 1,
+        "pre": {
+          "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+          "stepRevision": 1,
+          "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+          "evidence": "evidence/C1/step-04.md"
+        }
       }
     ]
   },
@@ -977,6 +989,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "orders-requirements",
           "orders-validator"
         ],
+        "pre": {
+          "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+          "stepRevision": 1,
+          "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+          "evidence": "evidence/C1/step-05.md"
+        },
         "inputFiles": [
           {
             "id": "orders-original",
@@ -1049,6 +1067,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "orders-generator",
           "orders-validator"
         ],
+        "pre": {
+          "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+          "stepRevision": 1,
+          "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+          "evidence": "evidence/C1/step-06.md"
+        },
         "inputFiles": [
           {
             "id": "orders-original",
@@ -1149,6 +1173,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "demo-workbook",
           "demo-requirements"
         ],
+        "pre": {
+          "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+          "stepRevision": 1,
+          "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+          "evidence": "evidence/C1/step-07.md"
+        },
         "inputFiles": [
           {
             "id": "orders-original",
@@ -1417,6 +1447,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "discovery-sentinel",
           "discovery-directions"
         ],
+        "pre": {
+          "sha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+          "stepRevision": 1,
+          "env": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+          "evidence": "evidence/C1/step-08.md"
+        },
         "inputFiles": [
           {
             "id": "discovery-runner",
@@ -1506,6 +1542,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "text-lf",
           "text-crlf"
         ],
+        "pre": {
+          "sha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+          "stepRevision": 1,
+          "env": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) at http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs.",
+          "evidence": "evidence/C1/step-09.md"
+        },
         "inputFiles": [
           {
             "id": "text-lf",
@@ -1568,6 +1610,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "demo-workbook",
           "demo-requirements"
         ],
+        "pre": {
+          "sha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+          "stepRevision": 1,
+          "env": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) at http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs.",
+          "evidence": "evidence/C1/step-10.md"
+        },
         "inputFiles": [
           {
             "id": "orders-original",
@@ -1831,6 +1879,12 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
           "demo-requirements",
           "text-lf"
         ],
+        "pre": {
+          "sha": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+          "stepRevision": 1,
+          "env": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) at http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs.",
+          "evidence": "evidence/C1/step-11.md"
+        },
         "inputFiles": [
           {
             "id": "orders-original",
@@ -1932,7 +1986,7 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
     ]
   }
 ];
-  var BUILD_SHA = "6c84b930aa4297283f94ce9eeacdff44d2b22ba4";
+  var BUILD_SHA = "49dfe07c09111197b8739aac2df0cea43c985cdf";
 
   // Stop before reading storage, connecting to the store, or enabling verdicts.
   // An unfilled slot must never become a shared identity across different builds.
@@ -2587,4 +2641,4 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
 })();
 </script>
 
-<!-- smoke-sidecar-sha256:eb696897678cdd1c9c86251e850a4c6a01e6d464be81e7724d9428465ee4f4c4 -->
+<!-- smoke-sidecar-sha256:b073e6f5139e07f15a9550b10b3960c9ee4ffecb080f756658daa79dc43fc32b -->

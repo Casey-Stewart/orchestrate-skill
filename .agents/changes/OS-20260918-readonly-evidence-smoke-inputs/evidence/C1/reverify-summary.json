@@ -1,0 +1,16 @@
+{
+  "testedSHA": "49dfe07c09111197b8739aac2df0cea43c985cdf",
+  "environment": "Windows 11 Home 10.0.26200; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.6; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Claude Code built-in Browser pane (Chromium) driving http://127.0.0.1:8765/ served by evidence/C1/scripts/serve-checkpoint.mjs over the ledger directory; scratch root C:/Users/fatbo/AppData/Local/Temp/claude/C--Users-fatbo-OneDrive-Desktop-Claude-Testing-orchestrate-skill/33a1a374-d8d2-4c69-9b4d-22589d630f20/scratchpad/C1-REVERIFY",
+  "reasonForRerun": "C1 was pre-verified at build 6c84b930aa4297283f94ce9eeacdff44d2b22ba4, where step 10 FAILED: the delivered prose told a clean user to mark Pass and then enter a note, but the settled runtime hides the note field after a clean Pass. The reviewed and merged repair rewrote delivery prose in all six page/sidecar files (no production template or engine change) and the pages were rebuilt at 49dfe07c09111197b8739aac2df0cea43c985cdf, invalidating every pre-verified label whose covered files it touched: the step-0 gate and steps 9, 10 and 11.",
+  "gate": "PASS",
+  "steps": [
+    { "n": 9, "verdict": "PASS", "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/step-09.md" },
+    { "n": 10, "verdict": "PASS", "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/step-10.md" },
+    { "n": 11, "verdict": "PASS", "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/step-11.md" }
+  ],
+  "notRerun": {
+    "carriedOver": [3, 4, 5, 6, 7, 8],
+    "why": "Steps 3-8 cover the Git evidence helpers, fence checks, workbook semantics, reproduction, fresh-checkout byte preservation and recursive discovery. The prose-only repair touched none of their covered files, so their earlier evidence at build 6c84b930aa4297283f94ce9eeacdff44d2b22ba4 stands as carried over and they were not re-run here; their step-NN.md files under evidence/C1 are unchanged by this run.",
+    "human": [1, 2]
+  }
+}
