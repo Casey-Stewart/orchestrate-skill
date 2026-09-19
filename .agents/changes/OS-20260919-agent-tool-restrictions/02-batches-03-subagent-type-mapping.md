@@ -5,7 +5,7 @@ Cut from the integration tip when the wave opens.
 **Wave**: 2 · **Weight**: S
 **Depends on**: B01 (its four `.claude/agents/*.md` files must be on the integration tip before this batch's cross-reference test can pass)
 **Smoke gate**: hands-on — checkpoint C1 follows wave 2
-**Files**: `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `tests/subagent-type-mapping.test.cjs`
+**Files**: `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `tests/subagent-type-mapping.test.cjs`, `README.md`
 The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: additive edits only — remove no existing content from either reference file; surgical, no reflowing; `git diff --check` clean; do NOT create or edit any `.claude/agents/*` file (B01's fence); do NOT edit `orchestrate/SKILL.md` or anything under `orchestrate/templates/` (B02's fence); never paste a local absolute path into a reference file.
 **Spec**: [01-plan.md](01-plan.md) §B03 · **Gate**: fence check → one combined reviewer pass (reviewer only — the contract names no gate agents)
@@ -153,22 +153,25 @@ content). It must assert:
 
 ## Checklist
 
-- [ ] Add a `subagent_type:` line above the opening fence of all seven skeletons in
+- [x] Add a `subagent_type:` line above the opening fence of all seven skeletons in
       `orchestrate/references/subagent-prompts.md`, per the mapping table, in one
       consistent form.
-- [ ] Add the new bullet to `## Spawning rules (orchestrator)`: pass the skeleton's
+- [x] Add the new bullet to `## Spawning rules (orchestrator)`: pass the skeleton's
       `subagent_type`, never substitute a wildcard-tool agent for a read-only role, carry
       the Bash caveat verbatim, cross-reference the `protocol.md` fallback.
-- [ ] Add the undefined-agent-types bullet to `orchestrate/references/protocol.md`
+- [x] Add the undefined-agent-types bullet to `orchestrate/references/protocol.md`
       §Degraded environments, in that section's existing idiom.
-- [ ] Optionally align the `vacuous-test-hunter` example near `:169` with the
+- [x] Optionally align the `vacuous-test-hunter` example near `:169` with the
       `test-hunter` type B01 provides, preserving the sentence's meaning.
-- [ ] Add `tests/subagent-type-mapping.test.cjs` with every assertion group above,
+- [x] Add `tests/subagent-type-mapping.test.cjs` with every assertion group above,
       including the strict `.claude/agents/<type>.md` existence check.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `feat/subagent-type-mapping` — `feat: name the agent type per skeleton and document the missing-agent fallback (batch 03)`.
+- [x] Commit on `feat/subagent-type-mapping` — `feat: name the agent type per skeleton and document the missing-agent fallback (batch 03)`.
+- [x] polish: correct the README fallback sentence — an unknown subagent_type errors, the orchestrator substitutes general-purpose itself
+- [x] polish: make `section()` fence-aware — replace the three `section(prompts, …)` call sites used by tests 5/6/7 with `bounds()`-derived slices
+- [x] polish: drop the backticks from the anti-regression README pattern so an unbackticked pointer is caught too
 
 ## Acceptance criteria
 

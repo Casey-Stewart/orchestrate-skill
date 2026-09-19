@@ -145,8 +145,11 @@ New-Item -ItemType Directory -Force -Path "$HOME\.claude\agents" | Out-Null; Cop
 
 For one project only, copy them into that project's `.claude/agents/` instead. Either
 way, restart Claude Code — definitions are read at startup. The skill still works
-without them: the prompt skeletons fall back to a general-purpose agent and the
-read-only rules stay prose-enforced. And with them, the guarantee is stronger but not
+without them, but nothing falls back on its own: a spawn naming one of these
+types fails outright (`Agent type 'implementer' not found`), so the orchestrator
+substitutes the general-purpose agent itself on every spawn and the read-only
+rules stay prose-enforced — see `orchestrate/references/protocol.md`
+§Degraded environments. And with them, the guarantee is stronger but not
 absolute — Bash can still write, so "read-only" stays partly conventional; removing
 Write/Edit closes the easy path, not every path.
 
