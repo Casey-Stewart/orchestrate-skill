@@ -1,0 +1,77 @@
+[
+  {
+    "target": "refs/tags/missing",
+    "prior": {
+      "ref": {
+        "ref": "refs/remotes/origin/HEAD",
+        "sha": null,
+        "symref": "refs/tags/missing"
+      },
+      "completeness": "complete",
+      "diagnostics": []
+    },
+    "current": {
+      "ref": {
+        "ref": "refs/remotes/origin/HEAD",
+        "sha": null,
+        "symref": null
+      },
+      "completeness": "partial",
+      "diagnostics": [
+        {
+          "code": "invalid-symbolic-ref",
+          "message": "Malformed symbolic ref",
+          "ref": "refs/remotes/origin/HEAD"
+        }
+      ]
+    }
+  },
+  {
+    "target": "refs/custom/missing",
+    "prior": {
+      "ref": {
+        "ref": "refs/remotes/origin/HEAD",
+        "sha": null,
+        "symref": "refs/custom/missing"
+      },
+      "completeness": "complete",
+      "diagnostics": []
+    },
+    "current": {
+      "ref": {
+        "ref": "refs/remotes/origin/HEAD",
+        "sha": null,
+        "symref": null
+      },
+      "completeness": "partial",
+      "diagnostics": [
+        {
+          "code": "invalid-symbolic-ref",
+          "message": "Malformed symbolic ref",
+          "ref": "refs/remotes/origin/HEAD"
+        }
+      ]
+    }
+  },
+  {
+    "target": "refs/remotes/absent/main",
+    "prior": {
+      "ref": {
+        "ref": "refs/remotes/origin/HEAD",
+        "sha": null,
+        "symref": "refs/remotes/absent/main"
+      },
+      "completeness": "complete",
+      "diagnostics": []
+    },
+    "current": {
+      "ref": {
+        "ref": "refs/remotes/origin/HEAD",
+        "sha": null,
+        "symref": "refs/remotes/absent/main"
+      },
+      "completeness": "complete",
+      "diagnostics": []
+    }
+  }
+]

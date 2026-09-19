@@ -1,0 +1,106 @@
+{
+  "integration": {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "73ebca3f10ade035c8f68f07d1bacc6bafa0671c",
+    "stderr": ""
+  },
+  "mainHead": {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "f918fe39762c70edb9a3424e54eaa208fd7c5727",
+    "stderr": ""
+  },
+  "mainBranch": {
+    "args": [
+      "branch",
+      "--show-current"
+    ],
+    "exit": 0,
+    "stdout": "main",
+    "stderr": ""
+  },
+  "mainStatus": {
+    "args": [
+      "status",
+      "--porcelain"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "candidateHead": {
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "fac37a5163db2bd816ece3b68e936ab534b7f77d",
+    "stderr": ""
+  },
+  "candidateStatus": {
+    "args": [
+      "status",
+      "--porcelain"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "b01Integrated": {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "fac37a5163db2bd816ece3b68e936ab534b7f77d",
+      "HEAD"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "b02Integrated": {
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "c78f4270fe678e8dd049a3bf8ff19b80348689bf",
+      "HEAD"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "b03Branch": {
+    "args": [
+      "show-ref",
+      "--verify",
+      "refs/heads/codex/workflow-input-delivery"
+    ],
+    "exit": 128,
+    "stdout": "",
+    "stderr": "fatal: 'refs/heads/codex/workflow-input-delivery' - not a valid ref"
+  },
+  "contract": {
+    "args": [
+      "rev-parse",
+      "HEAD:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md"
+    ],
+    "exit": 0,
+    "stdout": "0add94797721d18049d4c7492daa5d6ea488dcda",
+    "stderr": ""
+  },
+  "plan": {
+    "args": [
+      "rev-parse",
+      "HEAD:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+    ],
+    "exit": 0,
+    "stdout": "5b145f8819af05db6bc166d2364b031942673007",
+    "stderr": ""
+  }
+}

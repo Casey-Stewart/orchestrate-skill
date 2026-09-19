@@ -1,0 +1,309 @@
+✔ every template slot is filled, and the builder fills no slot the template lacks (3.2675ms)
+✔ the same sidecar always produces the same bytes (1.5874ms)
+✔ sections survive the fill verbatim and stay inside the script block (LF template) (0.9451ms)
+✔ sections survive the fill verbatim and stay inside the script block (CRLF template) (0.7695ms)
+✔ facts render in the documented order, with the old version struck through (0.7328ms)
+✔ the gate renders the documented structure (0.3699ms)
+✔ derived headings can be overridden without touching the template (1.0845ms)
+✔ a sidecar that would produce a broken run sheet is refused (0.6899ms)
+✔ ordinary punctuation in a plain name never breaks the generated script (4.5869ms)
+✔ embedded data cannot introduce HTML parser tokens and round-trips unchanged (3.0152ms)
+✔ step and section numbers must be ones the page can tell apart (0.3086ms)
+✔ keys and provenance that the page cannot use are refused (0.5253ms)
+✔ checkpoint storage keys cannot be coerced from other JSON types (0.7527ms)
+✔ reissues append after existing steps, in the final section or new sections (1.033ms)
+✔ reissues reject deletion, renumbering, reordering, and insertion before old steps (0.5224ms)
+✔ instruction changes require revision increases even on the same build (1.4636ms)
+✔ changing section instructions requires increasing every affected existing revision (1.2025ms)
+✔ later reissues cannot lose previous revision increases, including by omission (1.1458ms)
+✔ page facts, evidence, and JSON key order do not invalidate unchanged instructions (0.6609ms)
+✔ checkpoint identity is stable and a clean sheet requires an explicit new storage key (0.8724ms)
+✔ the command line writes the page, or explains why it did not (260.633ms)
+✔ CLI reissues require the last issued snapshot and preserve the old page on failure (1138.9671ms)
+✔ legacy pages require a reproducible baseline before their first guarded reissue (144.8826ms)
+✔ actual fence CLI PASS is read-only and imported result agrees (7018.8226ms)
+▶ adds modifications deletions and type changes obey literal fence
+  ✔ add inside (3674.4962ms)
+  ✔ add outside (3547.6754ms)
+  ✔ modify inside (3963.0477ms)
+  ✔ modify outside (4237.4581ms)
+  ✔ delete inside (3888.4437ms)
+  ✔ delete outside (3819.5109ms)
+  ✔ type inside (3885.1455ms)
+  ✔ type outside (4299.4262ms)
+✔ adds modifications deletions and type changes obey literal fence (31316.8979ms)
+▶ both rename directions and copy sources enforce both raw endpoints
+  ✔ outside.txt -> allowed.txt copy=false (3668.5209ms)
+  ✔ allowed.txt -> outside-new.txt copy=false (4265.6105ms)
+  ✔ outside.txt -> allowed.txt copy=true (4131.7011ms)
+✔ both rename directions and copy sources enforce both raw endpoints (12066.786ms)
+✔ raw spaces Unicode and option-like filenames are never trimmed or option parsed (6129.8817ms)
+▶ candidate staged unstaged untracked rename and conflicted dirt are violations and remain untouched
+  ✔ staged (7177.5984ms)
+  ✔ unstaged (6459.2911ms)
+  ✔ untracked (6604.4619ms)
+  ✔ rename (5791.9801ms)
+  ✔ conflict (6626.7706ms)
+✔ candidate staged unstaged untracked rename and conflicted dirt are violations and remain untouched (32661.171ms)
+✔ other worktree dirt is evidence without a batch violation (3346.3754ms)
+▶ missing worktree and changed checkout identity are UNKNOWN, never clean
+  ✔ missing (2234.064ms)
+  ✔ identity (2652.3363ms)
+✔ missing worktree and changed checkout identity are UNKNOWN, never clean (4886.8553ms)
+✔ captured integration plan wins over forged candidate plan and Files grants (4150.5283ms)
+▶ explicit and row-bound extensions require matching committed Notes and session-log authority
+  ✔ explicit B01 (4360.1825ms)
+  ✔ row-bound (4201.3688ms)
+✔ explicit and row-bound extensions require matching committed Notes and session-log authority (8562.0171ms)
+▶ mismatched ambiguous substring and forged extension records never grant authority
+  ✔ mismatch (4049.1404ms)
+  ✔ duplicate-log (4041.119ms)
+  ✔ missing-log (4211.3617ms)
+  ✔ substring (4335.5244ms)
+  ✔ candidate-only (3640.7675ms)
+  ✔ other-row (4644.6417ms)
+  ✔ embedded-record (3480.9604ms)
+✔ mismatched ambiguous substring and forged extension records never grant authority (28404.6787ms)
+▶ malformed duplicate glob traversal missing and wrong-linkage authority is explicit UNKNOWN
+  ✔ malformed 0 (3570.4423ms)
+  ✔ malformed 1 (3297.4823ms)
+  ✔ malformed 2 (3360.4364ms)
+  ✔ malformed 3 (3668.2183ms)
+  ✔ malformed 4 (3268.3389ms)
+  ✔ malformed 5 (3226.4253ms)
+  ✔ malformed 6 (3274.1468ms)
+  ✔ malformed 7 (3208.3713ms)
+  ✔ invalid encoding (3239.4069ms)
+  ✔ wrong requested filename (858.7469ms)
+✔ malformed duplicate glob traversal missing and wrong-linkage authority is explicit UNKNOWN (30973.5939ms)
+✔ own batch permits ticks and appended polish while retaining all original lines (3550.1208ms)
+▶ own batch rejects every forbidden structural edit with line diagnostics
+  ✔ reword (3646.8393ms)
+  ✔ reset (3317.5251ms)
+  ✔ remove (3517.702ms)
+  ✔ reorder (4786.0452ms)
+  ✔ ordinary (4942.7351ms)
+  ✔ outside (4285.2482ms)
+  ✔ section (3939.5561ms)
+  ✔ title (3987.4279ms)
+  ✔ files (4206.5642ms)
+✔ own batch rejects every forbidden structural edit with line diagnostics (36631.3781ms)
+▶ batch deletion and rename cannot be treated as permitted own-file edits
+  ✔ delete (4134.3509ms)
+  ✔ rename (4218.3685ms)
+✔ batch deletion and rename cannot be treated as permitted own-file edits (8353.3146ms)
+✔ UNKNOWN takes precedence while preserving known violations; invalid CLI flags are structured (5256.3678ms)
+✔ criss-cross merge bases are UNKNOWN and preserve a clean candidate snapshot (5321.6837ms)
+✔ own batch type replacement is rejected even with identical blob bytes (4123.5968ms)
+✔ candidate with no associated worktree and missing integration objects are UNKNOWN (3978.7264ms)
+▶ ref and worktree races during real probes return UNKNOWN
+  ✔ ref (4029.6774ms)
+  ✔ checkout (3641.0739ms)
+✔ ref and worktree races during real probes return UNKNOWN (7671.3028ms)
+✔ unsupported original Checklist shapes are UNKNOWN, not a content verdict (4212.933ms)
+✔ an inaccessible unrelated worktree is unknown evidence rather than a false clean gate (3724.4445ms)
+✔ authority file type replacement cannot supply a valid plan from a symlink blob (4160.03ms)
+✔ own batch executable-bit edits are outside permitted checklist-only changes (3418.956ms)
+✔ configured filters leave the fence UNKNOWN without executing a command or changing bytes (5267.0393ms)
+▶ staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI
+  ✔ staged (6487.6657ms)
+  ✔ unstaged (7686.9962ms)
+✔ staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI (14175.312ms)
+✔ late real working-file mutation requires the final worktree-race comparison (3927.7127ms)
+✔ deleted origin/HEAD supplies no hint despite a checked-out feature branch (1850.4789ms)
+✔ main and master can coexist without a remote HEAD to choose between them (1017.7122ms)
+✔ a successful origin/HEAD lookup can still name a missing target (1174.7374ms)
+✔ the all-branch probe finds merged, custom, shallow and remote-only ledgers without a default hint (4579.2069ms)
+✔ ancestry distinguishes equal/contained, not-contained and unavailable objects (1343.2293ms)
+✔ an unpushed merge is contained locally but not on the recorded remote (1697.4789ms)
+✔ a stale local default does not disprove a merge into the recorded remote (1865.3434ms)
+✔ different local and remote tips can both contain integration (2418.9222ms)
+✔ a fresh remote SHA missing locally is unknown even when the tracking cache is usable (2715.0887ms)
+✔ an absent remote branch and an unavailable remote do not supply shipment evidence (2108.4157ms)
+✔ ledger history proves an archived copy is older despite unrelated branch commits and a deleted owner (5399.6377ms)
+✔ a newer ledger commit fails the older-copy ancestry proof (3089.8592ms)
+✔ dirty ledger edits in another worktree remain visible despite older committed provenance (4235.1451ms)
+✔ recorded target corrections have newer provenance than retained batch contracts (3781.9887ms)
+✔ every fixed evidence CLI command returns structured real evidence without writes (5735.8308ms)
+✔ CLI errors, invalid encoding, unavailable Git and dirty calls preserve unknowns and bytes (3320.702ms)
+✔ worktree and ledger CLIs retain unavailable observations and config failures as UNKNOWN (1484.3858ms)
+✔ read-only probes do not execute configured external diff or fsmonitor shell commands (1948.9403ms)
+✔ remote branch must point to an actual local commit rather than a peelable tag (2365.0292ms)
+▶ configured clean and process filters never execute through API or actual CLI status probes
+  ✔ clean (3545.4828ms)
+  ✔ process (4067.012ms)
+✔ configured clean and process filters never execute through API or actual CLI status probes (7613.3182ms)
+✔ malformed loose refs are retained as unknown while valid sibling evidence remains available (3704.8114ms)
+▶ staged and unstaged T statuses remain complete dirty observations in API and CLI
+  ✔ staged (2296.2936ms)
+  ✔ unstaged (2366.1688ms)
+✔ staged and unstaged T statuses remain complete dirty observations in API and CLI (4663.1529ms)
+✔ submodule status does not enter a nested repository with its own executable filters (4305.9044ms)
+✔ sidecar-built reissues preserve old verdicts while appends start unmarked (16.7391ms)
+✔ current verdict survives reload with build identity; selecting it twice still clears (3.8266ms)
+✔ repair retains history, requires affected step again, and preserves unaffected pass (3.7779ms)
+✔ a new build does not blanket-invalidate unchanged steps or change their verdicts (3.409ms)
+✔ later re-issues retain an outstanding re-run until that step is actually tested (4.592ms)
+✔ re-selecting an unchanged carried verdict records the current build in one click (1.4909ms)
+✔ a corrected instruction requires a re-run even when the application SHA is unchanged (2.8904ms)
+✔ editing a carried-over note never promotes its verdict to the new build (2.4224ms)
+✔ artifact database round trip retains build and step revision (2.6336ms)
+✔ agent re-verification supersedes an old revision while a fresh human verdict still wins (2.7664ms)
+✔ unknown provenance is kept as history, never guessed to be the current build (0.9003ms)
+✔ partially missing provenance also requires re-verification (0.8792ms)
+✔ new checkpoints keep independent verdict storage (2.1989ms)
+✔ every template slot is documented in the smoke-page reference (1.2911ms)
+✔ stale agent evidence cannot complete a changed step, including a correction on the same build (10.4923ms)
+✔ current agent evidence accepts short or full SHAs with an explicit matching revision (3.5196ms)
+✔ unchanged agent evidence survives subsequent builds and is explicitly labeled carried over (5.0095ms)
+✔ incomplete agent evidence is historical only, even with the current build SHA (12.154ms)
+✔ invalid page build identities block verdict collection and leave saved records untouched (7.2075ms)
+✔ valid full build identities work with either Git hash length and normalized casing (5.576ms)
+✔ records with an invalid saved build identity cannot count as carried-over passes (1.9609ms)
+✔ a delayed pass snapshot cannot overwrite a newer local failure, including after reload (2.5954ms)
+✔ verdict clears remain newer than saved passes even within one millisecond (5.5639ms)
+✔ note edits are stamped immediately and delayed persistence sends that exact timestamp (0.903ms)
+✔ equal, missing, malformed, and empty snapshots never rewrite an existing local result (0.7686ms)
+✔ genuinely newer remote results replace the entire record and survive an older echo (0.9618ms)
+✔ a newer remote edit waits for note blur and is applied without combining two records (1.0383ms)
+✔ continued typing advances beyond a deferred remote update and preserves the local verdict (0.8701ms)
+ℹ tests 156
+ℹ suites 0
+ℹ pass 156
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 283417.2168
+
+Git diff --check exit=129
+warning: Not a git repository. Use --no-index to compare two paths outside a working tree
+usage: git diff --no-index [<options>] <path> <path> [<pathspec>...]
+
+Diff output format options
+    -p, --patch           generate patch
+    -s, --no-patch        suppress diff output
+    -u                    generate patch
+    -U, --unified[=<n>]   generate diffs with <n> lines context
+    -W, --[no-]function-context
+                          generate diffs with <n> lines context
+    --raw                 generate the diff in raw format
+    --patch-with-raw      synonym for '-p --raw'
+    --patch-with-stat     synonym for '-p --stat'
+    --numstat             machine friendly --stat
+    --shortstat           output only the last line of --stat
+    -X, --dirstat[=<param1>,<param2>...]
+                          output the distribution of relative amount of changes for each sub-directory
+    --cumulative          synonym for --dirstat=cumulative
+    --dirstat-by-file[=<param1>,<param2>...]
+                          synonym for --dirstat=files,<param1>,<param2>...
+    --check               warn if changes introduce conflict markers or whitespace errors
+    --summary             condensed summary such as creations, renames and mode changes
+    --name-only           show only names of changed files
+    --name-status         show only names and status of changed files
+    --stat[=<width>[,<name-width>[,<count>]]]
+                          generate diffstat
+    --stat-width <width>  generate diffstat with a given width
+    --stat-name-width <width>
+                          generate diffstat with a given name width
+    --stat-graph-width <width>
+                          generate diffstat with a given graph width
+    --stat-count <count>  generate diffstat with limited lines
+    --[no-]compact-summary
+                          generate compact summary in diffstat
+    --binary              output a binary diff that can be applied
+    --[no-]full-index     show full pre- and post-image object names on the "index" lines
+    --[no-]color[=<when>] show colored diff
+    --ws-error-highlight <kind>
+                          highlight whitespace errors in the 'context', 'old' or 'new' lines in the diff
+    -z                    do not munge pathnames and use NULs as output field terminators in --raw or --numstat
+    --[no-]abbrev[=<n>]   use <n> digits to display object names
+    --src-prefix <prefix> show the given source prefix instead of "a/"
+    --dst-prefix <prefix> show the given destination prefix instead of "b/"
+    --line-prefix <prefix>
+                          prepend an additional prefix to every line of output
+    --no-prefix           do not show any source or destination prefix
+    --default-prefix      use default prefixes a/ and b/
+    --inter-hunk-context <n>
+                          show context between diff hunks up to the specified number of lines
+    --output-indicator-new <char>
+                          specify the character to indicate a new line instead of '+'
+    --output-indicator-old <char>
+                          specify the character to indicate an old line instead of '-'
+    --output-indicator-context <char>
+                          specify the character to indicate a context instead of ' '
+
+Diff rename options
+    -B, --break-rewrites[=<n>[/<m>]]
+                          break complete rewrite changes into pairs of delete and create
+    -M, --find-renames[=<n>]
+                          detect renames
+    -D, --irreversible-delete
+                          omit the preimage for deletes
+    -C, --find-copies[=<n>]
+                          detect copies
+    --[no-]find-copies-harder
+                          use unmodified files as source to find copies
+    --no-renames          disable rename detection
+    --[no-]rename-empty   use empty blobs as rename source
+    --[no-]follow         continue listing the history of a file beyond renames
+    -l <n>                prevent rename/copy detection if the number of rename/copy targets exceeds given limit
+
+Diff algorithm options
+    --minimal             produce the smallest possible diff
+    -w, --ignore-all-space
+                          ignore whitespace when comparing lines
+    -b, --ignore-space-change
+                          ignore changes in amount of whitespace
+    --ignore-space-at-eol ignore changes in whitespace at EOL
+    --ignore-cr-at-eol    ignore carrier-return at the end of line
+    --ignore-blank-lines  ignore changes whose lines are all blank
+    -I, --[no-]ignore-matching-lines <regex>
+                          ignore changes whose all lines match <regex>
+    --[no-]indent-heuristic
+                          heuristic to shift diff hunk boundaries for easy reading
+    --patience            generate diff using the "patience diff" algorithm
+    --histogram           generate diff using the "histogram diff" algorithm
+    --diff-algorithm <algorithm>
+                          choose a diff algorithm
+    --anchored <text>     generate diff using the "anchored diff" algorithm
+    --word-diff[=<mode>]  show word diff, using <mode> to delimit changed words
+    --word-diff-regex <regex>
+                          use <regex> to decide what a word is
+    --color-words[=<regex>]
+                          equivalent to --word-diff=color --word-diff-regex=<regex>
+    --[no-]color-moved[=<mode>]
+                          moved lines of code are colored differently
+    --[no-]color-moved-ws <mode>
+                          how white spaces are ignored in --color-moved
+
+Other diff options
+    --[no-]relative[=<prefix>]
+                          when run from subdir, exclude changes outside and show relative paths
+    -a, --[no-]text       treat all files as text
+    -R                    swap two inputs, reverse the diff
+    --[no-]exit-code      exit with 1 if there were differences, 0 otherwise
+    --[no-]quiet          disable all output of the program
+    --[no-]ext-diff       allow an external diff helper to be executed
+    --[no-]textconv       run external text conversion filters when comparing binary files
+    --ignore-submodules[=<when>]
+                          ignore changes to submodules in the diff generation
+    --submodule[=<format>]
+                          specify how differences in submodules are shown
+    --ita-invisible-in-index
+                          hide 'git add -N' entries from the index
+    --ita-visible-in-index
+                          treat 'git add -N' entries as real in the index
+    -S <string>           look for differences that change the number of occurrences of the specified string
+    -G <regex>            look for differences that change the number of occurrences of the specified regex
+    --pickaxe-all         show all changes in the changeset with -S or -G
+    --pickaxe-regex       treat <string> in -S as extended POSIX regular expression
+    -O <file>             control the order in which files appear in the output
+    --rotate-to <path>    show the change in the specified path first
+    --skip-to <path>      skip the output to the specified path
+    --find-object <object-id>
+                          look for differences that change the number of occurrences of the specified object
+    --diff-filter [(A|C|D|M|R|T|U|X|B)...[*]]
+                          select files by diff type
+    --max-depth <depth>   maximum tree depth to recurse
+    --output <file>       output to a specific file

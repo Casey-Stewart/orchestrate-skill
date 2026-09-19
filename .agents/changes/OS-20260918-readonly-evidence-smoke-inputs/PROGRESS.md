@@ -8,7 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-W1 is open: B01+B02 execute concurrently from the recorded green wave base. B03 waits for W1.
+W1 is stopped at B01’s second FIX FIRST. B01 is capped and unmerged; B02 is integrated and green. W2 has not opened and C1 has not been reached. A user verdict is required before further B01 implementation or dependent work.
 
 ## Plan approval and integration worktree
 
@@ -47,9 +47,9 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | R1 FIX FIRST @b3ce33eb35dab7ac43472faa0f90220ff32a48dd; 2P0+1P1,1ASK; current inherited tier; LOG#B01-R1-verdict m: rounds=1 asks=0 fence-bounces=0 gate=1/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⛔ green, residual finding open (P1) | 2026-09-18 | R1 FIX FIRST @b3ce33eb35dab7ac43472faa0f90220ff32a48dd; R2 FIX FIRST @fac37a5163db2bd816ece3b68e936ab534b7f77d; symbolic target namespace regression; current inherited tier; second-round cap, awaiting user; hunter R2 evidence pending; LOG#B01-R2-cap m: rounds=2 asks=0 fence-bounces=0 gate=1/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Baseline repair integrated ce1f444; approved repair-only proof exception; see LOG#repair-integrated m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Blocked by capped B01 dependency; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -66,9 +66,9 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
-| 1a checker behavior and tests | request | B01 | — | ⬜ |
+| 1a checker behavior and tests | request | B01 | — | ⛔ |
 | 1b gate wiring and authority | request | B03 | — | ⬜ |
-| 2a Git helper and actual-helper scenarios | request | B01 | — | ⬜ |
+| 2a Git helper and actual-helper scenarios | request | B01 | — | ⛔ |
 | 2b evidence-only workflow use | request | B03 | — | ⬜ |
 | 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🟢 |
 | 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | ⬜ |
@@ -115,3 +115,11 @@ Repair integrated at ce1f4448617a51031981d3180f7a681a5714dd93 after clean merge-
 ## W1 opened — 2026-09-18
 
 Wave base: ae850a38fa760cb36f0ca83db35e5830ed1cc2ed. B01 codex/readonly-evidence-checker and B02 codex/smoke-input-files both cut exactly from this green integration tip with isolated worktrees under C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run. This commit is the wave-open crash marker. All earlier gates resolved; no unanswered checkpoint. Implementers run concurrently on current inherited model. B03 remains not started until both pass manual fence, reviewer/hunter and integration validation. Existing .gitattributes effective-independence checks remain mandatory.
+
+## B01 second-round cap — user verdict required
+
+R2 FIX FIRST at fac37a5163db2bd816ece3b68e936ab534b7f77d. Recursive candidate validation156/156 passes and explicit candidate-directory diff check passes; this is a green candidate with an open P1, not approval to integrate. R1 findings were fixed. The fix introduced rejection of a legal dangling symbolic target: refs/remotes/origin/HEAD -> refs/tags/missing (also refs/custom/missing). Git accepts the target, but discovery discards it as symref:null, labels invalid-symbolic-ref, and exits2. Prior production retained the target. Exact reproduction and before/after evidence: evidence/W1/B01/review-R2/.
+
+The frozen contract section6c requires the second FIX FIRST to leave B01 out of integration and stop after current-wave siblings finish. B02 is already reviewed/integrated/green. No third implementation attempt, W2, or C1 is authorized by the earlier repair-only exception. Choose fix again (one third round with a fresh implementer), ship with this residual (recorded residual plus human smoke step), or drop (dependent B03 then needs re-planning or dropping). The remaining already-dispatched hunter report will be retained before handoff; it does not reopen implementation. No user verdict has been inferred.
+
+Main remains unchanged on main at f918fe39762c70edb9a3424e54eaa208fd7c5727. No main merge or push. Frozen contract and locked plan blobs remain unchanged. C1 input preparation is retained only in external scratch; no checkpoint page or verdict is claimed.
