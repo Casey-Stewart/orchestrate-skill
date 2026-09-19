@@ -5,7 +5,7 @@ Cut from the integration tip when the wave opens.
 **Wave**: 2 · **Weight**: S
 **Depends on**: B01 (its four `.claude/agents/*.md` files must be on the integration tip before this batch's cross-reference test can pass)
 **Smoke gate**: hands-on — checkpoint C1 follows wave 2
-**Files**: `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `tests/subagent-type-mapping.test.cjs`
+**Files**: `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `tests/subagent-type-mapping.test.cjs`, `README.md`
 The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: additive edits only — remove no existing content from either reference file; surgical, no reflowing; `git diff --check` clean; do NOT create or edit any `.claude/agents/*` file (B01's fence); do NOT edit `orchestrate/SKILL.md` or anything under `orchestrate/templates/` (B02's fence); never paste a local absolute path into a reference file.
 **Spec**: [01-plan.md](01-plan.md) §B03 · **Gate**: fence check → one combined reviewer pass (reviewer only — the contract names no gate agents)
@@ -169,6 +169,7 @@ content). It must assert:
 - [x] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
 - [x] Commit on `feat/subagent-type-mapping` — `feat: name the agent type per skeleton and document the missing-agent fallback (batch 03)`.
+- [x] polish: correct the README fallback sentence — an unknown subagent_type errors, the orchestrator substitutes general-purpose itself
 
 ## Acceptance criteria
 
