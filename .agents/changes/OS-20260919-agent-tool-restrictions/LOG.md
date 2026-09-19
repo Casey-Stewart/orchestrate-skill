@@ -422,3 +422,59 @@ inconsistency and is not: ASK 3 *added* skeleton quotes to `qa-runner.md` while 
 *deleted* a skeleton restatement from `reviewer.md`. The distinction holds — qa-runner
 cites the skeleton as the authority for its unusual tools line, whereas reviewer was
 re-issuing a duty the spawn prompt already issues on every spawn.
+
+### B03 — gate, round 1: FIX FIRST
+
+**Fence check (6a).** Manual fallback. Worktree clean; five paths — the three planned,
+plus `README.md` under the recorded extension, plus the batch's own file. The batch-file
+diff is ticks, the authorized `Files` line addition, and one appended ticked `polish:`
+line. PASS. 6b does not apply (`feature` batch).
+
+**The empirical premise, verified twice.** B03's implementer established by probe — not
+by assumption — that an unknown `subagent_type` **errors**:
+`Agent type 'implementer' not found. Available agents: claude, claude-code-guide, Explore,
+general-purpose, Plan, statusline-setup`, spawning nothing. The reviewer ran the same
+probe itself rather than accepting the report, and got the same result. This is observed
+harness behaviour, not a documented contract — the Agent tool's documentation covers only
+the *omitted* case — which is why both the protocol bullet and the README sentence are
+worded as duties on the orchestrator rather than claims about the tool. That wording
+survives a future harness that softens the error into a real fallback.
+
+**Verdict `R1 FIX FIRST @edcce9c`** on one P1.
+
+**The P1 — a pointer that dangles exactly where it is needed.** The new §Degraded
+environments bullet ended `(README.md: copy .claude/agents/*.md, then restart)`. But
+`README.md` **is not shipped**: the install symlinks `orchestrate/` alone, and
+`git ls-files orchestrate` returns 17 files with no README among them — independently
+confirmed by the orchestrator. Every other cross-reference in `references/` is a bare
+sibling *inside* `references/`, so under that idiom `README.md` resolves to
+`orchestrate/references/README.md`, which does not exist; under the naive reading it
+resolves to the consuming project's own README, which says nothing about agents.
+
+The failure is precise: an orchestrator in an unrelated repo hits
+`Agent type 'reviewer' not found`, follows the chain to §Degraded, and the last hop — the
+one carrying the install — is the broken one. The bullet exists for the reader who is not
+in this repo, and that is exactly the reader for whom the pointer resolves to nothing.
+
+**And the test pinned the defect.** `tests/subagent-type-mapping.test.cjs:139` asserted
+`/README\.md/` as the definition of "the bullet names the install", so the suite was green
+*because of* the dangling reference. A test that enshrines the bug it should catch is
+worse than no test: it converts a fixable slip into a defended one. The fix retargets the
+assertion at the install *action* rather than the filename.
+
+**Three test-strength ASKs, one of them a real mutation escape.** Deleting the
+Implementer's or Reviewer's **main prompt block** survives all seven new tests, because
+`body.indexOf('\n```')` takes each section's *first* fence and both skeletons have two —
+remove block 1 and block 2 answers in its place. Nothing else in the suite pins those
+bodies. The other two ASKs are false-positive risks in the "no section escapes the
+mapping" scan (it flags any `##` section with any fence, and its heading filter reads
+lines *inside* fences, so pasted ledger markdown becomes a phantom heading) and in the
+document-wide `subagent_type:` collection (which passes today only because one prose
+mention happens to omit the colon).
+
+**Findings 1 and 5 are the same error.** Skill source written from inside this repo and
+read from outside it — the dangling `README.md`, and "the generic `test-hunter` definition
+**this repo ships**", which in a consuming repo reads as that project. The fix round was
+told to sweep both new reference-file additions for any other phrasing that only makes
+sense to a reader sitting in the orchestrate-skill clone. That is the class this change
+keeps producing, because its product is a skill consumed elsewhere.
