@@ -53,7 +53,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🧪 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🧪 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🧪 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🧪 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated; pre-smoke repair pending: step 00, fix/B03-presmoke-00 @12a34693bd3f7740a79faff0e26a42691f1d7d04 m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -295,3 +295,45 @@ to delete its storage key: after clearing both verdicts and emptying the note th
 field, the key still holds two inert empty records. Cosmetic, isolated to the demo storage
 key, and identical to the previous run's end state. It is recorded here rather than fixed,
 because fixing it would be a production change no gate has authorized.
+
+## C1 gate repair opened — 2026-09-19
+
+The user reached the issued checkpoint and could not run the step-0 gate. Their shell is
+cmd.exe; the delivered block is PowerShell. Two verbatim observations from their terminal:
+
+    'Set-Location' is not recognized as an internal or external command,
+    operable program or batch file.
+
+    Error: Cannot find module 'C:\Users\fatbo\...\wt-int\'.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\evidence\C1\scripts\c1-canary.mjs''
+    code: 'MODULE_NOT_FOUND'
+
+The second is cmd.exe declining to strip the single quotes the PowerShell block uses, so
+they reach Node inside the filename. The conductor proposed a pre-smoke repair rather than
+having the user hand-translate the gate.
+
+User authorization, verbatim: "Yea sounds solid."
+
+This is a pre-smoke repair, not a checkpoint failure. No numbered step carries a verdict
+yet, the gate is explicitly a non-verdict gate, and no batch is indicted: the defect is in
+delivery prose the conductor owns, and every batch's code is correct. The covered rows stay
+at checkpoint — they are not flipped back and no fail status is written, because that
+status means the user reached the checkpoint and a BATCH failed it. B03 owns smoke-page
+delivery, so the repair hangs off B03 and its Notes carry the `pre-smoke repair pending:`
+marker §Recovery keys on.
+
+Repair base 12a34693bd3f7740a79faff0e26a42691f1d7d04; branch fix/B03-presmoke-00; complete
+conductor-authoritative fence in 02-fix-B03-presmoke-00-gate.md. Fence is smoke-C1.json,
+smoke-C1.html and a new ledger-local c1-gate-portability.test.cjs, plus the repair's own
+checklist. Both demo gates carry an empty `commands` array, so neither demo page nor demo
+sidecar is in scope. Every step's do/pass/aside/inputs/revision/pre block must stay
+byte-identical so the user's pending verdicts and the carried-over labels survive the
+re-issue; buildSha and ckptKey stay as issued and the conductor advances build identity at
+close-out.
+
+Roles inherit Claude Opus 5, as recorded for this session. Frozen contract and locked plan
+stay byte-identical. Fresh implementer, then the conductor's own manual fence and
+failing-on-base check, then a fresh independent reviewer and a separate fresh test hunter.
+No main merge, no push, and no user verdict is requested or inferred while this runs.
+
+The user has not yet reported the canary result; the QA runner's own run at the tested SHA
+passed, and the canary re-runs as part of the re-issue's pre-smoke regardless.

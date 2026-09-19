@@ -752,3 +752,55 @@ checkpoint row becomes 🧪 with `m: pre-smoke=9/2 human-smoke-min=? escaped=?`,
 open values completed when the user's verdict is recorded. State is AT-CHECKPOINT C1. The
 session STOPs here: a reached checkpoint belongs to the user, and no verdict is inferred.
 No main merge, no push.
+
+## C1-gate-repair-opened
+
+The user ran the issued gate in cmd.exe and it failed twice, exactly as delivered. First
+`Set-Location -LiteralPath '<path>'` — a PowerShell cmdlet — produced "'Set-Location' is
+not recognized as an internal or external command, operable program or batch file." Then,
+after changing directory themselves, `node '<ledger>/evidence/C1/scripts/c1-canary.mjs' .`
+produced MODULE_NOT_FOUND with the single quotes embedded inside the resolved filename,
+because cmd.exe does not strip them the way PowerShell does. Both are the same underlying
+defect: the gate block silently assumes a PowerShell prompt.
+
+That is the same class as the step-10 failure just repaired — delivered instructions that
+cannot be followed in the environment the user actually has — and it sits in the one block
+the user is told to run before spending any time. The conductor offered a pre-smoke repair
+instead of asking the user to hand-translate it. User authorization, verbatim: "Yea sounds
+solid."
+
+Classification. This is a pre-smoke repair, NOT a checkpoint failure. The frozen rules
+reserve the failed status for the case where the user reached the checkpoint and a BATCH
+failed it; here no numbered step has a verdict, the step-0 gate is explicitly a non-verdict
+gate, and the defect is in delivery prose the conductor owns rather than in any batch's
+code. So no row is indicted, no row flips back from the checkpoint status, and B03 — which
+owns smoke-page delivery — carries the `pre-smoke repair pending: step 00,
+fix/B03-presmoke-00 @12a34693bd3f7740a79faff0e26a42691f1d7d04` marker that §Recovery keys
+on.
+
+Fence reasoning. Only the main page's gate has commands: `smoke-C1.json` carries the single
+PowerShell block, while both demo sidecars carry an empty `commands` array, so neither demo
+page nor demo sidecar is in scope and both must stay untouched. The fence is therefore
+smoke-C1.json, its regenerated smoke-C1.html, and a new ledger-local
+c1-gate-portability.test.cjs, plus the repair's own checklist.
+
+The binding constraint on this repair is that it must not disturb the user's pending
+checkpoint. Every step's do/pass/aside/inputs/revision and every `pre` block must stay
+byte-identical, or the page would invalidate the carried-over labels and the verdicts the
+user is about to record. buildSha and ckptKey stay as issued; the conductor advances build
+identity at close-out, as before.
+
+The test is specified to exercise real shell dispatch rather than prose matching: extract
+the gate block from the EMITTED page — so an HTML/sidecar drift is caught too — and run it
+through actual cmd.exe and actual PowerShell against shims in a disposable directory,
+asserting each intended command is dispatched with the intended arguments, that the canary
+path arrives with no stray quote characters, and that no PowerShell-only cmdlet is invoked
+on the cmd.exe path. It must fail on the pre-repair tip for the right reason: a real shell
+could not dispatch the delivered block. The real canary is deliberately not executed by the
+test, so the test does not depend on the integration branch being checked out.
+
+Recording note: the first attempt to write this record died in the conductor's own tooling
+— a Windows path inside a non-raw Python string was parsed as a unicode escape — so the
+commit that landed carried only the new batch file. The PROGRESS marker and this entry
+follow in the next commit, still before the repair branch is cut and before any implementer
+is spawned, so the marker accompanies the spawn as the contract requires.
