@@ -499,3 +499,7 @@ Fresh third-round implementer completed @9f05127c33040d02a08782a5d23c23242021de3
 ## B01-R3-SHIP
 
 R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; separate hunter CLEAN. Both fresh inherited GPT-6 Astra / xhigh. Exact reviewed fix preserves legal symbolic targets via Git syntax validation, without target tree/namespace expansion. R1 production findings/race ASK and R2 global-filter coverage ASK verified fixed; no residuals or open polish. Candidate166/166, independent recursive review validation and diff check green. Third-round approval consumed once; only prior two FIX FIRST rounds count. Evidence retained under evidence/W1/B01/review-R3 and hunter-R3. Ready for merge-tree, merge and integration validation.
+
+## B01-integrated
+
+Reviewed third-round candidate 9f05127c33040d02a08782a5d23c23242021de39 merged at dd32593ae06215f61abed695625024aa0c04b9b0 after conflict-free merge-tree a97a905ef6178f0fbe075c3a46eac28d18ea65be. Full recursive integration validation166/166 and diff check PASS. B01 now green; earlier cap resolved by explicit consumed authorization and R3 SHIP. No residual. B02 remains integrated/green; W1 closed. Clean B01 worktree will be removed, branch retained. No main merge/push.

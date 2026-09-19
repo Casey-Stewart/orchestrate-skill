@@ -1,0 +1,10 @@
+B01 merged integration workbook check
+Tested integration: dd32593ae06215f61abed695625024aa0c04b9b0
+Native workdir: existing wt-int
+Process PATH prefix: C:/Users/fatbo/AppData/Local/Programs/Python/Python310
+python -c "import sys, openpyxl; print(sys.executable); print(sys.version); print(openpyxl.__version__)"
+Exit0: Python3.10.6, openpyxl3.1.5, verified Python310/python.exe
+python tests/fixtures/smoke-inputs/validate-orders.py tests/fixtures/smoke-inputs/orders.xlsx tests/fixtures/smoke-inputs/orders.requirements.json
+Exit0: 3 sheets,47 declared cells,6 formulas/numeric caches; all edge cases; Summary!B2=23.50,Summary!B3=4
+Get-FileHash -LiteralPath tests/fixtures/smoke-inputs/orders.xlsx -Algorithm SHA256
+Exit0: e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f (unchanged)

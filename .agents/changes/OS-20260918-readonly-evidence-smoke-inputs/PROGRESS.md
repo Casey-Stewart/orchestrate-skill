@@ -8,7 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-B01 third round is authorized and in progress with a fresh implementer at GPT-6 Astra / xhigh. B02 remains integrated and green. W2 waits for B01 integration; C1 has not been reached.
+W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 is ready to open; C1 has not been reached.
 
 ## Plan approval and integration worktree
 
@@ -47,7 +47,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | Authorized third round; fresh GPT-6 Astra / xhigh implementer/reviewer/hunter; R1/R2 FIX FIRST findings resolved; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; hunter R3 CLEAN; LOG#B01-R3-SHIP m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
 | B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Waiting for authorized B01 third round; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
@@ -67,9 +67,9 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
-| 1a checker behavior and tests | request | B01 | — | 🔄 |
+| 1a checker behavior and tests | request | B01 | — | 🟢 |
 | 1b gate wiring and authority | request | B03 | — | ⬜ |
-| 2a Git helper and actual-helper scenarios | request | B01 | — | 🔄 |
+| 2a Git helper and actual-helper scenarios | request | B01 | — | 🟢 |
 | 2b evidence-only workflow use | request | B03 | — | ⬜ |
 | 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🟢 |
 | 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | ⬜ |
