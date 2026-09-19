@@ -1,0 +1,238 @@
+{
+  "verdict": "PASS",
+  "method": "Frozen manual conductor Git/blob check; new checker not used",
+  "id": "B01",
+  "integration": "fc13eaedd4f5a24614a9da05f48dcc816aa2607c",
+  "candidate": "9f05127c33040d02a08782a5d23c23242021de39",
+  "branch": "codex/readonly-evidence-checker",
+  "mergeBase": "ae850a38fa760cb36f0ca83db35e5830ed1cc2ed",
+  "fence": [
+    "orchestrate/tools/git-evidence.mjs",
+    "orchestrate/tools/check-fence.mjs",
+    "tests/git-contract.test.cjs",
+    "tests/check-fence.test.cjs",
+    "tests/support/git-fixture.cjs"
+  ],
+  "extensions": [],
+  "changes": [
+    {
+      "status": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "orchestrate/tools/check-fence.mjs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "orchestrate/tools/git-evidence.mjs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/check-fence.test.cjs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/git-contract.test.cjs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/support/git-fixture.cjs"
+      ]
+    }
+  ],
+  "batchEdits": [
+    {
+      "line": 96,
+      "type": "tick"
+    },
+    {
+      "line": 97,
+      "type": "tick"
+    },
+    {
+      "line": 98,
+      "type": "tick"
+    },
+    {
+      "line": 99,
+      "type": "tick"
+    },
+    {
+      "line": 100,
+      "type": "tick"
+    },
+    {
+      "line": 101,
+      "type": "tick"
+    }
+  ],
+  "frozen": {
+    "contract": "0add94797721d18049d4c7492daa5d6ea488dcda",
+    "plan": "5b145f8819af05db6bc166d2364b031942673007"
+  },
+  "clean": true,
+  "worktreeAssociation": "worktree C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\nHEAD f918fe39762c70edb9a3424e54eaa208fd7c5727\nbranch refs/heads/main\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\nHEAD fc13eaedd4f5a24614a9da05f48dcc816aa2607c\nbranch refs/heads/codex/readonly-evidence-smoke-inputs-ledger\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B01\nHEAD 9f05127c33040d02a08782a5d23c23242021de39\nbranch refs/heads/codex/readonly-evidence-checker\n\n",
+  "fixDiff": "M\torchestrate/tools/git-evidence.mjs\nM\ttests/git-contract.test.cjs\n",
+  "batchDiff": "diff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md\nindex 3fe52ea..fc59154 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md\n@@ -93,12 +93,12 @@ never exit 0; document deterministic precedence.\n \n ## Checklist\n \n-- [ ] Extract the reusable disposable Git fixture and implement evidence API/CLI.\n-- [ ] Test every planned consumer CLI invocation, result shape and error/exit contract.\n-- [ ] Convert all fourteen existing Git scenarios to assert actual helper outputs.\n-- [ ] Implement trusted-authority, path/rename and cleanliness fence checks.\n-- [ ] Implement structural own-batch edit validation and explicit unknowns.\n-- [ ] Add adversarial tests and prove helper/checker read-only behavior.\n+- [x] Extract the reusable disposable Git fixture and implement evidence API/CLI.\n+- [x] Test every planned consumer CLI invocation, result shape and error/exit contract.\n+- [x] Convert all fourteen existing Git scenarios to assert actual helper outputs.\n+- [x] Implement trusted-authority, path/rename and cleanliness fence checks.\n+- [x] Implement structural own-batch edit validation and explicit unknowns.\n+- [x] Add adversarial tests and prove helper/checker read-only behavior.\n \n ## Acceptance criteria\n \n",
+  "commands": [
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "refs/heads/codex/readonly-evidence-smoke-inputs-ledger"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B01",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B01",
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "show",
+        "fc13eaedd4f5a24614a9da05f48dcc816aa2607c:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B01",
+      "args": [
+        "branch",
+        "--show-current"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "refs/heads/codex/readonly-evidence-checker"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "merge-base",
+        "--all",
+        "fc13eaedd4f5a24614a9da05f48dcc816aa2607c",
+        "9f05127c33040d02a08782a5d23c23242021de39"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "diff",
+        "--name-status",
+        "-z",
+        "-M",
+        "fc13eaedd4f5a24614a9da05f48dcc816aa2607c...9f05127c33040d02a08782a5d23c23242021de39"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "show",
+        "ae850a38fa760cb36f0ca83db35e5830ed1cc2ed:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "show",
+        "9f05127c33040d02a08782a5d23c23242021de39:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "fc13eaedd4f5a24614a9da05f48dcc816aa2607c:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "fc13eaedd4f5a24614a9da05f48dcc816aa2607c:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "diff",
+        "--name-status",
+        "-M",
+        "fac37a5163db2bd816ece3b68e936ab534b7f77d..9f05127c33040d02a08782a5d23c23242021de39"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "diff",
+        "ae850a38fa760cb36f0ca83db35e5830ed1cc2ed",
+        "9f05127c33040d02a08782a5d23c23242021de39",
+        "--",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md"
+      ],
+      "exit": 0
+    }
+  ]
+}

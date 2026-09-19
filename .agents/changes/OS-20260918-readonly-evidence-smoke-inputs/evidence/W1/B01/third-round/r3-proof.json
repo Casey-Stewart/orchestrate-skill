@@ -1,0 +1,28 @@
+{
+  "priorCommit": "fac37a5163db2bd816ece3b68e936ab534b7f77d",
+  "mutation": "Add only --local to the effective filter configuration inventory",
+  "baseProof": {
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B01-r3-scratch\\pre-r3-production-Xzn1Y3",
+    "command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-name-pattern=dangling symbolic hints",
+      "tests/git-contract.test.cjs"
+    ],
+    "exit": 1,
+    "report": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B01-r3-scratch\\r3-regressions-on-pre-r3.txt"
+  },
+  "mutationProof": {
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B01-r3-scratch\\local-only-production-iQNHM9",
+    "command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-name-pattern=global clean filters",
+      "tests/git-contract.test.cjs"
+    ],
+    "exit": 1,
+    "report": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B01-r3-scratch\\r3-local-only-mutant.txt"
+  }
+}
