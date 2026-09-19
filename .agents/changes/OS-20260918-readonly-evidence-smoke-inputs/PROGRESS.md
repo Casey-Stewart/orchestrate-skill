@@ -49,7 +49,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🟢 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🟢 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair pending: step 10, fix/B03-presmoke-10 @9b40054dfc9571af25267050640f66bc00e7e619 m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -137,3 +137,7 @@ Discovery found one active ledger across all non-symbolic local/remote refs; int
 ## W2 opened — 2026-09-18
 
 Wave base: 6e1fb4428e871760d8f31a99606c3ad68db5015f. B01 and B02 are integrated and validated green. Branch codex/workflow-input-delivery cut exactly from this tip in C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03. This commit is the W2-open crash marker. B03 retains all18 approved paths plus own checklist; the running frozen contract/plan are not editable. One fresh implementer on inherited GPT-6 Astra / xhigh, then manual conductor gate and fresh reviewer/hunter. Final C1 follows successful integration; no interim checkpoint or main merge/push.
+
+## C1 repair opened
+
+Repair base 9b40054dfc9571af25267050640f66bc00e7e619; branch fix/B03-presmoke-10; worktree C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\wt-C1-repair. Complete conductor-authoritative repair fence is in 02-fix-B03-presmoke-10.md. Frozen contract/plan stay byte-identical. GPT-6 Astra / xhigh inherited, fresh implementer and fresh independent reviewer/hunter. No user checkpoint reached; rows remain green. Only trailing blank EOF in retained QA Markdown/scripts was trimmed for diff-check; raw proof/input bytes unchanged.
