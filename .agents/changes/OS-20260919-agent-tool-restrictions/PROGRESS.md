@@ -3,11 +3,11 @@
 **Identifier**: OS-20260919-agent-tool-restrictions
 **Started**: 2026-09-19 · **Base**: 5110f71d8e63142fa1bb55210ab24b870b7af757 (the default-branch commit the ledger
 branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
-**State**: ACTIVE
+**State**: AT-CHECKPOINT C1
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
-**Smoke page**: — (current delivery: URL, ledger-relative HTML path, or `plain text`; update at each hand-over)
+**Smoke page**: `.agents/changes/OS-20260919-agent-tool-restrictions/smoke-C1.html` (ledger-relative; also delivered as text in the hand-over)
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
 before believing any row (§Recovery in the contract).
 
@@ -39,15 +39,15 @@ checkpoint after W1 would cost the user a second session restart and prove less.
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| 01 | Tool-restricted agent definitions + install docs | `feat/agent-definitions` | 1 | — | 🟢 | 2026-09-19 | S/feature. Creates `.claude/agents/` (absent at base). `qa-runner` keeps Write/Edit by design — evidence files, `subagent-prompts.md:222`; flagged deviation from the request's literal wording. Hands-on at C1. W1 open @7b74811; worktree <temp>/claude/wt-os919/b01. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). R1 SHIP @33a8d5b asks=4 (LOG §B01). Merged 15d47cf. Polish @c72368f; scoped re-review R2 SHIP @c72368f (polish touched two definition bodies — prose/citations only, no frontmatter). 4 new polish-phase ASKs → BACKLOG (LOG §B01 polish). Tier: default. m: rounds=0 asks=4 fence-bounces=0 gate=0/0 tip-red=0 |
-| 02 | Contract boot: the prompt is authoritative | `fix/contract-prompt-authority` | 1 | — | 🟢 | 2026-09-19 | S/fix. One paragraph at `templates/00-READBEFORE.md:33-36`. Failing-on-base test: `tests/contract-prompt-authority.test.cjs`. Template only — archive and this ledger's own contract stay as-is. W1 open @7b74811; worktree <temp>/claude/wt-os919/b02. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). Failing-on-base CONFIRMED by the orchestrator at 7b74811: 4 tests, 1 pass, 3 fail. R1 SHIP @1912369 asks=2 (LOG §B02). Merged 3f441c3. Polish @9cc3375 (test-only — no scoped re-review needed). Tier: default. m: rounds=0 asks=2 fence-bounces=0 gate=0/0 tip-red=0 |
-| 03 | `subagent_type` per skeleton + missing-agent fallback | `feat/subagent-type-mapping` | 2 | — | 🔄 | 2026-09-19 | S/feature. Seven skeletons → four types. Depends on B01: its cross-reference test asserts `.claude/agents/<type>.md` exists. Adds the degraded-environments fallback. Hands-on at C1. W2 open @15d47cf; worktree <temp>/claude/wt-os919/b03. fence +README.md (B03, fallback documentation, an unknown subagent_type errors so B01 README sentence is false once B03 lands, 2026-09-19). Fence PASS (manual, extended fence). R1 FIX FIRST @edcce9c — P1: §Degraded install pointer dangles outside this repo, and the test pinned it (LOG §B03). R2 SHIP @86d41d6 — all five FIX VERIFIED. Polish (2 test-only ASKs) in flight. Tier: default. |
+| 01 | Tool-restricted agent definitions + install docs | `feat/agent-definitions` | 1 | — | 🧪 | 2026-09-19 | S/feature. Creates `.claude/agents/` (absent at base). `qa-runner` keeps Write/Edit by design — evidence files, `subagent-prompts.md:222`; flagged deviation from the request's literal wording. Hands-on at C1. W1 open @7b74811; worktree <temp>/claude/wt-os919/b01. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). R1 SHIP @33a8d5b asks=4 (LOG §B01). Merged 15d47cf. Polish @c72368f; scoped re-review R2 SHIP @c72368f (polish touched two definition bodies — prose/citations only, no frontmatter). 4 new polish-phase ASKs → BACKLOG (LOG §B01 polish). Tier: default. m: rounds=0 asks=4 fence-bounces=0 gate=0/0 tip-red=0 |
+| 02 | Contract boot: the prompt is authoritative | `fix/contract-prompt-authority` | 1 | — | 🧪 | 2026-09-19 | S/fix. One paragraph at `templates/00-READBEFORE.md:33-36`. Failing-on-base test: `tests/contract-prompt-authority.test.cjs`. Template only — archive and this ledger's own contract stay as-is. W1 open @7b74811; worktree <temp>/claude/wt-os919/b02. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). Failing-on-base CONFIRMED by the orchestrator at 7b74811: 4 tests, 1 pass, 3 fail. R1 SHIP @1912369 asks=2 (LOG §B02). Merged 3f441c3. Polish @9cc3375 (test-only — no scoped re-review needed). Tier: default. m: rounds=0 asks=2 fence-bounces=0 gate=0/0 tip-red=0 |
+| 03 | `subagent_type` per skeleton + missing-agent fallback | `feat/subagent-type-mapping` | 2 | — | 🧪 | 2026-09-19 | S/feature. Seven skeletons → four types. Depends on B01: its cross-reference test asserts `.claude/agents/<type>.md` exists. Adds the degraded-environments fallback. Hands-on at C1. W2 open @15d47cf; worktree <temp>/claude/wt-os919/b03. fence +README.md (B03, fallback documentation, an unknown subagent_type errors so B01 README sentence is false once B03 lands, 2026-09-19). Fence PASS (manual, extended fence). R1 FIX FIRST @edcce9c — P1: §Degraded install pointer dangles outside this repo, and the test pinned it (LOG §B03). R2 SHIP @86d41d6 — all five FIX VERIFIED. Polish @25b1f3e (test-only; also closed two further raw scanners it found unprompted). Merged 168b9d8. m: rounds=1 asks=2 fence-bounces=1 gate=0/0 tip-red=0 Tier: default. |
 
 ## Checkpoints
 
 | Checkpoint | After wave | Covers | Why here | Status | Verdict |
 |------------|------------|--------|----------|--------|---------|
-| C1 (final) | 2 | B01, B02, B03 | Agent definitions load only at session start, so no agent in this run can verify its own restrictions — the user must restart. The end-to-end check (skeleton names a type → type exists → type is restricted) needs B03 landed, so an intermediate checkpoint after W1 would cost a second restart and prove less. | ⬜ | — |
+| C1 (final) | 2 | B01, B02, B03 | Agent definitions load only at session start, so no agent in this run can verify its own restrictions — the user must restart. The end-to-end check (skeleton names a type → type exists → type is restricted) needs B03 landed, so an intermediate checkpoint after W1 would cost a second restart and prove less. | 🧪 | awaiting the user — page `smoke-C1.html`, integration SHA `168b9d8`. m: pre-smoke=0/9 human-smoke-min=? escaped=? |
 
 ## Issued checkpoint inputs
 
@@ -70,18 +70,18 @@ without running it.
 
 | Request item | Source | Batch | Version | Status |
 |--------------|--------|-------|---------|--------|
-| `.claude/agents/` directory created | request (change 1) | B01 | — | 🟢 |
-| `implementer` tool list (Read/Write/Edit/Glob/Grep/Bash) | request (change 1) | B01 | — | 🟢 |
-| `reviewer` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🟢 |
-| `test-hunter` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🟢 |
-| `qa-runner` tool list + browser tools | request (change 1) | B01 | — | 🟢 |
-| Artifact/visualize/session/Drive/Gmail dropped from every spawn | request (change 1) | B01 | — | 🟢 |
-| Bash caveat recorded verbatim (read-only stays partly conventional) | request (change 1) | B01 | — | 🟢 |
-| README tells users to install the agents into their own agents folder | user decision 2026-09-19 | B01 | — | 🟢 |
-| `subagent_type:` line on every skeleton (all seven) | request (change 2) | B03 | — | 🔄 |
-| Orchestrator cannot default to general-purpose with `*` | request (change 2) | B03 | — | 🔄 |
-| Fallback for repos without the definitions installed | planning finding, accepted | B03 | — | 🔄 |
-| Contract: prompt authoritative, contract consulted only if incomplete | request (change 3) | B02 | — | 🟢 |
+| `.claude/agents/` directory created | request (change 1) | B01 | — | 🧪 |
+| `implementer` tool list (Read/Write/Edit/Glob/Grep/Bash) | request (change 1) | B01 | — | 🧪 |
+| `reviewer` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🧪 |
+| `test-hunter` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🧪 |
+| `qa-runner` tool list + browser tools | request (change 1) | B01 | — | 🧪 |
+| Artifact/visualize/session/Drive/Gmail dropped from every spawn | request (change 1) | B01 | — | 🧪 |
+| Bash caveat recorded verbatim (read-only stays partly conventional) | request (change 1) | B01 | — | 🧪 |
+| README tells users to install the agents into their own agents folder | user decision 2026-09-19 | B01 | — | 🧪 |
+| `subagent_type:` line on every skeleton (all seven) | request (change 2) | B03 | — | 🧪 |
+| Orchestrator cannot default to general-purpose with `*` | request (change 2) | B03 | — | 🧪 |
+| Fallback for repos without the definitions installed | planning finding, accepted | B03 | — | 🧪 |
+| Contract: prompt authoritative, contract consulted only if incomplete | request (change 3) | B02 | — | 🧪 |
 
 ## Session log
 
@@ -93,3 +93,4 @@ without running it.
 | 2026-09-19 | **Wave 1 gated and integrated.** B01 `R1 SHIP @33a8d5b asks=4` → polish `c72368f` → scoped re-review `R2 SHIP` (polish touched two definition bodies; prose/citations only). B02 `R1 SHIP @1912369 asks=2` → polish `9cc3375` (test-only, no scoped re-review). Fence PASS on both by the manual fallback; B02's failing-on-base proven independently by the orchestrator at `7b74811` (4 tests, 1 pass, 3 fail). Merged `--no-ff`: B02 → `3f441c3` (tip green 193/193), B01 → `15d47cf` (tip green **200/200**, baseline 187 + 13 new). Wave-1 worktrees deregistered. **Opened wave 2**: cut `feat/subagent-type-mapping` (B03) from wave base **`15d47cf`**, worktree created, implementer spawned. | (wave 2 in progress) |
 | 2026-09-19 | Seven residuals recorded for the close-out backlog, none blocking: **BL-001** dead archive guard at `tests/protocol-contract.test.cjs:122`; **BL-002** `check-fence.mjs` rejects the bare `NN` batch ids the plan template permits, so the mechanical fence gate was unusable all change and every batch used the manual fallback; **BL-003** `unsafe-filter` fires on stock Git-for-Windows LFS config rather than resolved per-path attributes; **BL-004**–**BL-007** from B01's scoped re-review (three YAML-invalid `description:` forms still accepted, non-recursive `readdirSync`, "bytes" that measures UTF-16 length, and a missing polish checklist line). BL-004/005 were deliberately not spun into a further polish round — the contract completes the close on a scoped `SHIP`. Detail in LOG §Residual R1–R3 and §B01 polish. | — |
 | 2026-09-19 | **Fence extension granted to B03: `+README.md`.** B03 established empirically — by spawning a probe, not by guessing — that an unknown `subagent_type` **errors** (`Agent type 'implementer' not found. Available agents: claude, claude-code-guide, Explore, general-purpose, Plan, statusline-setup`) rather than falling back. B01's README sentence "the prompt skeletons fall back to a general-purpose agent" was vacuously true before B03 and becomes **false** the moment B03 lands, with no documented recovery for a user who skipped the install. Mechanical test passed: B03 is alone in wave 2, so no same-wave sibling holds `README.md`; no extension was recorded this wave; and it is not a ledger, version or changelog file. The sentence is part of the plan's own item "Fallback for repos without the definitions installed", which the coverage audit assigns to B03 — so the correction belongs to this batch, not to a later repair. | — |
+| 2026-09-19 | **B03 gated and integrated; C1 reached.** `R1 FIX FIRST @edcce9c` on one P1 — the §Degraded install pointer named `README.md`, which is not shipped, so it dangled from any other repo, and the test pinned that dangling pointer as its definition of "names the install". Fix round → `R2 SHIP @86d41d6`, all five findings FIX VERIFIED by a fresh reviewer. Polish `25b1f3e` (test-only) closed two ASKs and two further raw scanners the implementer found unprompted. Merged `--no-ff` → **`168b9d8`**, tip validation green **207/207** (187 baseline + 20 new). Wave 2 closed. C1 close-out: no version bump (nothing in this repo is versioned; the behavioural canary is the build marker), **no pre-smoke — all nine steps are `human`**, rows `🟢`→`🧪`, page built at `smoke-C1.html` via the repo's own `build-smoke-page.mjs` (0 unfilled slots) and gate verified runnable in both cmd.exe and PowerShell from an unrelated cwd, with the canary confirmed empty on base `5110f71`. | **STOP — C1 awaits the user's verdict.** Nothing further can be verified from inside this session: agent definitions load at session start, so the run that wrote them can never test them. |
