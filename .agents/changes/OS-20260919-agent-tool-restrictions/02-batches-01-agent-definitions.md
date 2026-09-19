@@ -150,6 +150,16 @@ asserting it here would fail until B03 lands.
 - [x] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
 - [x] Commit on `feat/agent-definitions` — `feat: tool-restricted agent definitions for the four roles (batch 01)`.
+- [x] polish: ASK 1 — assert `.claude/agents/` holds exactly the four known `.md` files, so a
+      fifth definition with no `tools:` line cannot pass unnoticed and ride the README `cp`
+      into `~/.claude/agents/`.
+- [x] polish: ASK 2 — tighten the frontmatter field parse to `:[ \t]+` plus a well-formed
+      single-line guard, so `tools:Read, …` (no space) and an unquoted `: ` in a value fail
+      the test instead of parsing as a field YAML would not produce.
+- [x] polish: ASK 3 — cite the QA-runner skeleton by quoted phrase instead of bare line
+      numbers in `.claude/agents/qa-runner.md` (`:217` was wrong, and B03 shifts both).
+- [x] polish: ASK 4 — drop the sentence in `.claude/agents/reviewer.md` that restates duty 1
+      of the reviewer skeleton.
 
 ## Acceptance criteria
 

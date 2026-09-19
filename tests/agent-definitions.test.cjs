@@ -20,6 +20,11 @@ const CAVEAT = 'Bash can still write, so "read-only" stays partly conventional; 
 const flow = text => text.replace(/\s+/g, ' ');
 // Frontmatter fields are single-line by contract; a parser, not a substring search, so
 // that prose in the body mentioning a tool name cannot satisfy or break these checks.
+// The parse is deliberately stricter than the regex needs to be: every frontmatter line
+// must be a well-formed `key: value` mapping that YAML would read the same way. Without
+// that, `tools:Read, Glob` (no space) still yields a `tools` capture here while YAML
+// sees a bare scalar and Claude Code loads the definition with no tool list at all —
+// the test would pass and the agent would inherit everything.
 function definition(name) {
   const file = '.claude/agents/' + name + '.md';
   assert.ok(fs.existsSync(path.join(ROOT, file)), 'missing definition: ' + file);
@@ -28,12 +33,27 @@ function definition(name) {
   assert.ok(match, file + ' must open with --- delimited YAML frontmatter');
   const fields = new Map();
   for (const line of match[1].split('\n')) {
-    const field = /^([A-Za-z_][A-Za-z0-9_-]*):[ \t]*(.*)$/.exec(line);
-    if (field) fields.set(field[1], field[2].trim());
+    if (line.trim() === '') continue;
+    const field = /^([A-Za-z_][A-Za-z0-9_-]*):[ \t]+(\S.*)$/.exec(line);
+    assert.ok(field, file + ' frontmatter line is not a single-line `key: value` mapping: ' + line);
+    assert.ok(!/^[A-Za-z_][A-Za-z0-9_-]*:[ \t]+[^"'\n]*:[ \t]/.test(line),
+      file + ' frontmatter value needs quoting — an unquoted ": " is a YAML error: ' + line);
+    assert.ok(!fields.has(field[1]), file + ' declares ' + field[1] + ': twice');
+    fields.set(field[1], field[2].trim());
   }
   const tools = (fields.get('tools') || '').split(',').map(t => t.trim()).filter(Boolean);
   return { file, text, body: text.slice(match[0].length), fields, tools };
 }
+
+// Every other test iterates the known roles, so an unlisted file would never be read.
+// The README's `cp .claude/agents/*.md ~/.claude/agents/` installs whatever is in the
+// directory for every project, so a fifth definition — with no `tools:` line, inheriting
+// the whole catalog — has to fail here or it ships unnoticed.
+test('the directory holds exactly the four known definitions', () => {
+  const present = fs.readdirSync(path.join(ROOT, '.claude/agents')).filter(f => f.endsWith('.md')).sort();
+  assert.deepEqual(present, Object.keys(TOOLS).map(n => n + '.md').sort(),
+    '.claude/agents/ must hold exactly the definitions this test knows the tool list for');
+});
 
 test('every role ships a definition whose frontmatter names and describes it', () => {
   for (const name of Object.keys(TOOLS)) {
@@ -70,6 +90,16 @@ test('no definition pins a model or reaches past the browser MCP server', () => 
       assert.equal(tool, 'mcp__Claude_Browser__*', file + ' lists an unexpected MCP tool: ' + tool);
       assert.equal(name, 'qa-runner', file + ' must not list an MCP tool at all');
     }
+  }
+});
+
+// A drift alarm, not a style rule. These files are re-read on every spawn, so length is
+// the cost this batch exists to remove; the largest is ~1.2 KiB today and the ceiling is
+// roughly 3x that. Tripping it means rewrite the body, not raise the number.
+test('no definition has grown into a document', () => {
+  for (const name of Object.keys(TOOLS)) {
+    const { file, text } = definition(name);
+    assert.ok(text.length <= 4096, file + ' is ' + text.length + ' bytes; keep definitions under 4 KiB');
   }
 });
 
