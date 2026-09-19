@@ -346,3 +346,27 @@ and §Recovery uses this SHA to tell "never started" from "in flight", so it mus
 real base. The worktree sits at a short path because this ledger's deepest evidence paths
 exceed the checkout limit under the session scratchpad; the same workaround was recorded
 for the step-10 repair's base probe. Worktree is clean at the cut and on the right branch.
+
+## Step-0 gate confirmed by the user — 2026-09-19
+
+The user ran the canary themselves in cmd.exe, from the integration worktree, and it
+PASSED. Their output, key fields: branch codex/readonly-evidence-smoke-inputs-ledger;
+testedSHA 49dfe07c09111197b8739aac2df0cea43c985cdf; head
+9909d30ffd6bef49649bfa50b4e1422a339289d8; intactInputsValidated true; original workbook
+SHA-256 e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f mutated to
+5833d64b164814fe1ddc5f2f9240d0adff043ead7a62f81e3acae9160cc6ea8b; current builder exit 1
+with "input artifact evidence/C1/inputs/issue-001/orders.xlsx: SHA-256 mismatch for raw
+file bytes" and oldHTMLPreserved true; starting f918fe39762c70edb9a3424e54eaa208fd7c5727
+builder exit 0, writing 60498 bytes. Verdict, verbatim: "PASS: current rejects tampered
+bytes; starting builder accepts/ignores them".
+
+This is the opposite-behavior proof the frozen rules require, now independently reproduced
+on the user's own machine rather than only by the QA runner. It also confirms two things
+the conductor had asserted: the canary's own ancestry check accepts head 9909d30 as a
+descendant of the tested SHA, and its source-drift check found README.md, orchestrate,
+tests and .gitattributes unchanged between 49dfe07 and 9909d30 — so every commit since the
+tested SHA really is checkpoint artifacts only, exactly as the gate text claims.
+
+The gate CONTENT is therefore sound; only the shell portability of the command block was
+defective, which is what fix/B03-presmoke-00 addresses. No numbered step verdict is implied
+by this gate run.
