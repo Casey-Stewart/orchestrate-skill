@@ -503,3 +503,7 @@ R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; separate hunter CLEAN. Both f
 ## B01-integrated
 
 Reviewed third-round candidate 9f05127c33040d02a08782a5d23c23242021de39 merged at dd32593ae06215f61abed695625024aa0c04b9b0 after conflict-free merge-tree a97a905ef6178f0fbe075c3a46eac28d18ea65be. Full recursive integration validation166/166 and diff check PASS. B01 now green; earlier cap resolved by explicit consumed authorization and R3 SHIP. No residual. B02 remains integrated/green; W1 closed. Clean B01 worktree will be removed, branch retained. No main merge/push.
+
+## W2-open
+
+W2 B03 opened from 6e1fb4428e871760d8f31a99606c3ad68db5015f after W1 completion. Branch codex/workflow-input-delivery and isolated wt-B03 created. Frozen contract and plan remain unchanged; edited skill rules only affect future ledgers. B03 owns the smoke-input/builder/page seam and shared docs, no split or new gate. Final C1 remains next planned stop.

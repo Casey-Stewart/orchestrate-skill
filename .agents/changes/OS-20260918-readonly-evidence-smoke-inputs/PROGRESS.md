@@ -8,7 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 is ready to open; C1 has not been reached.
+W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 B03 is now in progress. C1 has not been reached.
 
 ## Plan approval and integration worktree
 
@@ -49,7 +49,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Waiting for authorized B01 third round; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🔄 | 2026-09-18 | W2 opened from 6e1fb4428e871760d8f31a99606c3ad68db5015f; isolated wt-B03; inherited GPT-6 Astra / xhigh; LOG#W2-open m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -68,11 +68,11 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
 | 1a checker behavior and tests | request | B01 | — | 🟢 |
-| 1b gate wiring and authority | request | B03 | — | ⬜ |
+| 1b gate wiring and authority | request | B03 | — | 🔄 |
 | 2a Git helper and actual-helper scenarios | request | B01 | — | 🟢 |
-| 2b evidence-only workflow use | request | B03 | — | ⬜ |
+| 2b evidence-only workflow use | request | B03 | — | 🔄 |
 | 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🟢 |
-| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | ⬜ |
+| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | 🔄 |
 | Starting protocol freeze, scheduling/cap and historical baseline evidence | run requirement | B00 conductor | — | baked and source provenance verified at scaffold |
 
 ## Session log
@@ -133,3 +133,7 @@ User, verbatim: "OKay, yeah do another round. Same level"
 This explicitly authorizes one third B01 round with a fresh implementer on the retained batch branch at GPT-6 Astra (`gpt-6-astra`), `xhigh` effort, matching both prior rounds as verified in local session records. Both rounds’ findings and current diff are supplied; fresh independent reviewer and separate hunter follow the existing manual fence gate. Authorization consumed once in the B01 Notes marker. If this third round returns FIX FIRST, stop again with ship/drop choices; no fourth round is authorized. No other frozen rule changes.
 
 Discovery found one active ledger across all non-symbolic local/remote refs; integrated older copies are proven by equal ledger-subtree trees and ledger-changing commit ancestry. The known unmerged B01 copy remains visible and contains only its permitted checklist ticks. Main and integration/candidate trees are clean; B02 is integrated, B01 is not, B03 is absent. Shipment local refs/heads/main is not-contained. Frozen contract/plan blobs unchanged. Resume validation65/65 and diff check PASS. Evidence: evidence/W1/B01/third-round/. Existing integration worktree reused.
+
+## W2 opened — 2026-09-18
+
+Wave base: 6e1fb4428e871760d8f31a99606c3ad68db5015f. B01 and B02 are integrated and validated green. Branch codex/workflow-input-delivery cut exactly from this tip in C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03. This commit is the W2-open crash marker. B03 retains all18 approved paths plus own checklist; the running frozen contract/plan are not editable. One fresh implementer on inherited GPT-6 Astra / xhigh, then manual conductor gate and fresh reviewer/hunter. Final C1 follows successful integration; no interim checkpoint or main merge/push.
