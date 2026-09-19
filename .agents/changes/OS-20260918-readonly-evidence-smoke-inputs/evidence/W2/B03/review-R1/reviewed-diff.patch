@@ -1,0 +1,1549 @@
+diff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md
+index cfe867a..0d5570c 100644
+--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md
++++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md
+@@ -111,10 +111,10 @@ opening is a human step unless an actual spreadsheet runner is available.
+-- [ ] Wire/document helper probes and mechanical gate without changing decisions.
+-- [ ] Bake conductor input responsibilities into skill/references/templates/prompts.
+-- [ ] Implement and test smoke-input declarations, disk validation and per-step identities.
+-- [ ] Integrate input-byte validation and retained artifacts into smoke builder.
+-- [ ] Test raw delivered-byte hashes, LF/CRLF-only tampering and fresh autocrlf=true checkout preservation for active/archived input copies.
+-- [ ] Keep the machine-local Python path out of reusable templates while preserving this ledger's explicit environment fact.
+-- [ ] Render exact file links and use/reset instructions in existing page design.
+-- [ ] Enforce per-input affected revision invalidation and historical verdicts.
+-- [ ] Add builder/runtime/doc consistency regression tests and helper documentation.
+-- [ ] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).
++- [x] Wire/document helper probes and mechanical gate without changing decisions.
++- [x] Bake conductor input responsibilities into skill/references/templates/prompts.
++- [x] Implement and test smoke-input declarations, disk validation and per-step identities.
++- [x] Integrate input-byte validation and retained artifacts into smoke builder.
++- [x] Test raw delivered-byte hashes, LF/CRLF-only tampering and fresh autocrlf=true checkout preservation for active/archived input copies.
++- [x] Keep the machine-local Python path out of reusable templates while preserving this ledger's explicit environment fact.
++- [x] Render exact file links and use/reset instructions in existing page design.
++- [x] Enforce per-input affected revision invalidation and historical verdicts.
++- [x] Add builder/runtime/doc consistency regression tests and helper documentation.
++- [x] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).
+diff --git a/README.md b/README.md
+index 22295f1..9aacdc9 100644
+--- a/README.md
++++ b/README.md
+@@ -171 +171,4 @@ orchestrate/
+-    └── build-smoke-page.mjs        fills the template from a checkpoint's `smoke-<Cn>.json` sidecar
++    ├── git-evidence.mjs            read-only discovery, provenance and shipment facts
++    ├── check-fence.mjs             read-only mechanical gate before independent review
++    ├── smoke-inputs.mjs            input declarations, retained history and raw-file checks
++    └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
+@@ -174,2 +177,4 @@ orchestrate/
+-Markdown, one self-contained HTML template, and one optional Node script that fills it —
+-nothing runs against your app, and a page can still be filled by hand without it.
++The Markdown ledger remains the workflow authority. Read-only Git helpers collect
++evidence, and the smoke builder checks actual delivered input bytes before writing
++the page. Existing ledgers keep their frozen rules; unsupported helper shapes use
++the contract's manual read-only fallback. A mechanical PASS never replaces review.
+@@ -177 +182,16 @@ nothing runs against your app, and a page can still be filled by hand without it
+-Tests use Node's built-in test runner: `node --test tests/smoke-page.test.cjs tests/git-contract.test.cjs tests/build-smoke-page.test.cjs`.
++Run all repository suites from the root with this PowerShell validation recipe:
++
++```powershell
++$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)
++if ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }
++node --test --test-reporter=spec @testFiles
++if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }
++git diff --check
++if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }
++```
++
++Portable convenience: `node --test` from the repository root (bare, no directory
++argument). Node's default discovery is separate from the explicit recursive FullName
++ordering, empty-suite guard and failure propagation above; keep the full recipe for
++ledger validation. Protocol tests execute both forms against a nested failing then
++passing disposable sentinel and check the primary recipe's empty-discovery failure.
+@@ -182,2 +202,2 @@ configuration; no network service is needed, and temporary repos are removed aft
+-They verify F5's Git assumptions about discovery, shipment evidence and ledger history,
+-not whether an agent follows the prose. Keep their command recipes aligned with the
++They exercise the actual read-only evidence and fence CLIs for discovery, shipment
++and ledger history. Keep their command recipes aligned with the
+@@ -189,0 +210,16 @@ increases, and refusing a stale baseline without overwriting the issued page.
++The conductor prepares and delivers actual reproducible smoke inputs, including the
++Excel example in `tests/fixtures/smoke-inputs/`. Generate with literal `python
++tests/fixtures/smoke-inputs/generate-orders.py <new-output.xlsx>` and independently
++validate with `python tests/fixtures/smoke-inputs/validate-orders.py <workbook.xlsx>
++<requirements.json>` (Python with openpyxl required). The expected total is 23.50 and
++count is 4. Requirements cover sheets, types, formulas and cached results; hashes do
++not replace that semantic validation. Detect the interpreter in the current environment.
++
++Each file-dependent step links exact immutable inputs, validation evidence and
++working-copy/reset instructions. The [input sidecar schema](orchestrate/references/smoke-page.md#input-registry-and-immutable-issue-files)
++uses stable IDs with per-step references. Reissues preserve old issue files/history,
++verify raw bytes (including LF/CRLF), and bump EVERY affected step's revision so old
++passes become historical. Imported builders require an explicit inputRoot when files
++are declared. Missing private data, credentials or external access is a named
++prerequisite; no manual construction or false pre-verification replaces a deliverable.
++
+diff --git a/orchestrate/SKILL.md b/orchestrate/SKILL.md
+index 7f02f9a..81cb455 100644
+--- a/orchestrate/SKILL.md
++++ b/orchestrate/SKILL.md
+@@ -34,0 +35,6 @@ First word of the arguments:
++Use `node orchestrate/tools/git-evidence.mjs discovery --repo <repo>` for the
++repeatable read-only inventory and provenance probes; helper recipes and manual
++fallback are in protocol.md. Inspect completeness/diagnostics; unknown never means
++absent. The rules below still decide ownership, targets and ledger state. Existing
++ledgers keep their frozen contract and gates even when this skill changes.
++
+@@ -145,0 +152,18 @@ First word of the arguments:
++## Evidence and smoke-input responsibilities
++
++After the implementer report, use the read-only `check-fence.mjs` mechanical gate
++before fresh semantic review when the ledger's own contract enables it (commands,
++authority grammar and manual fallback in protocol.md). PASS does not grant scope or
++approve a merge; UNKNOWN never passes. Capture both refs/SHAs and both diagnostic
++arrays. Continue to map every hunk independently under the same cap and verdict rules.
++
++At planning and checkpoint close-out, the conductor inventories, generates,
++independently validates and delivers actual reproducible inputs per smoke step.
++Supply workbooks with specified sheets/types/formulas/edge cases, exact file links,
++expected results and working-copy/reset instructions; preserve immutable versioned
++inputs/evidence. Name specific private-data/credential/access prerequisites instead
++of fake files or pre-verification. No manual construction unless that is the test.
++Compare resolved input identities on reissue and bump EVERY affected step revision;
++use the input registry and raw-file/history checks in references/smoke-page.md.
++Ordinary synthetic preparation adds no user gate.
++
+diff --git a/orchestrate/references/execution-models.md b/orchestrate/references/execution-models.md
+index 370c58a..fd2ace8 100644
+--- a/orchestrate/references/execution-models.md
++++ b/orchestrate/references/execution-models.md
+@@ -8,0 +9,18 @@ the degenerate case (every wave width 1) — it is not a separate model.
++## Evidence and required inputs
++
++Discovery and shipment probes use the read-only git-evidence helper under the owning
++contract. After each implementer report, the contract's mechanical fence gate captures
++refs/SHAs before fresh independent semantic review; check-fence PASS is mechanical
++only, VIOLATION/UNKNOWN never authorize extensions or merges. Unsupported authority
++uses the baked manual fallback. Existing ledgers retain their frozen gate rules.
++
++Planning inventories inputs per step; checkpoint close-out generates reproducible
++synthetic files, independently validates requirements, and delivers exact linked
++files with Pass results and working-copy/reset instructions. Preserve originals and
++validation evidence under versioned input paths, verify raw bytes after checkout, and
++give QA the same registry/identities the user receives. Private-data, credential and
++external-access prerequisites must be named specifically, never called pre-verified.
++Input changes on reissue require new file paths and EVERY affected step's revision;
++unaffected verdicts remain applicable. Relative-file hosting failures need usable
++attachments/local links and a mapping. Ordinary synthetic preparation adds no gate.
++
+diff --git a/orchestrate/references/protocol.md b/orchestrate/references/protocol.md
+index 39b97b3..7401052 100644
+--- a/orchestrate/references/protocol.md
++++ b/orchestrate/references/protocol.md
+@@ -137,0 +138,88 @@ claims; **git is truth**. Reconcile before believing any row.
++### Read-only evidence tools
++
++The ledger's captured contract is authority. Changed skill files or templates do not
++rewrite existing ledgers or silently add new gates. Tools collect facts; the conductor
++still resolves ownership/target ambiguity and makes every Recovery decision.
++
++Run these Node commands with explicit arguments from the repository root. At scaffold
++time bake the resolved helper paths into this contract; if unavailable or unsupported,
++use the self-contained manual fallback below. Neither helper writes evidence files;
++the conductor may capture stdout with the command, exit and captured SHAs.
++
++```text
++node orchestrate/tools/git-evidence.mjs discovery --repo <repo>
++node orchestrate/tools/git-evidence.mjs worktrees --repo <repo>
++node orchestrate/tools/git-evidence.mjs ancestry --repo <repo> --ancestor <ref-or-sha> --descendant <ref-or-sha>
++node orchestrate/tools/git-evidence.mjs shipment --repo <repo> --integration <full-ref> --source local --ref <full-shipment-ref>
++node orchestrate/tools/git-evidence.mjs shipment --repo <repo> --integration <full-ref> --source remote --remote <name> --ref <full-shipment-ref>
++node orchestrate/tools/git-evidence.mjs ledger --repo <repo> --ref <full-ref> --ledger <id> --owner <ref-or-sha> --target <ref-or-sha>
++node orchestrate/tools/check-fence.mjs --repo <repo> --integration <full-ref> --batch <full-ref> --ledger <id> --batch-id <Bnn> --batch-file <repo-relative-path>
++```
++
++Evidence stdout is one JSON object: operation, repo, completeness
++(complete/partial/unknown), evidence and diagnostics. Discovery retains refs/SHAs/
++symbolic targets, worktrees and ledger locations/provenance grouped by id; it never
++classifies those ledgers. Ledger observations expose presence, tree, lastChange,
++lastChangeTree, progressText and contractTexts at the requested ref, including archive
++presence. Unavailable values are null, never absent facts. Ancestry/shipment return
++captured SHAs and result contained/not-contained/unknown. Exit 0 means complete facts
++(including not-contained); exit 2 means partial/unknown or invalid invocation. Read
++the JSON tri-state, never infer ancestry from helper exit 0 alone. Remote shipment
++queries the named remote now, without fetching; a cached remote ref is insufficient.
++
++After the implementer report, before failing-on-base and fresh independent review,
++run the mechanical fence command. It captures integrationSha, batchSha and mergeBase;
++authority is the committed integration plan plus recorded authorized extensions,
++never the candidate's Files line alone. PASS (exit 0) is only mechanical clearance;
++VIOLATION (1) returns violations; UNKNOWN (2) returns unknowns and takes precedence
++when both arrays contain diagnostics. Retain both arrays. Neither grants an extension,
++changes ledger state, replaces semantic hunk mapping, or approves a merge.
++
++Supported fence grammar: full local refs for integration and batch; a single id under
++.agents/changes; unambiguous Markdown tables with #, Branch, Files (fence) in 01-plan
++and #, Branch, Notes in PROGRESS; Bnn ids; exact comma-separated backtick paths (no
++globs). Baseline batch Branch and Files lines must exactly match the plan; Files is
++"**Files**: " followed by those paths. A unique "## Checklist" ends at the next
++level-two heading. Only [ ] to [x] ticks, appended "- [ ] polish: ..." items (or
++their completed ticks), and precisely authorized Files additions are permitted.
++Extensions use "fence +path (Bnn, item, reason, YYYY-MM-DD)" in Notes and exactly
++one matching Session log record (the row-bound short form omits Bnn); no commas in
++item/reason. Unknown or legacy shapes use the manual gate, never rewritten authority.
++All tools reject unknown, duplicate or missing flags; --help documents usage.
++
++**Manual read-only fallback.** Capture refs with git rev-parse --verify ref^{commit}
++before comparing; failed probes mean unknown. Enumerate ALL local/remote-tracking
++branches with git for-each-ref --format='%(refname) %(symref)' refs/heads/ refs/remotes/.
++Retain symbolic refs as hints but do not probe their trees. For every other full ref,
++git ls-tree -r --name-only ref -- .agents/changes/ finds active ledger PROGRESS files;
++also inspect .agents/changes directly in each worktree from git worktree list --porcelain.
++Group the same id across locations, never pre-filter by branch name or ancestry.
++Read only candidate ownership/target fields before selecting a ledger; read blobs with
++git show ref:./path from the repo root. Compare ledger-subtree tree IDs and the last
++ledger-changing commit (git log -1 --format=%H ref -- ledger-path), not whole tips.
++Proven older copies can be superseded by the owning contract; unknown provenance,
++dirty copies, divergent owners and conflicting targets remain visible/ambiguous.
++Only an explicit COMPLETE or archived copy at the resolved shipment target supersedes
++older candidates; ancestry alone never proves completion. Do not sweep archives into
++the active inventory. Follow the frozen discovery/Recovery classification rules.
++
++Classify from the PROGRESS preamble's State line; without it use batch-table rows and
++explicit Session/verdict-log completion, never the Legend or quoted log prose.
++COMPLETE is explicit and never resumed; ACTIVE/AT-CHECKPOINT or open non-human rows
++remain active without a COMPLETE marker; only human-action rows open means USER-BLOCKED.
++Ambiguity asks the user. Multiple active ledgers require a choice. Inspect the full
++body of only the selected ledger; never copy it into the default checkout.
++
++For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contained,
++1 not-contained, any other exit unknown. Shipment source resolution is in Recovery.
++Inspect every worktree's porcelain status including untracked files and both rename
++endpoints. Before status, inspect effective Git config: executable clean/process
++filters or submodules make safe cleanliness unknown; do not execute such filters to
++obtain a clean result. For the manual fence, use git diff --name-status -z -M
++integration-sha...batch-sha, inspect both rename endpoints against the committed plan
++union recorded extensions union own batch file; inspect that file's blob diff for
++only the permitted ticks/polish/authorized Files edits. Cleanliness and parse failures
++remain unknown until resolved. Report violations and unknowns separately and retain
++the same fresh semantic reviewer gate. No helper or fallback changes round caps.
++
++
+@@ -206,0 +295,61 @@ the map); wave n then closes without a checkpoint; the row returns to
++### Complete checkpoint inputs
++
++The conductor inventories required files per smoke step at planning and checkpoint
++close-out. Specify workbook sheets, columns, types, formulas, cached results and edge
++cases; generate reproducible synthetic inputs, then independently validate against
++those requirements. A digest proves byte identity, never workbook semantics. Preserve
++commands, exits, observed results and environment with the issued artifacts. Identify
++the exact private-data, credential or external-access prerequisite when generation
++is impossible; an unavailable dependency is never pre-verified. Ordinary synthetic
++preparation needs no new approval gate. Never ask the tester to construct files unless
++construction itself is the behavior being tested.
++
++Deliver the actual usable files beside the page, named/linked in each relevant step
++with its expected Pass result. Provide exact read-only or working-copy and reset
++instructions; modify disposable copies, never issued originals. Preserve files and
++validation evidence in versioned evidence/Cn/inputs/issue-NNN/ directories. Copy raw
++bytes and verify hashes in the delivered checkout, including effective Git attributes
++and core.autocrlf=true when Git carries the package. Keep validation reports whose
++hashes are declared under the same byte-preserving input paths. A hosted page whose
++renderer cannot serve relative files needs separate usable attachments/local links
++and an explicit mapping; an inaccessible URL is not a delivered download.
++
++The sidecar has a stable-id inputs registry; each step references its exact IDs.
++Each input records path, raw SHA-256, byte size, requirements, independent validation
++evidence (path/hash/size, command, exit 0, result, environment), mode, use and reset.
++Safe paths are relative to the HTML's artifact directory; reject absolute/traversal
++paths, symlinks, missing files, directories or mismatched bytes. The builder validates
++real disk bytes before writing HTML; imported calls with inputs need explicit
++inputRoot. Legacy sidecars with no inputs remain usable. In a tool-less runtime,
++perform these declaration, raw-file and history checks manually before hand-over.
++
++On reissue preserve the previous page/sidecar snapshot and every prior input/evidence
++file. Use a new issue path for changed bytes; inputHistory retains path/hash/size of
++old artifacts no longer referenced. An issued path cannot change identity, and missing
++prior artifacts are an error. Compare resolved input metadata, not just stable IDs:
++changed bytes, path, requirements or use/reset/validation instructions require revision
++increases for EVERY referencing existing step, including same-build corrections.
++Unrelated revisions/verdicts/notes remain intact; old affected passes and pre evidence
++are historical, shown as NOT RE-RUN until fresh applicable verification. The plain-text
++script/results name the same files, requirements and use/reset instructions.
++
++Record interpreter/dependency discovery as this ledger's environment fact; reusable
++templates never hardcode a machine installation path. For this skill's concrete Excel
++example, use literal python with openpyxl, confirm sys.executable/version, and run:
++
++```text
++python tests/fixtures/smoke-inputs/generate-orders.py <new-output.xlsx>
++python tests/fixtures/smoke-inputs/validate-orders.py <workbook.xlsx> <requirements.json>
++```
++
++The fixed example is tests/fixtures/smoke-inputs/orders.xlsx with
++orders.requirements.json, generate-orders.py and validate-orders.py beside it. Generate
++A and B to new paths (generation refuses overwrite) and require raw
++SHA256(generation A) = SHA256(generation B) = SHA256(committed workbook file bytes)
++from a fresh checkout. Independently check sheets/types/formulas/caches and reject a
++deliberately corrupt copy. Orders F2 is 22.50; Summary B2/B3 are 23.50/4. In a working
++copy, Orders C2 from 2 to 3 recalculates F2 to 33.75 and Summary B2 to 34.75; reset by
++recopying the immutable original. An actual Excel/compatible app is a human prerequisite
++unless a real spreadsheet runner is available. Hash checks alone never establish this.
++
++
+@@ -441 +590,2 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
+-   6a fence check (clean worktree; `git diff --name-status -M <integration>...HEAD`; every
++   6a fence check (read-only helper above, or its manual fallback; clean worktree;
++   `git diff --name-status -M <integration>...HEAD`; every
+diff --git a/orchestrate/references/scaffolding.md b/orchestrate/references/scaffolding.md
+index 5414b57..217f818 100644
+--- a/orchestrate/references/scaffolding.md
++++ b/orchestrate/references/scaffolding.md
+@@ -29,0 +30,6 @@
++   Inventory the exact required inputs for each step while planning: workbook
++   sheets/columns/types/formulas/edge cases, independent validation, reproducible
++   synthetic generation, immutable issue paths and working-copy/reset directions.
++   Name actual private-data/credential/access prerequisites; do not defer ordinary
++   input construction to the tester or invent a pre-verified result.
++
+@@ -82,0 +89,17 @@
++## Evidence and input baking
++
++Capture read-only discovery/shipment evidence with the protocol's helper recipes;
++the conductor still resolves owner/target ambiguity. Bake resolved EVIDENCE_TOOL and
++FENCE_TOOL paths plus the full manual fallback, three outcomes, captured-ref authority
++and supported grammar into new contracts. Never silently adopt changed gates for an
++existing ledger. Use exact Branch and Files lines in batch files and exact backtick
++paths in plan tables; unsupported shapes use manual checks, not inferred authority.
++
++At hand-over preserve generated files and independent validation reports under
++evidence/Cn/inputs/issue-NNN; use raw-byte copies and validate the delivered checkout.
++Record interpreter discovery in the generated ledger, never a machine-local Python
++path in reusable templates. Stable input IDs, step references and retained inputHistory
++belong in the sidecar; every affected revision increases on identity/instruction change.
++Hosted delivery without relative-file access requires usable attachments/local links.
++See smoke-page.md for the complete schema and commands.
++
+@@ -124,0 +148,2 @@ appear in the templates — check both directions when editing either.
++| `{{EVIDENCE_TOOL}}` | template (READBEFORE) | resolved path to git-evidence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
++| `{{FENCE_TOOL}}` | template (READBEFORE) | resolved path to check-fence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
+diff --git a/orchestrate/references/smoke-page-template.html b/orchestrate/references/smoke-page-template.html
+index 6bc720e..da4b292 100644
+--- a/orchestrate/references/smoke-page-template.html
++++ b/orchestrate/references/smoke-page-template.html
+@@ -538,0 +539,2 @@
++  .step-input { overflow-wrap: anywhere; }
++
+@@ -758 +760,3 @@
+-       step: { n, do, pass, revision?, aside?, unit?, tag?, pre? }
++       step: { n, do, pass, revision?, aside?, unit?, tag?, pre?, inputs? }
++         inputs — stable IDs in the sidecar's inputs registry. The builder validates
++                 their raw disk bytes and supplies resolved inputFiles below.
+@@ -958,0 +963,35 @@
++  function inputURL(path) {
++    return path.split('/').map(function (part) {
++      return encodeURIComponent(part).replace(/[!'()*]/g, function (c) {
++        return '%' + c.charCodeAt(0).toString(16).toUpperCase();
++      });
++    }).join('/');
++  }
++
++  function inputDetails(body, files) {
++    (files || []).forEach(function (input) {
++      var block = document.createElement('div');
++      block.className = 'step-input';
++      var label = document.createElement('p');
++      label.className = 'step-aside';
++      label.textContent = 'Input ' + input.id + ' (' + input.mode + '): ';
++      var link = document.createElement('a');
++      link.textContent = input.path;
++      link.setAttribute('href', inputURL(input.path));
++      label.appendChild(link);
++      block.appendChild(label);
++      ['Requirements: ' + input.requirements, 'Use: ' + input.use, 'Reset: ' + input.reset,
++        'SHA-256: ' + input.sha256 + ' · ' + input.size + ' bytes'].forEach(function (text) {
++        var p = document.createElement('p'); p.className = 'step-aside'; p.textContent = text;
++        block.appendChild(p);
++      });
++      var evidence = document.createElement('p'); evidence.className = 'step-aside';
++      evidence.textContent = 'Input validation: ' + input.validation.result + ' (' + input.validation.env +
++        '; exit ' + input.validation.exitCode + ') — ';
++      var proof = document.createElement('a'); proof.textContent = input.validation.path;
++      proof.setAttribute('href', inputURL(input.validation.path)); evidence.appendChild(proof);
++      block.appendChild(evidence);
++      body.appendChild(block);
++    });
++  }
++
+@@ -1002,0 +1042 @@
++    inputDetails(body, step.inputFiles);
+@@ -1300,0 +1341,7 @@
++        (st.inputFiles || []).forEach(function (input) {
++          lines.push('    Input ' + input.id + ': ' + input.path + ' (' + input.mode + ', ' + input.size +
++            ' bytes; SHA-256 ' + input.sha256 + ')');
++          lines.push('    Requirements: ' + input.requirements, '    Use: ' + input.use, '    Reset: ' + input.reset);
++          lines.push('    Input validation: ' + input.validation.path + ' — ' + input.validation.result +
++            '; command: ' + input.validation.command + '; exit ' + input.validation.exitCode + '; ' + input.validation.env);
++        });
+diff --git a/orchestrate/references/smoke-page.md b/orchestrate/references/smoke-page.md
+index d1087e3..faee0ac 100644
+--- a/orchestrate/references/smoke-page.md
++++ b/orchestrate/references/smoke-page.md
+@@ -177,0 +178,91 @@ data`). Assembly is mechanical:
++## Input registry and immutable issue files
++
++The conductor supplies actual generated, independently validated files. Inventory
++them at planning, including workbook sheets/columns/types/formulas/edge cases, then
++deliver the exact files at close-out with expected results and working-copy/reset
++instructions. Private-data, credential and external-access dependencies are named
++in `need`/`aside`, never represented by fictitious files or pre-verification. Ordinary
++synthetic preparation adds no approval gate; manual construction is only a test when
++construction itself is the behavior being checked.
++
++Add this structure to the sidecar (the digest/size values below are explanatory;
++fill them from the actual file Buffers, and retain a real validation report):
++
++```json
++{
++  "inputs": [{
++    "id": "orders",
++    "path": "evidence/C1/inputs/issue-001/orders.xlsx",
++    "sha256": "<64 lowercase hex characters from raw file bytes>",
++    "size": 8634,
++    "requirements": "Orders, Summary, Types; IDs remain text; formulas F2:F5; total 23.50 and count 4.",
++    "validation": {
++      "path": "evidence/C1/inputs/validation-001/independent-check.md",
++      "sha256": "<raw validation-report digest>",
++      "size": 123,
++      "command": "python evidence/C1/inputs/issue-001/validate-orders.py evidence/C1/inputs/issue-001/orders.xlsx evidence/C1/inputs/issue-001/orders.requirements.json",
++      "exitCode": 0,
++      "result": "Independent sheets, cell types, formulas and cached values passed.",
++      "env": "Observed Python and openpyxl versions recorded in the report"
++    },
++    "mode": "working-copy",
++    "use": "Copy-Item -LiteralPath evidence/C1/inputs/issue-001/orders.xlsx -Destination $env:TEMP/OS-orders-working.xlsx; open that copy and change Orders C2 from 2 to 3.",
++    "reset": "Close the working copy and repeat Copy-Item with -Force. Original F2/Summary B2 are 22.50/23.50; edited copy is 33.75/34.75."
++  }],
++  "inputHistory": [],
++  "sections": [{"n": 1, "title": "Workbook", "steps": [
++    {"n": 1, "revision": 1, "do": "Open the supplied workbook copy.",
++     "pass": "All three sheets and leading-zero IDs are visible.", "inputs": ["orders"]}
++  ]}]
++}
++```
++
++The registry is an array with unique stable IDs. A step's `inputs` is an array of
++those IDs, with no duplicates or dangling references. Every input needs path,
++lowercase raw SHA-256, nonnegative byte size, nonempty requirements, validation
++path/hash/size/command/result/env and exitCode 0, mode (`read-only` or `working-copy`),
++use and reset. Even read-only files name a reset rule, such as "Keep the issued file
++unchanged; recopy a disposable copy from this original." Shared validation reports
++are allowed. `inputFiles` is reserved for the builder's resolved display data.
++
++Paths are slash-separated relative file paths from the output HTML's directory.
++The CLI validates **actual disk bytes**, including validation evidence and historical
++files, before any output write. Imported calls must pass
++`buildSmokePage(data, template, {inputRoot, previous, resetVerdicts})` with explicit
++`inputRoot` whenever declarations exist. Pure declaration/history inspection lives
++in `smoke-inputs.mjs`; it does not pretend a temporary previous-sidecar directory is
++the original input root. Missing files, directories, absolute/traversal paths,
++Windows aliases and symlinks are rejected. Hash raw Buffers: no text decoding,
++line-ending normalization, trimming, BOM removal or Git object-ID substitution.
++Legacy sidecars with omitted/empty registries and no references remain compatible.
++
++On each reissue keep the unchanged previous sidecar and page snapshot. Changed bytes
++require new versioned paths, such as `issue-002/orders.xlsx`. In `inputHistory`, retain
++`{path, sha256, size}` for every prior input or validation file no longer present in
++current declarations, and carry older history forward. The builder refuses reused
++paths with different byte identities, omitted history, or missing historical files.
++Reusing the same unchanged file is allowed; never overwrite/delete issued originals.
++
++Every referencing existing step must increase its revision when resolved input
++metadata changes (bytes/digest/size, path, requirements, validation, mode, use or reset),
++even if its stable ID and build SHA stay unchanged. Unrelated steps keep their
++revisions and marks. The page then labels old affected passes `NOT RE-RUN`; merely
++editing a note cannot refresh them. New applicable human verdicts or agent evidence
++are still required. Registry edits cannot bypass revision checks by keeping IDs.
++
++The existing step layout displays encoded file/evidence links, requirements,
++hash/size and use/reset text. Copied results and a full plain-text fallback name the
++same files and instructions. Keep HTML and inputs usable together; browser QA checks
++the links. A hosted renderer that cannot serve relative files needs separate usable
++attachments/local links and an explicit mapping. Never call an inaccessible URL a
++download. Native Excel opening remains human unless a real spreadsheet runner exists.
++
++Use the fixed `tests/fixtures/smoke-inputs/orders.xlsx`, requirements, generator and
++validator for a concrete example. Run literal `python` generation to new paths and
++independent semantic validation; do not infer sheets/formulas/caches from a hash.
++Detect and record the interpreter environment in the ledger; never hardcode a local
++installation path into reusable instructions. Preserve input and evidence bytes with
++the scoped `.gitattributes`; verify effective attributes and a fresh
++`core.autocrlf=true` checkout (including LF/CRLF sentinels and an unprotected conversion
++control). Actual Excel values and validation recipes are in protocol.md.
++
+diff --git a/orchestrate/references/subagent-prompts.md b/orchestrate/references/subagent-prompts.md
+index 7a480a6..8507149 100644
+--- a/orchestrate/references/subagent-prompts.md
++++ b/orchestrate/references/subagent-prompts.md
+@@ -7,0 +8,13 @@ skeleton ends with a REPORT shape; the orchestrator acts on nothing that lacks i
++The conductor prepares checkpoint inputs as real immutable files with stable IDs,
++per-step references, raw hashes/sizes, requirements, independent validation evidence
++and exact use/reset commands. This is normal authorized preparation, not a new gate.
++Implementers stay inside their fences; reviewers verify the consumer behavior and
++never replace mechanical/semantic gates with a helper PASS. Pre-flight checks input
++requirements and genuine private-data/credential/access prerequisites. QA receives
++the actual inputRoot, sidecar, prior snapshots, expected identities and step revisions:
++read/hash the files, execute independent semantic validation, browser-check file links,
++and modify only disposable working copies. Never call missing dependencies pre-verified
++or claim Excel-app execution from hashes; leave native-app steps human if no runner.
++On reissue check retained issue paths/history and every affected revision. Existing
++ledger contracts keep their own rules; tool diagnostics never authorize state changes.
++
+@@ -199,0 +213,9 @@ and revisions, initially 1):
++ACTUAL INPUTS: [INPUT ROOT, STABLE-ID REGISTRY, EXACT PER-STEP FILE REFERENCES,
++RAW SHA-256/SIZES, REQUIREMENTS AND INDEPENDENT VALIDATION EVIDENCE, USE/RESET COMMANDS]
++PRIOR ISSUES (on reissue): [PRESERVED SIDECARS/PAGES, INPUT HISTORY AND AFFECTED REVISIONS]
++Validate the actual delivered files against these identities and semantic requirements,
++including workbook sheets/types/formulas/caches when relevant. Browser-check usable
++links. Modify only disposable working copies and prove reset; never overwrite issued
++files. Missing private data, credentials or external access means COULD-NOT-RUN with
++the exact prerequisite. Hashes alone do not establish semantics or Excel-app behavior.
++
+@@ -235,0 +258,5 @@ CHECK, in order, and report only failures with evidence:
++   Every file-dependent step inventories reproducible inputs, independent validation,
++   exact deliverable links and working-copy/reset instructions; genuine private-data,
++   credential or access prerequisites are explicit. No manual input construction
++   unless it is the tested behavior. Reissues preserve issue paths and revise every
++   affected consumer, not only the step where a registry edit was first noticed.
+diff --git a/orchestrate/templates/00-READBEFORE.md b/orchestrate/templates/00-READBEFORE.md
+index a8e97f8..72ebb38 100644
+--- a/orchestrate/templates/00-READBEFORE.md
++++ b/orchestrate/templates/00-READBEFORE.md
+@@ -79,0 +80,88 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
++### Read-only evidence tools
++
++The ledger's captured contract is authority. Changed skill files or templates do not
++rewrite existing ledgers or silently add new gates. Tools collect facts; the conductor
++still resolves ownership/target ambiguity and makes every Recovery decision.
++
++Run these Node commands with explicit arguments from the repository root. At scaffold
++time bake the resolved helper paths into this contract; if unavailable or unsupported,
++use the self-contained manual fallback below. Neither helper writes evidence files;
++the conductor may capture stdout with the command, exit and captured SHAs.
++
++```text
++node {{EVIDENCE_TOOL}} discovery --repo <repo>
++node {{EVIDENCE_TOOL}} worktrees --repo <repo>
++node {{EVIDENCE_TOOL}} ancestry --repo <repo> --ancestor <ref-or-sha> --descendant <ref-or-sha>
++node {{EVIDENCE_TOOL}} shipment --repo <repo> --integration <full-ref> --source local --ref <full-shipment-ref>
++node {{EVIDENCE_TOOL}} shipment --repo <repo> --integration <full-ref> --source remote --remote <name> --ref <full-shipment-ref>
++node {{EVIDENCE_TOOL}} ledger --repo <repo> --ref <full-ref> --ledger <id> --owner <ref-or-sha> --target <ref-or-sha>
++node {{FENCE_TOOL}} --repo <repo> --integration <full-ref> --batch <full-ref> --ledger <id> --batch-id <Bnn> --batch-file <repo-relative-path>
++```
++
++Evidence stdout is one JSON object: operation, repo, completeness
++(complete/partial/unknown), evidence and diagnostics. Discovery retains refs/SHAs/
++symbolic targets, worktrees and ledger locations/provenance grouped by id; it never
++classifies those ledgers. Ledger observations expose presence, tree, lastChange,
++lastChangeTree, progressText and contractTexts at the requested ref, including archive
++presence. Unavailable values are null, never absent facts. Ancestry/shipment return
++captured SHAs and result contained/not-contained/unknown. Exit 0 means complete facts
++(including not-contained); exit 2 means partial/unknown or invalid invocation. Read
++the JSON tri-state, never infer ancestry from helper exit 0 alone. Remote shipment
++queries the named remote now, without fetching; a cached remote ref is insufficient.
++
++After the implementer report, before failing-on-base and fresh independent review,
++run the mechanical fence command. It captures integrationSha, batchSha and mergeBase;
++authority is the committed integration plan plus recorded authorized extensions,
++never the candidate's Files line alone. PASS (exit 0) is only mechanical clearance;
++VIOLATION (1) returns violations; UNKNOWN (2) returns unknowns and takes precedence
++when both arrays contain diagnostics. Retain both arrays. Neither grants an extension,
++changes ledger state, replaces semantic hunk mapping, or approves a merge.
++
++Supported fence grammar: full local refs for integration and batch; a single id under
++.agents/changes; unambiguous Markdown tables with #, Branch, Files (fence) in 01-plan
++and #, Branch, Notes in PROGRESS; Bnn ids; exact comma-separated backtick paths (no
++globs). Baseline batch Branch and Files lines must exactly match the plan; Files is
++"**Files**: " followed by those paths. A unique "## Checklist" ends at the next
++level-two heading. Only [ ] to [x] ticks, appended "- [ ] polish: ..." items (or
++their completed ticks), and precisely authorized Files additions are permitted.
++Extensions use "fence +path (Bnn, item, reason, YYYY-MM-DD)" in Notes and exactly
++one matching Session log record (the row-bound short form omits Bnn); no commas in
++item/reason. Unknown or legacy shapes use the manual gate, never rewritten authority.
++All tools reject unknown, duplicate or missing flags; --help documents usage.
++
++**Manual read-only fallback.** Capture refs with git rev-parse --verify ref^{commit}
++before comparing; failed probes mean unknown. Enumerate ALL local/remote-tracking
++branches with git for-each-ref --format='%(refname) %(symref)' refs/heads/ refs/remotes/.
++Retain symbolic refs as hints but do not probe their trees. For every other full ref,
++git ls-tree -r --name-only ref -- .agents/changes/ finds active ledger PROGRESS files;
++also inspect .agents/changes directly in each worktree from git worktree list --porcelain.
++Group the same id across locations, never pre-filter by branch name or ancestry.
++Read only candidate ownership/target fields before selecting a ledger; read blobs with
++git show ref:./path from the repo root. Compare ledger-subtree tree IDs and the last
++ledger-changing commit (git log -1 --format=%H ref -- ledger-path), not whole tips.
++Proven older copies can be superseded by the owning contract; unknown provenance,
++dirty copies, divergent owners and conflicting targets remain visible/ambiguous.
++Only an explicit COMPLETE or archived copy at the resolved shipment target supersedes
++older candidates; ancestry alone never proves completion. Do not sweep archives into
++the active inventory. Follow the frozen discovery/Recovery classification rules.
++
++Classify from the PROGRESS preamble's State line; without it use batch-table rows and
++explicit Session/verdict-log completion, never the Legend or quoted log prose.
++COMPLETE is explicit and never resumed; ACTIVE/AT-CHECKPOINT or open non-human rows
++remain active without a COMPLETE marker; only human-action rows open means USER-BLOCKED.
++Ambiguity asks the user. Multiple active ledgers require a choice. Inspect the full
++body of only the selected ledger; never copy it into the default checkout.
++
++For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contained,
++1 not-contained, any other exit unknown. Shipment source resolution is in Recovery.
++Inspect every worktree's porcelain status including untracked files and both rename
++endpoints. Before status, inspect effective Git config: executable clean/process
++filters or submodules make safe cleanliness unknown; do not execute such filters to
++obtain a clean result. For the manual fence, use git diff --name-status -z -M
++integration-sha...batch-sha, inspect both rename endpoints against the committed plan
++union recorded extensions union own batch file; inspect that file's blob diff for
++only the permitted ticks/polish/authorized Files edits. Cleanliness and parse failures
++remain unknown until resolved. Report violations and unknowns separately and retain
++the same fresh semantic reviewer gate. No helper or fallback changes round caps.
++
++
+@@ -198,0 +287,61 @@ three lines say `none`, skip version/changelog work at close-out and say so.
++### Complete checkpoint inputs
++
++The conductor inventories required files per smoke step at planning and checkpoint
++close-out. Specify workbook sheets, columns, types, formulas, cached results and edge
++cases; generate reproducible synthetic inputs, then independently validate against
++those requirements. A digest proves byte identity, never workbook semantics. Preserve
++commands, exits, observed results and environment with the issued artifacts. Identify
++the exact private-data, credential or external-access prerequisite when generation
++is impossible; an unavailable dependency is never pre-verified. Ordinary synthetic
++preparation needs no new approval gate. Never ask the tester to construct files unless
++construction itself is the behavior being tested.
++
++Deliver the actual usable files beside the page, named/linked in each relevant step
++with its expected Pass result. Provide exact read-only or working-copy and reset
++instructions; modify disposable copies, never issued originals. Preserve files and
++validation evidence in versioned evidence/Cn/inputs/issue-NNN/ directories. Copy raw
++bytes and verify hashes in the delivered checkout, including effective Git attributes
++and core.autocrlf=true when Git carries the package. Keep validation reports whose
++hashes are declared under the same byte-preserving input paths. A hosted page whose
++renderer cannot serve relative files needs separate usable attachments/local links
++and an explicit mapping; an inaccessible URL is not a delivered download.
++
++The sidecar has a stable-id inputs registry; each step references its exact IDs.
++Each input records path, raw SHA-256, byte size, requirements, independent validation
++evidence (path/hash/size, command, exit 0, result, environment), mode, use and reset.
++Safe paths are relative to the HTML's artifact directory; reject absolute/traversal
++paths, symlinks, missing files, directories or mismatched bytes. The builder validates
++real disk bytes before writing HTML; imported calls with inputs need explicit
++inputRoot. Legacy sidecars with no inputs remain usable. In a tool-less runtime,
++perform these declaration, raw-file and history checks manually before hand-over.
++
++On reissue preserve the previous page/sidecar snapshot and every prior input/evidence
++file. Use a new issue path for changed bytes; inputHistory retains path/hash/size of
++old artifacts no longer referenced. An issued path cannot change identity, and missing
++prior artifacts are an error. Compare resolved input metadata, not just stable IDs:
++changed bytes, path, requirements or use/reset/validation instructions require revision
++increases for EVERY referencing existing step, including same-build corrections.
++Unrelated revisions/verdicts/notes remain intact; old affected passes and pre evidence
++are historical, shown as NOT RE-RUN until fresh applicable verification. The plain-text
++script/results name the same files, requirements and use/reset instructions.
++
++Record interpreter/dependency discovery as this ledger's environment fact; reusable
++templates never hardcode a machine installation path. For this skill's concrete Excel
++example, use literal python with openpyxl, confirm sys.executable/version, and run:
++
++```text
++python tests/fixtures/smoke-inputs/generate-orders.py <new-output.xlsx>
++python tests/fixtures/smoke-inputs/validate-orders.py <workbook.xlsx> <requirements.json>
++```
++
++The fixed example is tests/fixtures/smoke-inputs/orders.xlsx with
++orders.requirements.json, generate-orders.py and validate-orders.py beside it. Generate
++A and B to new paths (generation refuses overwrite) and require raw
++SHA256(generation A) = SHA256(generation B) = SHA256(committed workbook file bytes)
++from a fresh checkout. Independently check sheets/types/formulas/caches and reject a
++deliberately corrupt copy. Orders F2 is 22.50; Summary B2/B3 are 23.50/4. In a working
++copy, Orders C2 from 2 to 3 recalculates F2 to 33.75 and Summary B2 to 34.75; reset by
++recopying the immutable original. An actual Excel/compatible app is a human prerequisite
++unless a real spreadsheet runner is available. Hash checks alone never establish this.
++
++
+@@ -452 +601,2 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
+-   - **6a Fence check (mechanical, orchestrator).** Worktree clean (`git status
++   - **6a Fence check (mechanical, orchestrator).** Run the read-only helper above
++     or its manual fallback. Worktree clean (`git status
+diff --git a/orchestrate/templates/01-plan.md b/orchestrate/templates/01-plan.md
+index ec769ff..af0e7d3 100644
+--- a/orchestrate/templates/01-plan.md
++++ b/orchestrate/templates/01-plan.md
+@@ -31,0 +32,10 @@ file is the contract; this one only locks scope, waves, and checkpoints.
++## Smoke-input inventory
++
++<!-- For every file-dependent step: stable input ID, exact versioned issue path,
++     required contents (workbook sheets/columns/types/formulas/edge cases), synthetic
++     generation and independent validation, expected Pass result, read-only or exact
++     working-copy/reset instructions. Identify specific private-data, credentials or
++     external-access prerequisites. The conductor supplies actual usable files and
++     evidence at close-out; no manual construction unless construction is the test.
++     Preserve prior issue directories and bump every referencing revision on reissue. -->
++
+diff --git a/orchestrate/templates/02-batch.md b/orchestrate/templates/02-batch.md
+index 9a8345d..9611346 100644
+--- a/orchestrate/templates/02-batch.md
++++ b/orchestrate/templates/02-batch.md
+@@ -3 +3,2 @@
+-**Branch**: `{{BATCH_BRANCH}}` (cut from the integration tip when the wave opens)
++**Branch**: `{{BATCH_BRANCH}}`
++Cut from the integration tip when the wave opens.
+@@ -7 +8,2 @@
+-**Files** (the fence — modify NOTHING else; need more? report `NEEDS_FENCE`): {{BATCH_FILES}}
++**Files**: {{BATCH_FILES}}
++The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
+@@ -50,0 +53,6 @@ the merge.
++     - Inputs: stable IDs and exact issued file links, requirements, independently
++       validated expected results, read-only or working-copy/reset commands. Conductor
++       generates and delivers the files; no manual construction unless being tested.
++       Preserve prior input/evidence paths and bump EVERY affected revision on reissue.
++       Name specific private-data/credential/access prerequisites; missing means not
++       pre-verified. QA must receive and validate the same actual files as the tester.
+diff --git a/orchestrate/templates/PROGRESS.md b/orchestrate/templates/PROGRESS.md
+index f8a571f..74029db 100644
+--- a/orchestrate/templates/PROGRESS.md
++++ b/orchestrate/templates/PROGRESS.md
+@@ -60,0 +61,8 @@ before believing any row (§Recovery in the contract).
++## Issued checkpoint inputs
++
++<!-- At close-out link the sidecar's stable-id input registry, exact immutable issue
++     files and independent validation evidence, raw hash/size manifest and usable
++     delivery location. Record working-copy/reset instructions and named unavailable
++     prerequisites. Reissue preserves previous page/sidecar/inputHistory and files;
++     record every affected step revision. A hash alone is not semantic validation. -->
++
+diff --git a/orchestrate/tools/build-smoke-page.mjs b/orchestrate/tools/build-smoke-page.mjs
+index 61d3435..dc7cbfc 100644
+--- a/orchestrate/tools/build-smoke-page.mjs
++++ b/orchestrate/tools/build-smoke-page.mjs
+@@ -15,0 +16 @@ import { isDeepStrictEqual, parseArgs } from "node:util";
++import { declareInputs, compareInputHistory, validateInputFiles, sectionsWithInputs } from "./smoke-inputs.mjs";
+@@ -20 +21 @@ const DEFAULT_TEMPLATE = resolve(
+-export function buildSmokePage(data, template, { previous, resetVerdicts = false } = {}) {
++export function buildSmokePage(data, template, { previous, resetVerdicts = false, inputRoot } = {}) {
+@@ -23,0 +25 @@ export function buildSmokePage(data, template, { previous, resetVerdicts = false
++  validateInputFiles(declareInputs(data), inputRoot);
+@@ -77 +79 @@ export function renderSlots(data) {
+-    SECTIONS_JS: embed(d.sections),
++    SECTIONS_JS: embed(sectionsWithInputs(d, declareInputs(d))),
+@@ -170,0 +173 @@ function validate(d) {
++  declareInputs(d);
+@@ -174,0 +178,2 @@ function validateReissue(current, previous, resetVerdicts) {
++  const currentInputs = declareInputs(current), previousInputs = declareInputs(previous);
++  compareInputHistory(currentInputs, previousInputs);
+@@ -218,2 +223,3 @@ function validateReissue(current, previous, resetVerdicts) {
+-    if (newRevision === oldRevision && !isDeepStrictEqual(instructions(before[i]), instructions(after[i]))) {
+-      throw new Error(`step ${n}: instructions or section context changed; increment revision above ${oldRevision}`);
++    if (newRevision === oldRevision && (!isDeepStrictEqual(instructions(before[i]), instructions(after[i])) ||
++        !isDeepStrictEqual(previousInputs.byStep.get(n), currentInputs.byStep.get(n)))) {
++      throw new Error(`step ${n}: instructions or section context changed, or resolved inputs changed; increment revision above ${oldRevision}`);
+@@ -257,0 +264,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
++    const inputRoot = dirname(resolve(out));
++    for (const artifact of declareInputs(data).artifacts.values()) {
++      if (sameFile(out, resolve(inputRoot, artifact.path))) throw new Error("output must not overwrite an issued input artifact");
++    }
+@@ -260 +270 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+-      resetVerdicts
++      resetVerdicts, inputRoot
+@@ -272 +282 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+-          : sameHTML(existing + sidecarStamp(previousData), buildSmokePage(previousData, templateText));
++          : sameHTML(existing + sidecarStamp(previousData), buildSmokePage(previousData, templateText, { inputRoot }));
+diff --git a/orchestrate/tools/smoke-inputs.mjs b/orchestrate/tools/smoke-inputs.mjs
+new file mode 100644
+index 0000000..d70f00f
+--- /dev/null
++++ b/orchestrate/tools/smoke-inputs.mjs
+@@ -0,0 +1,125 @@
++// Checkpoint input declarations are evidence, not workbook semantic validation.
++// Keep history comparisons pure; disk checks hash the exact delivered bytes.
++import { createHash } from 'node:crypto';
++import { lstatSync, readFileSync, realpathSync } from 'node:fs';
++import { isAbsolute, relative, resolve, sep } from 'node:path';
++import { isDeepStrictEqual } from 'node:util';
++
++function object(value, label) {
++  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object`);
++}
++function text(value, label) {
++  if (typeof value !== 'string' || !value.trim()) throw new Error(`${label} must be nonempty text`);
++}
++export function inputPath(value, label = 'input path') {
++  text(value, label);
++  // One portable spelling, also safe as a relative browser URL after encoding.
++  // Reject Windows aliases/ADS and ambiguous trailing dots or spaces on every OS.
++  if (isAbsolute(value) || /[\\:<>"|?*\u0000-\u001f\u007f]/.test(value) || value.startsWith('/') ||
++      value.split('/').some(part => !part || part === '.' || part === '..' || /[. ]$/.test(part) ||
++        /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) {
++    throw new Error(`${label} must be a safe relative file path: ${JSON.stringify(value)}`);
++  }
++  return value;
++}
++function file(value, label) {
++  object(value, label);
++  inputPath(value.path, `${label}.path`);
++  if (typeof value.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(value.sha256)) {
++    throw new Error(`${label}.sha256 must be a lowercase SHA-256 of raw file bytes`);
++  }
++  if (!Number.isSafeInteger(value.size) || value.size < 0) throw new Error(`${label}.size must be a nonnegative safe integer`);
++  return { path: value.path, sha256: value.sha256, size: value.size };
++}
++const pathKey = value => value.toLowerCase(); // Reject collisions on Windows as well as POSIX.
++
++export function declareInputs(data) {
++  const inputs = data.inputs === undefined ? [] : data.inputs;
++  const history = data.inputHistory === undefined ? [] : data.inputHistory;
++  if (!Array.isArray(inputs)) throw new Error('inputs must be a stable-id registry array');
++  if (!Array.isArray(history)) throw new Error('inputHistory must be an array');
++  const byId = new Map(), artifacts = new Map();
++  function addFile(value, label) {
++    const descriptor = file(value, label), key = pathKey(descriptor.path);
++    const old = artifacts.get(key);
++    if (old && !isDeepStrictEqual(old, descriptor)) throw new Error(`conflicting issued input path: ${descriptor.path}`);
++    artifacts.set(key, descriptor);
++  }
++  for (const input of inputs) {
++    object(input, 'input');
++    if (typeof input.id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(input.id)) throw new Error('input.id must be a stable nonempty id');
++    if (byId.has(input.id)) throw new Error(`duplicate input id: ${input.id}`);
++    addFile(input, `input ${input.id}`);
++    for (const field of ['requirements', 'use', 'reset']) text(input[field], `input ${input.id}.${field}`);
++    if (!['read-only', 'working-copy'].includes(input.mode)) throw new Error(`input ${input.id}.mode must be read-only or working-copy`);
++    addFile(input.validation, `input ${input.id}.validation`);
++    for (const field of ['command', 'result', 'env']) text(input.validation[field], `input ${input.id}.validation.${field}`);
++    if (input.validation.exitCode !== 0) throw new Error(`input ${input.id}.validation.exitCode must be 0; unvalidated inputs cannot be issued`);
++    byId.set(input.id, input);
++  }
++  const historyPaths = new Set();
++  for (const entry of history) {
++    addFile(entry, 'inputHistory entry');
++    const key = pathKey(entry.path);
++    if (historyPaths.has(key)) throw new Error(`duplicate inputHistory path: ${entry.path}`);
++    historyPaths.add(key);
++  }
++  const byStep = new Map();
++  for (const section of data.sections || []) for (const step of section.steps || []) {
++    if (Object.hasOwn(step, 'inputFiles')) throw new Error(`step ${step.n}.inputFiles is reserved for resolved input declarations`);
++    const refs = step.inputs === undefined ? [] : step.inputs;
++    if (!Array.isArray(refs)) throw new Error(`step ${step.n}.inputs must be an array of input ids`);
++    const seen = new Set();
++    byStep.set(step.n, refs.map(id => {
++      if (typeof id !== 'string' || !byId.has(id)) throw new Error(`step ${step.n} has a dangling input reference: ${JSON.stringify(id)}`);
++      if (seen.has(id)) throw new Error(`step ${step.n} repeats input reference: ${id}`);
++      seen.add(id);
++      return byId.get(id);
++    }));
++  }
++  return { byId, byStep, artifacts };
++}
++
++// No filesystem reads here: a previous sidecar is historical metadata even if its
++// snapshot lives in a temporary directory. The caller separately verifies retention.
++export function compareInputHistory(current, previous) {
++  for (const [key, old] of previous.artifacts) {
++    const retained = current.artifacts.get(key);
++    if (!retained) throw new Error(`required prior input artifact is missing from inputs/inputHistory: ${old.path}`);
++    if (!isDeepStrictEqual(retained, old)) throw new Error(`issued input path is immutable: ${old.path}; use a new issue directory`);
++  }
++}
++
++export function validateInputFiles(declaration, inputRoot) {
++  if (!declaration.artifacts.size) return;
++  if (typeof inputRoot !== 'string' || !inputRoot.trim()) throw new Error('declared inputs require an explicit inputRoot');
++  const root = realpathSync(resolve(inputRoot));
++  for (const artifact of declaration.artifacts.values()) {
++    let target = root;
++    try {
++      // Reject links even when they currently resolve inside root: a delivered
++      // package must contain its files, not depend on mutable external pointers.
++      for (const component of artifact.path.split('/')) {
++        target = resolve(target, component);
++        if (lstatSync(target).isSymbolicLink()) throw new Error('symbolic links are not permitted');
++      }
++      const actual = realpathSync(target), rel = relative(root, actual);
++      if (rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)) throw new Error('file escapes inputRoot');
++      if (!lstatSync(actual).isFile()) throw new Error('not a regular file');
++      const bytes = readFileSync(actual);
++      if (bytes.length !== artifact.size) throw new Error(`size mismatch (expected ${artifact.size}, read ${bytes.length})`);
++      if (createHash('sha256').update(bytes).digest('hex') !== artifact.sha256) throw new Error('SHA-256 mismatch for raw file bytes');
++    } catch (error) {
++      throw new Error(`input artifact ${artifact.path}: ${error.message}`);
++    }
++  }
++}
++
++// The browser receives resolved descriptors, so registry edits cannot hide behind
++// unchanged IDs. Preserve the no-input template shape for legacy sidecars.
++export function sectionsWithInputs(data, declaration) {
++  return data.sections.map(section => ({ ...section, steps: section.steps.map(step => {
++    const resolved = declaration.byStep.get(step.n);
++    return resolved.length ? { ...step, inputFiles: resolved } : step;
++  }) }));
++}
+diff --git a/tests/build-smoke-page.test.cjs b/tests/build-smoke-page.test.cjs
+index ebaacf3..387f1d4 100644
+--- a/tests/build-smoke-page.test.cjs
++++ b/tests/build-smoke-page.test.cjs
+@@ -9,0 +10 @@ const vm = require('node:vm');
++const { createHash } = require('node:crypto');
+@@ -393,0 +395,144 @@ test('legacy pages require a reproducible baseline before their first guarded re
++
++function inputPackage(t) {
++  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'smoke-real-build-'));
++  t.after(() => fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }));
++  const put = (name, bytes) => {
++    fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true });
++    fs.writeFileSync(path.join(root, name), bytes);
++    return { path: name, size: Buffer.byteLength(bytes), sha256: createHash('sha256').update(bytes).digest('hex') };
++  };
++  const report = put('evidence/C1/inputs/validation-001/report.txt', 'Independent workbook fixture validation: passed.\n');
++  const workbook = fs.readFileSync(path.join(__dirname, 'fixtures/smoke-inputs/orders.xlsx'));
++  const d = sidecar();
++  d.inputs = [{ id: 'orders', ...put('evidence/C1/inputs/issue-001/orders.xlsx', workbook),
++    requirements: 'Three sheets; text IDs, formulas/caches; total 23.50/count 4.',
++    validation: { ...report, command: 'python validate-orders.py orders.xlsx orders.requirements.json',
++      exitCode: 0, result: 'All fixture requirements passed.', env: 'Independent B02 validator' },
++    mode: 'working-copy', use: 'Copy orders.xlsx to a temporary working file.', reset: 'Recopy the issued original.' }];
++  d.sections[0].steps[0].inputs = ['orders']; d.sections[1].steps[0].inputs = ['orders'];
++  const json = path.join(root, 'smoke-c1.json'), out = path.join(root, 'smoke-c1.html');
++  const write = data => fs.writeFileSync(json, JSON.stringify(data));
++  const run = (...args) => spawnSync(process.execPath, [BUILDER, json, out, ...args], { encoding: 'utf8', windowsHide: true });
++  return { root, put, report, workbook, d, json, out, write, run };
++}
++
++test('imported builder requires actual root/bytes and never accepts supplied digests on faith', t => {
++  const f = inputPackage(t);
++  assert.throws(() => builder.buildSmokePage(f.d, template), /explicit inputRoot/);
++  const original = JSON.stringify(f.d);
++  const built = builder.buildSmokePage(f.d, template, { inputRoot: f.root });
++  assert.equal(JSON.stringify(f.d), original);
++  const emitted = JSON.parse(built.match(/var SECTIONS = (\[[\s\S]*?\]);\r?\n/)[1]);
++  assert.deepEqual(emitted[0].steps[0].inputFiles, f.d.inputs);
++  assert.equal(emitted[0].steps[1].inputFiles, undefined);
++  const bytes = Buffer.from(f.workbook); bytes[150] ^= 1;
++  fs.writeFileSync(path.join(f.root, f.d.inputs[0].path), bytes);
++  assert.throws(() => builder.buildSmokePage(f.d, template, { inputRoot: f.root }), /SHA-256 mismatch/);
++});
++
++test('CLI validates files beside output, preserving old HTML on file, digest, evidence and metadata failures', t => {
++  const f = inputPackage(t); f.write(f.d);
++  let r = f.run(); assert.equal(r.status, 0, r.stderr);
++  const before = fs.readFileSync(f.out), original = path.join(f.root, f.d.inputs[0].path);
++  const refuse = (message, ...args) => {
++    const result = f.run(...args); assert.equal(result.status, 1, result.stderr);
++    assert.match(result.stderr, message); assert.deepEqual(fs.readFileSync(f.out), before);
++  };
++  const changed = Buffer.from(f.workbook); changed[200] ^= 1; fs.writeFileSync(original, changed);
++  refuse(/SHA-256 mismatch/);
++  fs.unlinkSync(original); refuse(/ENOENT/);
++  fs.mkdirSync(original); refuse(/not a regular file/); fs.rmdirSync(original);
++  fs.writeFileSync(original, f.workbook);
++  const report = path.join(f.root, f.report.path), reportBytes = fs.readFileSync(report);
++  fs.writeFileSync(report, Buffer.alloc(reportBytes.length)); refuse(/report.txt.*SHA-256 mismatch/);
++  fs.writeFileSync(report, reportBytes);
++  for (const mutate of [d => { d.inputs[0].use = ''; }, d => { d.sections[0].steps[0].inputs = ['missing']; },
++    d => { d.inputs[0].path = '../outside.xlsx'; }]) {
++    const invalid = structuredClone(f.d); mutate(invalid); f.write(invalid); refuse(/nonempty|dangling|safe relative/);
++  }
++  f.write(f.d); r = f.run(); assert.equal(r.status, 0, r.stderr);
++  // The source JSON may be elsewhere: file URLs resolve beside the output HTML.
++  const snapshot = path.join(f.root, 'snapshots', 'input.json'); fs.mkdirSync(path.dirname(snapshot));
++  fs.writeFileSync(snapshot, JSON.stringify(f.d));
++  r = spawnSync(process.execPath, [BUILDER, snapshot, f.out], { encoding: 'utf8' });
++  assert.equal(r.status, 0, r.stderr);
++});
++
++test('shared stable IDs require EVERY referencing revision for path, bytes and all semantic metadata changes', t => {
++  const f = inputPackage(t);
++  const edits = [
++    d => { d.inputs[0].requirements += ' Check another edge case.'; },
++    d => { d.inputs[0].use += ' Change C2.'; },
++    d => { d.inputs[0].reset += ' Verify restored value.'; },
++    d => { d.inputs[0].mode = 'read-only'; },
++    d => { d.inputs[0].validation.command += ' --changed'; },
++    d => { d.inputs[0].validation.result += ' New result text.'; },
++    d => { d.inputs[0].validation.env += ' New environment.'; },
++    d => { Object.assign(d.inputs[0], f.put('evidence/C1/inputs/issue-002/orders.xlsx', f.workbook)); },
++    d => { const bytes = Buffer.from(f.workbook); bytes[200] ^= 1;
++      Object.assign(d.inputs[0], f.put('evidence/C1/inputs/issue-002/orders.xlsx', bytes)); }
++  ];
++  for (const edit of edits) {
++    const current = structuredClone(f.d); edit(current);
++    current.inputHistory = [{ path: f.d.inputs[0].path, sha256: f.d.inputs[0].sha256, size: f.d.inputs[0].size }];
++    const options = { previous: f.d, inputRoot: f.root };
++    assert.throws(() => builder.buildSmokePage(current, template, options), /step 1:.*resolved inputs changed.*increment revision/);
++    current.sections[0].steps[0].revision++;
++    assert.throws(() => builder.buildSmokePage(current, template, options), /step 3:.*resolved inputs changed.*increment revision/);
++    current.sections[1].steps[0].revision++;
++    assert.doesNotThrow(() => builder.buildSmokePage(current, template, options));
++    assert.equal(current.sections[0].steps[1].revision, f.d.sections[0].steps[1].revision);
++    assert.equal(current.buildSha, f.d.buildSha, 'same-build changes must still invalidate input consumers');
++  }
++});
++
++test('shared validation report identity changes invalidate all input consumers and require its historical bytes', t => {
++  const f = inputPackage(t), current = structuredClone(f.d);
++  current.inputs.push({ ...structuredClone(current.inputs[0]), id: 'second' });
++  current.sections[1].steps[0].inputs = ['second'];
++  const previous = structuredClone(current);
++  const proof = f.put('evidence/C1/inputs/validation-002/report.txt', 'New independent validation.\n');
++  current.inputs.forEach(input => Object.assign(input.validation, proof));
++  current.inputHistory = [f.report];
++  const options = { previous, inputRoot: f.root };
++  assert.throws(() => builder.buildSmokePage(current, template, options), /step 1:.*increment revision/);
++  current.sections[0].steps[0].revision++;
++  assert.throws(() => builder.buildSmokePage(current, template, options), /step 3:.*increment revision/);
++  current.sections[1].steps[0].revision++;
++  assert.doesNotThrow(() => builder.buildSmokePage(current, template, options));
++  fs.unlinkSync(path.join(f.root, f.report.path));
++  assert.throws(() => builder.buildSmokePage(current, template, options), /validation-001.*ENOENT/);
++});
++
++test('LF/CRLF-only reissue refuses stale bytes then enforces new paths, all revisions and multi-issue history', t => {
++  const f = inputPackage(t);
++  Object.assign(f.d.inputs[0], f.put('evidence/C1/inputs/issue-001/raw.txt', 'one\ntwo\n'));
++  f.write(f.d); let r = f.run(); assert.equal(r.status, 0, r.stderr);
++  const before = fs.readFileSync(f.out), old = path.join(f.root, 'snapshots', 'previous.json');
++  fs.mkdirSync(path.dirname(old)); fs.writeFileSync(old, JSON.stringify(f.d));
++  const source = path.join(f.root, f.d.inputs[0].path);
++  fs.writeFileSync(source, 'one\r\ntwo\r\n');
++  r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /size mismatch/);
++  assert.deepEqual(fs.readFileSync(f.out), before);
++  const current = structuredClone(f.d); Object.assign(current.inputs[0], f.put(f.d.inputs[0].path, 'one\r\ntwo\r\n'));
++  current.sections[0].steps[0].revision++; current.sections[1].steps[0].revision++;
++  f.write(current); r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /immutable/);
++  assert.deepEqual(fs.readFileSync(f.out), before);
++  fs.writeFileSync(source, 'one\ntwo\n');
++  Object.assign(current.inputs[0], f.put('evidence/C1/inputs/issue-002/raw.txt', 'one\r\ntwo\r\n'));
++  f.write(current); r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /missing from inputs\/inputHistory/);
++  current.inputHistory = [{ path: f.d.inputs[0].path, sha256: f.d.inputs[0].sha256, size: f.d.inputs[0].size }];
++  current.sections[1].steps[0].revision--; f.write(current);
++  r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /step 3:.*increment revision/);
++  current.sections[1].steps[0].revision++; f.write(current);
++  r = f.run('--previous', old); assert.equal(r.status, 0, r.stderr);
++  assert.equal(fs.readFileSync(source, 'utf8'), 'one\ntwo\n');
++  const second = fs.readFileSync(f.out); fs.writeFileSync(old, JSON.stringify(current));
++  fs.unlinkSync(source); r = f.run('--previous', old);
++  assert.equal(r.status, 1); assert.match(r.stderr, /issue-001.*ENOENT/);
++  assert.deepEqual(fs.readFileSync(f.out), second);
++  fs.writeFileSync(source, 'one\ntwo\n');
++  delete current.inputHistory; f.write(current); r = f.run('--previous', old);
++  assert.equal(r.status, 1); assert.match(r.stderr, /missing.*issue-001/);
++  assert.deepEqual(fs.readFileSync(f.out), second);
++});
+diff --git a/tests/protocol-contract.test.cjs b/tests/protocol-contract.test.cjs
+new file mode 100644
+index 0000000..7d640c3
+--- /dev/null
++++ b/tests/protocol-contract.test.cjs
+@@ -0,0 +1,218 @@
++const assert = require('node:assert/strict');
++const { createHash } = require('node:crypto');
++const { spawnSync } = require('node:child_process');
++const fs = require('node:fs');
++const os = require('node:os');
++const path = require('node:path');
++const test = require('node:test');
++const ROOT = path.resolve(__dirname, '..');
++const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g, '\n');
++const protocol = read('orchestrate/references/protocol.md');
++const contract = read('orchestrate/templates/00-READBEFORE.md');
++// Consumer tests use isolated disposable repositories and actual CLI invocations;
++// they do not import the upstream evidence or fence implementation.
++function makeRepo(t) {
++  const temp = fs.realpathSync(os.tmpdir()), root = fs.mkdtempSync(path.join(temp, 'protocol-docs-git-'));
++  t.after(() => { assert.equal(path.dirname(fs.realpathSync(root)), temp); fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }); });
++  const empty = path.join(root, 'empty'); fs.writeFileSync(empty, '');
++  const hooks = path.join(root, 'hooks'), template = path.join(root, 'template'); fs.mkdirSync(hooks); fs.mkdirSync(template);
++  const env = { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key))),
++    GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: empty, GIT_TERMINAL_PROMPT: '0' };
++  const config = ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgSign=false',
++    '-c', 'core.autocrlf=false', '-c', 'core.hooksPath=' + hooks, '-c', 'protocol.allow=never', '-c', 'protocol.file.allow=always'];
++  function at(cwd) {
++    const git = (...args) => {
++      const r = spawnSync('git', [...config, ...args], { cwd, env, encoding: 'utf8', windowsHide: true, timeout: 15000 });
++      assert.ifError(r.error); assert.equal(r.status, 0, r.stderr); return r.stdout.trim();
++    };
++    const write = (file, bytes) => { const p = path.join(cwd, file); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, bytes); };
++    const commit = message => { git('add', '--all'); git('commit', '--allow-empty', '-m', message); return git('rev-parse', 'HEAD'); };
++    function snapshot() {
++      const files = {};
++      const walk = dir => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
++        if (e.name === '.git') continue;
++        const p = path.join(dir, e.name);
++        if (e.isDirectory()) walk(p); else files[path.relative(cwd, p)] = fs.readFileSync(p).toString('base64');
++      } };
++      walk(cwd);
++      const gitDir = path.resolve(cwd, git('rev-parse', '--git-dir'));
++      return { files, refs: git('for-each-ref', '--format=%(refname) %(objectname) %(symref)'),
++        head: fs.readFileSync(path.join(gitDir, 'HEAD')).toString('base64'),
++        index: fs.readFileSync(path.join(gitDir, 'index')).toString('base64') };
++    }
++    return { cwd, git, write, commit, snapshot };
++  }
++  const cwd = path.join(root, 'repo'); fs.mkdirSync(cwd);
++  const repo = at(cwd); repo.git('init', '--initial-branch=main', '--template=' + template);
++  const base = repo.commit('base');
++  const remote = () => {
++    const location = path.join(root, 'origin.git'); fs.mkdirSync(location);
++    const bare = at(location); bare.git('init', '--bare', '--initial-branch=main', '--template=' + template);
++    repo.git('remote', 'add', 'origin', location); repo.git('push', 'origin', base + ':refs/heads/main'); return bare;
++  };
++  return { ...repo, root, env, base, at, remote };
++}
++const normalize = text => text.replace(/`/g, '').replace(/\{\{INTEGRATION_BRANCH\}\}/g, 'the integration branch')
++  .replace(/\{\{BACKLOG_FILE\}\}/g, 'backlog').replace(/\s+/g, ' ').trim();
++function table(text, start) {
++  const i = text.indexOf(start); assert.notEqual(i, -1);
++  const rows = [];
++  for (const line of text.slice(i).split('\n')) { if (!/^\s*\|/.test(line)) break; rows.push(line); }
++  return rows.join('\n');
++}
++
++test('Recovery and capped-verdict tables agree exactly after placeholder normalization', () => {
++  for (const heading of ['| Ledger says | Git shows | Verdict |', '| Subject | fix again | ship with the residual | drop |']) {
++    assert.equal(normalize(table(contract, heading)), normalize(table(protocol, heading)), heading);
++  }
++  // These are the approved starting decision tables, not regenerated expectations.
++  // Comparing both mirrors alone would miss a coordinated accidental rule change.
++  const expected = {
++    '| Ledger says | Git shows | Verdict |': 'c3f5e598e853e6f3d3f0f5a7b98c10dd82e7d8e63b9ec47914c64c828323b4b1',
++    '| Subject | fix again | ship with the residual | drop |': '326ff764e5a7821d148ab18e38b9aed33a4c0fd36baebe5463da02c83adb7346'
++  };
++  for (const [heading, hash] of Object.entries(expected)) assert.equal(createHash('sha256').update(normalize(table(protocol, heading))).digest('hex'), hash);
++  const shipment = text => text.slice(text.indexOf("Resolve the integration branch's full local ref"), text.indexOf('For each PROGRESS row'))
++    .replace(/\{\{SHIPMENT_REF\}\}/g, '<shipment-ref>').replace(/\s+/g, ' ').trim();
++  assert.equal(shipment(contract), shipment(protocol), 'captured-source shipment semantics stay mirrored');
++});
++
++test('template placeholders and registry match in both directions', () => {
++  const files = fs.readdirSync(path.join(ROOT, 'orchestrate/templates')).filter(p => p.endsWith('.md'));
++  const used = new Set(files.flatMap(p => [...read('orchestrate/templates/' + p).matchAll(/\{\{([A-Z_]+)\}\}/g)].map(m => m[1])));
++  const rows = read('orchestrate/references/scaffolding.md').split('\n').filter(l => /^\| `\{\{[A-Z_]+\}\}` \| template/.test(l));
++  const listed = rows.map(l => l.match(/\{\{([A-Z_]+)\}\}/)[1]);
++  assert.equal(new Set(listed).size, listed.length);
++  assert.deepEqual([...used].sort(), listed.sort());
++});
++
++test('generated contract bakes helper grammar, outcomes, fallback and full input responsibility', () => {
++  const helperSection = text => text.slice(text.indexOf('### Read-only evidence tools'), text.indexOf('## Git model'));
++  assert.equal(helperSection(contract).replaceAll('{{EVIDENCE_TOOL}}', 'orchestrate/tools/git-evidence.mjs')
++    .replaceAll('{{FENCE_TOOL}}', 'orchestrate/tools/check-fence.mjs'), helperSection(protocol));
++  const inputSection = text => text.slice(text.indexOf('### Complete checkpoint inputs'), text.indexOf('## Smoke checkpoints'));
++  assert.equal(inputSection(contract), inputSection(protocol));
++  for (const needed of ['complete/partial/unknown', 'contained/not-contained/unknown', 'VIOLATION (1)', 'UNKNOWN (2)',
++    'both arrays', 'committed integration plan', 'never the candidate', 'exact comma-separated backtick paths',
++    'Manual read-only fallback', 'ALL local/remote-tracking', 'git show ref:./path', 'only the selected ledger',
++    'does not', 'immutable', 'inputHistory', 'EVERY', 'inputRoot', 'raw SHA-256', 'working-copy', 'reset',
++    'private-data', 'credential', 'external-access', 'independently validate', 'never workbook semantics']) {
++    assert.ok(contract.includes(needed), 'generated contract must bake: ' + needed);
++  }
++  for (const file of ['orchestrate/SKILL.md', 'orchestrate/references/scaffolding.md', 'orchestrate/references/execution-models.md',
++    'orchestrate/references/subagent-prompts.md', 'orchestrate/references/smoke-page.md']) {
++    const text = read(file);
++    for (const required of [/inputs/i, /reset/i, /independen/i, /revisio/i, /(?:private.data|credential)/i]) assert.match(text, required, file);
++  }
++  for (const file of ['orchestrate/templates/01-plan.md', 'orchestrate/templates/02-batch.md', 'orchestrate/templates/PROGRESS.md']) {
++    const text = read(file); assert.match(text, /input/i); assert.match(text, /reset/); assert.match(text, /revis/i);
++  }
++  assert.match(read('orchestrate/references/subagent-prompts.md'), /ACTUAL INPUTS: \[INPUT ROOT, STABLE-ID REGISTRY/);
++  assert.match(read('orchestrate/SKILL.md'), /Existing\nledgers keep their frozen contract/);
++  assert.ok(contract.indexOf('**6a Fence check') < contract.indexOf('**6b Failing-on-base'));
++  assert.ok(contract.indexOf('**6b Failing-on-base') < contract.indexOf('**6c Reviewer'));
++  assert.match(contract.slice(contract.indexOf('**6a Fence check'), contract.indexOf('**6b Failing-on-base')), /read-only helper.*\n\s+or its manual fallback/);
++});
++
++test('reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact', () => {
++  const paths = ['orchestrate/SKILL.md', ...fs.readdirSync(path.join(ROOT, 'orchestrate/templates')).map(p => 'orchestrate/templates/' + p),
++    ...fs.readdirSync(path.join(ROOT, 'orchestrate/references')).filter(p => p.endsWith('.md')).map(p => 'orchestrate/references/' + p),
++    'orchestrate/tools/build-smoke-page.mjs', 'orchestrate/tools/smoke-inputs.mjs'];
++  for (const file of paths) assert.doesNotMatch(read(file), /[A-Z]:[\\/](?:Users|Program Files)[\\/].*Python|fatbo|Python310/i, file);
++  const frozen = path.join(ROOT, '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md');
++  // The approved ledger is branch-local; ordinary clones after user archival need
++  // not contain it. When present, reusable edits must never rewrite its local fact.
++  if (fs.existsSync(frozen)) {
++    const text = fs.readFileSync(frozen, 'utf8');
++    assert.match(text, /Python310[\\/]python\.exe/);
++    assert.match(text, /Every generation and independent Excel-validation command in this run uses literal/);
++  }
++});
++
++test('published helper recipes execute actual CLIs and generated batch grammar passes the real fence', t => {
++  const repo = makeRepo(t), ledger = '.agents/changes/DOCS', integration = 'refs/heads/codex/docs-ledger';
++  const batch = 'refs/heads/codex/docs-b01', batchFile = ledger + '/02-batches-01-example.md';
++  repo.git('checkout', '-b', 'codex/docs-ledger');
++  const values = { BATCH_NUM: '01', BATCH_BRANCH: 'codex/docs-b01', BATCH_FILES: '`payload.txt`', BATCH_TITLE: 'Example',
++    BATCH_TYPE: 'feature', BATCH_VERSION: '—' };
++  const rendered = read('orchestrate/templates/02-batch.md').replace(/\{\{([A-Z_]+)\}\}/g, (_, k) => values[k] || 'example')
++    .replace(/<!-- - \[ \] one box[\s\S]*?-->/, '- [ ] Implement example.')
++    .replace(/<!--[\s\S]*?-->/g, '');
++  repo.write(batchFile, rendered);
++  repo.write(ledger + '/01-plan.md', '| # | Branch | Files (fence) |\n|---|---|---|\n| B01 | codex/docs-b01 | `payload.txt` |\n');
++  repo.write(ledger + '/PROGRESS.md', '**State**: ACTIVE\n| # | Branch | Notes |\n|---|---|---|\n| B01 | codex/docs-b01 | — |\n');
++  repo.write(ledger + '/00-READBEFORE.md', contract.replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => ({
++    INTEGRATION_BRANCH: 'codex/docs-ledger', EVIDENCE_TOOL: path.join(ROOT, 'orchestrate/tools/git-evidence.mjs'),
++    FENCE_TOOL: path.join(ROOT, 'orchestrate/tools/check-fence.mjs') }[key] || 'example')));
++  const source = repo.commit('rendered scaffold');
++  const remote = repo.remote(); repo.git('push', 'origin', source + ':refs/heads/main');
++  const wt = path.join(repo.root, 'batch'); repo.git('worktree', 'add', '-b', 'codex/docs-b01', wt, source);
++  const candidate = repo.at(wt); candidate.write('payload.txt', 'Implemented\n');
++  candidate.write(batchFile, rendered.replace('- [ ] Implement example.', '- [x] Implement example.'));
++  const tip = candidate.commit('implementation');
++  const before = repo.snapshot(), candidateBefore = candidate.snapshot();
++  const recipes = protocol.split('\n').filter(l => l.startsWith('node orchestrate/tools/'));
++  assert.equal(recipes.length, 7);
++  for (const line of recipes) {
++    const tokens = line.split(' '), script = path.join(ROOT, tokens[1]);
++    const args = tokens.slice(2).map((value, i, list) => {
++      if (!value.startsWith('<')) return value;
++      const flag = list[i - 1];
++      return { '--repo': repo.cwd, '--integration': integration, '--batch': batch, '--ledger': 'DOCS', '--batch-id': 'B01',
++        '--batch-file': batchFile, '--remote': 'origin', '--ancestor': repo.base, '--descendant': source,
++        '--owner': integration, '--target': source, '--ref': line.includes(' shipment ') ? 'refs/heads/main' : integration }[flag];
++    });
++    assert.ok(args.every(Boolean), line);
++    const r = spawnSync(process.execPath, [script, ...args], { cwd: repo.cwd, env: repo.env, encoding: 'utf8', windowsHide: true });
++    assert.ifError(r.error); assert.equal(r.status, 0, line + '\n' + r.stdout + r.stderr);
++    const result = JSON.parse(r.stdout);
++    if (line.includes('check-fence')) {
++      assert.equal(result.status, 'PASS'); assert.equal(result.integrationSha, source); assert.equal(result.batchSha, tip);
++    } else {
++      assert.equal(result.completeness, 'complete');
++      if (line.includes(' ancestry ')) assert.equal(result.evidence.result, 'contained');
++      if (line.includes(' shipment ')) assert.equal(result.evidence.result, line.includes('--source local') ? 'not-contained' : 'contained');
++      if (line.includes(' discovery ')) assert.ok(result.evidence.ledgers.some(l => l.id === 'DOCS'));
++      if (line.includes(' ledger ')) assert.equal(result.evidence.active.exists, true);
++    }
++  }
++  assert.deepEqual(repo.snapshot(), before); assert.deepEqual(candidate.snapshot(), candidateBefore);
++  assert.ok(remote.cwd);
++});
++
++test('actual README recursive command and portable form discover nested failure then success; empty primary discovery fails', t => {
++  const repo = makeRepo(t), readme = read('README.md');
++  const runnerEnv = { ...repo.env }; delete runnerEnv.NODE_TEST_CONTEXT;
++  const command = readme.match(/```powershell\n(\$testFiles = [\s\S]*?)\n```/)[1];
++  assert.match(command, /Get-ChildItem -LiteralPath tests -Filter \*\.test\.cjs -File -Recurse \| Sort-Object FullName \| ForEach-Object FullName/);
++  assert.match(command, /node --test --test-reporter=spec @testFiles/);
++  assert.match(readme, /Portable convenience: `node --test`/); assert.doesNotMatch(readme, /`node --test tests(?:`| )/);
++  const runner = path.join(repo.root, 'published-runner.ps1'); fs.writeFileSync(runner, command + '\n');
++  let powershell;
++  for (const shell of ['pwsh', 'powershell']) {
++    const r = spawnSync(shell, ['-NoProfile', '-NonInteractive', '-Command', '$PSVersionTable.PSVersion.ToString()'], { encoding: 'utf8' });
++    if (!r.error && r.status === 0) { powershell = shell; break; }
++  }
++  if (!powershell) { t.skip('PowerShell prerequisite unavailable; execute published recipe on a PowerShell runner before hand-over.'); return; }
++  const top = 'tests/a-control.test.cjs', nested = 'tests/unit/discovery-sentinel.test.cjs', last = 'tests/z-control.test.cjs';
++  const control = name => `require('node:test')('${name}', () => require('node:assert/strict').equal(1, 1));\n`;
++  repo.write(top, control('top-level discovery control')); repo.write(last, control('last discovery control'));
++  const sentinel = pass => `require('node:test')('UNIQUE nested discovery sentinel', () => require('node:assert/strict').equal(${pass ? '1' : '0'}, 1));\n`;
++  repo.write(nested, sentinel(false));
++  const run = () => spawnSync(powershell, ['-NoProfile', '-NonInteractive', '-File', runner], { cwd: repo.cwd, env: runnerEnv, encoding: 'utf8', windowsHide: true });
++  const portable = () => spawnSync(process.execPath, ['--test'], { cwd: repo.cwd, env: runnerEnv, encoding: 'utf8', windowsHide: true });
++  for (const result of [run(), portable()]) {
++    assert.ifError(result.error); assert.notEqual(result.status, 0, result.stdout + result.stderr);
++    assert.match(result.stdout + result.stderr, /UNIQUE nested discovery sentinel/);
++    assert.match(result.stdout, /fail 1/);
++  }
++  const failed = run(); assert.match(failed.stderr, /Node test suite failed/);
++  repo.write(nested, sentinel(true));
++  for (const result of [run(), portable()]) { assert.equal(result.status, 0, result.stderr); assert.match(result.stdout, /pass 3/); }
++  const enumeration = command.split('\n')[0] + '\n$testFiles | ConvertTo-Json -Compress';
++  const result = spawnSync(powershell, ['-NoProfile', '-NonInteractive', '-Command', enumeration], { cwd: repo.cwd, env: repo.env, encoding: 'utf8' });
++  assert.equal(result.status, 0, result.stderr);
++  assert.deepEqual(JSON.parse(result.stdout), [top, nested, last].map(p => path.join(repo.cwd, p)));
++  for (const name of [top, nested, last]) fs.unlinkSync(path.join(repo.cwd, name));
++  const empty = run(); assert.notEqual(empty.status, 0); assert.match(empty.stderr, /No Node test suites discovered/);
++});
+diff --git a/tests/smoke-inputs.test.cjs b/tests/smoke-inputs.test.cjs
+new file mode 100644
+index 0000000..8fdfdae
+--- /dev/null
++++ b/tests/smoke-inputs.test.cjs
+@@ -0,0 +1,212 @@
++const assert = require('node:assert/strict');
++const { createHash } = require('node:crypto');
++const { spawnSync } = require('node:child_process');
++const fs = require('node:fs');
++const os = require('node:os');
++const path = require('node:path');
++const { pathToFileURL } = require('node:url');
++const test = require('node:test');
++const FIXTURES = path.join(__dirname, 'fixtures/smoke-inputs');
++const rawHash = bytes => createHash('sha256').update(bytes).digest('hex');
++let inputs;
++test.before(async () => { inputs = await import(pathToFileURL(path.join(__dirname, '../orchestrate/tools/smoke-inputs.mjs'))); });
++
++function makeRepo(t) {
++  const temp = fs.realpathSync(os.tmpdir()), root = fs.mkdtempSync(path.join(temp, 'smoke-bytes-git-'));
++  t.after(() => { assert.equal(path.dirname(fs.realpathSync(root)), temp); fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }); });
++  const cwd = path.join(root, 'repo'); fs.mkdirSync(cwd);
++  const empty = path.join(root, 'empty'); fs.writeFileSync(empty, '');
++  const hooks = path.join(root, 'hooks'), template = path.join(root, 'template'); fs.mkdirSync(hooks); fs.mkdirSync(template);
++  const env = { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key))),
++    GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: empty, GIT_TERMINAL_PROMPT: '0' };
++  const config = ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgSign=false',
++    '-c', 'core.autocrlf=false', '-c', 'core.hooksPath=' + hooks];
++  const git = (...args) => {
++    const r = spawnSync('git', [...config, ...args], { cwd, env, encoding: 'utf8', windowsHide: true });
++    assert.ifError(r.error); assert.equal(r.status, 0, r.stderr); return r.stdout.trim();
++  };
++  git('init', '--initial-branch=main', '--template=' + template);
++  const write = (file, bytes) => { const p = path.join(cwd, file); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, bytes); };
++  const commit = message => { git('add', '--all'); git('commit', '--allow-empty', '-m', message); return git('rev-parse', 'HEAD'); };
++  return { root, cwd, env, git, write, commit };
++}
++
++function fixture(t) {
++  const temp = fs.realpathSync(os.tmpdir()), root = fs.mkdtempSync(path.join(temp, 'smoke-inputs-'));
++  t.after(() => { assert.equal(path.dirname(fs.realpathSync(root)), temp); fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }); });
++  const write = (file, bytes) => {
++    fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true }); fs.writeFileSync(path.join(root, file), bytes);
++    return { path: file, size: Buffer.byteLength(bytes), sha256: rawHash(bytes) };
++  };
++  const workbook = fs.readFileSync(path.join(FIXTURES, 'orders.xlsx'));
++  assert.equal(rawHash(workbook), 'e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f', 'exercise the actual independently validated B02 workbook');
++  const report = write('evidence/C1/inputs/validation-001/report.txt', 'Independent validation evidence: fixture checks passed.\n');
++  const input = { id: 'orders', ...write('evidence/C1/inputs/issue-001/orders.xlsx', workbook),
++    requirements: 'Orders/Summary/Types, leading-zero IDs, formulas/caches, total 23.50/count 4.',
++    validation: { ...report, command: 'python validate-orders.py orders.xlsx orders.requirements.json', exitCode: 0,
++      result: 'All sheet/cell/type/formula/cache requirements passed.', env: 'B02 fixture semantics independently validated; this test checks delivery bytes.' },
++    mode: 'working-copy', use: 'Copy original to a disposable workbook.', reset: 'Close the copy and recopy the preserved original.' };
++  const data = { inputs: [input], sections: [{ n: 1, steps: [{ n: 1, inputs: ['orders'] }, { n: 2, inputs: ['orders'] }, { n: 3 }] }] };
++  return { root, write, input, data, report, workbook };
++}
++
++test('real workbook declarations resolve shared stable IDs without mutating metadata', t => {
++  const f = fixture(t), original = JSON.stringify(f.data), d = inputs.declareInputs(f.data);
++  assert.equal(d.byStep.get(1)[0], f.input); assert.equal(d.byStep.get(2)[0], f.input);
++  assert.deepEqual(d.byStep.get(3), []);
++  assert.doesNotThrow(() => inputs.validateInputFiles(d, f.root));
++  assert.throws(() => inputs.validateInputFiles(d), /explicit inputRoot/);
++  assert.equal(JSON.stringify(f.data), original);
++  assert.doesNotThrow(() => inputs.validateInputFiles(inputs.declareInputs({ sections: [] })));
++});
++
++test('incomplete or ambiguous declarations never become inputs', t => {
++  const f = fixture(t);
++  const bad = [
++    [d => delete d.inputs[0].id, /stable nonempty id/],
++    [d => d.inputs.push(structuredClone(d.inputs[0])), /duplicate input id/],
++    [d => { d.inputs = {}; }, /registry array/],
++    [d => { d.inputHistory = {}; }, /inputHistory must be an array/],
++    [d => { d.sections[0].steps[0].inputs = ['missing']; }, /dangling/],
++    [d => { d.sections[0].steps[0].inputs = ['orders', 'orders']; }, /repeats/],
++    [d => { d.sections[0].steps[0].inputs = 'orders'; }, /array of input ids/],
++    [d => { d.sections[0].steps[0].inputFiles = []; }, /reserved/],
++    [d => { d.inputs[0].size = -1; }, /size/],
++    [d => { d.inputs[0].size = '8634'; }, /size/],
++    [d => { d.inputs[0].sha256 = 'a'.repeat(40); }, /SHA-256/],
++    [d => { d.inputs[0].sha256 = 'A'.repeat(64); }, /SHA-256/],
++    [d => { d.inputs[0].mode = 'edit-original'; }, /mode/],
++    [d => { d.inputs[0].validation.exitCode = 1; }, /exitCode/],
++    [d => { d.inputs[0].validation.exitCode = '0'; }, /exitCode/],
++    [d => { d.inputs[0].validation = null; }, /object/]
++  ];
++  for (const field of ['path', 'sha256', 'size', 'requirements', 'validation', 'mode', 'use', 'reset']) {
++    bad.push([d => delete d.inputs[0][field], new RegExp(field === 'validation' ? 'object' : field)]);
++  }
++  for (const field of ['path', 'sha256', 'size', 'command', 'result', 'env']) bad.push([d => delete d.inputs[0].validation[field], new RegExp(field)]);
++  for (const [edit, message] of bad) { const d = structuredClone(f.data); edit(d); assert.throws(() => inputs.declareInputs(d), message); }
++});
++
++test('portable input paths reject absolute, traversal and Windows alias spellings', t => {
++  const f = fixture(t);
++  for (const name of ['/tmp/file', 'C:/file', 'C:file', '//host/share', '..', '../file', 'a/../file',
++    'a/./file', 'a//file', 'a\\file', 'a\0file', 'a\nfile', 'a.', 'a ', 'NUL.txt', 'con', 'a/COM1.xlsx', 'a/',
++    'a?file', 'a*file', 'a"file', 'a|file', 'a<file', 'a>file']) {
++    for (const where of ['input', 'validation', 'history']) {
++      const d = structuredClone(f.data);
++      if (where === 'input') d.inputs[0].path = name;
++      else if (where === 'validation') d.inputs[0].validation.path = name;
++      else d.inputHistory = [{ ...f.report, path: name }];
++      assert.throws(() => inputs.declareInputs(d), /safe relative/, `${where}: ${JSON.stringify(name)}`);
++    }
++  }
++  const collision = structuredClone(f.data);
++  collision.inputHistory = [{ ...f.report, path: f.report.path.toUpperCase() }];
++  assert.throws(() => inputs.declareInputs(collision), /conflicting issued input path/);
++});
++
++test('disk checks reject missing files, directories, altered reports and stale raw hashes', t => {
++  const f = fixture(t), d = inputs.declareInputs(f.data), workbook = path.join(f.root, f.input.path);
++  fs.unlinkSync(workbook); assert.throws(() => inputs.validateInputFiles(d, f.root), /input artifact.*ENOENT/);
++  fs.mkdirSync(workbook); assert.throws(() => inputs.validateInputFiles(d, f.root), /not a regular file/);
++  fs.rmdirSync(workbook); fs.writeFileSync(workbook, f.workbook);
++  const tampered = Buffer.from(f.workbook); tampered[100] ^= 1; fs.writeFileSync(workbook, tampered);
++  assert.throws(() => inputs.validateInputFiles(d, f.root), /SHA-256 mismatch/);
++  fs.writeFileSync(workbook, f.workbook);
++  const report = path.join(f.root, f.report.path), bytes = fs.readFileSync(report);
++  const altered = Buffer.from(bytes); altered[0] ^= 1; fs.writeFileSync(report, altered);
++  assert.throws(() => inputs.validateInputFiles(d, f.root), /report.txt.*SHA-256 mismatch/);
++  fs.unlinkSync(report); assert.throws(() => inputs.validateInputFiles(d, f.root), /report.txt.*ENOENT/);
++});
++
++test('LF, CRLF, BOM and whitespace are significant raw bytes', t => {
++  const f = fixture(t);
++  const source = Buffer.from('A line\nAnother é line\n');
++  Object.assign(f.input, f.write('evidence/C1/inputs/issue-001/raw.txt', source));
++  const d = inputs.declareInputs(f.data);
++  for (const mutated of [Buffer.from(source.toString().replace(/\n/g, '\r\n')), Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), source]),
++    Buffer.concat([source, Buffer.from(' ')]), Buffer.from(source.toString().replace('A', 'B'))]) {
++    fs.writeFileSync(path.join(f.root, f.input.path), mutated);
++    assert.throws(() => inputs.validateInputFiles(d, f.root), /size mismatch|SHA-256 mismatch/);
++    const wrongDigest = structuredClone(f.data); wrongDigest.inputs[0].size = mutated.length;
++    assert.throws(() => inputs.validateInputFiles(inputs.declareInputs(wrongDigest), f.root), /SHA-256 mismatch/,
++      'the hash itself must reject normalization even when byte size metadata was updated');
++  }
++  fs.writeFileSync(path.join(f.root, f.input.path), source);
++  assert.doesNotThrow(() => inputs.validateInputFiles(d, f.root));
++});
++
++test('symlink or junction inputs and evidence cannot escape the delivery root', t => {
++  const f = fixture(t);
++  const external = fixture(t).root;
++  fs.writeFileSync(path.join(external, 'data.txt'), 'outside');
++  const link = path.join(f.root, 'redirect');
++  fs.symlinkSync(external, link, process.platform === 'win32' ? 'junction' : 'dir');
++  for (const place of ['input', 'validation', 'history']) {
++    const data = structuredClone(f.data), target = { path: 'redirect/data.txt', sha256: rawHash(Buffer.from('outside')), size: 7 };
++    if (place === 'input') Object.assign(data.inputs[0], target);
++    else if (place === 'validation') Object.assign(data.inputs[0].validation, target);
++    else data.inputHistory = [target];
++    assert.throws(() => inputs.validateInputFiles(inputs.declareInputs(data), f.root), /symbolic links are not permitted/);
++  }
++});
++
++test('history comparison is metadata-only but requires retention of input and shared evidence across later issues', t => {
++  const f = fixture(t), old = inputs.declareInputs(f.data), next = structuredClone(f.data);
++  const second = { ...f.input, id: 'orders-copy' }; next.inputs.push(second);
++  next.sections[0].steps[1].inputs = ['orders-copy'];
++  assert.doesNotThrow(() => inputs.compareInputHistory(inputs.declareInputs(next), old));
++  const before = inputs.declareInputs(next);
++  next.inputs = []; next.sections[0].steps.forEach(s => { s.inputs = []; });
++  assert.throws(() => inputs.compareInputHistory(inputs.declareInputs(next), before), /missing from inputs\/inputHistory.*orders.xlsx/);
++  next.inputHistory = [{ path: f.input.path, sha256: f.input.sha256, size: f.input.size }];
++  assert.throws(() => inputs.compareInputHistory(inputs.declareInputs(next), before), /missing.*report.txt/);
++  next.inputHistory.push(f.report);
++  assert.doesNotThrow(() => inputs.compareInputHistory(inputs.declareInputs(next), before));
++  // A later sidecar must carry history forward, even after no live step uses it.
++  const later = structuredClone(next); later.inputHistory.pop();
++  assert.throws(() => inputs.compareInputHistory(inputs.declareInputs(later), inputs.declareInputs(next)), /missing.*report.txt/);
++  const changed = structuredClone(next); changed.inputHistory[0].sha256 = '0'.repeat(64);
++  assert.throws(() => inputs.compareInputHistory(inputs.declareInputs(changed), before), /immutable/);
++  fs.unlinkSync(path.join(f.root, f.input.path));
++  assert.doesNotThrow(() => inputs.compareInputHistory(inputs.declareInputs(next), before), 'metadata comparison does not pretend old bytes are current files');
++  assert.throws(() => inputs.validateInputFiles(inputs.declareInputs(next), f.root), /orders.xlsx.*ENOENT/);
++});
++
++test('actual scoped attributes preserve fixture, active and archived raw bytes in a fresh autocrlf checkout', t => {
++  const repo = makeRepo(t), source = new Map();
++  repo.write('.gitattributes', fs.readFileSync(path.join(__dirname, '../.gitattributes')));
++  const remember = (p, bytes) => { repo.write(p, bytes); source.set(p, rawHash(bytes)); };
++  for (const name of ['orders.xlsx', 'orders.requirements.json', 'generate-orders.py', 'validate-orders.py']) {
++    const bytes = fs.readFileSync(path.join(FIXTURES, name));
++    remember('tests/fixtures/smoke-inputs/' + name, bytes);
++    for (const where of ['changes', 'archive']) remember(`.agents/${where}/BYTES/evidence/C1/inputs/issue-001/${name}`, bytes);
++  }
++  for (const where of ['changes', 'archive']) {
++    for (const [name, bytes] of [['lf.txt', Buffer.from('one\ntwo\n')], ['crlf.txt', Buffer.from('one\r\ntwo\r\n')],
++      ['nested/evidence.json', Buffer.from('{"validated":true}\n')]]) remember(`.agents/${where}/BYTES/evidence/C1/inputs/issue-001/${name}`, bytes);
++  }
++  repo.write('conversion-control.txt', 'one\ntwo\n');
++  const commit = repo.commit('real protected package');
++  const checkout = path.join(repo.root, 'checkout');
++  // Fixture helpers force autocrlf=false, so the checkout commands deliberately
++  // use the isolated env directly. Local true is effective before the first checkout.
++  function git(args, cwd = repo.cwd) {
++    const r = spawnSync('git', args, { cwd, env: repo.env, encoding: 'utf8', shell: false, windowsHide: true });
++    assert.ifError(r.error); assert.equal(r.status, 0, r.stderr); return r.stdout.trim();
++  }
++  git(['clone', '--no-checkout', '--no-hardlinks', repo.cwd, checkout]);
++  git(['config', '--local', 'core.autocrlf', 'true'], checkout);
++  assert.equal(git(['config', '--get', 'core.autocrlf'], checkout), 'true');
++  git(['checkout', '--detach', commit], checkout);
++  for (const [file, expected] of source) {
++    const actual = fs.readFileSync(path.join(checkout, file));
++    assert.equal(rawHash(actual), expected, file);
++    const attributes = git(['check-attr', 'text', 'eol', 'filter', 'ident', 'working-tree-encoding', '--', file], checkout);
++    assert.equal(attributes.split('\n').length, 5);
++    assert.ok(attributes.split('\n').every(line => line.endsWith(': unset')), attributes);
++    if (file.endsWith('.xlsx')) assert.ok(git(['check-attr', 'diff', 'merge', '--', file], checkout).split('\n').every(line => line.endsWith(': unset')));
++  }
++  assert.equal(fs.readFileSync(path.join(checkout, 'conversion-control.txt'), 'utf8'), 'one\r\ntwo\r\n', 'unprotected control proves conversion was effective');
++  assert.equal(source.size, 18);
++});
+diff --git a/tests/smoke-page.test.cjs b/tests/smoke-page.test.cjs
+index 505af15..e0e6697 100644
+--- a/tests/smoke-page.test.cjs
++++ b/tests/smoke-page.test.cjs
+@@ -8,0 +9,2 @@ const vm = require('node:vm');
++const os = require('node:os');
++const { createHash } = require('node:crypto');
+@@ -136,0 +139,61 @@ test('sidecar-built reissues preserve old verdicts while appends start unmarked'
++test('real input reissue flows through builder, displayed files and saved verdicts on the same build', async t => {
++  const { buildSmokePage } = await import(pathToFileURL(path.join(__dirname, '../orchestrate/tools/build-smoke-page.mjs')));
++  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'smoke-input-page-'));
++  t.after(() => fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }));
++  function put(name, bytes) {
++    fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); fs.writeFileSync(path.join(root, name), bytes);
++    return { path: name, size: Buffer.byteLength(bytes), sha256: createHash('sha256').update(bytes).digest('hex') };
++  }
++  const workbook = fs.readFileSync(path.join(__dirname, 'fixtures/smoke-inputs/orders.xlsx'));
++  const file = put("evidence/C1/inputs/issue-001/orders & 'é'.xlsx", workbook);
++  const proof = put('evidence/C1/inputs/validation-001/report & checks.txt', 'Independent requirements passed.\n');
++  const input = { id: 'orders', ...file, requirements: 'Three sheets; leading-zero IDs; total 23.50/count 4. <literal>',
++    validation: { ...proof, command: 'python validate-orders.py orders.xlsx orders.requirements.json', exitCode: 0,
++      result: 'All workbook requirements passed.', env: 'Python with openpyxl, independent fixture validator' },
++    mode: 'working-copy', use: 'Copy original to a temporary workbook; edit C2.', reset: 'Close copy, recopy original; total returns to 23.50.' };
++  const previous = { change: 'Input handoff', checkpoint: 1, batches: 'B03', branch: 'integration', buildSha: A,
++    ckptKey: 'c1', gate: { checks: ['Verify build and canary.'] }, inputs: [input],
++    sections: [{ n: 1, title: 'Workbook', steps: [
++      { n: 1, revision: 1, do: 'Open workbook copy.', pass: 'Three sheets.', inputs: ['orders'] },
++      { n: 2, revision: 1, do: 'Check unrelated feature.', pass: 'It opens.' },
++      { n: 3, revision: 1, do: 'Validate input.', pass: 'All requirements pass.', inputs: ['orders'],
++        pre: { sha: A, stepRevision: 1, env: 'Python', evidence: 'evidence/C1/step-03.md' } }
++    ] }] };
++  const options = { inputRoot: root };
++  const first = await page({ html: buildSmokePage(previous, template, options) });
++  const links = first.el('step-1').querySelectorAll('a');
++  assert.equal(links.length, 2);
++  assert.equal(links[0].textContent, file.path);
++  assert.equal(links[0].getAttribute('href'), 'evidence/C1/inputs/issue-001/orders%20%26%20%27%C3%A9%27.xlsx');
++  assert.equal(links[1].getAttribute('href'), 'evidence/C1/inputs/validation-001/report%20%26%20checks.txt');
++  assert.deepEqual(fs.readFileSync(path.join(root, decodeURIComponent(links[0].getAttribute('href')))), workbook);
++  const shown = first.el('step-1').querySelectorAll('.step-aside').map(p => p.textContent).join('\n');
++  assert.match(shown, /Requirements:.*<literal>/, 'input metadata is plain text, never authored HTML');
++  assert.ok(shown.includes(input.use)); assert.ok(shown.includes(input.reset));
++  for (const text of [file.path, proof.path, input.requirements, input.use, input.reset, input.validation.command]) assert.ok(first.copy().includes(text), text);
++  first.mark(1, 'pass'); first.note(1, 'Workbook observation');
++  first.mark(2, 'pass'); first.note(2, 'Keep unrelated note');
++  const oldRecords = [first.record(1), first.record(2)];
++  const current = structuredClone(previous), updated = Buffer.from(workbook); updated[200] ^= 1;
++  Object.assign(current.inputs[0], put('evidence/C1/inputs/issue-002/orders.xlsx', updated));
++  current.inputHistory = [file];
++  assert.throws(() => buildSmokePage(current, template, { ...options, previous }), /step 1:.*increment revision/);
++  current.sections[0].steps[0].revision++;
++  assert.throws(() => buildSmokePage(current, template, { ...options, previous }), /step 3:.*increment revision/);
++  current.sections[0].steps[2].revision++;
++  const reissue = await page({ storage: first.storage, html: buildSmokePage(current, template, { ...options, previous }) });
++  assert.deepEqual([reissue.record(1), reissue.record(2)], oldRecords);
++  assert.equal(reissue.el('t-rerun').textContent, 2);
++  assert.equal(reissue.el('t-pass').textContent, 1);
++  assert.equal(reissue.el('t-pre').textContent, 0);
++  assert.match(reissue.copy(), /1\. NOT RE-RUN — previous PASS/);
++  assert.match(reissue.copy(), /2\. PASS — Keep unrelated note/);
++  assert.match(reissue.copy(), /3\. NOT RE-RUN.*agent evidence.*stale/);
++  assert.ok(reissue.copy().includes(current.inputs[0].path));
++  reissue.note(1, 'Note edit only'); assert.equal(reissue.el('t-rerun').textContent, 2);
++  reissue.mark(1, 'pass'); assert.equal(reissue.el('t-rerun').textContent, 1);
++  assert.equal(reissue.record(1).stepRevision, '2'); assert.equal(reissue.record(1).buildSha, A);
++  assert.deepEqual(reissue.record(2), oldRecords[1]);
++  assert.deepEqual(fs.readFileSync(path.join(root, file.path)), workbook, 'issued original stays untouched');
++});
++
