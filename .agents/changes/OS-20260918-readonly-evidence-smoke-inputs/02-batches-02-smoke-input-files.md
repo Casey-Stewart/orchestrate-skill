@@ -64,6 +64,7 @@ the exact commands and results. It supplies the same fixed files for C1 QA.
 - [x] Add deterministic generator and independent openpyxl validation.
 - [x] Verify example formulas, cached results, types and all edge cases.
 - [x] Exercise fixed consumer commands, deterministic generation and a corrupted-workbook rejection.
+- [x] polish: Verify numeric 1 is rejected for the declared boolean Types!B2, including a permissive equality-only validator mutation.
 
 ## Acceptance criteria
 
