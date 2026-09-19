@@ -1,0 +1,67 @@
+Wave base: ae850a38fa760cb36f0ca83db35e5830ed1cc2ed
+Effective attributes before B02:
+orchestrate/tools/git-evidence.mjs: text: unspecified
+orchestrate/tools/git-evidence.mjs: eol: unspecified
+orchestrate/tools/git-evidence.mjs: filter: unspecified
+orchestrate/tools/git-evidence.mjs: ident: unspecified
+orchestrate/tools/git-evidence.mjs: working-tree-encoding: unspecified
+orchestrate/tools/git-evidence.mjs: diff: unspecified
+orchestrate/tools/git-evidence.mjs: merge: unspecified
+orchestrate/tools/check-fence.mjs: text: unspecified
+orchestrate/tools/check-fence.mjs: eol: unspecified
+orchestrate/tools/check-fence.mjs: filter: unspecified
+orchestrate/tools/check-fence.mjs: ident: unspecified
+orchestrate/tools/check-fence.mjs: working-tree-encoding: unspecified
+orchestrate/tools/check-fence.mjs: diff: unspecified
+orchestrate/tools/check-fence.mjs: merge: unspecified
+tests/git-contract.test.cjs: text: unspecified
+tests/git-contract.test.cjs: eol: unspecified
+tests/git-contract.test.cjs: filter: unspecified
+tests/git-contract.test.cjs: ident: unspecified
+tests/git-contract.test.cjs: working-tree-encoding: unspecified
+tests/git-contract.test.cjs: diff: unspecified
+tests/git-contract.test.cjs: merge: unspecified
+tests/check-fence.test.cjs: text: unspecified
+tests/check-fence.test.cjs: eol: unspecified
+tests/check-fence.test.cjs: filter: unspecified
+tests/check-fence.test.cjs: ident: unspecified
+tests/check-fence.test.cjs: working-tree-encoding: unspecified
+tests/check-fence.test.cjs: diff: unspecified
+tests/check-fence.test.cjs: merge: unspecified
+tests/support/git-fixture.cjs: text: unspecified
+tests/support/git-fixture.cjs: eol: unspecified
+tests/support/git-fixture.cjs: filter: unspecified
+tests/support/git-fixture.cjs: ident: unspecified
+tests/support/git-fixture.cjs: working-tree-encoding: unspecified
+tests/support/git-fixture.cjs: diff: unspecified
+tests/support/git-fixture.cjs: merge: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: text: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: eol: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: filter: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: ident: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: working-tree-encoding: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: diff: unspecified
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: merge: unspecified
+orchestrate/tools/build-smoke-page.mjs: text: unspecified
+orchestrate/tools/build-smoke-page.mjs: eol: unspecified
+orchestrate/tools/build-smoke-page.mjs: filter: unspecified
+orchestrate/tools/build-smoke-page.mjs: ident: unspecified
+orchestrate/tools/build-smoke-page.mjs: working-tree-encoding: unspecified
+orchestrate/tools/build-smoke-page.mjs: diff: unspecified
+orchestrate/tools/build-smoke-page.mjs: merge: unspecified
+tests/build-smoke-page.test.cjs: text: unspecified
+tests/build-smoke-page.test.cjs: eol: unspecified
+tests/build-smoke-page.test.cjs: filter: unspecified
+tests/build-smoke-page.test.cjs: ident: unspecified
+tests/build-smoke-page.test.cjs: working-tree-encoding: unspecified
+tests/build-smoke-page.test.cjs: diff: unspecified
+tests/build-smoke-page.test.cjs: merge: unspecified
+Raw existing B01/control bytes before B02:
+orchestrate/tools/git-evidence.mjs ABSENT
+orchestrate/tools/check-fence.mjs ABSENT
+tests/git-contract.test.cjs 85D48B98697723B1249D175995AD30C4DA8A1359375130C5159E8340FC7310F8
+tests/check-fence.test.cjs ABSENT
+tests/support/git-fixture.cjs ABSENT
+.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md B6626C73DDBADD80087351EF7514B56B9326A3DF459B792E66D4254DB1C5BB02
+orchestrate/tools/build-smoke-page.mjs 71605387393AAD6FD38346826CC7BCDD69FEC2DC0AD93C8B9C25A1C9EA0C7BB0
+tests/build-smoke-page.test.cjs 481CCF0F281B20B636DB0C36D65AB2D76E8025128FDCCECAAEB270AE33A5AEF9
