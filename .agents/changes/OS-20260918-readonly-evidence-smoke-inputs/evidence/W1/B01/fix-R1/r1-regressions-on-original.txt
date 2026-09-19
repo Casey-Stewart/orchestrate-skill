@@ -1,0 +1,225 @@
+✖ configured filters leave the fence UNKNOWN without executing a command or changing bytes (4435.6102ms)
+▶ staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI
+  ✖ staged (4572.7397ms)
+  ✖ unstaged (4420.2858ms)
+✖ staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI (8993.5758ms)
+▶ configured clean and process filters never execute through API or actual CLI status probes
+  ✖ clean (1043.6799ms)
+  ✖ process (961.828ms)
+✖ configured clean and process filters never execute through API or actual CLI status probes (2007.138ms)
+✖ malformed loose refs are retained as unknown while valid sibling evidence remains available (2218.0223ms)
+▶ staged and unstaged T statuses remain complete dirty observations in API and CLI
+  ✖ staged (1060.9728ms)
+  ✖ unstaged (1216.9895ms)
+✖ staged and unstaged T statuses remain complete dirty observations in API and CLI (2278.6581ms)
+✖ submodule status does not enter a nested repository with its own executable filters (3037.4292ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 0
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13532.9601
+
+✖ failing tests:
+
+test at tests\check-fence.test.cjs:235:1
+✖ configured filters leave the fence UNKNOWN without executing a command or changing bytes (4435.6102ms)
+  AssertionError [ERR_ASSERTION]: {"status":"VIOLATION","integrationSha":"7a3d7b341571404fa349b8c53bfa5e708dcf7c00","batchSha":"7a3d7b341571404fa349b8c53bfa5e708dcf7c00","mergeBase":"7a3d7b341571404fa349b8c53bfa5e708dcf7c00","violations":[{"code":"dirty-worktree","message":"Candidate has tracked, staged, untracked or conflicted changes","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-LPFryh/batch worktree","entries":[{"status":" M","path":"allowed.txt","originalPath":null}]}],"unknowns":[],"evidence":{"changes":[],"allowedPaths":["allowed.txt",".agents/changes/FIXTURE/02-batches-01-work.md"],"worktrees":[{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-LPFryh/batch worktree","head":"7a3d7b341571404fa349b8c53bfa5e708dcf7c00","branch":"refs/heads/batch-one","cleanliness":"dirty","status":[{"status":" M","path":"allowed.txt","originalPath":null}],"bare":false,"prunable":null},{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-LPFryh/repo","head":"7a3d7b341571404fa349b8c53bfa5e708dcf7c00","branch":"refs/heads/main","cleanliness":"clean","status":[],"bare":false,"prunable":null}],"worktreeDiagnostics":[]}}
+  + actual - expected
+
+  + 'VIOLATION'
+  - 'UNKNOWN'
+
+      at state (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:23:10)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:241:3)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'VIOLATION',
+    expected: 'UNKNOWN',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\check-fence.test.cjs:245:54
+✖ staged (4572.7397ms)
+  AssertionError [ERR_ASSERTION]: {"status":"UNKNOWN","integrationSha":"cc6dc43a7bd4aa9c8fdb1fb8fc12639eaeb37793","batchSha":"cc6dc43a7bd4aa9c8fdb1fb8fc12639eaeb37793","mergeBase":"cc6dc43a7bd4aa9c8fdb1fb8fc12639eaeb37793","violations":[],"unknowns":[{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-ktxRUb/batch worktree"},{"code":"candidate-worktree","message":"Candidate worktree is inaccessible or its HEAD does not match the captured branch","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-ktxRUb/batch worktree"},{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-ktxRUb/batch worktree"}],"evidence":{"changes":[],"allowedPaths":["allowed.txt",".agents/changes/FIXTURE/02-batches-01-work.md"],"worktrees":[{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-ktxRUb/batch worktree","head":"cc6dc43a7bd4aa9c8fdb1fb8fc12639eaeb37793","branch":"refs/heads/batch-one","cleanliness":"unknown","status":[],"bare":false,"prunable":null},{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-ktxRUb/repo","head":"cc6dc43a7bd4aa9c8fdb1fb8fc12639eaeb37793","branch":"refs/heads/main","cleanliness":"clean","status":[],"bare":false,"prunable":null}],"worktreeDiagnostics":[{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-ktxRUb/batch worktree"}]}}
+  + actual - expected
+
+  + 'UNKNOWN'
+  - 'VIOLATION'
+
+      at state (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:23:10)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:249:5)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at TestContext.test (node:internal/test_runner/test:373:20)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:245:54)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'UNKNOWN',
+    expected: 'VIOLATION',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\check-fence.test.cjs:245:54
+✖ unstaged (4420.2858ms)
+  AssertionError [ERR_ASSERTION]: {"status":"UNKNOWN","integrationSha":"857641ee2e00de17aae8fdeaeb52123546c52fa0","batchSha":"08f414b5af673090ef1b4d04f4c80c21de8001d8","mergeBase":"857641ee2e00de17aae8fdeaeb52123546c52fa0","violations":[],"unknowns":[{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-hGoBC8/batch worktree"},{"code":"candidate-worktree","message":"Candidate worktree is inaccessible or its HEAD does not match the captured branch","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-hGoBC8/batch worktree"},{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-hGoBC8/batch worktree"}],"evidence":{"changes":[{"status":"T","paths":["allowed.txt"]}],"allowedPaths":["allowed.txt",".agents/changes/FIXTURE/02-batches-01-work.md"],"worktrees":[{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-hGoBC8/batch worktree","head":"08f414b5af673090ef1b4d04f4c80c21de8001d8","branch":"refs/heads/batch-one","cleanliness":"unknown","status":[],"bare":false,"prunable":null},{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-hGoBC8/repo","head":"857641ee2e00de17aae8fdeaeb52123546c52fa0","branch":"refs/heads/main","cleanliness":"clean","status":[],"bare":false,"prunable":null}],"worktreeDiagnostics":[{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-hGoBC8/batch worktree"}]}}
+  + actual - expected
+
+  + 'UNKNOWN'
+  - 'VIOLATION'
+
+      at state (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:23:10)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:249:5)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at TestContext.test (node:internal/test_runner/test:373:20)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\check-fence.test.cjs:245:54)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'UNKNOWN',
+    expected: 'VIOLATION',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:188:52
+✖ clean (1043.6799ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'complete'
+  - 'partial'
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:197:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at TestContext.test (node:internal/test_runner/test:373:20)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:188:52)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'partial',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:188:52
+✖ process (961.828ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(result.diagnostics.some(d => d.code === 'unsafe-filter'))
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:197:127)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at TestContext.test (node:internal/test_runner/test:373:20)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:188:52)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:209:1
+✖ malformed loose refs are retained as unknown while valid sibling evidence remains available (2218.0223ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 2
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:213:10)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:225:54
+✖ staged (1060.9728ms)
+  AssertionError [ERR_ASSERTION]: [{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-obtF71/repo"}]
+  + actual - expected
+
+  + 'partial'
+  - 'complete'
+
+      at complete (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:13:36)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:230:15)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at TestContext.test (node:internal/test_runner/test:373:20)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:225:54)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'partial',
+    expected: 'complete',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:225:54
+✖ unstaged (1216.9895ms)
+  AssertionError [ERR_ASSERTION]: [{"code":"worktree-unavailable","message":"Worktree is missing, inaccessible, malformed or has changed identity","path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-bcW1E6/repo"}]
+  + actual - expected
+
+  + 'partial'
+  - 'complete'
+
+      at complete (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:13:36)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:230:15)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at TestContext.test (node:internal/test_runner/test:373:20)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:225:54)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'partial',
+    expected: 'complete',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:234:1
+✖ submodule status does not enter a nested repository with its own executable filters (3037.4292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 2
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-original-production\tests\git-contract.test.cjs:242:86)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

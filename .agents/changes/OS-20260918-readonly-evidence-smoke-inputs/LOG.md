@@ -435,3 +435,7 @@ Proof files:
 - late-worktree-race-output.txt: candidate UNKNOWN, mutant PASS; probe 2/2 pass.
 
 Inspected all five B01 source/test files. Tests exercise real APIs and every required real CLI; tri-state ancestry, remote missing objects, source selection, authoritative integration plans/extensions, both rename/copy endpoints, own-batch structure, dirty/missing worktrees, and read-only refs/HEAD/index/working-file snapshots have meaningful assertions. Candidate source and worktree remain unchanged; all mutation artifacts are external scratch copies.
+
+## B01-R2-gate
+
+DONE @fac37a5163db2bd816ece3b68e936ab534b7f77d, recursive156/156PASS, clean. Manual gate PASS with capturedintegrationc45555f5172d0a321284d37be1bb536982f19361 and mergebaseae850a38fa760cb36f0ca83db35e5830ed1cc2ed. Full fence unchanged; fix diff b3ce33eb35dab7ac43472faa0f90220ff32a48dd..fac37a5163db2bd816ece3b68e936ab534b7f77d onlygit-evidence.mjs andtwoB01tests; own6ticksunchanged. Regression12failuresagainstoriginalproduction andlate-race-comparisonmutant rejectionproven. Fresh reviewer/hunter dispatchedparallel oncurrentinheritedmodel, verifiesR1fixes+scansfixdiffonly. HunterASK addressed withinfix; not a separatepolishpass. Evidence under evidence/W1/B01/fix-R1. R1 remains onlycountedFIXFIRST pendingR2.

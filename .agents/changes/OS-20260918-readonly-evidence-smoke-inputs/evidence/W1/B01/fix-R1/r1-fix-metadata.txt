@@ -1,0 +1,15 @@
+Commit: fac37a5163db2bd816ece3b68e936ab534b7f77d
+Parent candidate: b3ce33eb35dab7ac43472faa0f90220ff32a48dd
+Full recursive validation exit: 0
+156 tests; 156 pass; 0 fail; 0 skipped
+git diff --check exit: 0
+git diff --cached --check exit: 0 before commit
+Original production regression selection: expected exit 1; 12 failed, 0 passed
+Deleted-final-race-comparison mutant: expected exit 1; late real-file mutation rejected PASS
+Proof orchestrator command exit: 0
+Checklist: 6/6 unchanged
+Status porcelain:
+R1 fix paths:
+M	orchestrate/tools/git-evidence.mjs
+M	tests/check-fence.test.cjs
+M	tests/git-contract.test.cjs

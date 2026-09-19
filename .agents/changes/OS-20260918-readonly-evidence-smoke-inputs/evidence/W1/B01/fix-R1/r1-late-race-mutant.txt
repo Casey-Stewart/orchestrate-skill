@@ -1,0 +1,30 @@
+✖ late real working-file mutation requires the final worktree-race comparison (2679.8524ms)
+✔ tests\git-contract.test.cjs (72.303ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2769.0008
+
+✖ failing tests:
+
+test at tests\check-fence.test.cjs:254:1
+✖ late real working-file mutation requires the final worktree-race comparison (2679.8524ms)
+  AssertionError [ERR_ASSERTION]: {"status":"PASS","integrationSha":"cf15fb0a4dbc1b9342067d3c4f227f735e6cb5c8","batchSha":"cf15fb0a4dbc1b9342067d3c4f227f735e6cb5c8","mergeBase":"cf15fb0a4dbc1b9342067d3c4f227f735e6cb5c8","violations":[],"unknowns":[],"evidence":{"changes":[],"allowedPaths":["allowed.txt",".agents/changes/FIXTURE/02-batches-01-work.md"],"worktrees":[{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-CkLThb/batch worktree","head":"cf15fb0a4dbc1b9342067d3c4f227f735e6cb5c8","branch":"refs/heads/batch-one","cleanliness":"clean","status":[],"bare":false,"prunable":null},{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-CkLThb/repo","head":"cf15fb0a4dbc1b9342067d3c4f227f735e6cb5c8","branch":"refs/heads/main","cleanliness":"clean","status":[],"bare":false,"prunable":null}],"worktreeDiagnostics":[]}}
+
+  'PASS' !== 'UNKNOWN'
+
+      at state (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-no-worktree-race\tests\check-fence.test.cjs:23:10)
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-scratch\r1-no-worktree-race\tests\check-fence.test.cjs:261:34)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'PASS',
+    expected: 'UNKNOWN',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
