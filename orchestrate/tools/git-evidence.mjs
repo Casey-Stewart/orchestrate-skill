@@ -25,7 +25,7 @@ export function git(repo, args, options = {}) {
     command: args[0], exit: result.status, ...(result.error ? { error: result.error.code || 'launch-error' } : {}),
     ...(result.signal ? { signal: result.signal } : {}),
   });
-  try { return { ok: !result.error && result.signal === null && result.status === 0, exit: result.status, text: decode(result.stdout || Buffer.alloc(0)), bytes: result.stdout, diagnostic: failure }; }
+  try { return { ok: !result.error && result.signal === null && result.status === 0, exit: result.status, text: decode(result.stdout || Buffer.alloc(0)), bytes: result.stdout, stderrPresent: Boolean(result.stderr?.length), diagnostic: failure }; }
   catch { return { ok: false, exit: result.status, text: null, diagnostic: diagnostic('invalid-encoding', 'Git output is not valid UTF-8', { command: args[0], exit: result.status }) }; }
 }
 export function capture(repo, ref, diagnostics, options = {}) {
@@ -91,13 +91,36 @@ export function parseStatus(text) {
   const entries = [];
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
-    if (!/^[ MADRCU?!]{2} /.test(field) || field.length < 4) throw new Error('Malformed status entry');
+    if (!/^[ MTADRCU?!]{2} /.test(field) || field.length < 4) throw new Error('Malformed status entry');
     const xy = field.slice(0, 2), destination = field.slice(3);
     const entry = { status: xy, path: destination, originalPath: null };
     if (/[RC]/.test(xy)) { if (!fields[++i]) throw new Error('Missing rename endpoint'); entry.originalPath = fields[i]; }
     entries.push(entry);
   }
   return entries;
+}
+function safeStatusPrerequisites(repo, diagnostics, options) {
+  // Status may execute clean/process drivers even without updating the index. A
+  // configured driver makes cleanliness unavailable under this read-only contract;
+  // do not run it, or pretend disabling its conversion would give truthful status.
+  // GIT_CONFIG affects `git config` only, so omit that historical override to inspect
+  // the same configuration scopes that status would actually read (including includes).
+  const env = { ...(options.env ?? process.env) };
+  for (const key of Object.keys(env)) if (key.toUpperCase() === 'GIT_CONFIG') delete env[key];
+  const filters = git(repo, ['config', '--includes', '--null', '--name-only', '--get-regexp', '^filter[.].*[.](clean|process)$'], { ...options, env });
+  if (!filters.ok && !(filters.exit === 1 && filters.text === '')) { diagnostics.push({ ...filters.diagnostic, path: repo }); return false; }
+  if (filters.text) { diagnostics.push(diagnostic('unsafe-filter', 'Clean/process filters are configured; status was not run because it can execute commands', { path: repo })); return false; }
+  // Git status normally descends into submodules, whose separate local configuration
+  // could execute a driver as well. Do not recurse into uninspected repositories.
+  const index = git(repo, ['ls-files', '--stage', '-z'], options);
+  if (!index.ok) { diagnostics.push({ ...index.diagnostic, path: repo }); return false; }
+  const entries = index.text ? index.text.split('\0') : [];
+  if (entries.length && entries.pop() !== '') { diagnostics.push(diagnostic('invalid-index', 'Malformed index inventory', { path: repo })); return false; }
+  for (const entry of entries) {
+    if (!/^\d{6} [a-f0-9]{40}(?:[a-f0-9]{24})? [0-3]\t[\s\S]+$/.test(entry)) { diagnostics.push(diagnostic('invalid-index', 'Malformed index entry', { path: repo })); return false; }
+    if (entry.startsWith('160000 ')) { diagnostics.push(diagnostic('submodule-status-unsupported', 'Submodule cleanliness cannot be inspected safely without executing nested configuration; status was not run', { path: repo })); return false; }
+  }
+  return true;
 }
 function worktreesRaw(repo, diagnostics, options) {
   const r = git(repo, ['worktree', 'list', '--porcelain', '-z'], options);
@@ -121,7 +144,8 @@ function worktreesRaw(repo, diagnostics, options) {
       const actualBranch = git(wt.path, ['symbolic-ref', '--quiet', 'HEAD'], options);
       if (!actualBranch.ok && actualBranch.exit !== 1) { diagnostics.push(actualBranch.diagnostic); continue; }
       if (actualHead !== wt.head || (actualBranch.ok ? actualBranch.text.replace(/\r?\n$/, '') : null) !== wt.branch) throw new Error('checkout identity changed');
-      const status = git(wt.path, ['status', '--porcelain=v1', '-z', '--untracked-files=all', '--ignore-submodules=none'], options);
+      if (!safeStatusPrerequisites(wt.path, diagnostics, options)) continue;
+      const status = git(wt.path, ['status', '--porcelain=v1', '-z', '--untracked-files=all', '--ignore-submodules=all'], options);
       if (!status.ok) { diagnostics.push({ ...status.diagnostic, path: wt.path }); continue; }
       wt.status = parseStatus(status.text); wt.cleanliness = wt.status.length ? 'dirty' : 'clean';
     } catch { diagnostics.push(diagnostic('worktree-unavailable', 'Worktree is missing, inaccessible, malformed or has changed identity', { path: wt.path })); }
@@ -193,6 +217,7 @@ export function ledger({ repo, ref, ledger: id, ...options }) {
 function refsRaw(repo, diagnostics, options) {
   const r = git(repo, ['for-each-ref', '--format=%(refname)%00%(objectname)%00%(symref)', 'refs/heads/', 'refs/remotes/'], options);
   if (!r.ok) { diagnostics.push(r.diagnostic); return []; }
+  if (r.stderrPresent) diagnostics.push(diagnostic('ref-inventory-warning', 'Git reported a warning while enumerating refs; inventory may be incomplete (stderr withheld)', { command: 'for-each-ref', exit: r.exit }));
   const refs = [];
   for (const line of r.text.split('\n').filter(Boolean)) {
     const [ref, sha, symref, extra] = line.replace(/\r$/, '').split('\0');
@@ -211,10 +236,20 @@ function refsRaw(repo, diagnostics, options) {
         const name = `${prefix}/${entry.name}`, file = path.join(directory, entry.name);
         if (entry.isDirectory()) walk(file, name);
         else if (entry.isFile() && !refs.some(x => x.ref === name)) {
-          try { if (!fs.readFileSync(file).subarray(0, 5).equals(Buffer.from('ref: '))) continue; } catch { diagnostics.push(diagnostic('refs-unavailable', 'Cannot read loose ref')); continue; }
+          let text;
+          try { text = decode(fs.readFileSync(file)); }
+          catch { refs.push({ ref: name, sha: null, symref: null }); diagnostics.push(diagnostic('refs-unavailable', 'Cannot read loose ref as UTF-8', { ref: name })); continue; }
+          if (!text.startsWith('ref: ')) {
+            refs.push({ ref: name, sha: null, symref: null });
+            diagnostics.push(diagnostic('unobserved-loose-ref', 'A non-symbolic loose ref was omitted by Git; it is malformed, unavailable or changed during enumeration', { ref: name }));
+            continue;
+          }
           const s = git(repo, ['symbolic-ref', '--quiet', name], options);
-          if (!s.ok) diagnostics.push(s.diagnostic);
-          else refs.push({ ref: name, sha: null, symref: s.text.replace(/\r?\n$/, '') });
+          const target = s.ok ? s.text.replace(/\r?\n$/, '') : null;
+          if (!s.ok || !validFullRef(name) || !validFullRef(target)) {
+            refs.push({ ref: name, sha: null, symref: null });
+            diagnostics.push(s.ok ? diagnostic('invalid-symbolic-ref', 'Malformed symbolic ref', { ref: name }) : s.diagnostic);
+          } else refs.push({ ref: name, sha: null, symref: target });
         }
       }
     };
@@ -227,7 +262,7 @@ export function discovery({ repo, ...options }) {
   options = provenanceOptions(repo, diagnostics, options);
   const refs = refsRaw(repo, diagnostics, options), worktrees = worktreesRaw(repo, diagnostics, options), groups = new Map();
   const add = (id, location) => { if (!groups.has(id)) groups.set(id, { id, locations: [] }); groups.get(id).locations.push(location); };
-  for (const ref of refs.filter(x => !x.symref)) {
+  for (const ref of refs.filter(x => !x.symref && x.sha)) {
     const r = git(repo, ['ls-tree', '-r', '-z', ref.sha, '--', '.agents/changes/'], options);
     if (!r.ok) { diagnostics.push(r.diagnostic); continue; }
     let entries; try { entries = parseTree(r.text); } catch { diagnostics.push(diagnostic('invalid-tree', 'Malformed discovery tree')); continue; }
@@ -270,7 +305,7 @@ export function parseFlags(args, names, required) {
   return result;
 }
 export function evidenceCli(args) {
-  if (args.length === 1 && args[0] === '--help') return { code: 0, text: 'git-evidence.mjs <discovery|worktrees|ancestry|shipment|ledger> --repo <repo>\nancestry: --ancestor <ref-or-sha> --descendant <ref-or-sha>\nshipment: --integration <full-ref> --source <local|remote> [--remote <name>] --ref <full-ref>\nledger: --ref <full-ref> --ledger <id> [--owner <ref-or-sha>] [--target <ref-or-sha>]\nExit 0: complete facts (including not-contained); exit 2: partial/unknown or invalid invocation.\n' };
+  if (args.length === 1 && args[0] === '--help') return { code: 0, text: 'git-evidence.mjs <discovery|worktrees|ancestry|shipment|ledger> --repo <repo>\nancestry: --ancestor <ref-or-sha> --descendant <ref-or-sha>\nshipment: --integration <full-ref> --source <local|remote> [--remote <name>] --ref <full-ref>\nledger: --ref <full-ref> --ledger <id> [--owner <ref-or-sha>] [--target <ref-or-sha>]\nExit 0: complete facts (including not-contained); exit 2: partial/unknown or invalid invocation.\nConfigured clean/process filters or submodules make worktree cleanliness UNKNOWN; unsafe status commands are not run.\n' };
   const operation = args[0] || null;
   try {
     const defs = { discovery: [], worktrees: [], ancestry: ['ancestor', 'descendant'], shipment: ['integration', 'source', 'ref'], ledger: ['ref', 'ledger'] };

@@ -182,3 +182,64 @@ test('remote branch must point to an actual local commit rather than a peelable 
   const before = [repo.snapshot(), bare.snapshot()]; const c = cli(repo, 'shipment', ['--integration', INTEGRATION, '--source', 'remote', '--remote', 'origin', '--ref', MAIN]);
   assert.equal(c.status, 2); unknown(c.json); assert.equal(c.json.evidence.shipmentSha, tag); assert.ok(c.json.diagnostics.some(d => d.code === 'remote-object-type')); assert.deepEqual([repo.snapshot(), bare.snapshot()], before);
 });
+
+test('configured clean and process filters never execute through API or actual CLI status probes', async t => {
+  const { worktrees, discovery } = await api;
+  for (const kind of ['clean', 'process']) await t.test(kind, t => {
+    const repo = makeRepo(t), marker = path.join(repo.cwd, 'filter-must-not-run'), script = path.join(repo.root, `filter-${kind}.cjs`);
+    fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); ${kind === 'clean' ? 'process.stdin.pipe(process.stdout);' : 'process.exit(1);'}`);
+    repo.write('.gitattributes', 'filtered.txt filter=marker\n'); repo.write('filtered.txt', 'before\n'); repo.commit('filter fixture');
+    repo.git('config', `filter.marker.${kind}`, `node "${script.replaceAll('\\', '/')}"`);
+    repo.write('filtered.txt', 'after!\n'); fs.utimesSync(path.join(repo.cwd, 'filtered.txt'), new Date(0), new Date(0));
+    const before = repo.snapshot();
+    for (const operation of ['worktrees', 'discovery']) {
+      const result = ({ worktrees, discovery })[operation](options(repo));
+      assert.equal(result.completeness, 'partial'); assert.equal(result.evidence.worktrees[0].cleanliness, 'unknown'); assert.ok(result.diagnostics.some(d => d.code === 'unsafe-filter'));
+      const command = cli(repo, operation); assert.equal(command.status, 2); assert.equal(command.json.evidence.worktrees[0].cleanliness, 'unknown'); assert.ok(command.json.diagnostics.some(d => d.code === 'unsafe-filter'));
+      assert.equal(fs.existsSync(marker), false, `${operation} must not start ${kind} command`); assert.deepEqual(repo.snapshot(), before);
+    }
+    // GIT_CONFIG can redirect only `git config`; it must not conceal the real
+    // repository's configured filter from the status prerequisite check.
+    const conceal = { ...repo.env, GIT_CONFIG: path.join(repo.root, 'empty.gitconfig') };
+    const hidden = worktrees({ repo: repo.cwd, env: conceal }); assert.ok(hidden.diagnostics.some(d => d.code === 'unsafe-filter'));
+    const hiddenCli = repo.cli('git-evidence.mjs', ['worktrees', '--repo', repo.cwd], { GIT_CONFIG: conceal.GIT_CONFIG }); assert.equal(hiddenCli.status, 2); assert.ok(hiddenCli.json.diagnostics.some(d => d.code === 'unsafe-filter'));
+    assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before);
+  });
+});
+test('malformed loose refs are retained as unknown while valid sibling evidence remains available', async t => {
+  const repo = makeRepo(t); writeLedger(repo); repo.commit('valid sibling ledger'); repo.write('.git/refs/heads/broken', 'not-an-object\n');
+  const before = repo.snapshot(), brokenBytes = fs.readFileSync(path.join(repo.cwd, '.git/refs/heads/broken'));
+  const actual = (await api).discovery(options(repo)), command = cli(repo, 'discovery');
+  assert.equal(command.status, 2);
+  for (const result of [actual, command.json]) {
+    assert.equal(result.completeness, 'partial');
+    assert.deepEqual(result.evidence.refs.find(r => r.ref === 'refs/heads/broken'), { ref: 'refs/heads/broken', sha: null, symref: null });
+    assert.ok(result.evidence.refs.find(r => r.ref === MAIN).sha); assert.equal(result.evidence.ledgers[0].id, 'FIXTURE');
+    assert.ok(result.diagnostics.some(d => d.code === 'unobserved-loose-ref' && d.ref === 'refs/heads/broken'));
+    assert.ok(result.diagnostics.some(d => d.code === 'ref-inventory-warning' && d.command === 'for-each-ref' && d.exit === 0));
+  }
+  assert.deepEqual(repo.snapshot(), before); assert.deepEqual(fs.readFileSync(path.join(repo.cwd, '.git/refs/heads/broken')), brokenBytes);
+});
+test('staged and unstaged T statuses remain complete dirty observations in API and CLI', async t => {
+  const { worktrees } = await api;
+  for (const kind of ['staged', 'unstaged']) await t.test(kind, t => {
+    const repo = makeRepo(t); repo.write('tracked.txt', 'ordinary file\n'); repo.commit('ordinary'); repo.git('config', 'core.symlinks', 'false');
+    const blob = repo.git('hash-object', '-w', '--', 'tracked.txt'); repo.git('update-index', '--cacheinfo', `120000,${blob},tracked.txt`);
+    if (kind === 'unstaged') { repo.git('commit', '-m', 'symlink index'); repo.git('config', 'core.symlinks', 'true'); }
+    const before = repo.snapshot(), expected = [{ status: kind === 'staged' ? 'T ' : ' T', path: 'tracked.txt', originalPath: null }];
+    const r = complete(worktrees(options(repo))); assert.equal(r.worktrees[0].cleanliness, 'dirty'); assert.deepEqual(r.worktrees[0].status, expected);
+    const c = cli(repo, 'worktrees'); assert.equal(c.status, 0, c.stdout); assert.equal(complete(c.json).worktrees[0].cleanliness, 'dirty'); assert.deepEqual(c.json.evidence.worktrees[0].status, expected); assert.deepEqual(repo.snapshot(), before);
+  });
+});
+test('submodule status does not enter a nested repository with its own executable filters', async t => {
+  const repo = makeRepo(t), nestedPath = path.join(repo.root, 'nested-source'); fs.mkdirSync(nestedPath); const nested = repo.at(nestedPath);
+  nested.git('init', '--initial-branch=main'); nested.write('.gitattributes', 'tracked.txt filter=nested\n'); nested.write('tracked.txt', 'before\n'); nested.commit('nested');
+  repo.git('submodule', 'add', nestedPath, 'nested'); repo.commit('submodule');
+  const sub = repo.at(path.join(repo.cwd, 'nested')), marker = path.join(repo.cwd, 'nested-filter-must-not-run'), script = path.join(repo.root, 'nested-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  sub.git('config', 'filter.nested.clean', `node "${script.replaceAll('\\', '/')}"`); sub.write('tracked.txt', 'after!\n'); fs.utimesSync(path.join(sub.cwd, 'tracked.txt'), new Date(0), new Date(0));
+  const before = repo.snapshot(), subBefore = sub.snapshot();
+  const r = (await api).worktrees(options(repo)), c = cli(repo, 'worktrees'); assert.equal(c.status, 2);
+  for (const result of [r, c.json]) { assert.equal(result.completeness, 'partial'); assert.equal(result.evidence.worktrees[0].cleanliness, 'unknown'); assert.ok(result.diagnostics.some(d => d.code === 'submodule-status-unsupported')); }
+  assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before); assert.deepEqual(sub.snapshot(), subBefore);
+});

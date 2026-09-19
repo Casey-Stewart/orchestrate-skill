@@ -231,3 +231,35 @@ test('own batch executable-bit edits are outside permitted checklist-only change
   const f = fixture(t); f.candidate.git('update-index', '--chmod=+x', '--', BATCHFILE); f.candidate.git('commit', '-m', 'own batch mode');
   state((await api).checkFence(f.opts), 'VIOLATION', 'batch-type');
 });
+
+test('configured filters leave the fence UNKNOWN without executing a command or changing bytes', async t => {
+  const f = fixture(t), marker = path.join(f.candidate.cwd, 'filter-must-not-run'), script = path.join(f.repo.root, 'fence-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  f.repo.write('.git/info/attributes', 'allowed.txt filter=marker\n'); f.repo.git('config', 'filter.marker.clean', `node "${script.replaceAll('\\', '/')}"`);
+  f.candidate.write('allowed.txt', 'changed'); fs.utimesSync(path.join(f.candidate.cwd, 'allowed.txt'), new Date(0), new Date(0));
+  const before = [f.repo.snapshot(), f.candidate.snapshot()]; const r = (await api).checkFence(f.opts), c = f.cli();
+  state(r, 'UNKNOWN', 'unsafe-filter'); assert.equal(c.status, 2); state(c.json, 'UNKNOWN', 'unsafe-filter'); assert.equal(fs.existsSync(marker), false); assert.deepEqual([f.repo.snapshot(), f.candidate.snapshot()], before);
+});
+test('staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI', async t => {
+  const { checkFence } = await api;
+  for (const kind of ['staged', 'unstaged']) await t.test(kind, t => {
+    const f = fixture(t); f.candidate.git('config', 'core.symlinks', 'false'); const blob = f.candidate.git('hash-object', '-w', '--', 'allowed.txt'); f.candidate.git('update-index', '--cacheinfo', `120000,${blob},allowed.txt`);
+    if (kind === 'unstaged') { f.candidate.git('commit', '-m', 'symlink index'); f.candidate.git('config', 'core.symlinks', 'true'); }
+    const before = [f.repo.snapshot(), f.candidate.snapshot()], r = checkFence(f.opts), c = f.cli();
+    state(r, 'VIOLATION', 'dirty-worktree'); assert.equal(c.status, 1); state(c.json, 'VIOLATION', 'dirty-worktree');
+    for (const result of [r, c.json]) assert.deepEqual(result.violations.find(d => d.code === 'dirty-worktree').entries, [{ status: kind === 'staged' ? 'T ' : ' T', path: 'allowed.txt', originalPath: null }]);
+    assert.deepEqual([f.repo.snapshot(), f.candidate.snapshot()], before);
+  });
+});
+test('late real working-file mutation requires the final worktree-race comparison', async t => {
+  const { checkFence } = await api, f = fixture(t), originalStat = fs.statSync, before = f.candidate.snapshot(); let observations = 0;
+  fs.statSync = function(file, ...args) {
+    if (path.resolve(file) === path.resolve(f.candidate.cwd) && ++observations === 2) f.candidate.write('allowed.txt', 'concurrent uncommitted update');
+    return originalStat.call(this, file, ...args);
+  };
+  let r; try { r = checkFence(f.opts); } finally { fs.statSync = originalStat; }
+  assert.equal(observations, 2); state(r, 'UNKNOWN', 'worktree-race');
+  assert.equal(r.evidence.worktrees.find(w => w.branch === BATCH).cleanliness, 'clean'); assert.deepEqual(r.violations, []);
+  const after = f.candidate.snapshot(); assert.equal(after.head, before.head); assert.equal(after.index, before.index); assert.equal(after.refs, before.refs);
+  assert.deepEqual(after.files, { ...before.files, 'allowed.txt': Buffer.from('concurrent uncommitted update').toString('base64') }); assert.match(f.candidate.git('status', '--porcelain'), /M allowed\.txt/);
+});
