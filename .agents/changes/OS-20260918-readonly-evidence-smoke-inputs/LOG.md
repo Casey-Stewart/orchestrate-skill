@@ -363,3 +363,8 @@ Repair70f6baadd702425ef13741fe59d614232e256744 integrated with commits preserved
 ## W1-open
 
 W1 B01+B02 opened concurrently at ae850a38fa760cb36f0ca83db35e5830ed1cc2ed after repaired integration validation65/65. Planned branches previously absent; both cut exactly from wave base. Per-worktree setup n/a. No map/fence deviation. Implementer briefs contain complete frozen batch specs and binding role instructions.
+
+
+## B02-R1-gate
+
+DONE candidate6ccc46f76eb8d45ff9a9e24bf99ad45b76bab8dc,8/8 checklist. Manual gate PASS with captured immutable refs/both-endpoint path inspection/cleanliness/own-batch blob diff. Feature failing-on-base N/A. Full implementer proof/scripts preserved under evidence/W1/B02. Fresh independent reviewer and separate hunter dispatched on current inherited model; B01 continues independently.

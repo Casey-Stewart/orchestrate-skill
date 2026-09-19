@@ -1,0 +1,7 @@
+# Conductor manual fence gate — B02 R1
+
+PASS. Integration authority f653dcdea2c4f25a337321ce77526766541abc2c; candidate6ccc46f76eb8d45ff9a9e24bf99ad45b76bab8dc; merge-base ae850a38fa760cb36f0ca83db35e5830ed1cc2ed.
+
+Manually inspected git status --porcelain (empty), git diff --name-status -M integration...candidate (five added exact fenced paths and own batch modified; no rename/copy endpoints), entire batch-file diff (exactly8 unchecked-to-checked boxes, original text/sections/Files unchanged), diff --check (exit0). Allowed paths: .gitattributes; tests/fixtures/smoke-inputs/orders.xlsx, orders.requirements.json, generate-orders.py, validate-orders.py; own02-batches-02-smoke-input-files.md. No extensions. .gitattributes is exactly the eight narrowly scoped approved rules. New checker not used.
+
+Feature batch: failing-on-base N/A. Implementer DONE, checklist8/8, candidate65/65 Node suite; literal Python3.10.6/openpyxl3.1.5 semantic validation and68 named corruption rejections. Final exact-candidate fresh-checkout evidence captured: raw A=B=committed hash e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f;20 protected paths, active/archive/nested/LF/CRLF, unprotected LF-to-CRLF control and8 unchanged B01/control attributes/bytes. Independent gates must audit and rerun evidence rather than treating report as review.

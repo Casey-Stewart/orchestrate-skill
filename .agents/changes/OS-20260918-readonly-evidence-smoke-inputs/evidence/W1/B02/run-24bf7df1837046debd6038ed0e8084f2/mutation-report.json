@@ -1,0 +1,830 @@
+{
+  "results": [
+    {
+      "label": "Orders!A1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-1.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!A1.text: expected 'OrderID'; found 'CORRUPTED'",
+      "sha256": "04c8c9d882c3fe8a203f42c995ae21ce11fcab77fa696293823bd1e5eb0e4bca"
+    },
+    {
+      "label": "Orders!B1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-2.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!B1.text: expected 'Item'; found 'CORRUPTED'",
+      "sha256": "bdbe72a79f90e6894b54fa2e83004768a6e7a97983393ecf461a8161e89e2253"
+    },
+    {
+      "label": "Orders!C1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-3.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!C1.text: expected 'Quantity'; found 'CORRUPTED'",
+      "sha256": "fa81072c6d56eb5548724e5f91c824581242ae0917c1a9245b6127f57e9f0126"
+    },
+    {
+      "label": "Orders!D1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-4.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!D1.text: expected 'UnitPrice'; found 'CORRUPTED'",
+      "sha256": "06765dee998ad6060e8c69ba9c2eeab0db6e9243138e00edc986018f8ab62980"
+    },
+    {
+      "label": "Orders!E1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-5.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!E1.text: expected 'DiscountRate'; found 'CORRUPTED'",
+      "sha256": "12e9ce1b94f8b61c9fa6386fc5b623c752ad8911ccbe87b48199bfb913304a7d"
+    },
+    {
+      "label": "Orders!F1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-6.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F1.text: expected 'LineTotal'; found 'CORRUPTED'",
+      "sha256": "213a16cacbb365f3e830c8cf19dd78c4c7179948ec6218b27c9864a48628a459"
+    },
+    {
+      "label": "Orders!G1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-7.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!G1.text: expected 'Note'; found 'CORRUPTED'",
+      "sha256": "b261a109b85cc331798bef12f67f59057dd5acee6a91efa7ed4386df7773c0fa"
+    },
+    {
+      "label": "Orders!A2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-8.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!A2.text: expected '0001'; found 'CORRUPTED'",
+      "sha256": "f78070026ebf7643e25bb6e9132085bcdacf1e2e99a6712023b47d7e7853dbcc"
+    },
+    {
+      "label": "Orders!B2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-9.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!B2.text: expected 'Widget'; found 'CORRUPTED'",
+      "sha256": "6c93f4e2a62c3703b4e72817e1863fd7fc09958ac75d7ec5396f29b8e9b5fae3"
+    },
+    {
+      "label": "Orders!C2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-10.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!C2.integer: expected 2; found 9",
+      "sha256": "a337eff966b2849c5da37d663afb17013eb1ca7658d9ab262772072557749d32"
+    },
+    {
+      "label": "Orders!D2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-11.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!D2.number: expected 12.5; found 19.5",
+      "sha256": "cb8c25f81fc4e09fb2d200ac5ac61a96695fb9a7c7bb1a4ef1b89c861fa7e5d7"
+    },
+    {
+      "label": "Orders!E2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-12.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!E2.number: expected 0.1; found 7.1",
+      "sha256": "3f79a32ec6173c08636cfab3f34cc3e8fefc9c84075902eea43f99c714368232"
+    },
+    {
+      "label": "Orders!F2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-13.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F2.formula: expected '=ROUND(C2*D2*(1-E2),2)'; found '=ROUND(C2*D2*(1-E2),2)+1'",
+      "sha256": "1804cc4c2f8c88bf975b07e6ae987643cadda313158c3bb2dd58e1bf70181dbb"
+    },
+    {
+      "label": "Orders!F2 incorrect numeric cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-14.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F2.cached: expected 22.5; found 31.5",
+      "sha256": "2811f63f7cb9981e805ce56f2ae0e64f1154763e0997f25647964d6b10208231"
+    },
+    {
+      "label": "Orders!F2 missing cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-15.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F2.cached: expected 22.5; found None",
+      "sha256": "e692b6a89cf0b3d89c6fd58038becd6e989d89e6f51d98429ec34333f1e476c2"
+    },
+    {
+      "label": "Orders!G2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-16.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!G2.text: expected 'ordinary'; found 'CORRUPTED'",
+      "sha256": "fc327b1ad9dd4b33082f03aac1662ce38f181bf93bd0a56e76c6f365d3e18cb7"
+    },
+    {
+      "label": "Orders!A3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-17.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!A3.text: expected '0002'; found 'CORRUPTED'",
+      "sha256": "d6e5f9f8228e9d630ac83e63b49d40d7c69770e2693a36726a2e45876f180d47"
+    },
+    {
+      "label": "Orders!B3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-18.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!B3.text: expected 'Zero quantity'; found 'CORRUPTED'",
+      "sha256": "ca73aeee5ab989e02ba3b80c476a77c53d91c79bcf5ce138883f41111f58e5f7"
+    },
+    {
+      "label": "Orders!C3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-19.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!C3.integer: expected 0; found 7",
+      "sha256": "e79d91a54a155e59c429050ac08b34234ac3f4a3beb1c3c479d11dc4bb0f742e"
+    },
+    {
+      "label": "Orders!D3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-20.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!D3.number: expected 10; found 17",
+      "sha256": "bf8ebfa366abb1c8ce14c4b1dcd086228d1d868864c7018f35296260aac0a388"
+    },
+    {
+      "label": "Orders!E3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-21.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!E3.number: expected 0; found 7",
+      "sha256": "93bb601b1ecf713e6664e8c5136ad5f9b7aaf39b72c5d54b8557357cd26560b5"
+    },
+    {
+      "label": "Orders!F3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-22.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F3.formula: expected '=ROUND(C3*D3*(1-E3),2)'; found '=ROUND(C3*D3*(1-E3),2)+1'",
+      "sha256": "163b95165786c085307c5a04d938d3852eef608c3c5c7bc479b72d30490eebef"
+    },
+    {
+      "label": "Orders!F3 incorrect numeric cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-23.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F3.cached: expected 0; found 9",
+      "sha256": "3781ef35b28b72d600c9c8c6e6ab3a78ae957250fbc41ed38519ec7b2a82c08b"
+    },
+    {
+      "label": "Orders!F3 missing cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-24.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F3.cached: expected 0; found None",
+      "sha256": "c9566bb75d66e7ea347ca1aaa85f73042b68e45323a2e97302705643c39c3c84"
+    },
+    {
+      "label": "Orders!G3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-25.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!G3.empty: expected None; found 'CORRUPTED'",
+      "sha256": "04d7aa0d5ea5feac58f1c5828a9deaae437094c89ecf2554bbf8869d4b5e6bbd"
+    },
+    {
+      "label": "Orders!A4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-26.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!A4.text: expected '0003'; found 'CORRUPTED'",
+      "sha256": "f9d2c6eab0a3ca5fcac47ecf18e02f1144aa6ab7e84eddbc6a14df2a5fc0070a"
+    },
+    {
+      "label": "Orders!B4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-27.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!B4.text: expected 'Return'; found 'CORRUPTED'",
+      "sha256": "68833111aa586f3222f24c3896a5a4834eb73bdaa6bf894974dd6af0311b0cb5"
+    },
+    {
+      "label": "Orders!C4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-28.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!C4.integer: expected -1; found 6",
+      "sha256": "94d2022a8ff48e5a3de2fa220387d20c4f2905555297d40efa377d39e92057b1"
+    },
+    {
+      "label": "Orders!D4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-29.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!D4.number: expected 8; found 15",
+      "sha256": "d2d818e82ece010c3365cb817a7a67bad9531caa416b284636c8159882d45cc4"
+    },
+    {
+      "label": "Orders!E4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-30.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!E4.number: expected 0; found 7",
+      "sha256": "7fe46b25462ff55a7824aa7f0c60d4052ea897d105a949c95358b5f53feb7193"
+    },
+    {
+      "label": "Orders!F4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-31.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F4.formula: expected '=ROUND(C4*D4*(1-E4),2)'; found '=ROUND(C4*D4*(1-E4),2)+1'",
+      "sha256": "404c64bcd73b3f058182af36d3d8540605fb29db2535c17859209db31bc6deee"
+    },
+    {
+      "label": "Orders!F4 incorrect numeric cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-32.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F4.cached: expected -8; found 1",
+      "sha256": "14ccd8eba07a661d5c5298aaf94070baa4760d3bb5be9c7c98daca7f19cbd009"
+    },
+    {
+      "label": "Orders!F4 missing cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-33.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F4.cached: expected -8; found None",
+      "sha256": "016a423032c1f4ff1dacbcbc50dce5d9beb189acd2aa2d769e0c54e9af06b346"
+    },
+    {
+      "label": "Orders!G4 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-34.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!G4.text: expected 'return'; found 'CORRUPTED'",
+      "sha256": "3ec2c82d953ed7b27210dcb7f1476dbaef967df8b45f7d82ff09e339463c7d7f"
+    },
+    {
+      "label": "Orders!A5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-35.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!A5.text: expected '0004'; found 'CORRUPTED'",
+      "sha256": "55ca26b146946b9cc0229453ae52c377134368993b397c24e275eb5424f8af50"
+    },
+    {
+      "label": "Orders!B5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-36.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!B5.text: expected 'Caf\u00e9'; found 'CORRUPTED'",
+      "sha256": "be6dff3b008bed0ce78d19456036f2711969c098ef6c66892d575ad84e9a17cb"
+    },
+    {
+      "label": "Orders!C5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-37.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!C5.integer: expected 3; found 10",
+      "sha256": "2f1f25698a5a2caebef0ce31c2cff1724b526c66372ac1cc006612503634543a"
+    },
+    {
+      "label": "Orders!D5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-38.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!D5.number: expected 4; found 11",
+      "sha256": "b829895469c97f6b34b893d15ed4a7783609125e5ff0596ab342453d4d5d3312"
+    },
+    {
+      "label": "Orders!E5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-39.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!E5.number: expected 0.25; found 7.25",
+      "sha256": "e7014b4ad8b7ea3f50b52cf69a1dde9d5e5bc4ad0cef052fa77dbc95b01e86c7"
+    },
+    {
+      "label": "Orders!F5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-40.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F5.formula: expected '=ROUND(C5*D5*(1-E5),2)'; found '=ROUND(C5*D5*(1-E5),2)+1'",
+      "sha256": "7465db9e88e34eaf93ab970d4e722d557425a2d94e9293bb7e944a15bb1a82a5"
+    },
+    {
+      "label": "Orders!F5 incorrect numeric cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-41.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F5.cached: expected 9; found 18",
+      "sha256": "4abbc92ce02f11f5a1ee5ada88a211f2d7ed7924466a5cdb948e6bbc9d0b795f"
+    },
+    {
+      "label": "Orders!F5 missing cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-42.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F5.cached: expected 9; found None",
+      "sha256": "db3d0a20a3eb47b166838f9a9fc162cd7d403a47f8864a5ded11a4c3a9816194"
+    },
+    {
+      "label": "Orders!G5 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-43.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!G5.text: expected 'Unicode'; found 'CORRUPTED'",
+      "sha256": "12284f78ab1b2f85ef58495282e796e9cca874b3ac4bf0720ec07e5d3f9a7dc2"
+    },
+    {
+      "label": "Summary!A1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-44.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!A1.text: expected 'Metric'; found 'CORRUPTED'",
+      "sha256": "e9ac0946283c17e28685695523100de3a5bb4143176d0beb30219d9db8f4ba95"
+    },
+    {
+      "label": "Summary!B1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-45.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B1.text: expected 'Value'; found 'CORRUPTED'",
+      "sha256": "1a25bc9b985d7f49fa3b85181228d56281784169bac2c3d405313b7010d1962b"
+    },
+    {
+      "label": "Summary!A2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-46.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!A2.text: expected 'Net total'; found 'CORRUPTED'",
+      "sha256": "d27c82172f687ae2537ceebb7e41baa5736f3fe43f99da429c288f46b0e8d2b7"
+    },
+    {
+      "label": "Summary!B2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-47.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B2.formula: expected '=SUM(Orders!F2:F5)'; found '=SUM(Orders!F2:F5)+1'",
+      "sha256": "736a6ada894ead2c7aafd6aca29bbf23a0f743ac56079b0aa8ad24b6c7fa8407"
+    },
+    {
+      "label": "Summary!B2 incorrect numeric cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-48.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B2.cached: expected 23.5; found 32.5",
+      "sha256": "0e16e05c2aaf84432f272e36415fdedaf56f55bff5ece6506cfedabc207e2f6f"
+    },
+    {
+      "label": "Summary!B2 missing cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-49.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B2.cached: expected 23.5; found None",
+      "sha256": "e73dd5589d745359bccb76152c5b247bfe79bd5c5d1384df47cf3187bc87a244"
+    },
+    {
+      "label": "Summary!A3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-50.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!A3.text: expected 'Order count'; found 'CORRUPTED'",
+      "sha256": "379ccb65fefdad75467c99a0c73d4f144d129fae08cba376496c65e94630fc86"
+    },
+    {
+      "label": "Summary!B3 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-51.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B3.formula: expected '=COUNTA(Orders!A2:A5)'; found '=COUNTA(Orders!A2:A5)+1'",
+      "sha256": "13e5fba05314f9555f31fd0791ceb779747a955b275dd4997d74327fb0620d98"
+    },
+    {
+      "label": "Summary!B3 incorrect numeric cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-52.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B3.cached: expected 4; found 13",
+      "sha256": "3324968bcf044cb93ccd8b646d5054d3e04cea401d15c568232b011b4671b11d"
+    },
+    {
+      "label": "Summary!B3 missing cache",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-53.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Summary!B3.cached: expected 4; found None",
+      "sha256": "9afa69ce41a833c3faef17e424030e1f619367ce7a9dfbac0b43a59b8cb3ecb2"
+    },
+    {
+      "label": "Types!A1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-54.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!A1.text: expected 'SampleDate'; found 'CORRUPTED'",
+      "sha256": "88cf6f782345e70029b2b8e0ce1c6516af88efda41e6fbd37abc6c792a0bd1f3"
+    },
+    {
+      "label": "Types!B1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-55.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!B1.text: expected 'IsActive'; found 'CORRUPTED'",
+      "sha256": "68bf5a717be40397e6ed75fc413b12d09e90b6b5f44c07431592b29687d19152"
+    },
+    {
+      "label": "Types!C1 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-56.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!C1.text: expected 'Empty'; found 'CORRUPTED'",
+      "sha256": "7d35b361696246dae2eb058945675e92231c5dabe00b3100b394d0e3809b2a26"
+    },
+    {
+      "label": "Types!A2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-57.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!A2.date: expected '2026-09-18'; found datetime.datetime(2026, 9, 19, 0, 0)",
+      "sha256": "3450796950dacdfc56ccf29291546ffa1baeeb1a782bc3f4e46d12cef4414773"
+    },
+    {
+      "label": "Types!B2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-58.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!B2.boolean: expected True; found False",
+      "sha256": "24e09b8375aa0667bda85f6fdd46d15ec74cacfff6ba0aba8bf3b4dcf184994a"
+    },
+    {
+      "label": "Types!C2 incorrect value/formula",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-59.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!C2.empty: expected None; found 'CORRUPTED'",
+      "sha256": "d3bf3bc043b8e3788d0bee6a033a7df4c3e4a2efe5245d3379f151e3b2dc3061"
+    },
+    {
+      "label": "boolean false is not numeric zero",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-60.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!C3.integer: expected 0; found False",
+      "sha256": "a51e7406654dcd30358612a1392c07c304f28ab07106f3dc9028e6dcf12b5c69"
+    },
+    {
+      "label": "boolean false is not numeric cache zero",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-61.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!F3.cached: expected 0; found False",
+      "sha256": "5007405695dbc1a2a2ec586c989aee8fdf8d320c82ff4717ae30cdbed9f533af"
+    },
+    {
+      "label": "empty string is not an actually empty cell",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-62.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!C2.empty: expected None; found ''",
+      "sha256": "ac06ba71297b0d7ca2548e88242501a552d2f8f2a94914ba686a424e909369e3"
+    },
+    {
+      "label": "numeric ID loses text and leading zeroes",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-63.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!A2.text: expected '0001'; found 1",
+      "sha256": "13c593d65fe7faef5cfc3c949fbc527e4e02ec4af466b6a8f1f32c97a237e910"
+    },
+    {
+      "label": "missing percent number format",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-64.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Orders!E2.format: expected '0%'; found 'General'",
+      "sha256": "bff02648c58fcaf406cf5dfef788c5ccdb7367392f787ddd0d32ed3889469de9"
+    },
+    {
+      "label": "wrong sheet name",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-65.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement sheetOrder: expected ['Orders', 'Summary', 'Types']; found ['Wrong', 'Summary', 'Types']",
+      "sha256": "c9c5e33e444af2314b33ec6ea724d4142f17d869d5f270d635b6218bf22526cc"
+    },
+    {
+      "label": "wrong Excel date system",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-66.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement dateSystem: expected 'Excel 1900'; found datetime.datetime(1904, 1, 1, 0, 0)",
+      "sha256": "53ecba583b3cbe0e13cca03991a78356ad0a2a2e08705decef17b3171453543d"
+    },
+    {
+      "label": "external relationship",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-67.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement noExternalLinks._rels/.rels: expected 'internal relationships'; found {'Id': 'rId1', 'Type': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument', 'Target': 'xl/workbook.xml', 'TargetMode': 'External'}",
+      "sha256": "774be86699c4647c6756a51749b713bf60562a2aa79ebf36d495bd12fb794a7f"
+    },
+    {
+      "label": "macro-enabled content type",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\corrupt-68.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement noMacros.contentTypes: expected 'ordinary XLSX content types'; found '<?xml version=\\'1.0\\' encoding=\\'utf-8\\'?>\\n<ns0:Types xmlns:ns0=\"http://schemas.openxmlformats.org/package/2006/content-types\"><ns0:Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\" /><ns0:Default Extension=\"xml\" ContentType=\"application/xml\" /><ns0:Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.ms-excel.sheet.macroEnabled.main+xml\" /><ns0:Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\" /><ns0:Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\" /><ns0:Override PartName=\"/xl/worksheets/sheet2.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\" /><ns0:Override PartName=\"/xl/worksheets/sheet3.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\" /></ns0:Types>'",
+      "sha256": "8c082e4d0a58ec74ea3ef078edbc3ea56072fd4113695e11f2dc7c6dc4b8e12c"
+    }
+  ],
+  "inputHashesBefore": {
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.xlsx": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+  },
+  "inputHashesAfter": {
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.xlsx": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+  }
+}

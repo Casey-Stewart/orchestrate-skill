@@ -1,0 +1,34 @@
+[
+  {
+    "path": "orchestrate/tools/git-evidence.mjs",
+    "hash": "absent"
+  },
+  {
+    "path": "orchestrate/tools/check-fence.mjs",
+    "hash": "absent"
+  },
+  {
+    "path": "tests/git-contract.test.cjs",
+    "hash": "85D48B98697723B1249D175995AD30C4DA8A1359375130C5159E8340FC7310F8"
+  },
+  {
+    "path": "tests/check-fence.test.cjs",
+    "hash": "absent"
+  },
+  {
+    "path": "tests/support/git-fixture.cjs",
+    "hash": "absent"
+  },
+  {
+    "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md",
+    "hash": "FE10869E7CA1D032FD59BEF9BDF9AB59751E97059445FCCCEA1AB4E4DF8E77C6"
+  },
+  {
+    "path": "orchestrate/SKILL.md",
+    "hash": "67947BCAF335E5F2F223FDA949DE1AADF380525C45D704F5F37FC570C5A301CC"
+  },
+  {
+    "path": "tests/smoke-page.test.cjs",
+    "hash": "46C69F6E0D381B083127FE626B41F7641BFD5E71218862892057E3CEE8941823"
+  }
+]

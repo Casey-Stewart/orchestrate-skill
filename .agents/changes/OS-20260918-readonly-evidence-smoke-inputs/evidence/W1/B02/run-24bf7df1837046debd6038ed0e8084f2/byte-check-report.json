@@ -1,0 +1,883 @@
+{
+  "candidateCommit": "4330f446e7d41f3e129614621b3a80aa20f6045a",
+  "waveBase": "ae850a38fa760cb36f0ca83db35e5830ed1cc2ed",
+  "candidate": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+  "packageCommit": "2610ce67a9c82e1cf7fa6fca74f7e0adc56b3b22",
+  "checkout": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+  "triple": {
+    "generationA": {
+      "path": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\generation-A.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    "generationB": {
+      "path": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\generation-B.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    "committed": {
+      "path": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout\\tests\\fixtures\\smoke-inputs\\orders.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "commit": "4330f446e7d41f3e129614621b3a80aa20f6045a"
+    }
+  },
+  "inventory": [
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "original": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkedOut": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "original": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkedOut": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "original": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkedOut": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "original": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkedOut": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    }
+  ],
+  "outsideHashes": [
+    {
+      "path": "orchestrate/tools/git-evidence.mjs",
+      "before": "absent",
+      "after": "absent"
+    },
+    {
+      "path": "orchestrate/tools/check-fence.mjs",
+      "before": "absent",
+      "after": "absent"
+    },
+    {
+      "path": "tests/git-contract.test.cjs",
+      "before": "85d48b98697723b1249d175995ad30c4da8a1359375130c5159e8340fc7310f8",
+      "after": "85d48b98697723b1249d175995ad30c4da8a1359375130c5159e8340fc7310f8"
+    },
+    {
+      "path": "tests/check-fence.test.cjs",
+      "before": "absent",
+      "after": "absent"
+    },
+    {
+      "path": "tests/support/git-fixture.cjs",
+      "before": "absent",
+      "after": "absent"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md",
+      "before": "fe10869e7ca1d032fd59bef9bdf9ab59751e97059445fcccea1ab4e4df8e77c6",
+      "after": "fe10869e7ca1d032fd59bef9bdf9ab59751e97059445fcccea1ab4e4df8e77c6"
+    },
+    {
+      "path": "orchestrate/SKILL.md",
+      "before": "67947bcaf335e5f2f223fda949de1aadf380525c45d704f5f37fc570c5a301cc",
+      "after": "67947bcaf335e5f2f223fda949de1aadf380525c45d704f5f37fc570c5a301cc"
+    },
+    {
+      "path": "tests/smoke-page.test.cjs",
+      "before": "46c69f6e0d381b083127fe626b41f7641bfd5e71218862892057e3cee8941823",
+      "after": "46c69f6e0d381b083127fe626b41f7641bfd5e71218862892057e3cee8941823"
+    }
+  ],
+  "packageHashes": [
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "original": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkedOut": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "original": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkedOut": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "original": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkedOut": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "original": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkedOut": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "original": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkedOut": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "original": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkedOut": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "original": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkedOut": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "original": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkedOut": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt",
+      "original": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8",
+      "checkedOut": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt",
+      "original": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87",
+      "checkedOut": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt",
+      "original": "f980921b4d731117242f4247eae8121569bb2fefac8551e60daccf3b3e48a385",
+      "checkedOut": "f980921b4d731117242f4247eae8121569bb2fefac8551e60daccf3b3e48a385"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx",
+      "original": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkedOut": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "original": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkedOut": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "original": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkedOut": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "original": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkedOut": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "original": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkedOut": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt",
+      "original": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8",
+      "checkedOut": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt",
+      "original": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87",
+      "checkedOut": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt",
+      "original": "f980921b4d731117242f4247eae8121569bb2fefac8551e60daccf3b3e48a385",
+      "checkedOut": "f980921b4d731117242f4247eae8121569bb2fefac8551e60daccf3b3e48a385"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx",
+      "original": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkedOut": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    }
+  ],
+  "packageAttributes": "tests/fixtures/smoke-inputs/orders.xlsx: text: unset\ntests/fixtures/smoke-inputs/orders.xlsx: eol: unset\ntests/fixtures/smoke-inputs/orders.xlsx: filter: unset\ntests/fixtures/smoke-inputs/orders.xlsx: ident: unset\ntests/fixtures/smoke-inputs/orders.xlsx: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/orders.xlsx: diff: unset\ntests/fixtures/smoke-inputs/orders.xlsx: merge: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: text: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: eol: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: filter: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: ident: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: diff: unspecified\ntests/fixtures/smoke-inputs/orders.requirements.json: merge: unspecified\ntests/fixtures/smoke-inputs/generate-orders.py: text: unset\ntests/fixtures/smoke-inputs/generate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/generate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/generate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/generate-orders.py: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/generate-orders.py: diff: unspecified\ntests/fixtures/smoke-inputs/generate-orders.py: merge: unspecified\ntests/fixtures/smoke-inputs/validate-orders.py: text: unset\ntests/fixtures/smoke-inputs/validate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/validate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/validate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/validate-orders.py: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/validate-orders.py: diff: unspecified\ntests/fixtures/smoke-inputs/validate-orders.py: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: diff: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: merge: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: diff: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: merge: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: diff: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: merge: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: diff: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: merge: unset",
+  "outsideAttributes": "orchestrate/tools/git-evidence.mjs: text: unspecified\norchestrate/tools/git-evidence.mjs: eol: unspecified\norchestrate/tools/git-evidence.mjs: filter: unspecified\norchestrate/tools/git-evidence.mjs: ident: unspecified\norchestrate/tools/git-evidence.mjs: working-tree-encoding: unspecified\norchestrate/tools/git-evidence.mjs: diff: unspecified\norchestrate/tools/git-evidence.mjs: merge: unspecified\norchestrate/tools/check-fence.mjs: text: unspecified\norchestrate/tools/check-fence.mjs: eol: unspecified\norchestrate/tools/check-fence.mjs: filter: unspecified\norchestrate/tools/check-fence.mjs: ident: unspecified\norchestrate/tools/check-fence.mjs: working-tree-encoding: unspecified\norchestrate/tools/check-fence.mjs: diff: unspecified\norchestrate/tools/check-fence.mjs: merge: unspecified\ntests/git-contract.test.cjs: text: unspecified\ntests/git-contract.test.cjs: eol: unspecified\ntests/git-contract.test.cjs: filter: unspecified\ntests/git-contract.test.cjs: ident: unspecified\ntests/git-contract.test.cjs: working-tree-encoding: unspecified\ntests/git-contract.test.cjs: diff: unspecified\ntests/git-contract.test.cjs: merge: unspecified\ntests/check-fence.test.cjs: text: unspecified\ntests/check-fence.test.cjs: eol: unspecified\ntests/check-fence.test.cjs: filter: unspecified\ntests/check-fence.test.cjs: ident: unspecified\ntests/check-fence.test.cjs: working-tree-encoding: unspecified\ntests/check-fence.test.cjs: diff: unspecified\ntests/check-fence.test.cjs: merge: unspecified\ntests/support/git-fixture.cjs: text: unspecified\ntests/support/git-fixture.cjs: eol: unspecified\ntests/support/git-fixture.cjs: filter: unspecified\ntests/support/git-fixture.cjs: ident: unspecified\ntests/support/git-fixture.cjs: working-tree-encoding: unspecified\ntests/support/git-fixture.cjs: diff: unspecified\ntests/support/git-fixture.cjs: merge: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: text: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: eol: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: filter: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: ident: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: working-tree-encoding: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: diff: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: merge: unspecified\norchestrate/SKILL.md: text: unspecified\norchestrate/SKILL.md: eol: unspecified\norchestrate/SKILL.md: filter: unspecified\norchestrate/SKILL.md: ident: unspecified\norchestrate/SKILL.md: working-tree-encoding: unspecified\norchestrate/SKILL.md: diff: unspecified\norchestrate/SKILL.md: merge: unspecified\ntests/smoke-page.test.cjs: text: unspecified\ntests/smoke-page.test.cjs: eol: unspecified\ntests/smoke-page.test.cjs: filter: unspecified\ntests/smoke-page.test.cjs: ident: unspecified\ntests/smoke-page.test.cjs: working-tree-encoding: unspecified\ntests/smoke-page.test.cjs: diff: unspecified\ntests/smoke-page.test.cjs: merge: unspecified",
+  "control": {
+    "before": "unprotected\\nLF\\n",
+    "after": "unprotected\\r\\nLF\\r\\n",
+    "conversionVerified": true
+  },
+  "commands": [
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B02",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "4330f446e7d41f3e129614621b3a80aa20f6045a\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B02",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B02",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "check-attr",
+        "text",
+        "eol",
+        "filter",
+        "ident",
+        "working-tree-encoding",
+        "diff",
+        "merge",
+        "--",
+        "orchestrate/tools/git-evidence.mjs",
+        "orchestrate/tools/check-fence.mjs",
+        "tests/git-contract.test.cjs",
+        "tests/check-fence.test.cjs",
+        "tests/support/git-fixture.cjs",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md",
+        "orchestrate/SKILL.md",
+        "tests/smoke-page.test.cjs"
+      ],
+      "exit": 0,
+      "stdout": "orchestrate/tools/git-evidence.mjs: text: unspecified\norchestrate/tools/git-evidence.mjs: eol: unspecified\norchestrate/tools/git-evidence.mjs: filter: unspecified\norchestrate/tools/git-evidence.mjs: ident: unspecified\norchestrate/tools/git-evidence.mjs: working-tree-encoding: unspecified\norchestrate/tools/git-evidence.mjs: diff: unspecified\norchestrate/tools/git-evidence.mjs: merge: unspecified\norchestrate/tools/check-fence.mjs: text: unspecified\norchestrate/tools/check-fence.mjs: eol: unspecified\norchestrate/tools/check-fence.mjs: filter: unspecified\norchestrate/tools/check-fence.mjs: ident: unspecified\norchestrate/tools/check-fence.mjs: working-tree-encoding: unspecified\norchestrate/tools/check-fence.mjs: diff: unspecified\norchestrate/tools/check-fence.mjs: merge: unspecified\ntests/git-contract.test.cjs: text: unspecified\ntests/git-contract.test.cjs: eol: unspecified\ntests/git-contract.test.cjs: filter: unspecified\ntests/git-contract.test.cjs: ident: unspecified\ntests/git-contract.test.cjs: working-tree-encoding: unspecified\ntests/git-contract.test.cjs: diff: unspecified\ntests/git-contract.test.cjs: merge: unspecified\ntests/check-fence.test.cjs: text: unspecified\ntests/check-fence.test.cjs: eol: unspecified\ntests/check-fence.test.cjs: filter: unspecified\ntests/check-fence.test.cjs: ident: unspecified\ntests/check-fence.test.cjs: working-tree-encoding: unspecified\ntests/check-fence.test.cjs: diff: unspecified\ntests/check-fence.test.cjs: merge: unspecified\ntests/support/git-fixture.cjs: text: unspecified\ntests/support/git-fixture.cjs: eol: unspecified\ntests/support/git-fixture.cjs: filter: unspecified\ntests/support/git-fixture.cjs: ident: unspecified\ntests/support/git-fixture.cjs: working-tree-encoding: unspecified\ntests/support/git-fixture.cjs: diff: unspecified\ntests/support/git-fixture.cjs: merge: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: text: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: eol: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: filter: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: ident: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: working-tree-encoding: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: diff: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: merge: unspecified\norchestrate/SKILL.md: text: unspecified\norchestrate/SKILL.md: eol: unspecified\norchestrate/SKILL.md: filter: unspecified\norchestrate/SKILL.md: ident: unspecified\norchestrate/SKILL.md: working-tree-encoding: unspecified\norchestrate/SKILL.md: diff: unspecified\norchestrate/SKILL.md: merge: unspecified\ntests/smoke-page.test.cjs: text: unspecified\ntests/smoke-page.test.cjs: eol: unspecified\ntests/smoke-page.test.cjs: filter: unspecified\ntests/smoke-page.test.cjs: ident: unspecified\ntests/smoke-page.test.cjs: working-tree-encoding: unspecified\ntests/smoke-page.test.cjs: diff: unspecified\ntests/smoke-page.test.cjs: merge: unspecified\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "clone",
+        "--no-checkout",
+        "--no-hardlinks",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B02",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Cloning into 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout'...\ndone.\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--local",
+        "core.autocrlf",
+        "true"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--get",
+        "core.autocrlf"
+      ],
+      "exit": 0,
+      "stdout": "true\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "checkout",
+        "--detach",
+        "4330f446e7d41f3e129614621b3a80aa20f6045a"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "HEAD is now at 4330f44 feat: add reproducible validated Excel smoke inputs\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "4330f446e7d41f3e129614621b3a80aa20f6045a\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "clone",
+        "--no-checkout",
+        "--no-hardlinks",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B02",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Cloning into 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout'...\ndone.\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--local",
+        "core.autocrlf",
+        "true"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--get",
+        "core.autocrlf"
+      ],
+      "exit": 0,
+      "stdout": "true\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "checkout",
+        "--detach",
+        "ae850a38fa760cb36f0ca83db35e5830ed1cc2ed"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "HEAD is now at ae850a3 chore: close baseline repair after green integration validation\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "ae850a38fa760cb36f0ca83db35e5830ed1cc2ed\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "check-attr",
+        "text",
+        "eol",
+        "filter",
+        "ident",
+        "working-tree-encoding",
+        "diff",
+        "merge",
+        "--",
+        "orchestrate/tools/git-evidence.mjs",
+        "orchestrate/tools/check-fence.mjs",
+        "tests/git-contract.test.cjs",
+        "tests/check-fence.test.cjs",
+        "tests/support/git-fixture.cjs",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md",
+        "orchestrate/SKILL.md",
+        "tests/smoke-page.test.cjs"
+      ],
+      "exit": 0,
+      "stdout": "orchestrate/tools/git-evidence.mjs: text: unspecified\norchestrate/tools/git-evidence.mjs: eol: unspecified\norchestrate/tools/git-evidence.mjs: filter: unspecified\norchestrate/tools/git-evidence.mjs: ident: unspecified\norchestrate/tools/git-evidence.mjs: working-tree-encoding: unspecified\norchestrate/tools/git-evidence.mjs: diff: unspecified\norchestrate/tools/git-evidence.mjs: merge: unspecified\norchestrate/tools/check-fence.mjs: text: unspecified\norchestrate/tools/check-fence.mjs: eol: unspecified\norchestrate/tools/check-fence.mjs: filter: unspecified\norchestrate/tools/check-fence.mjs: ident: unspecified\norchestrate/tools/check-fence.mjs: working-tree-encoding: unspecified\norchestrate/tools/check-fence.mjs: diff: unspecified\norchestrate/tools/check-fence.mjs: merge: unspecified\ntests/git-contract.test.cjs: text: unspecified\ntests/git-contract.test.cjs: eol: unspecified\ntests/git-contract.test.cjs: filter: unspecified\ntests/git-contract.test.cjs: ident: unspecified\ntests/git-contract.test.cjs: working-tree-encoding: unspecified\ntests/git-contract.test.cjs: diff: unspecified\ntests/git-contract.test.cjs: merge: unspecified\ntests/check-fence.test.cjs: text: unspecified\ntests/check-fence.test.cjs: eol: unspecified\ntests/check-fence.test.cjs: filter: unspecified\ntests/check-fence.test.cjs: ident: unspecified\ntests/check-fence.test.cjs: working-tree-encoding: unspecified\ntests/check-fence.test.cjs: diff: unspecified\ntests/check-fence.test.cjs: merge: unspecified\ntests/support/git-fixture.cjs: text: unspecified\ntests/support/git-fixture.cjs: eol: unspecified\ntests/support/git-fixture.cjs: filter: unspecified\ntests/support/git-fixture.cjs: ident: unspecified\ntests/support/git-fixture.cjs: working-tree-encoding: unspecified\ntests/support/git-fixture.cjs: diff: unspecified\ntests/support/git-fixture.cjs: merge: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: text: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: eol: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: filter: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: ident: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: working-tree-encoding: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: diff: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: merge: unspecified\norchestrate/SKILL.md: text: unspecified\norchestrate/SKILL.md: eol: unspecified\norchestrate/SKILL.md: filter: unspecified\norchestrate/SKILL.md: ident: unspecified\norchestrate/SKILL.md: working-tree-encoding: unspecified\norchestrate/SKILL.md: diff: unspecified\norchestrate/SKILL.md: merge: unspecified\ntests/smoke-page.test.cjs: text: unspecified\ntests/smoke-page.test.cjs: eol: unspecified\ntests/smoke-page.test.cjs: filter: unspecified\ntests/smoke-page.test.cjs: ident: unspecified\ntests/smoke-page.test.cjs: working-tree-encoding: unspecified\ntests/smoke-page.test.cjs: diff: unspecified\ntests/smoke-page.test.cjs: merge: unspecified\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\baseline-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "check-attr",
+        "text",
+        "eol",
+        "filter",
+        "ident",
+        "working-tree-encoding",
+        "diff",
+        "merge",
+        "--",
+        "orchestrate/tools/git-evidence.mjs",
+        "orchestrate/tools/check-fence.mjs",
+        "tests/git-contract.test.cjs",
+        "tests/check-fence.test.cjs",
+        "tests/support/git-fixture.cjs",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md",
+        "orchestrate/SKILL.md",
+        "tests/smoke-page.test.cjs"
+      ],
+      "exit": 0,
+      "stdout": "orchestrate/tools/git-evidence.mjs: text: unspecified\norchestrate/tools/git-evidence.mjs: eol: unspecified\norchestrate/tools/git-evidence.mjs: filter: unspecified\norchestrate/tools/git-evidence.mjs: ident: unspecified\norchestrate/tools/git-evidence.mjs: working-tree-encoding: unspecified\norchestrate/tools/git-evidence.mjs: diff: unspecified\norchestrate/tools/git-evidence.mjs: merge: unspecified\norchestrate/tools/check-fence.mjs: text: unspecified\norchestrate/tools/check-fence.mjs: eol: unspecified\norchestrate/tools/check-fence.mjs: filter: unspecified\norchestrate/tools/check-fence.mjs: ident: unspecified\norchestrate/tools/check-fence.mjs: working-tree-encoding: unspecified\norchestrate/tools/check-fence.mjs: diff: unspecified\norchestrate/tools/check-fence.mjs: merge: unspecified\ntests/git-contract.test.cjs: text: unspecified\ntests/git-contract.test.cjs: eol: unspecified\ntests/git-contract.test.cjs: filter: unspecified\ntests/git-contract.test.cjs: ident: unspecified\ntests/git-contract.test.cjs: working-tree-encoding: unspecified\ntests/git-contract.test.cjs: diff: unspecified\ntests/git-contract.test.cjs: merge: unspecified\ntests/check-fence.test.cjs: text: unspecified\ntests/check-fence.test.cjs: eol: unspecified\ntests/check-fence.test.cjs: filter: unspecified\ntests/check-fence.test.cjs: ident: unspecified\ntests/check-fence.test.cjs: working-tree-encoding: unspecified\ntests/check-fence.test.cjs: diff: unspecified\ntests/check-fence.test.cjs: merge: unspecified\ntests/support/git-fixture.cjs: text: unspecified\ntests/support/git-fixture.cjs: eol: unspecified\ntests/support/git-fixture.cjs: filter: unspecified\ntests/support/git-fixture.cjs: ident: unspecified\ntests/support/git-fixture.cjs: working-tree-encoding: unspecified\ntests/support/git-fixture.cjs: diff: unspecified\ntests/support/git-fixture.cjs: merge: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: text: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: eol: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: filter: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: ident: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: working-tree-encoding: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: diff: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: merge: unspecified\norchestrate/SKILL.md: text: unspecified\norchestrate/SKILL.md: eol: unspecified\norchestrate/SKILL.md: filter: unspecified\norchestrate/SKILL.md: ident: unspecified\norchestrate/SKILL.md: working-tree-encoding: unspecified\norchestrate/SKILL.md: diff: unspecified\norchestrate/SKILL.md: merge: unspecified\ntests/smoke-page.test.cjs: text: unspecified\ntests/smoke-page.test.cjs: eol: unspecified\ntests/smoke-page.test.cjs: filter: unspecified\ntests/smoke-page.test.cjs: ident: unspecified\ntests/smoke-page.test.cjs: working-tree-encoding: unspecified\ntests/smoke-page.test.cjs: diff: unspecified\ntests/smoke-page.test.cjs: merge: unspecified\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "check-attr",
+        "text",
+        "eol",
+        "filter",
+        "ident",
+        "working-tree-encoding",
+        "diff",
+        "merge",
+        "--",
+        "tests/fixtures/smoke-inputs/orders.xlsx",
+        "tests/fixtures/smoke-inputs/orders.requirements.json",
+        "tests/fixtures/smoke-inputs/generate-orders.py",
+        "tests/fixtures/smoke-inputs/validate-orders.py"
+      ],
+      "exit": 0,
+      "stdout": "tests/fixtures/smoke-inputs/orders.xlsx: text: unset\ntests/fixtures/smoke-inputs/orders.xlsx: eol: unset\ntests/fixtures/smoke-inputs/orders.xlsx: filter: unset\ntests/fixtures/smoke-inputs/orders.xlsx: ident: unset\ntests/fixtures/smoke-inputs/orders.xlsx: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/orders.xlsx: diff: unset\ntests/fixtures/smoke-inputs/orders.xlsx: merge: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: text: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: eol: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: filter: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: ident: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: diff: unspecified\ntests/fixtures/smoke-inputs/orders.requirements.json: merge: unspecified\ntests/fixtures/smoke-inputs/generate-orders.py: text: unset\ntests/fixtures/smoke-inputs/generate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/generate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/generate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/generate-orders.py: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/generate-orders.py: diff: unspecified\ntests/fixtures/smoke-inputs/generate-orders.py: merge: unspecified\ntests/fixtures/smoke-inputs/validate-orders.py: text: unset\ntests/fixtures/smoke-inputs/validate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/validate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/validate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/validate-orders.py: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/validate-orders.py: diff: unspecified\ntests/fixtures/smoke-inputs/validate-orders.py: merge: unspecified\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "init"
+      ],
+      "exit": 0,
+      "stdout": "Initialized empty Git repository in C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B02-scratch/run-24bf7df1837046debd6038ed0e8084f2/package-authoring/.git/\n",
+      "stderr": "hint: Using 'master' as the name for the initial branch. This default branch name\nhint: will change to \"main\" in Git 3.0. To configure the initial branch name\nhint: to use in all of your new repositories, which will suppress this warning,\nhint: call:\nhint:\nhint: \tgit config --global init.defaultBranch <name>\nhint:\nhint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\nhint: 'development'. The just-created branch can be renamed via this command:\nhint:\nhint: \tgit branch -m <name>\nhint:\nhint: Disable this message with \"git config set advice.defaultBranchName false\"\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--local",
+        "user.name",
+        "Synthetic B02 byte check"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--local",
+        "user.email",
+        "synthetic@example.invalid"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--local",
+        "core.autocrlf",
+        "true"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "add",
+        "--all"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "warning: in the working copy of '.gitattributes', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'control.txt', LF will be replaced by CRLF the next time Git touches it\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "commit",
+        "-m",
+        "Synthetic B02 byte-preservation package"
+      ],
+      "exit": 0,
+      "stdout": "[master (root-commit) 2610ce6] Synthetic B02 byte-preservation package\n 22 files changed, 1237 insertions(+)\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx\n create mode 100644 .agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx\n create mode 100644 .agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py\n create mode 100644 .gitattributes\n create mode 100644 control.txt\n create mode 100644 tests/fixtures/smoke-inputs/generate-orders.py\n create mode 100644 tests/fixtures/smoke-inputs/orders.requirements.json\n create mode 100644 tests/fixtures/smoke-inputs/orders.xlsx\n create mode 100644 tests/fixtures/smoke-inputs/validate-orders.py\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "2610ce67a9c82e1cf7fa6fca74f7e0adc56b3b22\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "clone",
+        "--no-checkout",
+        "--no-hardlinks",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-authoring",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Cloning into 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout'...\ndone.\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--local",
+        "core.autocrlf",
+        "true"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "config",
+        "--get",
+        "core.autocrlf"
+      ],
+      "exit": 0,
+      "stdout": "true\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "checkout",
+        "--detach",
+        "2610ce67a9c82e1cf7fa6fca74f7e0adc56b3b22"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "HEAD is now at 2610ce6 Synthetic B02 byte-preservation package\n"
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "2610ce67a9c82e1cf7fa6fca74f7e0adc56b3b22\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\package-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "check-attr",
+        "text",
+        "eol",
+        "filter",
+        "ident",
+        "working-tree-encoding",
+        "diff",
+        "merge",
+        "--",
+        "tests/fixtures/smoke-inputs/orders.xlsx",
+        "tests/fixtures/smoke-inputs/orders.requirements.json",
+        "tests/fixtures/smoke-inputs/generate-orders.py",
+        "tests/fixtures/smoke-inputs/validate-orders.py",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt",
+        ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt",
+        ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx"
+      ],
+      "exit": 0,
+      "stdout": "tests/fixtures/smoke-inputs/orders.xlsx: text: unset\ntests/fixtures/smoke-inputs/orders.xlsx: eol: unset\ntests/fixtures/smoke-inputs/orders.xlsx: filter: unset\ntests/fixtures/smoke-inputs/orders.xlsx: ident: unset\ntests/fixtures/smoke-inputs/orders.xlsx: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/orders.xlsx: diff: unset\ntests/fixtures/smoke-inputs/orders.xlsx: merge: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: text: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: eol: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: filter: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: ident: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: diff: unspecified\ntests/fixtures/smoke-inputs/orders.requirements.json: merge: unspecified\ntests/fixtures/smoke-inputs/generate-orders.py: text: unset\ntests/fixtures/smoke-inputs/generate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/generate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/generate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/generate-orders.py: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/generate-orders.py: diff: unspecified\ntests/fixtures/smoke-inputs/generate-orders.py: merge: unspecified\ntests/fixtures/smoke-inputs/validate-orders.py: text: unset\ntests/fixtures/smoke-inputs/validate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/validate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/validate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/validate-orders.py: working-tree-encoding: unset\ntests/fixtures/smoke-inputs/validate-orders.py: diff: unspecified\ntests/fixtures/smoke-inputs/validate-orders.py: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: diff: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: merge: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: diff: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: merge: unspecified\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: text: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: eol: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: filter: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: ident: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: working-tree-encoding: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: diff: unset\n.agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: merge: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: diff: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx: merge: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/lf.txt: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/crlf.txt: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: diff: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/input.txt: merge: unspecified\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: text: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: eol: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: filter: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: ident: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: working-tree-encoding: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: diff: unset\n.agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/nested/deep/orders.xlsx: merge: unset\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\candidate-checkout",
+      "command": [
+        "git",
+        "-c",
+        "core.longpaths=true",
+        "-c",
+        "core.attributesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "-c",
+        "core.excludesFile=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\run-24bf7df1837046debd6038ed0e8084f2\\empty-gitconfig",
+        "check-attr",
+        "text",
+        "eol",
+        "filter",
+        "ident",
+        "working-tree-encoding",
+        "diff",
+        "merge",
+        "--",
+        "orchestrate/tools/git-evidence.mjs",
+        "orchestrate/tools/check-fence.mjs",
+        "tests/git-contract.test.cjs",
+        "tests/check-fence.test.cjs",
+        "tests/support/git-fixture.cjs",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md",
+        "orchestrate/SKILL.md",
+        "tests/smoke-page.test.cjs"
+      ],
+      "exit": 0,
+      "stdout": "orchestrate/tools/git-evidence.mjs: text: unspecified\norchestrate/tools/git-evidence.mjs: eol: unspecified\norchestrate/tools/git-evidence.mjs: filter: unspecified\norchestrate/tools/git-evidence.mjs: ident: unspecified\norchestrate/tools/git-evidence.mjs: working-tree-encoding: unspecified\norchestrate/tools/git-evidence.mjs: diff: unspecified\norchestrate/tools/git-evidence.mjs: merge: unspecified\norchestrate/tools/check-fence.mjs: text: unspecified\norchestrate/tools/check-fence.mjs: eol: unspecified\norchestrate/tools/check-fence.mjs: filter: unspecified\norchestrate/tools/check-fence.mjs: ident: unspecified\norchestrate/tools/check-fence.mjs: working-tree-encoding: unspecified\norchestrate/tools/check-fence.mjs: diff: unspecified\norchestrate/tools/check-fence.mjs: merge: unspecified\ntests/git-contract.test.cjs: text: unspecified\ntests/git-contract.test.cjs: eol: unspecified\ntests/git-contract.test.cjs: filter: unspecified\ntests/git-contract.test.cjs: ident: unspecified\ntests/git-contract.test.cjs: working-tree-encoding: unspecified\ntests/git-contract.test.cjs: diff: unspecified\ntests/git-contract.test.cjs: merge: unspecified\ntests/check-fence.test.cjs: text: unspecified\ntests/check-fence.test.cjs: eol: unspecified\ntests/check-fence.test.cjs: filter: unspecified\ntests/check-fence.test.cjs: ident: unspecified\ntests/check-fence.test.cjs: working-tree-encoding: unspecified\ntests/check-fence.test.cjs: diff: unspecified\ntests/check-fence.test.cjs: merge: unspecified\ntests/support/git-fixture.cjs: text: unspecified\ntests/support/git-fixture.cjs: eol: unspecified\ntests/support/git-fixture.cjs: filter: unspecified\ntests/support/git-fixture.cjs: ident: unspecified\ntests/support/git-fixture.cjs: working-tree-encoding: unspecified\ntests/support/git-fixture.cjs: diff: unspecified\ntests/support/git-fixture.cjs: merge: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: text: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: eol: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: filter: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: ident: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: working-tree-encoding: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: diff: unspecified\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-01-readonly-evidence.md: merge: unspecified\norchestrate/SKILL.md: text: unspecified\norchestrate/SKILL.md: eol: unspecified\norchestrate/SKILL.md: filter: unspecified\norchestrate/SKILL.md: ident: unspecified\norchestrate/SKILL.md: working-tree-encoding: unspecified\norchestrate/SKILL.md: diff: unspecified\norchestrate/SKILL.md: merge: unspecified\ntests/smoke-page.test.cjs: text: unspecified\ntests/smoke-page.test.cjs: eol: unspecified\ntests/smoke-page.test.cjs: filter: unspecified\ntests/smoke-page.test.cjs: ident: unspecified\ntests/smoke-page.test.cjs: working-tree-encoding: unspecified\ntests/smoke-page.test.cjs: diff: unspecified\ntests/smoke-page.test.cjs: merge: unspecified\n",
+      "stderr": ""
+    }
+  ]
+}
