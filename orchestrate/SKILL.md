@@ -32,6 +32,12 @@ First word of the arguments:
 
 ## Discovery (every mode starts here)
 
+Use `node orchestrate/tools/git-evidence.mjs discovery --repo <repo>` for the
+repeatable read-only inventory and provenance probes; helper recipes and manual
+fallback are in protocol.md. Inspect completeness/diagnostics; unknown never means
+absent. The rules below still decide ownership, targets and ledger state. Existing
+ledgers keep their frozen contract and gates even when this skill changes.
+
 1. Find ledgers in the WORKING TREE: glob `**/PROGRESS.md` rooted at
    `<repo>/.agents/changes/` — dot-dirs often escape repo-root globs, so root the search
    INSIDE the directory; if that still returns nothing, list the directory directly. A
@@ -142,6 +148,24 @@ First word of the arguments:
   user gate.
 - No `--no-verify`, no force-push, no history rewriting.
 - The ledger's own contract outranks this skill's reference docs.
+
+## Evidence and smoke-input responsibilities
+
+After the implementer report, use the read-only `check-fence.mjs` mechanical gate
+before fresh semantic review when the ledger's own contract enables it (commands,
+authority grammar and manual fallback in protocol.md). PASS does not grant scope or
+approve a merge; UNKNOWN never passes. Capture both refs/SHAs and both diagnostic
+arrays. Continue to map every hunk independently under the same cap and verdict rules.
+
+At planning and checkpoint close-out, the conductor inventories, generates,
+independently validates and delivers actual reproducible inputs per smoke step.
+Supply workbooks with specified sheets/types/formulas/edge cases, exact file links,
+expected results and working-copy/reset instructions; preserve immutable versioned
+inputs/evidence. Name specific private-data/credential/access prerequisites instead
+of fake files or pre-verification. No manual construction unless that is the test.
+Compare resolved input identities on reissue and bump EVERY affected step revision;
+use the input registry and raw-file/history checks in references/smoke-page.md.
+Ordinary synthetic preparation adds no user gate.
 
 ## Mode: new
 

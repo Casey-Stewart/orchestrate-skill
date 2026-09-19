@@ -536,6 +536,8 @@
   .step-pass p { margin: 0; }
   .step-pass p + p { margin-top: 7px; }
 
+  .step-input { overflow-wrap: anywhere; }
+
   .step-aside {
     margin: 10px 0 0;
     font-size: 13.5px;
@@ -755,7 +757,9 @@
          order       — "Order matters" callout (cross-step constraints)
          need        — "You need" callout (test data / hardware / accounts)
          touchesData — true flags the section "Touches your data"
-       step: { n, do, pass, revision?, aside?, unit?, tag?, pre? }
+       step: { n, do, pass, revision?, aside?, unit?, tag?, pre?, inputs? }
+         inputs — stable IDs in the sidecar's inputs registry. The builder validates
+                 their raw disk bytes and supplies resolved inputFiles below.
          do    — the action, imperative; one step, one action
          pass  — the acceptance criterion, kept apart from the instruction
                  because those are two different things to read
@@ -956,6 +960,41 @@
 
   /* ---------------------------------------------------------------- render */
 
+  function inputURL(path) {
+    return path.split('/').map(function (part) {
+      return encodeURIComponent(part).replace(/[!'()*]/g, function (c) {
+        return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+      });
+    }).join('/');
+  }
+
+  function inputDetails(body, files) {
+    (files || []).forEach(function (input) {
+      var block = document.createElement('div');
+      block.className = 'step-input';
+      var label = document.createElement('p');
+      label.className = 'step-aside';
+      label.textContent = 'Input ' + input.id + ' (' + input.mode + '): ';
+      var link = document.createElement('a');
+      link.textContent = input.path;
+      link.setAttribute('href', inputURL(input.path));
+      label.appendChild(link);
+      block.appendChild(label);
+      ['Requirements: ' + input.requirements, 'Use: ' + input.use, 'Reset: ' + input.reset,
+        'SHA-256: ' + input.sha256 + ' · ' + input.size + ' bytes'].forEach(function (text) {
+        var p = document.createElement('p'); p.className = 'step-aside'; p.textContent = text;
+        block.appendChild(p);
+      });
+      var evidence = document.createElement('p'); evidence.className = 'step-aside';
+      evidence.textContent = 'Input validation: ' + input.validation.result + ' (' + input.validation.env +
+        '; exit ' + input.validation.exitCode + ') — ';
+      var proof = document.createElement('a'); proof.textContent = input.validation.path;
+      proof.setAttribute('href', inputURL(input.validation.path)); evidence.appendChild(proof);
+      block.appendChild(evidence);
+      body.appendChild(block);
+    });
+  }
+
   function stepEl(step) {
     var wrap = document.createElement("div");
     wrap.className = "step";
@@ -1000,6 +1039,7 @@
     passBox.className = "step-pass";
     passBox.innerHTML = '<span class="pl">Pass</span><p>' + step.pass + "</p>";
     body.appendChild(passBox);
+    inputDetails(body, step.inputFiles);
 
     if (step.aside) {
       var a = document.createElement("p");
@@ -1298,6 +1338,13 @@
         var line = "  " + st.n + ". " + status;
         if (r.note && r.note.trim()) line += " — " + r.note.trim().replace(/\s+/g, " ");
         lines.push(line);
+        (st.inputFiles || []).forEach(function (input) {
+          lines.push('    Input ' + input.id + ': ' + input.path + ' (' + input.mode + ', ' + input.size +
+            ' bytes; SHA-256 ' + input.sha256 + ')');
+          lines.push('    Requirements: ' + input.requirements, '    Use: ' + input.use, '    Reset: ' + input.reset);
+          lines.push('    Input validation: ' + input.validation.path + ' — ' + input.validation.result +
+            '; command: ' + input.validation.command + '; exit ' + input.validation.exitCode + '; ' + input.validation.env);
+        });
       });
       lines.push("");
     });

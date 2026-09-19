@@ -5,6 +5,19 @@ the ledger files. Prompts must stand alone: sub-agents have NO session context, 
 the actual text into the prompt (don't just point at files an agent might skip). Every
 skeleton ends with a REPORT shape; the orchestrator acts on nothing that lacks it.
 
+The conductor prepares checkpoint inputs as real immutable files with stable IDs,
+per-step references, raw hashes/sizes, requirements, independent validation evidence
+and exact use/reset commands. This is normal authorized preparation, not a new gate.
+Implementers stay inside their fences; reviewers verify the consumer behavior and
+never replace mechanical/semantic gates with a helper PASS. Pre-flight checks input
+requirements and genuine private-data/credential/access prerequisites. QA receives
+the actual inputRoot, sidecar, prior snapshots, expected identities and step revisions:
+read/hash the files, execute independent semantic validation, browser-check file links,
+and modify only disposable working copies. Never call missing dependencies pre-verified
+or claim Excel-app execution from hashes; leave native-app steps human if no runner.
+On reissue check retained issue paths/history and every affected revision. Existing
+ledger contracts keep their own rules; tool diagnostics never authorize state changes.
+
 ## Implementer
 
 ```
@@ -197,6 +210,15 @@ STEPS (verbatim from the batch files, with Do / Pass text and the page's step nu
 and revisions, initially 1):
 [AGENT-TAGGED STEPS]
 
+ACTUAL INPUTS: [INPUT ROOT, STABLE-ID REGISTRY, EXACT PER-STEP FILE REFERENCES,
+RAW SHA-256/SIZES, REQUIREMENTS AND INDEPENDENT VALIDATION EVIDENCE, USE/RESET COMMANDS]
+PRIOR ISSUES (on reissue): [PRESERVED SIDECARS/PAGES, INPUT HISTORY AND AFFECTED REVISIONS]
+Validate the actual delivered files against these identities and semantic requirements,
+including workbook sheets/types/formulas/caches when relevant. Browser-check usable
+links. Modify only disposable working copies and prove reset; never overwrite issued
+files. Missing private data, credentials or external access means COULD-NOT-RUN with
+the exact prerequisite. Hashes alone do not establish semantics or Excel-app behavior.
+
 For each step: perform Do exactly, judge Pass literally, and write
 [LEDGER_DIR]/evidence/C[N]/step-[NN].md containing: the step text, the commands run,
 exit codes, output tail (≤20 lines) or the screenshot path, the integration SHA, the
@@ -233,6 +255,11 @@ CHECK, in order, and report only failures with evidence:
    decision.
 5. Every acceptance criterion is settleable by a diff, a test, or a smoke step — flag
    restatements of the checklist.
+   Every file-dependent step inventories reproducible inputs, independent validation,
+   exact deliverable links and working-copy/reset instructions; genuine private-data,
+   credential or access prerequisites are explicit. No manual input construction
+   unless it is the tested behavior. Reissues preserve issue paths and revise every
+   affected consumer, not only the step where a registry edit was first noticed.
 6. Hands-on / machine-verifiable and Runner tags are justified per batch; checkpoint
    placement follows from them; weights (S/M/L) are plausible.
 

@@ -58,6 +58,14 @@ before believing any row (§Recovery in the contract).
      reports> escaped=<defects the user found that no gate caught>`, completed when the
      user's verdict is recorded. -->
 
+## Issued checkpoint inputs
+
+<!-- At close-out link the sidecar's stable-id input registry, exact immutable issue
+     files and independent validation evidence, raw hash/size manifest and usable
+     delivery location. Record working-copy/reset instructions and named unavailable
+     prerequisites. Reissue preserves previous page/sidecar/inputHistory and files;
+     record every affected step revision. A hash alone is not semantic validation. -->
+
 ## Smoke-test verdict log
 
 | Date | Checkpoint | Verdict | User notes |

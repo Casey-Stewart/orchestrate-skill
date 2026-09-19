@@ -175,6 +175,97 @@ data`). Assembly is mechanical:
   Keep earlier revision increments on later re-issues, even when the step is unaffected
   this time.
 
+## Input registry and immutable issue files
+
+The conductor supplies actual generated, independently validated files. Inventory
+them at planning, including workbook sheets/columns/types/formulas/edge cases, then
+deliver the exact files at close-out with expected results and working-copy/reset
+instructions. Private-data, credential and external-access dependencies are named
+in `need`/`aside`, never represented by fictitious files or pre-verification. Ordinary
+synthetic preparation adds no approval gate; manual construction is only a test when
+construction itself is the behavior being checked.
+
+Add this structure to the sidecar (the digest/size values below are explanatory;
+fill them from the actual file Buffers, and retain a real validation report):
+
+```json
+{
+  "inputs": [{
+    "id": "orders",
+    "path": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "sha256": "<64 lowercase hex characters from raw file bytes>",
+    "size": 8634,
+    "requirements": "Orders, Summary, Types; IDs remain text; formulas F2:F5; total 23.50 and count 4.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "<raw validation-report digest>",
+      "size": 123,
+      "command": "python evidence/C1/inputs/issue-001/validate-orders.py evidence/C1/inputs/issue-001/orders.xlsx evidence/C1/inputs/issue-001/orders.requirements.json",
+      "exitCode": 0,
+      "result": "Independent sheets, cell types, formulas and cached values passed.",
+      "env": "Observed Python and openpyxl versions recorded in the report"
+    },
+    "mode": "working-copy",
+    "use": "Copy-Item -LiteralPath evidence/C1/inputs/issue-001/orders.xlsx -Destination $env:TEMP/OS-orders-working.xlsx; open that copy and change Orders C2 from 2 to 3.",
+    "reset": "Close the working copy and repeat Copy-Item with -Force. Original F2/Summary B2 are 22.50/23.50; edited copy is 33.75/34.75."
+  }],
+  "inputHistory": [],
+  "sections": [{"n": 1, "title": "Workbook", "steps": [
+    {"n": 1, "revision": 1, "do": "Open the supplied workbook copy.",
+     "pass": "All three sheets and leading-zero IDs are visible.", "inputs": ["orders"]}
+  ]}]
+}
+```
+
+The registry is an array with unique stable IDs. A step's `inputs` is an array of
+those IDs, with no duplicates or dangling references. Every input needs path,
+lowercase raw SHA-256, nonnegative byte size, nonempty requirements, validation
+path/hash/size/command/result/env and exitCode 0, mode (`read-only` or `working-copy`),
+use and reset. Even read-only files name a reset rule, such as "Keep the issued file
+unchanged; recopy a disposable copy from this original." Shared validation reports
+are allowed. `inputFiles` is reserved for the builder's resolved display data.
+
+Paths are slash-separated relative file paths from the output HTML's directory.
+The CLI validates **actual disk bytes**, including validation evidence and historical
+files, before any output write. Imported calls must pass
+`buildSmokePage(data, template, {inputRoot, previous, resetVerdicts})` with explicit
+`inputRoot` whenever declarations exist. Pure declaration/history inspection lives
+in `smoke-inputs.mjs`; it does not pretend a temporary previous-sidecar directory is
+the original input root. Missing files, directories, absolute/traversal paths,
+Windows aliases and symlinks are rejected. Hash raw Buffers: no text decoding,
+line-ending normalization, trimming, BOM removal or Git object-ID substitution.
+Legacy sidecars with omitted/empty registries and no references remain compatible.
+
+On each reissue keep the unchanged previous sidecar and page snapshot. Changed bytes
+require new versioned paths, such as `issue-002/orders.xlsx`. In `inputHistory`, retain
+`{path, sha256, size}` for every prior input or validation file no longer present in
+current declarations, and carry older history forward. The builder refuses reused
+paths with different byte identities, omitted history, or missing historical files.
+Reusing the same unchanged file is allowed; never overwrite/delete issued originals.
+
+Every referencing existing step must increase its revision when resolved input
+metadata changes (bytes/digest/size, path, requirements, validation, mode, use or reset),
+even if its stable ID and build SHA stay unchanged. Unrelated steps keep their
+revisions and marks. The page then labels old affected passes `NOT RE-RUN`; merely
+editing a note cannot refresh them. New applicable human verdicts or agent evidence
+are still required. Registry edits cannot bypass revision checks by keeping IDs.
+
+The existing step layout displays encoded file/evidence links, requirements,
+hash/size and use/reset text. Copied results and a full plain-text fallback name the
+same files and instructions. Keep HTML and inputs usable together; browser QA checks
+the links. A hosted renderer that cannot serve relative files needs separate usable
+attachments/local links and an explicit mapping. Never call an inaccessible URL a
+download. Native Excel opening remains human unless a real spreadsheet runner exists.
+
+Use the fixed `tests/fixtures/smoke-inputs/orders.xlsx`, requirements, generator and
+validator for a concrete example. Run literal `python` generation to new paths and
+independent semantic validation; do not infer sheets/formulas/caches from a hash.
+Detect and record the interpreter environment in the ledger; never hardcode a local
+installation path into reusable instructions. Preserve input and evidence bytes with
+the scoped `.gitattributes`; verify effective attributes and a fresh
+`core.autocrlf=true` checkout (including LF/CRLF sentinels and an unprotected conversion
+control). Actual Excel values and validation recipes are in protocol.md.
+
 ## Pre-verified steps
 
 Before the page is issued, the QA runner (`subagent-prompts.md`) performs every step

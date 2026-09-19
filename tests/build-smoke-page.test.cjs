@@ -7,6 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
+const { createHash } = require('node:crypto');
 
 const BUILDER = path.join(__dirname, '../orchestrate/tools/build-smoke-page.mjs');
 const TEMPLATE_PATH = path.join(__dirname, '../orchestrate/references/smoke-page-template.html');
@@ -390,4 +391,171 @@ test('legacy pages require a reproducible baseline before their first guarded re
   fs.writeFileSync(old, JSON.stringify(previous));
   result = run(); assert.equal(result.status, 0, result.stderr);
   assert.equal(fs.readFileSync(out, 'utf8'), reissue(current, previous));
+});
+
+function inputPackage(t) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'smoke-real-build-'));
+  t.after(() => fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }));
+  const put = (name, bytes) => {
+    fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true });
+    fs.writeFileSync(path.join(root, name), bytes);
+    return { path: name, size: Buffer.byteLength(bytes), sha256: createHash('sha256').update(bytes).digest('hex') };
+  };
+  const report = put('evidence/C1/inputs/validation-001/report.txt', 'Independent workbook fixture validation: passed.\n');
+  const workbook = fs.readFileSync(path.join(__dirname, 'fixtures/smoke-inputs/orders.xlsx'));
+  const d = sidecar();
+  d.inputs = [{ id: 'orders', ...put('evidence/C1/inputs/issue-001/orders.xlsx', workbook),
+    requirements: 'Three sheets; text IDs, formulas/caches; total 23.50/count 4.',
+    validation: { ...report, command: 'python validate-orders.py orders.xlsx orders.requirements.json',
+      exitCode: 0, result: 'All fixture requirements passed.', env: 'Independent B02 validator' },
+    mode: 'working-copy', use: 'Copy orders.xlsx to a temporary working file.', reset: 'Recopy the issued original.' }];
+  d.sections[0].steps[0].inputs = ['orders']; d.sections[1].steps[0].inputs = ['orders'];
+  const json = path.join(root, 'smoke-c1.json'), out = path.join(root, 'smoke-c1.html');
+  const write = data => fs.writeFileSync(json, JSON.stringify(data));
+  const run = (...args) => spawnSync(process.execPath, [BUILDER, json, out, ...args], { encoding: 'utf8', windowsHide: true });
+  return { root, put, report, workbook, d, json, out, write, run };
+}
+
+test('imported builder requires actual root/bytes and never accepts supplied digests on faith', t => {
+  const f = inputPackage(t);
+  assert.throws(() => builder.buildSmokePage(f.d, template), /explicit inputRoot/);
+  const original = JSON.stringify(f.d);
+  const built = builder.buildSmokePage(f.d, template, { inputRoot: f.root });
+  assert.equal(JSON.stringify(f.d), original);
+  const emitted = JSON.parse(built.match(/var SECTIONS = (\[[\s\S]*?\]);\r?\n/)[1]);
+  assert.deepEqual(emitted[0].steps[0].inputFiles, f.d.inputs);
+  assert.equal(emitted[0].steps[1].inputFiles, undefined);
+  const bytes = Buffer.from(f.workbook); bytes[150] ^= 1;
+  fs.writeFileSync(path.join(f.root, f.d.inputs[0].path), bytes);
+  assert.throws(() => builder.buildSmokePage(f.d, template, { inputRoot: f.root }), /SHA-256 mismatch/);
+});
+
+test('CLI validates files beside output, preserving old HTML on file, digest, evidence and metadata failures', t => {
+  const f = inputPackage(t); f.write(f.d);
+  let r = f.run(); assert.equal(r.status, 0, r.stderr);
+  const before = fs.readFileSync(f.out), original = path.join(f.root, f.d.inputs[0].path);
+  const refuse = (message, ...args) => {
+    const result = f.run(...args); assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, message); assert.deepEqual(fs.readFileSync(f.out), before);
+  };
+  const changed = Buffer.from(f.workbook); changed[200] ^= 1; fs.writeFileSync(original, changed);
+  refuse(/SHA-256 mismatch/);
+  fs.unlinkSync(original); refuse(/ENOENT/);
+  fs.mkdirSync(original); refuse(/not a regular file/); fs.rmdirSync(original);
+  fs.writeFileSync(original, f.workbook);
+  const report = path.join(f.root, f.report.path), reportBytes = fs.readFileSync(report);
+  fs.writeFileSync(report, Buffer.alloc(reportBytes.length)); refuse(/report.txt.*SHA-256 mismatch/);
+  fs.writeFileSync(report, reportBytes);
+  for (const mutate of [d => { d.inputs[0].use = ''; }, d => { d.sections[0].steps[0].inputs = ['missing']; },
+    d => { d.inputs[0].path = '../outside.xlsx'; }]) {
+    const invalid = structuredClone(f.d); mutate(invalid); f.write(invalid); refuse(/nonempty|dangling|safe relative/);
+  }
+  f.write(f.d); r = f.run(); assert.equal(r.status, 0, r.stderr);
+  // The source JSON may be elsewhere: file URLs resolve beside the output HTML.
+  const snapshot = path.join(f.root, 'snapshots', 'input.json'); fs.mkdirSync(path.dirname(snapshot));
+  fs.writeFileSync(snapshot, JSON.stringify(f.d));
+  r = spawnSync(process.execPath, [BUILDER, snapshot, f.out], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+});
+
+test('CLI reissue refuses to overwrite the existing HTML declared as an issued input', t => {
+  const f = inputPackage(t), previous = sidecar();
+  f.write(previous);
+  let result = f.run();
+  assert.equal(result.status, 0, result.stderr);
+  const issuedBytes = fs.readFileSync(f.out);
+  const prior = path.join(f.root, 'last-issued.json');
+  fs.writeFileSync(prior, JSON.stringify(previous));
+  const current = structuredClone(previous);
+  current.inputs = [{ ...f.d.inputs[0], id: 'prior-page', path: path.basename(f.out),
+    size: issuedBytes.length, sha256: createHash('sha256').update(issuedBytes).digest('hex'),
+    requirements: 'Preserve the issued prior page as an immutable input.',
+    mode: 'read-only', use: 'Read the issued prior page.', reset: 'Recopy the preserved original page.' }];
+  current.sections[0].steps[0].inputs = ['prior-page'];
+  current.sections[0].steps[0].revision++;
+  f.write(current);
+  result = f.run('--previous', prior);
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /output must not overwrite an issued input artifact/);
+  assert.deepEqual(fs.readFileSync(f.out), issuedBytes, 'the entire issued input/output must remain byte-identical');
+  assert.deepEqual(JSON.parse(fs.readFileSync(prior, 'utf8')), previous, 'the exact prior sidecar remains intact');
+});
+
+test('shared stable IDs require EVERY referencing revision for path, bytes and all semantic metadata changes', t => {
+  const f = inputPackage(t);
+  const edits = [
+    d => { d.inputs[0].requirements += ' Check another edge case.'; },
+    d => { d.inputs[0].use += ' Change C2.'; },
+    d => { d.inputs[0].reset += ' Verify restored value.'; },
+    d => { d.inputs[0].mode = 'read-only'; },
+    d => { d.inputs[0].validation.command += ' --changed'; },
+    d => { d.inputs[0].validation.result += ' New result text.'; },
+    d => { d.inputs[0].validation.env += ' New environment.'; },
+    d => { Object.assign(d.inputs[0], f.put('evidence/C1/inputs/issue-002/orders.xlsx', f.workbook)); },
+    d => { const bytes = Buffer.from(f.workbook); bytes[200] ^= 1;
+      Object.assign(d.inputs[0], f.put('evidence/C1/inputs/issue-002/orders.xlsx', bytes)); }
+  ];
+  for (const edit of edits) {
+    const current = structuredClone(f.d); edit(current);
+    current.inputHistory = [{ path: f.d.inputs[0].path, sha256: f.d.inputs[0].sha256, size: f.d.inputs[0].size }];
+    const options = { previous: f.d, inputRoot: f.root };
+    assert.throws(() => builder.buildSmokePage(current, template, options), /step 1:.*resolved inputs changed.*increment revision/);
+    current.sections[0].steps[0].revision++;
+    assert.throws(() => builder.buildSmokePage(current, template, options), /step 3:.*resolved inputs changed.*increment revision/);
+    current.sections[1].steps[0].revision++;
+    assert.doesNotThrow(() => builder.buildSmokePage(current, template, options));
+    assert.equal(current.sections[0].steps[1].revision, f.d.sections[0].steps[1].revision);
+    assert.equal(current.buildSha, f.d.buildSha, 'same-build changes must still invalidate input consumers');
+  }
+});
+
+test('shared validation report identity changes invalidate all input consumers and require its historical bytes', t => {
+  const f = inputPackage(t), current = structuredClone(f.d);
+  current.inputs.push({ ...structuredClone(current.inputs[0]), id: 'second' });
+  current.sections[1].steps[0].inputs = ['second'];
+  const previous = structuredClone(current);
+  const proof = f.put('evidence/C1/inputs/validation-002/report.txt', 'New independent validation.\n');
+  current.inputs.forEach(input => Object.assign(input.validation, proof));
+  current.inputHistory = [f.report];
+  const options = { previous, inputRoot: f.root };
+  assert.throws(() => builder.buildSmokePage(current, template, options), /step 1:.*increment revision/);
+  current.sections[0].steps[0].revision++;
+  assert.throws(() => builder.buildSmokePage(current, template, options), /step 3:.*increment revision/);
+  current.sections[1].steps[0].revision++;
+  assert.doesNotThrow(() => builder.buildSmokePage(current, template, options));
+  fs.unlinkSync(path.join(f.root, f.report.path));
+  assert.throws(() => builder.buildSmokePage(current, template, options), /validation-001.*ENOENT/);
+});
+
+test('LF/CRLF-only reissue refuses stale bytes then enforces new paths, all revisions and multi-issue history', t => {
+  const f = inputPackage(t);
+  Object.assign(f.d.inputs[0], f.put('evidence/C1/inputs/issue-001/raw.txt', 'one\ntwo\n'));
+  f.write(f.d); let r = f.run(); assert.equal(r.status, 0, r.stderr);
+  const before = fs.readFileSync(f.out), old = path.join(f.root, 'snapshots', 'previous.json');
+  fs.mkdirSync(path.dirname(old)); fs.writeFileSync(old, JSON.stringify(f.d));
+  const source = path.join(f.root, f.d.inputs[0].path);
+  fs.writeFileSync(source, 'one\r\ntwo\r\n');
+  r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /size mismatch/);
+  assert.deepEqual(fs.readFileSync(f.out), before);
+  const current = structuredClone(f.d); Object.assign(current.inputs[0], f.put(f.d.inputs[0].path, 'one\r\ntwo\r\n'));
+  current.sections[0].steps[0].revision++; current.sections[1].steps[0].revision++;
+  f.write(current); r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /immutable/);
+  assert.deepEqual(fs.readFileSync(f.out), before);
+  fs.writeFileSync(source, 'one\ntwo\n');
+  Object.assign(current.inputs[0], f.put('evidence/C1/inputs/issue-002/raw.txt', 'one\r\ntwo\r\n'));
+  f.write(current); r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /missing from inputs\/inputHistory/);
+  current.inputHistory = [{ path: f.d.inputs[0].path, sha256: f.d.inputs[0].sha256, size: f.d.inputs[0].size }];
+  current.sections[1].steps[0].revision--; f.write(current);
+  r = f.run('--previous', old); assert.equal(r.status, 1); assert.match(r.stderr, /step 3:.*increment revision/);
+  current.sections[1].steps[0].revision++; f.write(current);
+  r = f.run('--previous', old); assert.equal(r.status, 0, r.stderr);
+  assert.equal(fs.readFileSync(source, 'utf8'), 'one\ntwo\n');
+  const second = fs.readFileSync(f.out); fs.writeFileSync(old, JSON.stringify(current));
+  fs.unlinkSync(source); r = f.run('--previous', old);
+  assert.equal(r.status, 1); assert.match(r.stderr, /issue-001.*ENOENT/);
+  assert.deepEqual(fs.readFileSync(f.out), second);
+  fs.writeFileSync(source, 'one\ntwo\n');
+  delete current.inputHistory; f.write(current); r = f.run('--previous', old);
+  assert.equal(r.status, 1); assert.match(r.stderr, /missing.*issue-001/);
+  assert.deepEqual(fs.readFileSync(f.out), second);
 });
