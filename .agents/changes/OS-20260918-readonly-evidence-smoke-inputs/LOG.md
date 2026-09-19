@@ -390,3 +390,7 @@ Evidence-copy whitespace cleanup only: transcript blank metadata and captured di
 ## B02-integrated
 
 Reviewed/polished candidatec78f4270fe678e8dd049a3bf8ff19b80348689bf merged96f48ed17931053e7c70aed58ba9e581c9e4e560 after conflict-free merge-tree f8af2d14b2f833c71c2938a61275212f4f74a8a1. Integration recursive65/65 PASS, diff check PASS. Literal Python3.10.6 validator PASS:47cells/6formulas+caches,23.50/count4, workbook rawSHA256e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f. All8 B01/control raw bytes and effective attributes exactly equal pre-B02 capture; conductor compared recorded lines mechanically. B02 now green awaiting final C1; B01 continues; no main merge/push. Clean B02 worktree eligible for removal; branch retained.
+
+## B01-R1-gate
+
+DONE @b3ce33eb35dab7ac43472faa0f90220ff32a48dd,6/6 checklist. Manual gate PASS at integrationc163aeef65237b7cc5a0ecad206764012e102140 and mergebaseae850a38fa760cb36f0ca83db35e5830ed1cc2ed. Exact five source/test paths plus permitted own ticks, clean candidate, no renames or extensions. Evidence retained under evidence/W1/B01. Candidate recursive143/143 PASS. Fresh independent semantic reviewer and separate fresh hunter dispatched in parallel on current inherited model. Feature base proof N/A; frozen manual gate remains unchanged.
