@@ -1,10 +1,12 @@
 # B{{BATCH_NUM}} — {{BATCH_TITLE}} ({{BATCH_TYPE}}, {{BATCH_VERSION}})
 
-**Branch**: `{{BATCH_BRANCH}}` (cut from the integration tip when the wave opens)
+**Branch**: `{{BATCH_BRANCH}}`
+Cut from the integration tip when the wave opens.
 **Wave**: {{BATCH_WAVE}} · **Weight**: {{BATCH_WEIGHT}}
 **Depends on**: {{BATCH_DEPS}}
 **Smoke gate**: {{BATCH_SMOKE_GATE}}
-**Files** (the fence — modify NOTHING else; need more? report `NEEDS_FENCE`): {{BATCH_FILES}}
+**Files**: {{BATCH_FILES}}
+The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: {{BATCH_GUARDRAILS}}
 **Spec**: [01-plan.md](01-plan.md) §B{{BATCH_NUM}} · **Gate**: fence check → {{BATCH_GATE}}
 
@@ -48,6 +50,12 @@ the merge.
      - Runner: `agent` (executable in THIS repo's environment by a runner the contract
        lists — say which) or `human` (hardware, credentials, feel, another OS, live
        data). Default human. Agent steps are pre-verified before the hand-over.
+     - Inputs: stable IDs and exact issued file links, requirements, independently
+       validated expected results, read-only or working-copy/reset commands. Conductor
+       generates and delivers the files; no manual construction unless being tested.
+       Preserve prior input/evidence paths and bump EVERY affected revision on reissue.
+       Name specific private-data/credential/access prerequisites; missing means not
+       pre-verified. QA must receive and validate the same actual files as the tester.
      - Aside (optional): warning or context ("Enter cancels here — click the button").
      - Counting (optional): when Pass checks a number, define ONE unit in the user's
        words ("One unit = one purchase order").

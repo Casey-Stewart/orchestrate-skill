@@ -29,6 +29,16 @@ file is the contract; this one only locks scope, waves, and checkpoints.
      resolved at planning time where possible, else wave 1. No mid-run wave may stall
      waiting on the user for a gate the plan already knew about. -->
 
+## Smoke-input inventory
+
+<!-- For every file-dependent step: stable input ID, exact versioned issue path,
+     required contents (workbook sheets/columns/types/formulas/edge cases), synthetic
+     generation and independent validation, expected Pass result, read-only or exact
+     working-copy/reset instructions. Identify specific private-data, credentials or
+     external-access prerequisites. The conductor supplies actual usable files and
+     evidence at close-out; no manual construction unless construction is the test.
+     Preserve prior issue directories and bump every referencing revision on reissue. -->
+
 ## Backlog fold-ins
 
 <!-- Accepted at plan approval, one line each: `<id> — <backlog text, verbatim> → B<NN>`

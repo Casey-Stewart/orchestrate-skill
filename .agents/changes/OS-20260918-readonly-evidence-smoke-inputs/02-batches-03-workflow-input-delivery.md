@@ -108,16 +108,16 @@ opening is a human step unless an actual spreadsheet runner is available.
 
 ## Checklist
 
-- [ ] Wire/document helper probes and mechanical gate without changing decisions.
-- [ ] Bake conductor input responsibilities into skill/references/templates/prompts.
-- [ ] Implement and test smoke-input declarations, disk validation and per-step identities.
-- [ ] Integrate input-byte validation and retained artifacts into smoke builder.
-- [ ] Test raw delivered-byte hashes, LF/CRLF-only tampering and fresh autocrlf=true checkout preservation for active/archived input copies.
-- [ ] Keep the machine-local Python path out of reusable templates while preserving this ledger's explicit environment fact.
-- [ ] Render exact file links and use/reset instructions in existing page design.
-- [ ] Enforce per-input affected revision invalidation and historical verdicts.
-- [ ] Add builder/runtime/doc consistency regression tests and helper documentation.
-- [ ] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).
+- [x] Wire/document helper probes and mechanical gate without changing decisions.
+- [x] Bake conductor input responsibilities into skill/references/templates/prompts.
+- [x] Implement and test smoke-input declarations, disk validation and per-step identities.
+- [x] Integrate input-byte validation and retained artifacts into smoke builder.
+- [x] Test raw delivered-byte hashes, LF/CRLF-only tampering and fresh autocrlf=true checkout preservation for active/archived input copies.
+- [x] Keep the machine-local Python path out of reusable templates while preserving this ledger's explicit environment fact.
+- [x] Render exact file links and use/reset instructions in existing page design.
+- [x] Enforce per-input affected revision invalidation and historical verdicts.
+- [x] Add builder/runtime/doc consistency regression tests and helper documentation.
+- [x] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).
 
 ## Acceptance criteria
 

@@ -6,6 +6,8 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const test = require('node:test');
 const vm = require('node:vm');
+const os = require('node:os');
+const { createHash } = require('node:crypto');
 
 const template = fs.readFileSync(path.join(__dirname, '../orchestrate/references/smoke-page-template.html'), 'utf8');
 const A = 'a'.repeat(40), B = 'b'.repeat(40), C = 'c'.repeat(40);
@@ -132,6 +134,67 @@ test('sidecar-built reissues preserve old verdicts while appends start unmarked'
   reissue.mark(3, 'pass');
   assert.equal(reissue.record(3).buildSha, B);
   assert.deepEqual(reissue.record(2), records[1], 'marking appended work cannot overwrite an old verdict');
+});
+
+test('real input reissue flows through builder, displayed files and saved verdicts on the same build', async t => {
+  const { buildSmokePage } = await import(pathToFileURL(path.join(__dirname, '../orchestrate/tools/build-smoke-page.mjs')));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'smoke-input-page-'));
+  t.after(() => fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }));
+  function put(name, bytes) {
+    fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); fs.writeFileSync(path.join(root, name), bytes);
+    return { path: name, size: Buffer.byteLength(bytes), sha256: createHash('sha256').update(bytes).digest('hex') };
+  }
+  const workbook = fs.readFileSync(path.join(__dirname, 'fixtures/smoke-inputs/orders.xlsx'));
+  const file = put("evidence/C1/inputs/issue-001/orders & 'é'.xlsx", workbook);
+  const proof = put('evidence/C1/inputs/validation-001/report & checks.txt', 'Independent requirements passed.\n');
+  const input = { id: 'orders', ...file, requirements: 'Three sheets; leading-zero IDs; total 23.50/count 4. <literal>',
+    validation: { ...proof, command: 'python validate-orders.py orders.xlsx orders.requirements.json', exitCode: 0,
+      result: 'All workbook requirements passed.', env: 'Python with openpyxl, independent fixture validator' },
+    mode: 'working-copy', use: 'Copy original to a temporary workbook; edit C2.', reset: 'Close copy, recopy original; total returns to 23.50.' };
+  const previous = { change: 'Input handoff', checkpoint: 1, batches: 'B03', branch: 'integration', buildSha: A,
+    ckptKey: 'c1', gate: { checks: ['Verify build and canary.'] }, inputs: [input],
+    sections: [{ n: 1, title: 'Workbook', steps: [
+      { n: 1, revision: 1, do: 'Open workbook copy.', pass: 'Three sheets.', inputs: ['orders'] },
+      { n: 2, revision: 1, do: 'Check unrelated feature.', pass: 'It opens.' },
+      { n: 3, revision: 1, do: 'Validate input.', pass: 'All requirements pass.', inputs: ['orders'],
+        pre: { sha: A, stepRevision: 1, env: 'Python', evidence: 'evidence/C1/step-03.md' } }
+    ] }] };
+  const options = { inputRoot: root };
+  const first = await page({ html: buildSmokePage(previous, template, options) });
+  const links = first.el('step-1').querySelectorAll('a');
+  assert.equal(links.length, 2);
+  assert.equal(links[0].textContent, file.path);
+  assert.equal(links[0].getAttribute('href'), 'evidence/C1/inputs/issue-001/orders%20%26%20%27%C3%A9%27.xlsx');
+  assert.equal(links[1].getAttribute('href'), 'evidence/C1/inputs/validation-001/report%20%26%20checks.txt');
+  assert.deepEqual(fs.readFileSync(path.join(root, decodeURIComponent(links[0].getAttribute('href')))), workbook);
+  const shown = first.el('step-1').querySelectorAll('.step-aside').map(p => p.textContent).join('\n');
+  assert.match(shown, /Requirements:.*<literal>/, 'input metadata is plain text, never authored HTML');
+  assert.ok(shown.includes(input.use)); assert.ok(shown.includes(input.reset));
+  for (const text of [file.path, proof.path, input.requirements, input.use, input.reset, input.validation.command]) assert.ok(first.copy().includes(text), text);
+  first.mark(1, 'pass'); first.note(1, 'Workbook observation');
+  first.mark(2, 'pass'); first.note(2, 'Keep unrelated note');
+  const oldRecords = [first.record(1), first.record(2)];
+  const current = structuredClone(previous), updated = Buffer.from(workbook); updated[200] ^= 1;
+  Object.assign(current.inputs[0], put('evidence/C1/inputs/issue-002/orders.xlsx', updated));
+  current.inputHistory = [file];
+  assert.throws(() => buildSmokePage(current, template, { ...options, previous }), /step 1:.*increment revision/);
+  current.sections[0].steps[0].revision++;
+  assert.throws(() => buildSmokePage(current, template, { ...options, previous }), /step 3:.*increment revision/);
+  current.sections[0].steps[2].revision++;
+  const reissue = await page({ storage: first.storage, html: buildSmokePage(current, template, { ...options, previous }) });
+  assert.deepEqual([reissue.record(1), reissue.record(2)], oldRecords);
+  assert.equal(reissue.el('t-rerun').textContent, 2);
+  assert.equal(reissue.el('t-pass').textContent, 1);
+  assert.equal(reissue.el('t-pre').textContent, 0);
+  assert.match(reissue.copy(), /1\. NOT RE-RUN — previous PASS/);
+  assert.match(reissue.copy(), /2\. PASS — Keep unrelated note/);
+  assert.match(reissue.copy(), /3\. NOT RE-RUN.*agent evidence.*stale/);
+  assert.ok(reissue.copy().includes(current.inputs[0].path));
+  reissue.note(1, 'Note edit only'); assert.equal(reissue.el('t-rerun').textContent, 2);
+  reissue.mark(1, 'pass'); assert.equal(reissue.el('t-rerun').textContent, 1);
+  assert.equal(reissue.record(1).stepRevision, '2'); assert.equal(reissue.record(1).buildSha, A);
+  assert.deepEqual(reissue.record(2), oldRecords[1]);
+  assert.deepEqual(fs.readFileSync(path.join(root, file.path)), workbook, 'issued original stays untouched');
 });
 
 test('current verdict survives reload with build identity; selecting it twice still clears', async () => {

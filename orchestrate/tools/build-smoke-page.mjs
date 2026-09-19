@@ -13,14 +13,16 @@ import { createHash } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isDeepStrictEqual, parseArgs } from "node:util";
+import { declareInputs, compareInputHistory, validateInputFiles, sectionsWithInputs } from "./smoke-inputs.mjs";
 
 const DEFAULT_TEMPLATE = resolve(
   dirname(fileURLToPath(import.meta.url)), "../references/smoke-page-template.html");
 
-export function buildSmokePage(data, template, { previous, resetVerdicts = false } = {}) {
+export function buildSmokePage(data, template, { previous, resetVerdicts = false, inputRoot } = {}) {
   const slots = renderSlots(data);
   if (previous !== undefined) validateReissue(data, validate(previous), resetVerdicts);
   else if (resetVerdicts) throw new Error("resetting verdicts requires a previous sidecar");
+  validateInputFiles(declareInputs(data), inputRoot);
   const out = template.replace(/\{\{([A-Z_]+)\}\}/g, (_, name) => {
     if (!(name in slots)) throw new Error(`template wants a slot the sidecar cannot fill: {{${name}}}`);
     return slots[name];
@@ -74,7 +76,7 @@ export function renderSlots(data) {
       + "<strong>Copy results as text</strong> and paste it into the chat.",
     FACTS_HTML: facts.join("\n"),
     GATE_BODY: renderGate(d.gate),
-    SECTIONS_JS: embed(d.sections),
+    SECTIONS_JS: embed(sectionsWithInputs(d, declareInputs(d))),
     CKPT_KEY: d.ckptKey,                                       // charset-checked in validate()
     BUILD_SHA: d.buildSha,                                     // hex-checked in validate()
     COPY_HEADER: jsString(d.copyHeader                         // a JS string literal
@@ -168,10 +170,13 @@ function validate(d) {
       }
     }
   }
+  declareInputs(d);
   return d;
 }
 
 function validateReissue(current, previous, resetVerdicts) {
+  const currentInputs = declareInputs(current), previousInputs = declareInputs(previous);
+  compareInputHistory(currentInputs, previousInputs);
   if (current.checkpoint !== previous.checkpoint) {
     throw new Error("previous sidecar belongs to a different checkpoint");
   }
@@ -215,8 +220,9 @@ function validateReissue(current, previous, resetVerdicts) {
     if (newRevision < oldRevision) {
       throw new Error(`step ${n}: revision cannot decrease from ${oldRevision} to ${newRevision}`);
     }
-    if (newRevision === oldRevision && !isDeepStrictEqual(instructions(before[i]), instructions(after[i]))) {
-      throw new Error(`step ${n}: instructions or section context changed; increment revision above ${oldRevision}`);
+    if (newRevision === oldRevision && (!isDeepStrictEqual(instructions(before[i]), instructions(after[i])) ||
+        !isDeepStrictEqual(previousInputs.byStep.get(n), currentInputs.byStep.get(n)))) {
+      throw new Error(`step ${n}: instructions or section context changed, or resolved inputs changed; increment revision above ${oldRevision}`);
     }
   }
 }
@@ -255,9 +261,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const data = JSON.parse(readFileSync(sidecar, "utf8"));
     const previousData = previous ? JSON.parse(readFileSync(previous, "utf8")) : undefined;
     const templateText = readFileSync(template, "utf8");
+    const inputRoot = dirname(resolve(out));
+    for (const artifact of declareInputs(data).artifacts.values()) {
+      if (sameFile(out, resolve(inputRoot, artifact.path))) throw new Error("output must not overwrite an issued input artifact");
+    }
     const html = buildSmokePage(data, templateText, {
       previous: previousData,
-      resetVerdicts
+      resetVerdicts, inputRoot
     });
     if (existsSync(out)) {
       const existing = readFileSync(out, "utf8");
@@ -269,7 +279,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         // Legacy pages have no stamp. Accept their baseline only if it reproduces
         // the old page exactly with the supplied template, before adding a stamp.
         const matches = fingerprint ? fingerprint === sidecarFingerprint(previousData)
-          : sameHTML(existing + sidecarStamp(previousData), buildSmokePage(previousData, templateText));
+          : sameHTML(existing + sidecarStamp(previousData), buildSmokePage(previousData, templateText, { inputRoot }));
         if (!matches) throw new Error("--previous does not match the last issued page; use its exact sidecar snapshot (and the original template for an unstamped page)");
       } else if (!sameHTML(existing, html) && !sameHTML(existing + sidecarStamp(data), html)) {
         throw new Error("reissuing an existing page requires --previous <last-issued.json>; identical rebuilds need no snapshot");

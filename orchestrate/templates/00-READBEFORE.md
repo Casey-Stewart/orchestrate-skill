@@ -77,6 +77,94 @@ steps passed>/<human steps> human-smoke-min=<minutes the user reports> escaped=<
 the user found that no gate caught>`, completed when the user's final verdict on that
 checkpoint is recorded (`escaped` counts every fail across re-runs).
 
+### Read-only evidence tools
+
+The ledger's captured contract is authority. Changed skill files or templates do not
+rewrite existing ledgers or silently add new gates. Tools collect facts; the conductor
+still resolves ownership/target ambiguity and makes every Recovery decision.
+
+Run these Node commands with explicit arguments from the repository root. At scaffold
+time bake the resolved helper paths into this contract; if unavailable or unsupported,
+use the self-contained manual fallback below. Neither helper writes evidence files;
+the conductor may capture stdout with the command, exit and captured SHAs.
+
+```text
+node {{EVIDENCE_TOOL}} discovery --repo <repo>
+node {{EVIDENCE_TOOL}} worktrees --repo <repo>
+node {{EVIDENCE_TOOL}} ancestry --repo <repo> --ancestor <ref-or-sha> --descendant <ref-or-sha>
+node {{EVIDENCE_TOOL}} shipment --repo <repo> --integration <full-ref> --source local --ref <full-shipment-ref>
+node {{EVIDENCE_TOOL}} shipment --repo <repo> --integration <full-ref> --source remote --remote <name> --ref <full-shipment-ref>
+node {{EVIDENCE_TOOL}} ledger --repo <repo> --ref <full-ref> --ledger <id> --owner <ref-or-sha> --target <ref-or-sha>
+node {{FENCE_TOOL}} --repo <repo> --integration <full-ref> --batch <full-ref> --ledger <id> --batch-id <Bnn> --batch-file <repo-relative-path>
+```
+
+Evidence stdout is one JSON object: operation, repo, completeness
+(complete/partial/unknown), evidence and diagnostics. Discovery retains refs/SHAs/
+symbolic targets, worktrees and ledger locations/provenance grouped by id; it never
+classifies those ledgers. Ledger observations expose presence, tree, lastChange,
+lastChangeTree, progressText and contractTexts at the requested ref, including archive
+presence. Unavailable values are null, never absent facts. Ancestry/shipment return
+captured SHAs and result contained/not-contained/unknown. Exit 0 means complete facts
+(including not-contained); exit 2 means partial/unknown or invalid invocation. Read
+the JSON tri-state, never infer ancestry from helper exit 0 alone. Remote shipment
+queries the named remote now, without fetching; a cached remote ref is insufficient.
+
+After the implementer report, before failing-on-base and fresh independent review,
+run the mechanical fence command. It captures integrationSha, batchSha and mergeBase;
+authority is the committed integration plan plus recorded authorized extensions,
+never the candidate's Files line alone. PASS (exit 0) is only mechanical clearance;
+VIOLATION (1) returns violations; UNKNOWN (2) returns unknowns and takes precedence
+when both arrays contain diagnostics. Retain both arrays. Neither grants an extension,
+changes ledger state, replaces semantic hunk mapping, or approves a merge.
+
+Supported fence grammar: full local refs for integration and batch; a single id under
+.agents/changes; unambiguous Markdown tables with #, Branch, Files (fence) in 01-plan
+and #, Branch, Notes in PROGRESS; Bnn ids; exact comma-separated backtick paths (no
+globs). Baseline batch Branch and Files lines must exactly match the plan; Files is
+"**Files**: " followed by those paths. A unique "## Checklist" ends at the next
+level-two heading. Only [ ] to [x] ticks, appended "- [ ] polish: ..." items (or
+their completed ticks), and precisely authorized Files additions are permitted.
+Extensions use "fence +path (Bnn, item, reason, YYYY-MM-DD)" in Notes and exactly
+one matching Session log record (the row-bound short form omits Bnn); no commas in
+item/reason. Unknown or legacy shapes use the manual gate, never rewritten authority.
+All tools reject unknown, duplicate or missing flags; --help documents usage.
+
+**Manual read-only fallback.** Capture refs with git rev-parse --verify ref^{commit}
+before comparing; failed probes mean unknown. Enumerate ALL local/remote-tracking
+branches with git for-each-ref --format='%(refname) %(symref)' refs/heads/ refs/remotes/.
+Retain symbolic refs as hints but do not probe their trees. For every other full ref,
+git ls-tree -r --name-only ref -- .agents/changes/ finds active ledger PROGRESS files;
+also inspect .agents/changes directly in each worktree from git worktree list --porcelain.
+Group the same id across locations, never pre-filter by branch name or ancestry.
+Read only candidate ownership/target fields before selecting a ledger; read blobs with
+git show ref:./path from the repo root. Compare ledger-subtree tree IDs and the last
+ledger-changing commit (git log -1 --format=%H ref -- ledger-path), not whole tips.
+Proven older copies can be superseded by the owning contract; unknown provenance,
+dirty copies, divergent owners and conflicting targets remain visible/ambiguous.
+Only an explicit COMPLETE or archived copy at the resolved shipment target supersedes
+older candidates; ancestry alone never proves completion. Do not sweep archives into
+the active inventory. Follow the frozen discovery/Recovery classification rules.
+
+Classify from the PROGRESS preamble's State line; without it use batch-table rows and
+explicit Session/verdict-log completion, never the Legend or quoted log prose.
+COMPLETE is explicit and never resumed; ACTIVE/AT-CHECKPOINT or open non-human rows
+remain active without a COMPLETE marker; only human-action rows open means USER-BLOCKED.
+Ambiguity asks the user. Multiple active ledgers require a choice. Inspect the full
+body of only the selected ledger; never copy it into the default checkout.
+
+For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contained,
+1 not-contained, any other exit unknown. Shipment source resolution is in Recovery.
+Inspect every worktree's porcelain status including untracked files and both rename
+endpoints. Before status, inspect effective Git config: executable clean/process
+filters or submodules make safe cleanliness unknown; do not execute such filters to
+obtain a clean result. For the manual fence, use git diff --name-status -z -M
+integration-sha...batch-sha, inspect both rename endpoints against the committed plan
+union recorded extensions union own batch file; inspect that file's blob diff for
+only the permitted ticks/polish/authorized Files edits. Cleanliness and parse failures
+remain unknown until resolved. Report violations and unknowns separately and retain
+the same fresh semantic reviewer gate. No helper or fallback changes round caps.
+
+
 ## Git model (locked)
 
 - Default branch (protected local ref): `{{MAIN_BRANCH}}`. Integration branch: `{{INTEGRATION_BRANCH}}` —
@@ -195,6 +283,67 @@ three lines say `none`, skip version/changelog work at close-out and say so.
   current session. (Merging reviewed batch branches into `{{INTEGRATION_BRANCH}}` is
   the orchestrator's normal job.)
 - {{EXTRA_PROHIBITIONS}}
+
+### Complete checkpoint inputs
+
+The conductor inventories required files per smoke step at planning and checkpoint
+close-out. Specify workbook sheets, columns, types, formulas, cached results and edge
+cases; generate reproducible synthetic inputs, then independently validate against
+those requirements. A digest proves byte identity, never workbook semantics. Preserve
+commands, exits, observed results and environment with the issued artifacts. Identify
+the exact private-data, credential or external-access prerequisite when generation
+is impossible; an unavailable dependency is never pre-verified. Ordinary synthetic
+preparation needs no new approval gate. Never ask the tester to construct files unless
+construction itself is the behavior being tested.
+
+Deliver the actual usable files beside the page, named/linked in each relevant step
+with its expected Pass result. Provide exact read-only or working-copy and reset
+instructions; modify disposable copies, never issued originals. Preserve files and
+validation evidence in versioned evidence/Cn/inputs/issue-NNN/ directories. Copy raw
+bytes and verify hashes in the delivered checkout, including effective Git attributes
+and core.autocrlf=true when Git carries the package. Keep validation reports whose
+hashes are declared under the same byte-preserving input paths. A hosted page whose
+renderer cannot serve relative files needs separate usable attachments/local links
+and an explicit mapping; an inaccessible URL is not a delivered download.
+
+The sidecar has a stable-id inputs registry; each step references its exact IDs.
+Each input records path, raw SHA-256, byte size, requirements, independent validation
+evidence (path/hash/size, command, exit 0, result, environment), mode, use and reset.
+Safe paths are relative to the HTML's artifact directory; reject absolute/traversal
+paths, symlinks, missing files, directories or mismatched bytes. The builder validates
+real disk bytes before writing HTML; imported calls with inputs need explicit
+inputRoot. Legacy sidecars with no inputs remain usable. In a tool-less runtime,
+perform these declaration, raw-file and history checks manually before hand-over.
+
+On reissue preserve the previous page/sidecar snapshot and every prior input/evidence
+file. Use a new issue path for changed bytes; inputHistory retains path/hash/size of
+old artifacts no longer referenced. An issued path cannot change identity, and missing
+prior artifacts are an error. Compare resolved input metadata, not just stable IDs:
+changed bytes, path, requirements or use/reset/validation instructions require revision
+increases for EVERY referencing existing step, including same-build corrections.
+Unrelated revisions/verdicts/notes remain intact; old affected passes and pre evidence
+are historical, shown as NOT RE-RUN until fresh applicable verification. The plain-text
+script/results name the same files, requirements and use/reset instructions.
+
+Record interpreter/dependency discovery as this ledger's environment fact; reusable
+templates never hardcode a machine installation path. For this skill's concrete Excel
+example, use literal python with openpyxl, confirm sys.executable/version, and run:
+
+```text
+python tests/fixtures/smoke-inputs/generate-orders.py <new-output.xlsx>
+python tests/fixtures/smoke-inputs/validate-orders.py <workbook.xlsx> <requirements.json>
+```
+
+The fixed example is tests/fixtures/smoke-inputs/orders.xlsx with
+orders.requirements.json, generate-orders.py and validate-orders.py beside it. Generate
+A and B to new paths (generation refuses overwrite) and require raw
+SHA256(generation A) = SHA256(generation B) = SHA256(committed workbook file bytes)
+from a fresh checkout. Independently check sheets/types/formulas/caches and reject a
+deliberately corrupt copy. Orders F2 is 22.50; Summary B2/B3 are 23.50/4. In a working
+copy, Orders C2 from 2 to 3 recalculates F2 to 33.75 and Summary B2 to 34.75; reset by
+recopying the immutable original. An actual Excel/compatible app is a human prerequisite
+unless a real spreadsheet runner is available. Hash checks alone never establish this.
+
 
 ## Smoke checkpoints
 
@@ -449,7 +598,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
 6. Gate PER BATCH, as each implementer reports (don't wait for the wave's slowest). A
    report without the status line + evidence block → resume the implementer for it (not
    a round).
-   - **6a Fence check (mechanical, orchestrator).** Worktree clean (`git status
+   - **6a Fence check (mechanical, orchestrator).** Run the read-only helper above
+     or its manual fallback. Worktree clean (`git status
      --porcelain` empty); `git diff --name-status -M {{INTEGRATION_BRANCH}}...HEAD`; every
      path (both endpoints of a rename) in the plan's fence ∪ recorded extensions ∪ the
      batch's own file — and within the batch file only ticks, `polish:` appends and a

@@ -27,6 +27,12 @@
    checkpoints (one after each hands-on wave + the mandatory final one — never per
    batch). Pick the applicable guardrails per batch (the subset of the project's
    guardrail bullets its fence can violate).
+   Inventory the exact required inputs for each step while planning: workbook
+   sheets/columns/types/formulas/edge cases, independent validation, reproducible
+   synthetic generation, immutable issue paths and working-copy/reset directions.
+   Name actual private-data/credential/access prerequisites; do not defer ordinary
+   input construction to the tester or invent a pre-verified result.
+
 4. **Backlog sweep** — read the repo's backlog / feature / bug files and propose
    fold-ins. Eligible only if ALL hold: (a) the item's files are a SUBSET of one draft
    batch's fence; (b) it is machine-verifiable or covered by that batch's existing
@@ -80,6 +86,23 @@
 11. **STOP** — report the ledger path and batch table. Start wave 1 only if the user
     says so.
 
+## Evidence and input baking
+
+Capture read-only discovery/shipment evidence with the protocol's helper recipes;
+the conductor still resolves owner/target ambiguity. Bake resolved EVIDENCE_TOOL and
+FENCE_TOOL paths plus the full manual fallback, three outcomes, captured-ref authority
+and supported grammar into new contracts. Never silently adopt changed gates for an
+existing ledger. Use exact Branch and Files lines in batch files and exact backtick
+paths in plan tables; unsupported shapes use manual checks, not inferred authority.
+
+At hand-over preserve generated files and independent validation reports under
+evidence/Cn/inputs/issue-NNN; use raw-byte copies and validate the delivered checkout.
+Record interpreter discovery in the generated ledger, never a machine-local Python
+path in reusable templates. Stable input IDs, step references and retained inputHistory
+belong in the sidecar; every affected revision increases on identity/instruction change.
+Hosted delivery without relative-file access requires usable attachments/local links.
+See smoke-page.md for the complete schema and commands.
+
 ## Naming
 
 - `{{CHANGE_ID}}` = `{{ID_PREFIX}}-<YYYYMMDD>-{{CHANGE_SLUG}}` (e.g.
@@ -122,6 +145,8 @@ appear in the templates — check both directions when editing either.
 | `{{CHANGELOG_RULE}}` | template (READBEFORE) | interview #2 — path, ordering (append bottom vs prepend), heading format, voice, or `none` |
 | `{{SMOKE_PROCEDURE}}` | template (READBEFORE) | interview #3 — always asked |
 | `{{AGENT_RUNNERS}}` | template (READBEFORE) | interview #3 — which runners an agent may use in THIS environment (`none` / CLI / HTTP / browser / screenshot), the disposable data environment if any, and the prohibitions that apply (e.g. "never launch the headed app") |
+| `{{EVIDENCE_TOOL}}` | template (READBEFORE) | resolved path to git-evidence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
+| `{{FENCE_TOOL}}` | template (READBEFORE) | resolved path to check-fence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
 | `{{WORKTREE_SETUP}}` | template (READBEFORE) | detected install/build step (`npm install`, `cargo fetch`, …) or `n/a` |
 | `{{REPO_CONVENTIONS}}` | template (READBEFORE) | distilled from the project CLAUDE.md/docs — the BINDING subset, ≤25 lines, plus a pointer to the source doc; never a wholesale copy |
 | `{{EXTRA_PROHIBITIONS}}` | template (READBEFORE) | interview #7 / CLAUDE.md — repo-specific never-touch items; `(none beyond the above)` if empty |

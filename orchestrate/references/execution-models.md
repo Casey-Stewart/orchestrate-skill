@@ -6,6 +6,24 @@ concurrently, waves stack serially onto an **integration branch**, and the user
 smoke-tests only at planned **checkpoints**. Strict one-at-a-time sequencing is just
 the degenerate case (every wave width 1) — it is not a separate model.
 
+## Evidence and required inputs
+
+Discovery and shipment probes use the read-only git-evidence helper under the owning
+contract. After each implementer report, the contract's mechanical fence gate captures
+refs/SHAs before fresh independent semantic review; check-fence PASS is mechanical
+only, VIOLATION/UNKNOWN never authorize extensions or merges. Unsupported authority
+uses the baked manual fallback. Existing ledgers retain their frozen gate rules.
+
+Planning inventories inputs per step; checkpoint close-out generates reproducible
+synthetic files, independently validates requirements, and delivers exact linked
+files with Pass results and working-copy/reset instructions. Preserve originals and
+validation evidence under versioned input paths, verify raw bytes after checkout, and
+give QA the same registry/identities the user receives. Private-data, credential and
+external-access prerequisites must be named specifically, never called pre-verified.
+Input changes on reissue require new file paths and EVERY affected step's revision;
+unaffected verdicts remain applicable. Relative-file hosting failures need usable
+attachments/local links and a mapping. Ordinary synthetic preparation adds no gate.
+
 ## The three structures
 
 - **Wave** — a set of batches that run AT THE SAME TIME: one implementer per batch,

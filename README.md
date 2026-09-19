@@ -168,24 +168,60 @@ orchestrate/
 │   └── smoke-page-template.html    the smoke page itself, with slots for the run-specific content
 ├── templates/                      the six ledger files, with placeholders
 └── tools/
-    └── build-smoke-page.mjs        fills the template from a checkpoint's `smoke-<Cn>.json` sidecar
+    ├── git-evidence.mjs            read-only discovery, provenance and shipment facts
+    ├── check-fence.mjs             read-only mechanical gate before independent review
+    ├── smoke-inputs.mjs            input declarations, retained history and raw-file checks
+    └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 
-Markdown, one self-contained HTML template, and one optional Node script that fills it —
-nothing runs against your app, and a page can still be filled by hand without it.
+The Markdown ledger remains the workflow authority. Read-only Git helpers collect
+evidence, and the smoke builder checks actual delivered input bytes before writing
+the page. Existing ledgers keep their frozen rules; unsupported helper shapes use
+the contract's manual read-only fallback. A mechanical PASS never replaces review.
 
-Tests use Node's built-in test runner: `node --test tests/smoke-page.test.cjs tests/git-contract.test.cjs tests/build-smoke-page.test.cjs`.
+Run all repository suites from the root with this PowerShell validation recipe:
+
+```powershell
+$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)
+if ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }
+node --test --test-reporter=spec @testFiles
+if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }
+```
+
+Portable convenience: `node --test` from the repository root (bare, no directory
+argument). Node's default discovery is separate from the explicit recursive FullName
+ordering, empty-suite guard and failure propagation above; keep the full recipe for
+ledger validation. Protocol tests execute both forms against a nested failing then
+passing disposable sentinel and check the primary recipe's empty-discovery failure.
 The smoke-page tests run the template's JavaScript with a minimal DOM and artifact-store
 adapter, including checkpoint re-issues and verdict provenance. The Git-contract tests
 require Git on PATH and create disposable local repos and bare remotes with isolated
 configuration; no network service is needed, and temporary repos are removed afterward.
-They verify F5's Git assumptions about discovery, shipment evidence and ledger history,
-not whether an agent follows the prose. Keep their command recipes aligned with the
+They exercise the actual read-only evidence and fence CLIs for discovery, shipment
+and ledger history. Keep their command recipes aligned with the
 documented rules when editing either; prose changes do not automatically change the tests.
 The builder tests fill the shipped template from a sidecar and check the result against
 the slot table: every slot filled, the same bytes each run, and rejection of invalid
 inputs. Reissue tests cover stable step identities, appending new steps, revision
 increases, and refusing a stale baseline without overwriting the issued page.
+
+The conductor prepares and delivers actual reproducible smoke inputs, including the
+Excel example in `tests/fixtures/smoke-inputs/`. Generate with literal `python
+tests/fixtures/smoke-inputs/generate-orders.py <new-output.xlsx>` and independently
+validate with `python tests/fixtures/smoke-inputs/validate-orders.py <workbook.xlsx>
+<requirements.json>` (Python with openpyxl required). The expected total is 23.50 and
+count is 4. Requirements cover sheets, types, formulas and cached results; hashes do
+not replace that semantic validation. Detect the interpreter in the current environment.
+
+Each file-dependent step links exact immutable inputs, validation evidence and
+working-copy/reset instructions. The [input sidecar schema](orchestrate/references/smoke-page.md#input-registry-and-immutable-issue-files)
+uses stable IDs with per-step references. Reissues preserve old issue files/history,
+verify raw bytes (including LF/CRLF), and bump EVERY affected step's revision so old
+passes become historical. Imported builders require an explicit inputRoot when files
+are declared. Missing private data, credentials or external access is a named
+prerequisite; no manual construction or false pre-verification replaces a deliverable.
 
 ## License
 
