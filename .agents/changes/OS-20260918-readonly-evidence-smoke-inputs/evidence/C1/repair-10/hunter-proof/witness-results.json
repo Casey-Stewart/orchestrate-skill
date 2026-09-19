@@ -1,0 +1,32 @@
+[
+  {
+    "name": "wrong-prerequisite-verdict",
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "cases\\wrong-prerequisite-verdict\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\witness.cjs"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1",
+    "exit": 0,
+    "log": "proof/wrong-prerequisite-verdict.witness.txt"
+  },
+  {
+    "name": "wrong-note-step",
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "cases\\wrong-note-step\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\witness.cjs"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1",
+    "exit": 0,
+    "log": "proof/wrong-note-step.witness.txt"
+  },
+  {
+    "name": "stale-after-visible-instructions",
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "cases\\stale-after-visible-instructions\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\witness.cjs"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1",
+    "exit": 0,
+    "log": "proof/stale-after-visible-instructions.witness.txt"
+  }
+]

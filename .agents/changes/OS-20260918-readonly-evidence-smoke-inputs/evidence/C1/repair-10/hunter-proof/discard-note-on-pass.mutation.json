@@ -1,0 +1,1399 @@
+[
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1303,
+    "before": "    local[n] = cur;",
+    "after": "    if (status === \"pass\") cur.note = \"\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1304,
+    "before": "    stamp(n);",
+    "after": "    local[n] = cur;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1305,
+    "before": "    cancelNoteWrite(n);",
+    "after": "    stamp(n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1306,
+    "before": "    saveLocal();",
+    "after": "    cancelNoteWrite(n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1307,
+    "before": "    persist(n);",
+    "after": "    saveLocal();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1308,
+    "before": "    paintStep(n);",
+    "after": "    persist(n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1309,
+    "before": "    paintTotals();",
+    "after": "    paintStep(n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1310,
+    "before": "  }",
+    "after": "    paintTotals();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1311,
+    "before": "",
+    "after": "  }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1312,
+    "before": "  function paintStep(n, forceNote) {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1313,
+    "before": "    var el = document.getElementById(\"step-\" + n);",
+    "after": "  function paintStep(n, forceNote) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1314,
+    "before": "    if (!el) return;",
+    "after": "    var el = document.getElementById(\"step-\" + n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1315,
+    "before": "    var state = stepState(stepOf(n));",
+    "after": "    if (!el) return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1316,
+    "before": "    var rec = state.record;",
+    "after": "    var state = stepState(stepOf(n));"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1317,
+    "before": "    var applicable = state.kind === \"current\" || state.kind === \"carried\";",
+    "after": "    var rec = state.record;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1318,
+    "before": "",
+    "after": "    var applicable = state.kind === \"current\" || state.kind === \"carried\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1319,
+    "before": "    el.setAttribute(\"data-status\", applicable ? rec.status : \"\");",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1320,
+    "before": "",
+    "after": "    el.setAttribute(\"data-status\", applicable ? rec.status : \"\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1321,
+    "before": "    var btns = el.querySelectorAll(\".vbtn\");",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1322,
+    "before": "    for (var i = 0; i < btns.length; i++) {",
+    "after": "    var btns = el.querySelectorAll(\".vbtn\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1323,
+    "before": "      btns[i].setAttribute(\"aria-pressed\", applicable && btns[i].getAttribute(\"data-state\") === rec.status ? \"true\" : \"false\");",
+    "after": "    for (var i = 0; i < btns.length; i++) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1324,
+    "before": "    }",
+    "after": "      btns[i].setAttribute(\"aria-pressed\", applicable && btns[i].getAttribute(\"data-state\") === rec.status ? \"true\" : \"false\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1325,
+    "before": "",
+    "after": "    }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1326,
+    "before": "    var history = el.querySelector(\".step-history\");",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1327,
+    "before": "    history.hidden = !state.marked || state.kind === \"current\";",
+    "after": "    var history = el.querySelector(\".step-history\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1328,
+    "before": "    history.textContent = history.hidden ? \"\" : carriedLabel(rec) + \". \" +",
+    "after": "    history.hidden = !state.marked || state.kind === \"current\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1329,
+    "before": "      (state.kind === \"carried\" ? \"Step unchanged; kept without re-running. Select a verdict after re-running to record a new result.\"",
+    "after": "    history.textContent = history.hidden ? \"\" : carriedLabel(rec) + \". \" +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1330,
+    "before": "        : state.kind === \"pre\" ? \"Agent evidence applies to this step revision; see its build and evidence above.\"",
+    "after": "      (state.kind === \"carried\" ? \"Step unchanged; kept without re-running. Select a verdict after re-running to record a new result.\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1331,
+    "before": "        : \"Step changed or its earlier build/revision is unknown. Run it again and select a verdict.\");",
+    "after": "        : state.kind === \"pre\" ? \"Agent evidence applies to this step revision; see its build and evidence above.\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1332,
+    "before": "",
+    "after": "        : \"Step changed or its earlier build/revision is unknown. Run it again and select a verdict.\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1333,
+    "before": "    var nw = el.querySelector(\".note-wrap\");",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1334,
+    "before": "    var ta = el.querySelector(\"textarea\");",
+    "after": "    var nw = el.querySelector(\".note-wrap\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1335,
+    "before": "    var lab = el.querySelector(\".note-wrap label\");",
+    "after": "    var ta = el.querySelector(\"textarea\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1336,
+    "before": "    var wantNote = rec.status === \"fail\" || rec.status === \"blocked\" ||",
+    "after": "    var lab = el.querySelector(\".note-wrap label\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1337,
+    "before": "      rec.status === \"change\" || !!rec.note;",
+    "after": "    var wantNote = rec.status === \"fail\" || rec.status === \"blocked\" ||"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1338,
+    "before": "    nw.hidden = !wantNote;",
+    "after": "      rec.status === \"change\" || !!rec.note;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1339,
+    "before": "    if (lab) {",
+    "after": "    nw.hidden = !wantNote;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1340,
+    "before": "      lab.textContent = rec.status === \"change\"",
+    "after": "    if (lab) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1341,
+    "before": "        ? \"What would you rather it did?\"",
+    "after": "      lab.textContent = rec.status === \"change\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1342,
+    "before": "        : \"What you actually saw\";",
+    "after": "        ? \"What would you rather it did?\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1343,
+    "before": "    }",
+    "after": "        : \"What you actually saw\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1344,
+    "before": "    if (ta) {",
+    "after": "    }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1345,
+    "before": "      ta.placeholder = rec.status === \"change\"",
+    "after": "    if (ta) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1346,
+    "before": "        ? \"It works as described. Describe the change you want.\"",
+    "after": "      ta.placeholder = rec.status === \"change\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1347,
+    "before": "        : \"What happened instead?\";",
+    "after": "        ? \"It works as described. Describe the change you want.\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1348,
+    "before": "    }",
+    "after": "        : \"What happened instead?\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1349,
+    "before": "    if (ta && (forceNote || document.activeElement !== ta) && ta.value !== (rec.note || \"\")) ta.value = rec.note || \"\";",
+    "after": "    }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1350,
+    "before": "  }",
+    "after": "    if (ta && (forceNote || document.activeElement !== ta) && ta.value !== (rec.note || \"\")) ta.value = rec.note || \"\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1351,
+    "before": "",
+    "after": "  }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1352,
+    "before": "  function paintTotals() {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1353,
+    "before": "    var c = counts();",
+    "after": "  function paintTotals() {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1354,
+    "before": "",
+    "after": "    var c = counts();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1355,
+    "before": "    document.getElementById(\"t-pass\").textContent = c.pass;",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1356,
+    "before": "    document.getElementById(\"t-fail\").textContent = c.fail;",
+    "after": "    document.getElementById(\"t-pass\").textContent = c.pass;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1357,
+    "before": "    document.getElementById(\"t-block\").textContent = c.blocked;",
+    "after": "    document.getElementById(\"t-fail\").textContent = c.fail;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1358,
+    "before": "    document.getElementById(\"t-change\").textContent = c.change;",
+    "after": "    document.getElementById(\"t-block\").textContent = c.blocked;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1359,
+    "before": "    document.getElementById(\"t-carried\").textContent = c.carried;",
+    "after": "    document.getElementById(\"t-change\").textContent = c.change;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1360,
+    "before": "    document.getElementById(\"t-rerun\").textContent = c.rerun;",
+    "after": "    document.getElementById(\"t-carried\").textContent = c.carried;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1361,
+    "before": "    document.getElementById(\"t-pre\").textContent = c.pre;",
+    "after": "    document.getElementById(\"t-rerun\").textContent = c.rerun;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1362,
+    "before": "    document.getElementById(\"t-todo\").textContent = c.todo;",
+    "after": "    document.getElementById(\"t-pre\").textContent = c.pre;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1363,
+    "before": "    document.getElementById(\"t-total\").textContent = TOTAL;",
+    "after": "    document.getElementById(\"t-todo\").textContent = c.todo;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1364,
+    "before": "",
+    "after": "    document.getElementById(\"t-total\").textContent = TOTAL;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1365,
+    "before": "    var total = TOTAL || 1;",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1366,
+    "before": "    document.getElementById(\"m-pass\").style.width   = (c.pass    / total * 100) + \"%\";",
+    "after": "    var total = TOTAL || 1;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1367,
+    "before": "    document.getElementById(\"m-change\").style.width = (c.change  / total * 100) + \"%\";",
+    "after": "    document.getElementById(\"m-pass\").style.width   = (c.pass    / total * 100) + \"%\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1368,
+    "before": "    document.getElementById(\"m-fail\").style.width   = (c.fail    / total * 100) + \"%\";",
+    "after": "    document.getElementById(\"m-change\").style.width = (c.change  / total * 100) + \"%\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1369,
+    "before": "    document.getElementById(\"m-block\").style.width  = (c.blocked / total * 100) + \"%\";",
+    "after": "    document.getElementById(\"m-fail\").style.width   = (c.fail    / total * 100) + \"%\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1370,
+    "before": "    document.getElementById(\"m-carried\").style.width = (c.carried / total * 100) + \"%\";",
+    "after": "    document.getElementById(\"m-block\").style.width  = (c.blocked / total * 100) + \"%\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1371,
+    "before": "",
+    "after": "    document.getElementById(\"m-carried\").style.width = (c.carried / total * 100) + \"%\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1372,
+    "before": "    SECTIONS.forEach(function (s) {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1373,
+    "before": "      var done = 0, bad = 0;",
+    "after": "    SECTIONS.forEach(function (s) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1374,
+    "before": "      s.steps.forEach(function (st) {",
+    "after": "      var done = 0, bad = 0;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1375,
+    "before": "        var state = stepState(st);",
+    "after": "      s.steps.forEach(function (st) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1376,
+    "before": "        var applicable = state.kind === \"current\" || state.kind === \"carried\";",
+    "after": "        var state = stepState(st);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1377,
+    "before": "        if (applicable || state.kind === \"pre\") done++;",
+    "after": "        var applicable = state.kind === \"current\" || state.kind === \"carried\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1378,
+    "before": "        // A change request is NOT a bad outcome — the step passed. Only a",
+    "after": "        if (applicable || state.kind === \"pre\") done++;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1379,
+    "before": "        // real fail or a step the user could not perform reddens the section.",
+    "after": "        // A change request is NOT a bad outcome — the step passed. Only a"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1380,
+    "before": "        if (applicable && (state.record.status === \"fail\" || state.record.status === \"blocked\")) bad++;",
+    "after": "        // real fail or a step the user could not perform reddens the section."
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1381,
+    "before": "      });",
+    "after": "        if (applicable && (state.record.status === \"fail\" || state.record.status === \"blocked\")) bad++;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1382,
+    "before": "      var el = document.getElementById(\"rc-\" + s.n);",
+    "after": "      });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1383,
+    "before": "      if (!el) return;",
+    "after": "      var el = document.getElementById(\"rc-\" + s.n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1384,
+    "before": "      el.textContent = done + \"/\" + s.steps.length;",
+    "after": "      if (!el) return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1385,
+    "before": "      el.className = \"rc\" + (bad ? \" has-fail\" : done === s.steps.length ? \" done\" : \"\");",
+    "after": "      el.textContent = done + \"/\" + s.steps.length;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1386,
+    "before": "    });",
+    "after": "      el.className = \"rc\" + (bad ? \" has-fail\" : done === s.steps.length ? \" done\" : \"\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1387,
+    "before": "  }",
+    "after": "    });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1388,
+    "before": "",
+    "after": "  }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1389,
+    "before": "  function paintAll() {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1390,
+    "before": "    SECTIONS.forEach(function (s) {",
+    "after": "  function paintAll() {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1391,
+    "before": "      s.steps.forEach(function (st) { paintStep(st.n); });",
+    "after": "    SECTIONS.forEach(function (s) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1392,
+    "before": "    });",
+    "after": "      s.steps.forEach(function (st) { paintStep(st.n); });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1393,
+    "before": "    paintTotals();",
+    "after": "    });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1394,
+    "before": "  }",
+    "after": "    paintTotals();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1395,
+    "before": "",
+    "after": "  }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1396,
+    "before": "  /* --------------------------------------------------------------- actions */",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1397,
+    "before": "",
+    "after": "  /* --------------------------------------------------------------- actions */"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1398,
+    "before": "  document.getElementById(\"btn-next\").addEventListener(\"click\", function () {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1399,
+    "before": "    for (var i = 0; i < SECTIONS.length; i++) {",
+    "after": "  document.getElementById(\"btn-next\").addEventListener(\"click\", function () {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1400,
+    "before": "      var s = SECTIONS[i];",
+    "after": "    for (var i = 0; i < SECTIONS.length; i++) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1401,
+    "before": "      for (var j = 0; j < s.steps.length; j++) {",
+    "after": "      var s = SECTIONS[i];"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1402,
+    "before": "        var n = s.steps[j].n;",
+    "after": "      for (var j = 0; j < s.steps.length; j++) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1403,
+    "before": "        var kind = stepState(s.steps[j]).kind;",
+    "after": "        var n = s.steps[j].n;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1404,
+    "before": "        if (kind === \"todo\" || kind === \"rerun\") {",
+    "after": "        var kind = stepState(s.steps[j]).kind;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1405,
+    "before": "          var el = document.getElementById(\"step-\" + n);",
+    "after": "        if (kind === \"todo\" || kind === \"rerun\") {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1406,
+    "before": "          if (el) { el.scrollIntoView({ behavior: \"smooth\", block: \"center\" }); }",
+    "after": "          var el = document.getElementById(\"step-\" + n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1407,
+    "before": "          return;",
+    "after": "          if (el) { el.scrollIntoView({ behavior: \"smooth\", block: \"center\" }); }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1408,
+    "before": "        }",
+    "after": "          return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1409,
+    "before": "      }",
+    "after": "        }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1410,
+    "before": "    }",
+    "after": "      }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1411,
+    "before": "  });",
+    "after": "    }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1412,
+    "before": "",
+    "after": "  });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1413,
+    "before": "  document.getElementById(\"btn-copy\").addEventListener(\"click\", function () {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1414,
+    "before": "    var lines = [\"C1 smoke run — Changed-input reissue demonstration\", \"Current build: \" + BUILD_SHA, \"\"];",
+    "after": "  document.getElementById(\"btn-copy\").addEventListener(\"click\", function () {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1415,
+    "before": "    var c = counts();",
+    "after": "    var lines = [\"C1 smoke run — Changed-input reissue demonstration\", \"Current build: \" + BUILD_SHA, \"\"];"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1416,
+    "before": "",
+    "after": "    var c = counts();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1417,
+    "before": "    SECTIONS.forEach(function (s) {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1418,
+    "before": "      lines.push(\"Section \" + s.n + \" — \" + s.title);",
+    "after": "    SECTIONS.forEach(function (s) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1419,
+    "before": "      s.steps.forEach(function (st) {",
+    "after": "      lines.push(\"Section \" + s.n + \" — \" + s.title);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1420,
+    "before": "        var state = stepState(st);",
+    "after": "      s.steps.forEach(function (st) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1421,
+    "before": "        var r = state.record;",
+    "after": "        var state = stepState(st);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1422,
+    "before": "        var status = state.kind === \"current\" ? (r.status === \"change\" ? \"WORKS, BUT\" : r.status.toUpperCase())",
+    "after": "        var r = state.record;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1423,
+    "before": "          : state.kind === \"carried\" ? carriedLabel(r) + \" — unchanged step\"",
+    "after": "        var status = state.kind === \"current\" ? (r.status === \"change\" ? \"WORKS, BUT\" : r.status.toUpperCase())"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1424,
+    "before": "          : state.kind === \"rerun\" ? \"NOT RE-RUN\" +",
+    "after": "          : state.kind === \"carried\" ? carriedLabel(r) + \" — unchanged step\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1425,
+    "before": "            (state.marked ? \" — previous \" + carriedLabel(r) : \"\") +",
+    "after": "          : state.kind === \"rerun\" ? \"NOT RE-RUN\" +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1426,
+    "before": "            (preState(st) === \"stale\" ? \"; agent evidence @\" + (st.pre.sha || \"unknown\") + \" is stale or incomplete\" : \"\") +",
+    "after": "            (state.marked ? \" — previous \" + carriedLabel(r) : \"\") +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1427,
+    "before": "            \"; re-run required\"",
+    "after": "            (preState(st) === \"stale\" ? \"; agent evidence @\" + (st.pre.sha || \"unknown\") + \" is stale or incomplete\" : \"\") +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1428,
+    "before": "          : state.kind === \"pre\" ? preLabel(st) +",
+    "after": "            \"; re-run required\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1429,
+    "before": "            (state.marked ? \"; previous \" + carriedLabel(r) + \" has an earlier or unknown build/revision\" : \"\")",
+    "after": "          : state.kind === \"pre\" ? preLabel(st) +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1430,
+    "before": "          : \"NOT RUN\";",
+    "after": "            (state.marked ? \"; previous \" + carriedLabel(r) + \" has an earlier or unknown build/revision\" : \"\")"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1431,
+    "before": "        var line = \"  \" + st.n + \". \" + status;",
+    "after": "          : \"NOT RUN\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1432,
+    "before": "        if (r.note && r.note.trim()) line += \" — \" + r.note.trim().replace(/\\s+/g, \" \");",
+    "after": "        var line = \"  \" + st.n + \". \" + status;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1433,
+    "before": "        lines.push(line);",
+    "after": "        if (r.note && r.note.trim()) line += \" — \" + r.note.trim().replace(/\\s+/g, \" \");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1434,
+    "before": "        (st.inputFiles || []).forEach(function (input) {",
+    "after": "        lines.push(line);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1435,
+    "before": "          lines.push('    Input ' + input.id + ': ' + input.path + ' (' + input.mode + ', ' + input.size +",
+    "after": "        (st.inputFiles || []).forEach(function (input) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1436,
+    "before": "            ' bytes; SHA-256 ' + input.sha256 + ')');",
+    "after": "          lines.push('    Input ' + input.id + ': ' + input.path + ' (' + input.mode + ', ' + input.size +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1437,
+    "before": "          lines.push('    Requirements: ' + input.requirements, '    Use: ' + input.use, '    Reset: ' + input.reset);",
+    "after": "            ' bytes; SHA-256 ' + input.sha256 + ')');"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1438,
+    "before": "          lines.push('    Input validation: ' + input.validation.path + ' — ' + input.validation.result +",
+    "after": "          lines.push('    Requirements: ' + input.requirements, '    Use: ' + input.use, '    Reset: ' + input.reset);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1439,
+    "before": "            '; command: ' + input.validation.command + '; exit ' + input.validation.exitCode + '; ' + input.validation.env);",
+    "after": "          lines.push('    Input validation: ' + input.validation.path + ' — ' + input.validation.result +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1440,
+    "before": "        });",
+    "after": "            '; command: ' + input.validation.command + '; exit ' + input.validation.exitCode + '; ' + input.validation.env);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1441,
+    "before": "      });",
+    "after": "        });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1442,
+    "before": "      lines.push(\"\");",
+    "after": "      });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1443,
+    "before": "    });",
+    "after": "      lines.push(\"\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1444,
+    "before": "",
+    "after": "    });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1445,
+    "before": "    lines.push(\"Current-build verdicts: passed \" + c.pass + \" · failed \" + c.fail + \" · blocked \" + c.blocked +",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1446,
+    "before": "      \" · works-but \" + c.change + \" · carried over (unchanged) \" + c.carried +",
+    "after": "    lines.push(\"Current-build verdicts: passed \" + c.pass + \" · failed \" + c.fail + \" · blocked \" + c.blocked +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1447,
+    "before": "      \" · needs re-run \" + c.rerun + \" · pre-verified only \" + c.pre + \" · not run \" + c.todo + \" of \" + TOTAL);",
+    "after": "      \" · works-but \" + c.change + \" · carried over (unchanged) \" + c.carried +"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1448,
+    "before": "",
+    "after": "      \" · needs re-run \" + c.rerun + \" · pre-verified only \" + c.pre + \" · not run \" + c.todo + \" of \" + TOTAL);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1449,
+    "before": "    var text = lines.join(\"\\n\");",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1450,
+    "before": "    var done = function () {",
+    "after": "    var text = lines.join(\"\\n\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1451,
+    "before": "      var f = document.getElementById(\"copied\");",
+    "after": "    var done = function () {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1452,
+    "before": "      f.hidden = false;",
+    "after": "      var f = document.getElementById(\"copied\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1453,
+    "before": "      setTimeout(function () { f.hidden = true; }, 3200);",
+    "after": "      f.hidden = false;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1454,
+    "before": "    };",
+    "after": "      setTimeout(function () { f.hidden = true; }, 3200);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1455,
+    "before": "",
+    "after": "    };"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1456,
+    "before": "    if (navigator.clipboard && navigator.clipboard.writeText) {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1457,
+    "before": "      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });",
+    "after": "    if (navigator.clipboard && navigator.clipboard.writeText) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1458,
+    "before": "    } else {",
+    "after": "      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1459,
+    "before": "      fallbackCopy(text, done);",
+    "after": "    } else {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1460,
+    "before": "    }",
+    "after": "      fallbackCopy(text, done);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1461,
+    "before": "  });",
+    "after": "    }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1462,
+    "before": "",
+    "after": "  });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1463,
+    "before": "  function fallbackCopy(text, done) {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1464,
+    "before": "    var ta = document.createElement(\"textarea\");",
+    "after": "  function fallbackCopy(text, done) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1465,
+    "before": "    ta.value = text;",
+    "after": "    var ta = document.createElement(\"textarea\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1466,
+    "before": "    ta.setAttribute(\"readonly\", \"\");",
+    "after": "    ta.value = text;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1467,
+    "before": "    ta.style.position = \"fixed\";",
+    "after": "    ta.setAttribute(\"readonly\", \"\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1468,
+    "before": "    ta.style.top = \"-1000px\";",
+    "after": "    ta.style.position = \"fixed\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1469,
+    "before": "    document.body.appendChild(ta);",
+    "after": "    ta.style.top = \"-1000px\";"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1470,
+    "before": "    ta.select();",
+    "after": "    document.body.appendChild(ta);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1471,
+    "before": "    try { document.execCommand(\"copy\"); done(); } catch (e) { /* nothing to do */ }",
+    "after": "    ta.select();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1472,
+    "before": "    document.body.removeChild(ta);",
+    "after": "    try { document.execCommand(\"copy\"); done(); } catch (e) { /* nothing to do */ }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1473,
+    "before": "  }",
+    "after": "    document.body.removeChild(ta);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1474,
+    "before": "",
+    "after": "  }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1475,
+    "before": "  /* ------------------------------------------------------------------ boot */",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1476,
+    "before": "",
+    "after": "  /* ------------------------------------------------------------------ boot */"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1477,
+    "before": "  loadLocal();",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1478,
+    "before": "  buildSections();",
+    "after": "  loadLocal();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1479,
+    "before": "  paintAll();",
+    "after": "  buildSections();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1480,
+    "before": "",
+    "after": "  paintAll();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1481,
+    "before": "  if (window.claude && typeof window.claude.use === \"function\") {",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1482,
+    "before": "    window.claude.use(\"db\").then(function (ns) {",
+    "after": "  if (window.claude && typeof window.claude.use === \"function\") {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1483,
+    "before": "      if (!ns) {",
+    "after": "    window.claude.use(\"db\").then(function (ns) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1484,
+    "before": "        setStoreNote(\"Saving to this browser only — this view cannot reach the page's store.\", \"off\");",
+    "after": "      if (!ns) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1485,
+    "before": "        return;",
+    "after": "        setStoreNote(\"Saving to this browser only — this view cannot reach the page's store.\", \"off\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1486,
+    "before": "      }",
+    "after": "        return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1487,
+    "before": "      db = ns;",
+    "after": "      }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1488,
+    "before": "      db.collection(\"OS-20260918-readonly-evidence-smoke-inputs-C1-demo-steps\").onSnapshot(function (snap) {",
+    "after": "      db = ns;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1489,
+    "before": "        var changed = false, retained = false, deferred = false;",
+    "after": "      db.collection(\"OS-20260918-readonly-evidence-smoke-inputs-C1-demo-steps\").onSnapshot(function (snap) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1490,
+    "before": "        snap.docs.forEach(function (d) {",
+    "after": "        var changed = false, retained = false, deferred = false;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1491,
+    "before": "          var v = d.data() || {};",
+    "after": "        snap.docs.forEach(function (d) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1492,
+    "before": "          var n = Number(v.n != null ? v.n : d.id);",
+    "after": "          var v = d.data() || {};"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1493,
+    "before": "          if (!stepOf(n)) return;",
+    "after": "          var n = Number(v.n != null ? v.n : d.id);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1494,
+    "before": "          var rec = {",
+    "after": "          if (!stepOf(n)) return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1495,
+    "before": "            status: v.status || \"\",",
+    "after": "          var rec = {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1496,
+    "before": "            note: v.note || \"\",",
+    "after": "            status: v.status || \"\","
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1497,
+    "before": "            buildSha: v.buildSha || \"\",",
+    "after": "            note: v.note || \"\","
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1498,
+    "before": "            stepRevision: v.stepRevision || \"\",",
+    "after": "            buildSha: v.buildSha || \"\","
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1499,
+    "before": "            at: v.at || \"\"",
+    "after": "            stepRevision: v.stepRevision || \"\","
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1500,
+    "before": "          };",
+    "after": "            at: v.at || \"\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1501,
+    "before": "          var cur = local[n];",
+    "after": "          };"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1502,
+    "before": "          if (cur && recordTime(rec) <= recordTime(cur)) {",
+    "after": "          var cur = local[n];"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1503,
+    "before": "            if (recordTime(rec) < recordTime(cur)) retained = true;",
+    "after": "          if (cur && recordTime(rec) <= recordTime(cur)) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1504,
+    "before": "            return;",
+    "after": "            if (recordTime(rec) < recordTime(cur)) retained = true;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1505,
+    "before": "          }",
+    "after": "            return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1506,
+    "before": "          var ta = document.getElementById(\"note-\" + n);",
+    "after": "          }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1507,
+    "before": "          if (ta && document.activeElement === ta) {",
+    "after": "          var ta = document.getElementById(\"note-\" + n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1508,
+    "before": "            // Never combine a remote verdict/provenance with the active local note.",
+    "after": "          if (ta && document.activeElement === ta) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1509,
+    "before": "            // On blur the newer whole record wins, unless typing advanced local time.",
+    "after": "            // Never combine a remote verdict/provenance with the active local note."
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1510,
+    "before": "            if (!pendingRemote[n] || recordTime(rec) > recordTime(pendingRemote[n])) pendingRemote[n] = rec;",
+    "after": "            // On blur the newer whole record wins, unless typing advanced local time."
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1511,
+    "before": "            cancelNoteWrite(n);",
+    "after": "            if (!pendingRemote[n] || recordTime(rec) > recordTime(pendingRemote[n])) pendingRemote[n] = rec;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1512,
+    "before": "            deferred = true;",
+    "after": "            cancelNoteWrite(n);"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1513,
+    "before": "            return;",
+    "after": "            deferred = true;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1514,
+    "before": "          }",
+    "after": "            return;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1515,
+    "before": "          if (applyRemote(n, rec)) changed = true;",
+    "after": "          }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1516,
+    "before": "        });",
+    "after": "          if (applyRemote(n, rec)) changed = true;"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1517,
+    "before": "        if (changed) { saveLocal(); paintAll(); }",
+    "after": "        });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1518,
+    "before": "        setStoreNote(deferred ? \"A page update is waiting until you finish editing this note.\"",
+    "after": "        if (changed) { saveLocal(); paintAll(); }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1519,
+    "before": "          : retained ? \"Newer results kept in this browser; an older page update was ignored.\"",
+    "after": "        setStoreNote(deferred ? \"A page update is waiting until you finish editing this note.\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1520,
+    "before": "          : \"Connected to the page's store.\", \"live\");",
+    "after": "          : retained ? \"Newer results kept in this browser; an older page update was ignored.\""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1521,
+    "before": "      }, function (e) {",
+    "after": "          : \"Connected to the page's store.\", \"live\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1522,
+    "before": "        setStoreNote(\"Saving to this browser only (\" + (e && e.code ? e.code : \"error\") + \").\", \"off\");",
+    "after": "      }, function (e) {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1523,
+    "before": "      });",
+    "after": "        setStoreNote(\"Saving to this browser only (\" + (e && e.code ? e.code : \"error\") + \").\", \"off\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1524,
+    "before": "    }, function () {",
+    "after": "      });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1525,
+    "before": "      setStoreNote(\"Saving to this browser only.\", \"off\");",
+    "after": "    }, function () {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1526,
+    "before": "    });",
+    "after": "      setStoreNote(\"Saving to this browser only.\", \"off\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1527,
+    "before": "  } else {",
+    "after": "    });"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1528,
+    "before": "    setStoreNote(\"Saving to this browser only.\", \"off\");",
+    "after": "  } else {"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1529,
+    "before": "  }",
+    "after": "    setStoreNote(\"Saving to this browser only.\", \"off\");"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1530,
+    "before": "})();",
+    "after": "  }"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1531,
+    "before": "</script>",
+    "after": "})();"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1532,
+    "before": "",
+    "after": "</script>"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1533,
+    "before": "<!-- smoke-sidecar-sha256:b6a2714830cbbbbf94fa9f38bf14119f39be4d08ac6e6c3a87630cdb3e642ea5 -->",
+    "after": ""
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1534,
+    "before": "",
+    "after": "<!-- smoke-sidecar-sha256:b6a2714830cbbbbf94fa9f38bf14119f39be4d08ac6e6c3a87630cdb3e642ea5 -->"
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1535,
+    "after": ""
+  }
+]

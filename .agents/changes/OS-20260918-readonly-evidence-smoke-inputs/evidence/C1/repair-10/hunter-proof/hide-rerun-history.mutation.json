@@ -1,0 +1,8 @@
+[
+  {
+    "file": "smoke-C1-demo-after.html",
+    "line": 1327,
+    "before": "    history.hidden = !state.marked || state.kind === \"current\";",
+    "after": "    history.hidden = true;"
+  }
+]

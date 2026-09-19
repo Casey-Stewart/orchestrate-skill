@@ -1,0 +1,20 @@
+[
+  {
+    "stem": "smoke-C1",
+    "byteIdentical": true,
+    "previous": "9b40054dfc9571af25267050640f66bc00e7e619",
+    "inputRoot": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs"
+  },
+  {
+    "stem": "smoke-C1-demo-before",
+    "byteIdentical": true,
+    "previous": "9b40054dfc9571af25267050640f66bc00e7e619",
+    "inputRoot": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs"
+  },
+  {
+    "stem": "smoke-C1-demo-after",
+    "byteIdentical": true,
+    "previous": "9b40054dfc9571af25267050640f66bc00e7e619",
+    "inputRoot": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 679,
+    "before": "    <p class=\"standfirst\">These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.</p>",
+    "after": "    <p class=\"standfirst\">These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.</p>"
+  },
+  {
+    "file": "smoke-C1-demo-before.json",
+    "line": 10,
+    "before": "  \"standfirst\": \"These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.\",",
+    "after": "  \"standfirst\": \"These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.\","
+  }
+]

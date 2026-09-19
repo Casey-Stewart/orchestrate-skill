@@ -1,0 +1,26 @@
+[
+  {
+    "file": "smoke-C1.html",
+    "line": 854,
+    "before": "        \"do\": \"Follow the workbook and instruction links. Open \\u003ca href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration\\u003c/a> and mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open \\u003ca href=\\\"smoke-C1-demo-after.html\\\">the After demonstration\\u003c/a> in the same browser and press Copy results as text.\",",
+    "after": "        \"do\": \"Follow the workbook and instruction links. Open \\u003ca href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration\\u003c/a> and mark demo step 1 Pass. For demo step 1, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open \\u003ca href=\\\"smoke-C1-demo-after.html\\\">the After demonstration\\u003c/a> in the same browser and press Copy results as text.\","
+  },
+  {
+    "file": "smoke-C1.json",
+    "line": 39,
+    "before": "          \"do\": \"Follow the workbook and instruction links. Open <a href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration</a> and mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open <a href=\\\"smoke-C1-demo-after.html\\\">the After demonstration</a> in the same browser and press Copy results as text.\",",
+    "after": "          \"do\": \"Follow the workbook and instruction links. Open <a href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration</a> and mark demo step 1 Pass. For demo step 1, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open <a href=\\\"smoke-C1-demo-after.html\\\">the After demonstration</a> in the same browser and press Copy results as text.\","
+  },
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 679,
+    "before": "    <p class=\"standfirst\">These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.</p>",
+    "after": "    <p class=\"standfirst\">These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 1, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.</p>"
+  },
+  {
+    "file": "smoke-C1-demo-before.json",
+    "line": 10,
+    "before": "  \"standfirst\": \"These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.\",",
+    "after": "  \"standfirst\": \"These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 1, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.\","
+  }
+]

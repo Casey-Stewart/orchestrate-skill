@@ -1,0 +1,8 @@
+[
+  {
+    "file": "smoke-C1-demo-after.html",
+    "line": 679,
+    "before": "    <p class=\"standfirst\">The workbook input has changed on the same build. Step 1 has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. Step 2 keeps its Pass and “keep this note”. Return to the real C1 page after inspecting this demonstration.</p>",
+    "after": "    <p class=\"standfirst\">The workbook input has changed on the same build. Step 1 must say NOT RE-RUN; step 2 must keep its Pass and note. Return to the real C1 page after inspecting this demonstration.</p>"
+  }
+]

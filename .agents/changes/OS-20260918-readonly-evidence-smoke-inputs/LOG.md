@@ -541,3 +541,11 @@ All feature batches remain green. Actual input package and source SHA6c84b930aa4
 ## C1 repair10 candidate manual gate
 
 Candidate f2c2ceeb73a8adeee5dd2249a97df84bb1a19134 on fix/B03-presmoke-10, base 9b40054dfc9571af25267050640f66bc00e7e619. Conductor frozen manual Git/blob gate PASS: complete seven-file repair fence plus own four checklist ticks; both rename endpoints, clean candidate/integration, correct branch/worktree and unchanged frozen blobs/main. Copied only c1-demo-instructions.test.cjs to a temporary worktree at the base: actual instruction/runtime assertion FAIL; candidate PASS. Evidence under evidence/C1/repair-10. Fresh independent reviewer and separate hunter now assess this exact candidate; no reviewer verdict inferred.
+
+## C1 repair10 R1 SHIP with test-only polish
+
+Fresh reviewer SHIP f2c2ceeb73a8adeee5dd2249a97df84bb1a19134;15hunks mapped,6/6 targeted,3 exact page rebuilds and14raw input/evidence identities. Separate fresh hunter FINDINGS2, both ASK, no current production defect. The desktop spawn tool returned task-limit errors twice; an ephemeral independent Codex CLI worker with explicit same gpt-6-astra/xhigh, automatic approval review/workspace-write and no bypass flags ran in parallel. Invocation and substantive mutation evidence retained in hunter-proof.
+
+ASK1: instruction executor ignores earlier prerequisite verdict and step targets, allowing wrong-step or wrong-initial-verdict mutations to survive6/6; actual UI witness yields previous WORKS,BUT or step2 NOT RUN. Derive the full displayed route for main/Before; prerequisite seeding only for standalone step2 tests. ASK2: emitted After introduction can revert to misleading old wording while sidecar stays correct and6/6survives; assert displayed introduction/sidecar agreement and accurate visible-history/export distinction. Exact full reports/mutations/witnesses retained.
+
+Same implementer closes ordinary test-only polish: c1-demo-instructions.test.cjs and own two appended polish checklist ticks only. Six reviewed source pages remain unchanged. Full recursive validation and explicit regression, exact three surviving mutations must fail. No new FIX FIRST round, no production change, no new plan/fence amendment or waiver. Manual fence/mechanical closure follows.

@@ -1,0 +1,109 @@
+✔ clean Pass hides the note field: the old Pass then note sequence is unusable (4.688ms)
+✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.5955ms)
+✖ Before standfirst gives a visible note-entry route that survives the real reissue (0.8929ms)
+✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4324ms)
+✖ After step 2 gives a visible note-entry route that survives the real reissue (2.2595ms)
+✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (2.8564ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 1
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.0024
+
+✖ failing tests:
+
+test at .agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:149:3
+✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.5955ms)
+  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text
+
+  true !== false
+
+      at Object.note (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:84:14)
+      at followRoute (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:112:35)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:150:5)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:149:3
+✖ Before standfirst gives a visible note-entry route that survives the real reissue (0.8929ms)
+  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text
+
+  true !== false
+
+      at Object.note (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:84:14)
+      at followRoute (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:112:35)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:150:5)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:149:3
+✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4324ms)
+  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text
+
+  true !== false
+
+      at Object.note (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:84:14)
+      at followRoute (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:112:35)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:150:5)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:149:3
+✖ After step 2 gives a visible note-entry route that survives the real reissue (2.2595ms)
+  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text
+
+  true !== false
+
+      at Object.note (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:84:14)
+      at followRoute (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:112:35)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:150:5)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:154:1
+✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (2.8564ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  1 !== 2
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\C1-repair-hunter-R1\cases\base-test-only\.agents\changes\OS-20260918-readonly-evidence-smoke-inputs\c1-demo-instructions.test.cjs:164:10)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

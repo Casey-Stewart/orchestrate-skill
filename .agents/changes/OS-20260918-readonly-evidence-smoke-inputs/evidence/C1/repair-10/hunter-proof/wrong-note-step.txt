@@ -1,0 +1,14 @@
+✔ clean Pass hides the note field: the old Pass then note sequence is unusable (4.1896ms)
+✔ main human step 2 gives a visible note-entry route that survives the real reissue (8.2166ms)
+✔ Before standfirst gives a visible note-entry route that survives the real reissue (2.0768ms)
+✔ Before step 2 gives a visible note-entry route that survives the real reissue (2.9085ms)
+✔ After step 2 gives a visible note-entry route that survives the real reissue (2.4147ms)
+✔ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.082ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.2556

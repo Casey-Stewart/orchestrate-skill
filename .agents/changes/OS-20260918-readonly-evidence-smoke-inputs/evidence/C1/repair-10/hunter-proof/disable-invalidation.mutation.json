@@ -1,0 +1,8 @@
+[
+  {
+    "file": "smoke-C1-demo-after.html",
+    "line": 1025,
+    "before": "    var applicable = marked && isFullSha(rec.buildSha) && rec.stepRevision === revisionOf(step);",
+    "after": "    var applicable = marked && isFullSha(rec.buildSha) && true;"
+  }
+]

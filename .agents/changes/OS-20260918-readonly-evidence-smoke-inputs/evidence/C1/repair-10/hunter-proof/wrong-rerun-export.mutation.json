@@ -1,0 +1,8 @@
+[
+  {
+    "file": "smoke-C1-demo-after.html",
+    "line": 1424,
+    "before": "          : state.kind === \"rerun\" ? \"NOT RE-RUN\" +",
+    "after": "          : state.kind === \"rerun\" ? \"PASS\" +"
+  }
+]

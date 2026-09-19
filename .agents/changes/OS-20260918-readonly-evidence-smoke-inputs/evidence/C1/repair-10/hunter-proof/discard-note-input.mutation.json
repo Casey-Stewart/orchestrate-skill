@@ -1,0 +1,8 @@
+[
+  {
+    "file": "smoke-C1-demo-before.html",
+    "line": 1206,
+    "before": "      local[step.n].note = ta.value;",
+    "after": "      local[step.n].note = \"\";"
+  }
+]

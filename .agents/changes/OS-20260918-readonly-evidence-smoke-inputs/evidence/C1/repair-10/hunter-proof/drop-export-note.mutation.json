@@ -1,0 +1,8 @@
+[
+  {
+    "file": "smoke-C1-demo-after.html",
+    "line": 1432,
+    "before": "        if (r.note && r.note.trim()) line += \" — \" + r.note.trim().replace(/\\s+/g, \" \");",
+    "after": "        if (false) line += \" — \" + r.note.trim().replace(/\\s+/g, \" \");"
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "exe": "git",
+    "args": [
+      "--no-optional-locks",
+      "-c",
+      "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+      "-c",
+      "core.longpaths=true",
+      "-C",
+      "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+      "diff",
+      "--check",
+      "ebdde4fc2354f0280b91a5225219950bec7e696b...f2c2ceeb73a8adeee5dd2249a97df84bb1a19134"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "exe": "git",
+    "args": [
+      "--no-optional-locks",
+      "-c",
+      "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+      "-c",
+      "core.longpaths=true",
+      "-C",
+      "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+      "status",
+      "--porcelain"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: unable to access 'C:\\Users\\fatbo/.config/git/ignore': Permission denied\nwarning: unable to access 'C:\\Users\\fatbo/.config/git/ignore': Permission denied\n"
+  }
+]

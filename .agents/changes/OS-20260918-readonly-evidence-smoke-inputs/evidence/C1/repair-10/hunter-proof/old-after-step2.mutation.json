@@ -1,0 +1,14 @@
+[
+  {
+    "file": "smoke-C1-demo-after.html",
+    "line": 847,
+    "before": "        \"do\": \"Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.\",",
+    "after": "        \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\","
+  },
+  {
+    "file": "smoke-C1-demo-after.json",
+    "line": 94,
+    "before": "          \"do\": \"Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.\",",
+    "after": "          \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\","
+  }
+]

@@ -1,0 +1,449 @@
+{
+  "verdict": "PASS",
+  "candidate": "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134",
+  "base": "9b40054dfc9571af25267050640f66bc00e7e619",
+  "results": [
+    {
+      "name": "smoke-C1",
+      "previous": "9b40054dfc9571af25267050640f66bc00e7e619",
+      "exactGeneratedBytes": 165772,
+      "buildSha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+      "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1",
+      "revisions": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          7,
+          1
+        ],
+        [
+          8,
+          1
+        ],
+        [
+          9,
+          1
+        ],
+        [
+          10,
+          1
+        ],
+        [
+          11,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "smoke-C1-demo-before",
+      "previous": "9b40054dfc9571af25267050640f66bc00e7e619",
+      "exactGeneratedBytes": 58174,
+      "buildSha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+      "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1-demo",
+      "revisions": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "smoke-C1-demo-after",
+      "previous": "9b40054dfc9571af25267050640f66bc00e7e619",
+      "exactGeneratedBytes": 58152,
+      "buildSha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+      "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1-demo",
+      "revisions": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  ],
+  "raw": [
+    {
+      "name": "evidence/C1/inputs/issue-001/orders.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "size": 8634
+    },
+    {
+      "name": "evidence/C1/inputs/validation-001/input-validation.json",
+      "sha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+      "size": 18641
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/orders.requirements.json",
+      "sha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "size": 4115
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/generate-orders.py",
+      "sha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "size": 9188
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/validate-orders.py",
+      "sha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "size": 9950
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "sha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785",
+      "size": 1616
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "sha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6",
+      "size": 383
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "sha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56",
+      "size": 160
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "sha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94",
+      "size": 169
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "sha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973",
+      "size": 862
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "sha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "size": 79
+    },
+    {
+      "name": "evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "sha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7",
+      "size": 82
+    },
+    {
+      "name": "evidence/C1/inputs/issue-002/orders.xlsx",
+      "sha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79",
+      "size": 8636
+    },
+    {
+      "name": "evidence/C1/inputs/issue-002/orders.requirements.json",
+      "sha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269",
+      "size": 6044
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "warning: unable to access 'C:\\Users\\fatbo/.config/git/ignore': Permission denied\nwarning: unable to access 'C:\\Users\\fatbo/.config/git/ignore': Permission denied\n"
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "diff",
+        "--name-only",
+        "codex/readonly-evidence-smoke-inputs-ledger...HEAD"
+      ],
+      "exit": 0,
+      "stdout": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html\n.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"change\": \"Read-only evidence and complete smoke inputs\",\n  \"checkpoint\": 1,\n  \"batches\": \"B01–B03\",\n  \"branch\": \"codex/readonly-evidence-smoke-inputs-ledger\",\n  \"buildSha\": \"6c84b930aa4297283f94ce9eeacdff44d2b22ba4\",\n  \"ckptKey\": \"OS-20260918-readonly-evidence-smoke-inputs-C1\",\n  \"pageTitle\": \"C1 smoke run\",\n  \"standfirst\": \"Two human checks and nine automated checks. Run Step 0 first. When done—or as soon as something fails—press <strong>Copy results as text</strong> and paste it into the task.\",\n  \"gate\": {\n    \"intro\": \"Run this gate from the integration worktree before recording a verdict. The repository has no version file, so the source is identified by its tested commit and a behavioral canary.\",\n    \"commands\": [\n      \"Set-Location -LiteralPath 'C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int'\\ngit branch --show-current\\ngit rev-parse HEAD\\nnode '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs' .\"\n    ],\n    \"checks\": [\n      \"Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.\",\n      \"Canary must report <strong>PASS</strong>: the current builder rejects a changed workbook byte and preserves the old HTML; the starting <code>f918fe39762c70edb9a3424e54eaa208fd7c5727</code> builder accepts or ignores that same change. If it behaves the old way, stop and report it.\"\n    ]\n  },\n  \"sections\": [\n    {\n      \"n\": 1,\n      \"title\": \"Workbook and delivered files\",\n      \"need\": \"Excel or a compatible application; use the supplied disposable working copy.\",\n      \"steps\": [\n        {\n          \"n\": 1,\n          \"do\": \"Open <a href=\\\"evidence/C1/inputs/issue-001/orders.xlsx\\\">the original workbook</a>, inspect its three sheets, then close without saving. Follow <a href=\\\"evidence/C1/inputs/issue-001/WORKING-COPY.md\\\">the exact working-copy instructions</a>. In the copy change <code>Orders!C2</code> from 2 to 3, then reset the copy using the supplied command.\",\n          \"pass\": \"Original sheets are Orders, Summary and Types; IDs retain 0001–0004. Original F2=22.50, total=23.50 and count=4. The copy recalculates F2=33.75 and total=34.75; resetting restores 22.50/23.50. The original remains unchanged.\",\n          \"aside\": \"Runner: human. Excel or a compatible spreadsheet application with calculation enabled is required. Automated validation does not claim this application step was performed.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"workbook-copy-reset\"\n          ]\n        },\n        {\n          \"n\": 2,\n          \"do\": \"Follow the workbook and instruction links. Open <a href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration</a>, mark its two demo steps Pass, and add “keep this note” to demo step 2. Then open <a href=\\\"smoke-C1-demo-after.html\\\">the After demonstration</a> in the same browser.\",\n          \"pass\": \"Files and copy/reset directions are usable. The changed-input demo step says NOT RE-RUN, while the unaffected step retains Pass and its note. Demo marks are separate from this C1 verdict.\",\n          \"aside\": \"Runner: human. The demo changes synthetic files and isolated browser marks only.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"workbook-copy-reset\",\n            \"demo-workbook\",\n            \"demo-requirements\"\n          ]\n        }\n      ]\n    },\n    {\n      \"n\": 2,\n      \"title\": \"Git evidence and fence checks\",\n      \"steps\": [\n        {\n          \"n\": 3,\n          \"do\": \"Run the Git-evidence disposable scenarios through the production helper and its fixed CLI commands.\",\n          \"pass\": \"All cases pass; evidence retains explicit source/ref/SHAs and contained/not-contained/unknown ancestry. Repository and remote state remain unchanged.\",\n          \"aside\": \"Runner: agent. Generated isolated Git repositories come from the committed tests/support/git-fixture.cjs; no manual repository construction.\",\n          \"revision\": 1\n        },\n        {\n          \"n\": 4,\n          \"do\": \"Run the production fence API/CLI scenarios using disposable repositories and authoritative integration-ledger fixtures.\",\n          \"pass\": \"PASS/VIOLATION/UNKNOWN, both rename endpoints, worktree cleanliness, structural batch edits and unknown authority are enforced without writes.\",\n          \"aside\": \"Runner: agent. The implemented checker is a tested deliverable; this ledger used its frozen manual conductor gates.\",\n          \"revision\": 1\n        }\n      ]\n    },\n    {\n      \"n\": 3,\n      \"title\": \"Workbook validation and byte preservation\",\n      \"steps\": [\n        {\n          \"n\": 5,\n          \"do\": \"Use literal python and the delivered independent validator against the actual issued workbook and requirements. Corrupt a disposable copy and rerun.\",\n          \"pass\": \"All three sheets, 47 cells, six formulas/caches and declared edge cases pass; total 23.50 and count 4. The corrupted copy fails a named requirement.\",\n          \"aside\": \"Runner: agent. Python 3.10.6 / openpyxl 3.1.5; originals are preserved.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"orders-requirements\",\n            \"orders-validator\"\n          ]\n        },\n        {\n          \"n\": 6,\n          \"do\": \"Generate workbooks A and B into distinct new paths. Independently validate them and the workbook materialized from the recorded commit in a fresh checkout.\",\n          \"pass\": \"SHA256(A) = SHA256(B) = SHA256(committed workbook file bytes), and independent semantic validation passes. File-content hashes are recorded with all three paths and the tested commit.\",\n          \"aside\": \"Runner: agent. Fresh clone uses core.autocrlf=true before first checkout; hash equality alone is not semantic validation.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"orders-requirements\",\n            \"orders-generator\",\n            \"orders-validator\"\n          ]\n        },\n        {\n          \"n\": 7,\n          \"do\": \"Fresh-checkout the actual committed C1 input package with core.autocrlf=true. Repeat with byte copies under active and archived paths in a disposable repository.\",\n          \"pass\": \"Every raw hash and effective attribute is correct, including nested/LF/CRLF inputs. An unprotected LF control converts to CRLF. The live ledger is neither archived nor changed.\",\n          \"aside\": \"Runner: agent. Execute the retained verify-issued-checkout.mjs with the recorded commit and package.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"orders-requirements\",\n            \"orders-generator\",\n            \"orders-validator\",\n            \"workbook-copy-reset\",\n            \"discovery-runner\",\n            \"discovery-control\",\n            \"discovery-sentinel\",\n            \"discovery-directions\",\n            \"text-lf\",\n            \"text-crlf\",\n            \"demo-workbook\",\n            \"demo-requirements\"\n          ]\n        }\n      ]\n    },\n    {\n      \"n\": 4,\n      \"title\": \"Input delivery and reissue behavior\",\n      \"steps\": [\n        {\n          \"n\": 8,\n          \"do\": \"Copy the delivered recursive-discovery inputs into a disposable Git repository. Run the actual README PowerShell recipe, change only the nested false assertion to true, and rerun. Also check empty discovery and bare node --test.\",\n          \"pass\": \"The named nested sentinel fails with a nonzero result, then passes after its assertion correction. FullName order is stable; empty discovery fails. The portable command also finds the nested failure and then passes.\",\n          \"aside\": \"Runner: agent. The issued deliberately failing sentinel remains unchanged; reset by making a fresh copy.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"discovery-runner\",\n            \"discovery-control\",\n            \"discovery-sentinel\",\n            \"discovery-directions\"\n          ]\n        },\n        {\n          \"n\": 9,\n          \"do\": \"In a disposable package change only LF/CRLF bytes in a declared text input. Try building with its stale hash, then update its path/hash without changing revisions.\",\n          \"pass\": \"Stale bytes are rejected before replacing the old HTML. Updated input identity still requires every referencing step’s revision to increase.\",\n          \"aside\": \"Runner: agent. Immutable LF and CRLF input files are supplied; original issued inputs are never overwritten.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"text-lf\",\n            \"text-crlf\"\n          ]\n        },\n        {\n          \"n\": 10,\n          \"do\": \"Validate every declared delivered file and evidence link, then inspect this generated page in a browser.\",\n          \"pass\": \"The current page and exact files are usable; linked bytes match declarations. Expected workbook total 23.50 and count 4 and working-copy/reset instructions are explicit; no manual data construction is required.\",\n          \"aside\": \"Runner: agent. Browser checks do not claim native Excel execution.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"orders-requirements\",\n            \"orders-generator\",\n            \"orders-validator\",\n            \"workbook-copy-reset\",\n            \"discovery-runner\",\n            \"discovery-control\",\n            \"discovery-sentinel\",\n            \"discovery-directions\",\n            \"text-lf\",\n            \"text-crlf\",\n            \"demo-workbook\",\n            \"demo-requirements\"\n          ]\n        },\n        {\n          \"n\": 11,\n          \"do\": \"Use disposable before/after packages to change workbook contents and reissue on the same build. Exercise the generated pages and saved demo verdicts.\",\n          \"pass\": \"Unchanged affected revision is refused. A new issue path and increased revision succeed; the prior affected pass becomes NOT RE-RUN while unrelated pass and notes survive. Original input sets remain intact.\",\n          \"aside\": \"Runner: agent. Demonstration storage is isolated from the real checkpoint.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"orders-original\",\n            \"orders-requirements\",\n            \"demo-workbook\",\n            \"demo-requirements\",\n            \"text-lf\"\n          ]\n        }\n      ]\n    }\n  ],\n  \"inputs\": [\n    {\n      \"id\": \"orders-original\",\n      \"path\": \"evidence/C1/inputs/issue-001/orders.xlsx\",\n      \"sha256\": \"e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f\",\n      \"size\": 8634,\n      \"requirements\": \"Three sheets Orders/Summary/Types; text IDs 0001–0004, numeric/zero/negative/discount/Unicode/date/boolean/empty edges, six formulas with caches, total 23.50 and count 4.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Copy to the named disposable workbook before editing; see WORKING-COPY.md.\",\n      \"reset\": \"Close and replace only the working copy from the immutable original.\"\n    },\n    {\n      \"id\": \"orders-requirements\",\n      \"path\": \"evidence/C1/inputs/issue-001/orders.requirements.json\",\n      \"sha256\": \"9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8\",\n      \"size\": 4115,\n      \"requirements\": \"Independent manifest declares every required sheet, cell, type, format, formula and cached value.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only requirements for the delivered validator.\",\n      \"reset\": \"Use a new disposable package; never edit the issued manifest.\"\n    },\n    {\n      \"id\": \"orders-generator\",\n      \"path\": \"evidence/C1/inputs/issue-001/generate-orders.py\",\n      \"sha256\": \"43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d\",\n      \"size\": 9188,\n      \"requirements\": \"Deterministic stdlib generator; refuses existing output paths.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Run with literal python and a new output file path.\",\n      \"reset\": \"Generate to another new temporary file.\"\n    },\n    {\n      \"id\": \"orders-validator\",\n      \"path\": \"evidence/C1/inputs/issue-001/validate-orders.py\",\n      \"sha256\": \"67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8\",\n      \"size\": 9950,\n      \"requirements\": \"Independent openpyxl formula/data-only checks; named failure for corruption.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Run with literal python, workbook path and requirements path.\",\n      \"reset\": \"Restore corrupted working copies from their issued originals.\"\n    },\n    {\n      \"id\": \"workbook-copy-reset\",\n      \"path\": \"evidence/C1/inputs/issue-001/WORKING-COPY.md\",\n      \"sha256\": \"b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785\",\n      \"size\": 1616,\n      \"requirements\": \"Exact PowerShell source/destination, open, change C2, expected results and reset commands.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read and follow for human Excel step.\",\n      \"reset\": \"Close and recopy the disposable workbook; original stays unchanged.\"\n    },\n    {\n      \"id\": \"discovery-runner\",\n      \"path\": \"evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1\",\n      \"sha256\": \"a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6\",\n      \"size\": 383,\n      \"requirements\": \"Recursive FullName-sorted discovery, no-suite guard, test failure propagation and diff check.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Copy whole recursive-discovery directory into a disposable Git repo and run from its root.\",\n      \"reset\": \"Use a fresh directory copied from issued files.\"\n    },\n    {\n      \"id\": \"discovery-control\",\n      \"path\": \"evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs\",\n      \"sha256\": \"10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56\",\n      \"size\": 160,\n      \"requirements\": \"Passing top-level control test.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Run through the supplied discovery command in a disposable copy.\",\n      \"reset\": \"Restore from this original.\"\n    },\n    {\n      \"id\": \"discovery-sentinel\",\n      \"path\": \"evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs\",\n      \"sha256\": \"32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94\",\n      \"size\": 169,\n      \"requirements\": \"Named nested test deliberately fails; correcting only false to true makes it pass.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Edit only the disposable copy during the fail/pass proof.\",\n      \"reset\": \"Restore this deliberately failing original in a new copy.\"\n    },\n    {\n      \"id\": \"discovery-directions\",\n      \"path\": \"evidence/C1/inputs/issue-001/recursive-discovery/README.md\",\n      \"sha256\": \"36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973\",\n      \"size\": 862,\n      \"requirements\": \"Names the actual nested sentinel and failure/success/empty-suite expectations.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only instructions for delivered runner and files.\",\n      \"reset\": \"Use fresh copies; preserve originals.\"\n    },\n    {\n      \"id\": \"text-lf\",\n      \"path\": \"evidence/C1/inputs/issue-001/text/lf-input.txt\",\n      \"sha256\": \"fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434\",\n      \"size\": 79,\n      \"requirements\": \"UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Copy before changing line endings for stale-digest test.\",\n      \"reset\": \"Replace disposable copy from immutable original.\"\n    },\n    {\n      \"id\": \"text-crlf\",\n      \"path\": \"evidence/C1/inputs/issue-001/text/crlf-input.txt\",\n      \"sha256\": \"a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7\",\n      \"size\": 82,\n      \"requirements\": \"Same synthetic text content with CRLF bytes; raw identity differs from LF.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Read-only comparison or disposable copy for byte-preservation proof.\",\n      \"reset\": \"Replace disposable copy from immutable original.\"\n    },\n    {\n      \"id\": \"demo-workbook\",\n      \"path\": \"evidence/C1/inputs/issue-002/orders.xlsx\",\n      \"sha256\": \"9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79\",\n      \"size\": 8636,\n      \"requirements\": \"Reissue demo: C2=3, F2=33.75, Summary!B2=34.75/count 4; other values/types/formulas/styles retained.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only changed-input demo; separate from original human working copy.\",\n      \"reset\": \"Keep both issue paths; reset browser demo marks on Before page.\"\n    },\n    {\n      \"id\": \"demo-requirements\",\n      \"path\": \"evidence/C1/inputs/issue-002/orders.requirements.json\",\n      \"sha256\": \"e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269\",\n      \"size\": 6044,\n      \"requirements\": \"Explicit demo requirements reflect the changed quantity and dependent caches.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only revised manifest for the preserved demo workbook.\",\n      \"reset\": \"Retain issue-001 requirements alongside this new path.\"\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"change\": \"Changed-input reissue demonstration\",\n  \"checkpoint\": 1,\n  \"batches\": \"B03 demonstration\",\n  \"branch\": \"codex/readonly-evidence-smoke-inputs-ledger\",\n  \"buildSha\": \"6c84b930aa4297283f94ce9eeacdff44d2b22ba4\",\n  \"ckptKey\": \"OS-20260918-readonly-evidence-smoke-inputs-C1-demo\",\n  \"pageTitle\": \"C1 input reissue — Before\",\n  \"headline\": \"Input reissue demonstration — Before\",\n  \"standfirst\": \"These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.\",\n  \"gate\": {\n    \"intro\": \"This is a disposable demonstration using the same tested build and a separate browser storage key.\",\n    \"commands\": [],\n    \"checks\": [\n      \"Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. Return to the real C1 page to record your checkpoint verdict.\"\n    ]\n  },\n  \"inputs\": [\n    {\n      \"id\": \"demo-orders\",\n      \"path\": \"evidence/C1/inputs/issue-001/orders.xlsx\",\n      \"sha256\": \"e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f\",\n      \"size\": 8634,\n      \"requirements\": \"Three sheets Orders/Summary/Types; text IDs 0001–0004, numeric/zero/negative/discount/Unicode/date/boolean/empty edges, six formulas with caches, total 23.50 and count 4.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Copy to the named disposable workbook before editing; see WORKING-COPY.md.\",\n      \"reset\": \"Close and replace only the working copy from the immutable original.\"\n    },\n    {\n      \"id\": \"demo-spec\",\n      \"path\": \"evidence/C1/inputs/issue-001/orders.requirements.json\",\n      \"sha256\": \"9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8\",\n      \"size\": 4115,\n      \"requirements\": \"Independent manifest declares every required sheet, cell, type, format, formula and cached value.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only requirements for the delivered validator.\",\n      \"reset\": \"Use a new disposable package; never edit the issued manifest.\"\n    },\n    {\n      \"id\": \"demo-control\",\n      \"path\": \"evidence/C1/inputs/issue-001/text/lf-input.txt\",\n      \"sha256\": \"fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434\",\n      \"size\": 79,\n      \"requirements\": \"UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Copy before changing line endings for stale-digest test.\",\n      \"reset\": \"Replace disposable copy from immutable original.\"\n    }\n  ],\n  \"sections\": [\n    {\n      \"n\": 1,\n      \"title\": \"Two independent checks\",\n      \"steps\": [\n        {\n          \"n\": 1,\n          \"do\": \"Inspect the linked workbook and requirements, then mark this demonstration step Pass.\",\n          \"pass\": \"Original workbook: Orders!C2=2; Orders!F2=22.50; Summary!B2=23.50; count=4.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"demo-orders\",\n            \"demo-spec\"\n          ]\n        },\n        {\n          \"n\": 2,\n          \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\",\n          \"pass\": \"This input and its step revision stay unchanged in the After page; the Pass and note should survive.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"demo-control\"\n          ]\n        }\n      ]\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"change\": \"Changed-input reissue demonstration\",\n  \"checkpoint\": 1,\n  \"batches\": \"B03 demonstration\",\n  \"branch\": \"codex/readonly-evidence-smoke-inputs-ledger\",\n  \"buildSha\": \"6c84b930aa4297283f94ce9eeacdff44d2b22ba4\",\n  \"ckptKey\": \"OS-20260918-readonly-evidence-smoke-inputs-C1-demo\",\n  \"pageTitle\": \"C1 input reissue — After\",\n  \"headline\": \"Input reissue demonstration — After\",\n  \"standfirst\": \"The workbook input has changed on the same build. Step 1 must say NOT RE-RUN; step 2 must keep its Pass and note. Return to the real C1 page after inspecting this demonstration.\",\n  \"gate\": {\n    \"intro\": \"This is a disposable demonstration using the same tested build and a separate browser storage key.\",\n    \"commands\": [],\n    \"checks\": [\n      \"Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. Return to the real C1 page to record your checkpoint verdict.\"\n    ]\n  },\n  \"inputs\": [\n    {\n      \"id\": \"demo-orders\",\n      \"path\": \"evidence/C1/inputs/issue-002/orders.xlsx\",\n      \"sha256\": \"9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79\",\n      \"size\": 8636,\n      \"requirements\": \"Reissue demo: C2=3, F2=33.75, Summary!B2=34.75/count 4; other values/types/formulas/styles retained.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only changed-input demo; separate from original human working copy.\",\n      \"reset\": \"Keep both issue paths; reset browser demo marks on Before page.\"\n    },\n    {\n      \"id\": \"demo-spec\",\n      \"path\": \"evidence/C1/inputs/issue-002/orders.requirements.json\",\n      \"sha256\": \"e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269\",\n      \"size\": 6044,\n      \"requirements\": \"Explicit demo requirements reflect the changed quantity and dependent caches.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"read-only\",\n      \"use\": \"Read-only revised manifest for the preserved demo workbook.\",\n      \"reset\": \"Retain issue-001 requirements alongside this new path.\"\n    },\n    {\n      \"id\": \"demo-control\",\n      \"path\": \"evidence/C1/inputs/issue-001/text/lf-input.txt\",\n      \"sha256\": \"fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434\",\n      \"size\": 79,\n      \"requirements\": \"UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity.\",\n      \"validation\": {\n        \"path\": \"evidence/C1/inputs/validation-001/input-validation.json\",\n        \"sha256\": \"2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b\",\n        \"size\": 18641,\n        \"command\": \"node 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts\\\\c1-input-validation.mjs' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\18\\\\01a0b671-3325-77d3-b360-845f09da4bdc\\\\orchestrate-run\\\\wt-int\\\\.agents\\\\changes\\\\OS-20260918-readonly-evidence-smoke-inputs\\\\evidence\\\\C1\\\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-validation'\",\n        \"exitCode\": 0,\n        \"result\": \"PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.\",\n        \"env\": \"C:\\\\Users\\\\fatbo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python310\\\\python.exe\\r\\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\\r\\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git\"\n      },\n      \"mode\": \"working-copy\",\n      \"use\": \"Copy before changing line endings for stale-digest test.\",\n      \"reset\": \"Replace disposable copy from immutable original.\"\n    }\n  ],\n  \"sections\": [\n    {\n      \"n\": 1,\n      \"title\": \"Two independent checks\",\n      \"steps\": [\n        {\n          \"n\": 1,\n          \"do\": \"Inspect the linked workbook and requirements, then mark this demonstration step Pass.\",\n          \"pass\": \"Changed workbook: Orders!C2=3; Orders!F2=33.75; Summary!B2=34.75; count=4. The prior Pass is historical until this step is rerun.\",\n          \"revision\": 2,\n          \"inputs\": [\n            \"demo-orders\",\n            \"demo-spec\"\n          ]\n        },\n        {\n          \"n\": 2,\n          \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\",\n          \"pass\": \"This input and its step revision stay unchanged in the After page; the Pass and note should survive.\",\n          \"revision\": 1,\n          \"inputs\": [\n            \"demo-control\"\n          ]\n        }\n      ]\n    }\n  ],\n  \"inputHistory\": [\n    {\n      \"path\": \"evidence/C1/inputs/issue-001/orders.xlsx\",\n      \"sha256\": \"e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f\",\n      \"size\": 8634\n    },\n    {\n      \"path\": \"evidence/C1/inputs/issue-001/orders.requirements.json\",\n      \"sha256\": \"9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8\",\n      \"size\": 4115\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx"
+      ],
+      "exit": 0,
+      "bytes": 8634
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json"
+      ],
+      "exit": 0,
+      "bytes": 18641
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json"
+      ],
+      "exit": 0,
+      "bytes": 4115
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py"
+      ],
+      "exit": 0,
+      "bytes": 9188
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py"
+      ],
+      "exit": 0,
+      "bytes": 9950
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md"
+      ],
+      "exit": 0,
+      "bytes": 1616
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1"
+      ],
+      "exit": 0,
+      "bytes": 383
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs"
+      ],
+      "exit": 0,
+      "bytes": 160
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs"
+      ],
+      "exit": 0,
+      "bytes": 169
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md"
+      ],
+      "exit": 0,
+      "bytes": 862
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt"
+      ],
+      "exit": 0,
+      "bytes": 79
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt"
+      ],
+      "exit": 0,
+      "bytes": 82
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx"
+      ],
+      "exit": 0,
+      "bytes": 8636
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json"
+      ],
+      "exit": 0,
+      "bytes": 6044
+    }
+  ]
+}

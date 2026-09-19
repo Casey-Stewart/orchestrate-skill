@@ -1,0 +1,845 @@
+{
+  "candidate": "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134",
+  "base": "9b40054dfc9571af25267050640f66bc00e7e619",
+  "integration": "ebdde4fc2354f0280b91a5225219950bec7e696b",
+  "results": [
+    {
+      "name": "candidate",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\candidate",
+      "exit": 0,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [],
+      "changed": [],
+      "log": "proof/candidate.txt",
+      "mutation": "proof/candidate.mutation.json"
+    },
+    {
+      "name": "base-test-only",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\base-test-only",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 1",
+        "ℹ fail 5",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.5955ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (0.8929ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4324ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.2595ms)",
+        "✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (2.8564ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.5955ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (0.8929ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4324ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.2595ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (2.8564ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+      ],
+      "changed": [],
+      "log": "proof/base-test-only.txt",
+      "mutation": "proof/base-test-only.mutation.json"
+    },
+    {
+      "name": "old-main-route",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\old-main-route",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 5",
+        "ℹ fail 1",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (6.1859ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (6.1859ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text"
+      ],
+      "changed": [
+        "smoke-C1.html",
+        "smoke-C1.json"
+      ],
+      "log": "proof/old-main-route.txt",
+      "mutation": "proof/old-main-route.mutation.json"
+    },
+    {
+      "name": "old-before-standfirst",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\old-before-standfirst",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 5",
+        "ℹ fail 1",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.0148ms)",
+        "✖ failing tests:",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.0148ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text"
+      ],
+      "changed": [
+        "smoke-C1-demo-before.html",
+        "smoke-C1-demo-before.json"
+      ],
+      "log": "proof/old-before-standfirst.txt",
+      "mutation": "proof/old-before-standfirst.mutation.json"
+    },
+    {
+      "name": "old-before-step2",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\old-before-step2",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 4",
+        "ℹ fail 2",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.9164ms)",
+        "✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.4812ms)",
+        "✖ failing tests:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.9164ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.4812ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:"
+      ],
+      "changed": [
+        "smoke-C1-demo-before.html",
+        "smoke-C1-demo-before.json"
+      ],
+      "log": "proof/old-before-step2.txt",
+      "mutation": "proof/old-before-step2.mutation.json"
+    },
+    {
+      "name": "old-after-step2",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\old-after-step2",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 4",
+        "ℹ fail 2",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (1.3637ms)",
+        "✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.5422ms)",
+        "✖ failing tests:",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (1.3637ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.5422ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:"
+      ],
+      "changed": [
+        "smoke-C1-demo-after.html",
+        "smoke-C1-demo-after.json"
+      ],
+      "log": "proof/old-after-step2.txt",
+      "mutation": "proof/old-after-step2.mutation.json"
+    },
+    {
+      "name": "omit-final-pass",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\omit-final-pass",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 4",
+        "ℹ fail 2",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4591ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (1.3637ms)",
+        "✖ failing tests:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4591ms)",
+        "  AssertionError [ERR_ASSERTION]: both demo steps finish Pass",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (1.3637ms)",
+        "  AssertionError [ERR_ASSERTION]: both demo steps finish Pass"
+      ],
+      "changed": [
+        "smoke-C1-demo-before.html",
+        "smoke-C1-demo-before.json",
+        "smoke-C1-demo-after.html",
+        "smoke-C1-demo-after.json"
+      ],
+      "log": "proof/omit-final-pass.txt",
+      "mutation": "proof/omit-final-pass.mutation.json"
+    },
+    {
+      "name": "hidden-works-field",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\hidden-works-field",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.1938ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (0.9999ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.5011ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.2665ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.1938ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (0.9999ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.5011ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.2665ms)",
+        "  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text"
+      ],
+      "changed": [
+        "smoke-C1-demo-before.html"
+      ],
+      "log": "proof/hidden-works-field.txt",
+      "mutation": "proof/hidden-works-field.mutation.json"
+    },
+    {
+      "name": "discard-note-input",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\discard-note-input",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.5459ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.1483ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4449ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.7611ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.5459ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.1483ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4449ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.7611ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+      ],
+      "changed": [
+        "smoke-C1-demo-before.html"
+      ],
+      "log": "proof/discard-note-input.txt",
+      "mutation": "proof/discard-note-input.mutation.json"
+    },
+    {
+      "name": "discard-note-on-pass",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\discard-note-on-pass",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.4167ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.0532ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4183ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.7892ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (5.4167ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.0532ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.4183ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.7892ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+      ],
+      "changed": [
+        "smoke-C1-demo-before.html"
+      ],
+      "log": "proof/discard-note-on-pass.txt",
+      "mutation": "proof/discard-note-on-pass.mutation.json"
+    },
+    {
+      "name": "disable-invalidation",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\disable-invalidation",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (7.6839ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (2.0797ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (2.8863ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.4818ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (7.6839ms)",
+        "  AssertionError [ERR_ASSERTION]: changed workbook step requires rerun",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (2.0797ms)",
+        "  AssertionError [ERR_ASSERTION]: changed workbook step requires rerun",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (2.8863ms)",
+        "  AssertionError [ERR_ASSERTION]: changed workbook step requires rerun",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.4818ms)",
+        "  AssertionError [ERR_ASSERTION]: changed workbook step requires rerun"
+      ],
+      "changed": [
+        "smoke-C1-demo-after.html"
+      ],
+      "log": "proof/disable-invalidation.txt",
+      "mutation": "proof/disable-invalidation.mutation.json"
+    },
+    {
+      "name": "hide-rerun-history",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\hide-rerun-history",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (7.5149ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (2.2491ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (3.0285ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.4756ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (7.5149ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (2.2491ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (3.0285ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.4756ms)",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+      ],
+      "changed": [
+        "smoke-C1-demo-after.html"
+      ],
+      "log": "proof/hide-rerun-history.txt",
+      "mutation": "proof/hide-rerun-history.mutation.json"
+    },
+    {
+      "name": "wrong-rerun-export",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\wrong-rerun-export",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (8.876ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (2.8546ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (2.4431ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.4471ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (8.876ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /1\\. NOT RE-RUN — previous PASS/. Input:",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (2.8546ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /1\\. NOT RE-RUN — previous PASS/. Input:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (2.4431ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /1\\. NOT RE-RUN — previous PASS/. Input:",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.4471ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /1\\. NOT RE-RUN — previous PASS/. Input:"
+      ],
+      "changed": [
+        "smoke-C1-demo-after.html"
+      ],
+      "log": "proof/wrong-rerun-export.txt",
+      "mutation": "proof/wrong-rerun-export.mutation.json"
+    },
+    {
+      "name": "drop-export-note",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\drop-export-note",
+      "exit": 1,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 2",
+        "ℹ fail 4",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (8.4799ms)",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (3.0234ms)",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (2.718ms)",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.5097ms)",
+        "✖ failing tests:",
+        "✖ main human step 2 gives a visible note-entry route that survives the real reissue (8.4799ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /2\\. PASS — keep this note/. Input:",
+        "✖ Before standfirst gives a visible note-entry route that survives the real reissue (3.0234ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /2\\. PASS — keep this note/. Input:",
+        "✖ Before step 2 gives a visible note-entry route that survives the real reissue (2.718ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /2\\. PASS — keep this note/. Input:",
+        "✖ After step 2 gives a visible note-entry route that survives the real reissue (2.5097ms)",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /2\\. PASS — keep this note/. Input:"
+      ],
+      "changed": [
+        "smoke-C1-demo-after.html"
+      ],
+      "log": "proof/drop-export-note.txt",
+      "mutation": "proof/drop-export-note.mutation.json"
+    },
+    {
+      "name": "wrong-prerequisite-verdict",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\wrong-prerequisite-verdict",
+      "exit": 0,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [],
+      "changed": [
+        "smoke-C1.html",
+        "smoke-C1.json",
+        "smoke-C1-demo-before.html",
+        "smoke-C1-demo-before.json"
+      ],
+      "log": "proof/wrong-prerequisite-verdict.txt",
+      "mutation": "proof/wrong-prerequisite-verdict.mutation.json"
+    },
+    {
+      "name": "wrong-note-step",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\wrong-note-step",
+      "exit": 0,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [],
+      "changed": [
+        "smoke-C1.html",
+        "smoke-C1.json",
+        "smoke-C1-demo-before.html",
+        "smoke-C1-demo-before.json"
+      ],
+      "log": "proof/wrong-note-step.txt",
+      "mutation": "proof/wrong-note-step.mutation.json"
+    },
+    {
+      "name": "stale-after-visible-instructions",
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-repair-hunter-R1\\cases\\stale-after-visible-instructions",
+      "exit": 0,
+      "totals": [
+        "ℹ tests 6",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0"
+      ],
+      "failures": [],
+      "changed": [
+        "smoke-C1-demo-after.html"
+      ],
+      "log": "proof/stale-after-visible-instructions.txt",
+      "mutation": "proof/stale-after-visible-instructions.mutation.json"
+    }
+  ],
+  "gitCommands": [
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "rev-parse",
+        "codex/readonly-evidence-smoke-inputs-ledger"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "diff",
+        "ebdde4fc2354f0280b91a5225219950bec7e696b...f2c2ceeb73a8adeee5dd2249a97df84bb1a19134"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./orchestrate/references/smoke-page-template.html"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./orchestrate/tools/build-smoke-page.mjs"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "-c",
+        "core.longpaths=true",
+        "-C",
+        "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair",
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./orchestrate/tools/smoke-inputs.mjs"
+      ],
+      "exit": 0,
+      "stderr": ""
+    }
+  ]
+}
