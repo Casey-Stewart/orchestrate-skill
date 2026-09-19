@@ -691,6 +691,12 @@ Never rewrite a legacy ledger into the new format — drive it under its own con
   time in the main checkout (worktrees unnecessary). The reviewer gate still runs per
   batch — a separate adversarial pass over each finished diff, with the same
   hunk-mapping duty, before integration. Checkpoint placement is unchanged.
+- **No agent definitions installed** (the skeletons' `subagent_type:` lines name types
+  this environment does not define): the spawn ERRORS — `Agent type '<name>' not found` —
+  it does not degrade on its own, so the ORCHESTRATOR substitutes the general-purpose
+  agent itself on every spawn. The skeleton's prose read-only rules are then the only
+  enforcement and bind strictly; the per-spawn token saving is forfeited until the
+  definitions are installed (`README.md`: copy `.claude/agents/*.md`, then restart).
 - **No gate agents named**: the reviewer alone carries duties (a)–(f).
 - **No runners** (or the environment forbids running the app): every smoke step is
   human; no pre-smoke, no `evidence/`; the hand-over says so.

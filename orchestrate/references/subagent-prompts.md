@@ -20,6 +20,8 @@ ledger contracts keep their own rules; tool diagnostics never authorize state ch
 
 ## Implementer
 
+**Spawn with** `subagent_type: implementer`.
+
 ```
 You are the IMPLEMENTER for batch B[NN] of change [CHANGE_ID] in [REPO_PATH].
 You have no other context; everything you need is below.
@@ -91,6 +93,8 @@ findings + `git diff [INTEGRATION_BRANCH]...HEAD`, told "you own this batch now"
 fresh re-review.
 
 ## Reviewer (the gate — read-only)
+
+**Spawn with** `subagent_type: reviewer`.
 
 ```
 You are the INDEPENDENT REVIEWER for batch B[NN] of change [CHANGE_ID] in [REPO_PATH].
@@ -167,7 +171,10 @@ verdicts: fix again (the authorized third round above) / ship with the residual 
 Run by the ORCHESTRATOR, in parallel with the reviewer, only when the batch added or
 changed tests. A repo-local hunter (named in the contract's gate-agent list, e.g. a
 `vacuous-test-hunter` under `.claude/agents/`) replaces this skeleton and reads its own
-catalog first.
+catalog first. The generic `test-hunter` definition this repo ships is this skeleton's
+own type, not such a replacement.
+
+**Spawn with** `subagent_type: test-hunter`.
 
 ```
 You hunt tests that cannot fail, for batch B[NN] of [CHANGE_ID] in [REPO_PATH]. Use only
@@ -197,6 +204,8 @@ Mutation runner (if the contract names one): the orchestrator runs it scoped to 
 batch's changed production files and hands the surviving mutants to the hunter as input.
 
 ## QA runner (checkpoint pre-smoke)
+
+**Spawn with** `subagent_type: qa-runner`.
 
 ```
 You are the QA RUNNER for checkpoint C[N] of [CHANGE_ID] in [REPO_PATH], on the
@@ -234,6 +243,8 @@ A FAIL becomes a repair mini-batch before the page is issued; COULD-NOT-RUN step
 issued to the user as human steps, with the reason.
 
 ## Plan pre-flight (scaffold time — read-only)
+
+**Spawn with** `subagent_type: reviewer`.
 
 ```
 You are the independent PRE-FLIGHT reviewer of a change plan for [REPO_PATH]. You did not
@@ -273,6 +284,8 @@ final line in the plan's coverage audit.
 
 ## Convergence (change-complete — read-only)
 
+**Spawn with** `subagent_type: reviewer`.
+
 ```
 You verify that change [CHANGE_ID] in [REPO_PATH] converged with its plan. Read-only.
 Integration tip: [INTEGRATION_SHA]. Full diff: `git diff [BASE_SHA]..[INTEGRATION_SHA]
@@ -297,6 +310,8 @@ as a mini-batch on its own branch cut from the integration tip, and goes through
 fence check, a fresh reviewer, the merge-tree dry run, the merge and tip validation like
 any batch. A revert is exempt from failing-on-base: its proof is a green tip after the
 merge plus the reviewer confirming the diff is the exact inverse of the reverted merge.
+
+**Spawn with** `subagent_type: implementer`.
 
 ```
 You are fixing [a smoke-test failure from checkpoint [CN] | a red integration tip after
@@ -364,6 +379,11 @@ unmerged and the session STOPs with the three verdicts.
   model available (the strong tier); record
   the tier in the row's Notes. Reconcile, status and discovery are never delegated.
 - Paste, don't point: the batch text and contract excerpts go INTO the prompt verbatim.
+- Pass the named type: spawn each skeleton with the `subagent_type` that skeleton names,
+  never a wildcard-tool agent standing in for a read-only role. Bash can still write, so
+  "read-only" stays partly conventional; removing Write/Edit closes the easy path, not
+  every path. Where those types are not defined, see `protocol.md` §Degraded
+  environments — the spawn errors, it does not quietly downgrade.
 - Every report is capped (~40 lines + findings); anything longer belongs in a commit
   message or under the session scratchpad, never in the orchestrator's context and never
   as an untracked file in a worktree.

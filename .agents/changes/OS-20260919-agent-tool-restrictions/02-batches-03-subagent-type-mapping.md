@@ -153,22 +153,22 @@ content). It must assert:
 
 ## Checklist
 
-- [ ] Add a `subagent_type:` line above the opening fence of all seven skeletons in
+- [x] Add a `subagent_type:` line above the opening fence of all seven skeletons in
       `orchestrate/references/subagent-prompts.md`, per the mapping table, in one
       consistent form.
-- [ ] Add the new bullet to `## Spawning rules (orchestrator)`: pass the skeleton's
+- [x] Add the new bullet to `## Spawning rules (orchestrator)`: pass the skeleton's
       `subagent_type`, never substitute a wildcard-tool agent for a read-only role, carry
       the Bash caveat verbatim, cross-reference the `protocol.md` fallback.
-- [ ] Add the undefined-agent-types bullet to `orchestrate/references/protocol.md`
+- [x] Add the undefined-agent-types bullet to `orchestrate/references/protocol.md`
       §Degraded environments, in that section's existing idiom.
-- [ ] Optionally align the `vacuous-test-hunter` example near `:169` with the
+- [x] Optionally align the `vacuous-test-hunter` example near `:169` with the
       `test-hunter` type B01 provides, preserving the sentence's meaning.
-- [ ] Add `tests/subagent-type-mapping.test.cjs` with every assertion group above,
+- [x] Add `tests/subagent-type-mapping.test.cjs` with every assertion group above,
       including the strict `.claude/agents/<type>.md` existence check.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `feat/subagent-type-mapping` — `feat: name the agent type per skeleton and document the missing-agent fallback (batch 03)`.
+- [x] Commit on `feat/subagent-type-mapping` — `feat: name the agent type per skeleton and document the missing-agent fallback (batch 03)`.
 
 ## Acceptance criteria
 
