@@ -246,3 +246,56 @@ So the helper reports UNKNOWN on essentially every Windows machine, whether or n
 filter can actually engage. Checking the resolved `filter` **attribute** per path, rather
 than the presence of filter **config**, would keep the safety property and restore the
 mechanical gate. Out of fence. Destination: `BACKLOG.md` as **BL-003**.
+
+### B02 — gate, round 1
+
+**Fence check (6a).** The mechanical helper returned `UNKNOWN` (exit 2) for the two
+reasons recorded as R2 and R3 above, so the contract's manual fallback was used:
+`git status --porcelain -unormal` empty in the worktree; `git diff --name-status -M
+chore/agent-tool-restrictions-ledger...HEAD` returned exactly
+`orchestrate/templates/00-READBEFORE.md` (M), `tests/contract-prompt-authority.test.cjs`
+(A) and the batch's own file (M); the batch-file blob diff is six `- [ ]` → `- [x]` ticks
+and nothing else. PASS.
+
+**Failing-on-base (6b).** Run by the orchestrator, not taken from the implementer's
+report. A detached worktree at the ledger base `7b74811`, the new test file copied in
+alone, then `node --test --test-reporter=spec tests/contract-prompt-authority.test.cjs`:
+exit 1, `tests 4 / pass 1 / fail 3`. The three failures name the behaviour — *the contract
+no longer sends implementers to read the contract at boot*, *the implementer paragraph
+makes the spawn prompt authoritative and the contract on-demand*, *the constraints the old
+boot paragraph carried survive the rewrite* — and *the archived ledger keeps its original
+boot wording* passes, which is correct for a regression guard. The regression test is
+proven. Temporary worktree removed.
+
+**Review (6c).** One fresh read-only reviewer, default tier, no gate agent (the contract
+names none). Verdict **`R1 SHIP @1912369 asks=2`**. It mapped all three hunks, verified the
+hunk arithmetic to prove the edit is confined (3 context / 4 removed / 8 added / 3 context,
+boot steps 1–4 and `## Roles, gates, tiers` byte-identical), confirmed the failing-on-base
+result by construction at base rather than by trust, and ran the full suite green at
+191/191.
+
+Reviewer note worth keeping: the new paragraph also removes an internal contradiction —
+it now agrees with §Session algorithm step 5 ("Every prompt must be SELF-CONTAINED").
+
+**ASK 1 (assertion strength) — the good one.** Every assertion but the first is a positive
+substring match on the flattened paragraph, and the first bans a single literal. So
+appending one sentence — *"Even so, skim this contract end to end before you start."* —
+passes all four tests while destroying the batch's entire payoff. A second variant adds
+the instruction elsewhere in the file, outside the anchored slice, where tests 2 and 3
+never look. Suggested fix: exact-pin the flattened paragraph, with precedent at
+`tests/protocol-contract.test.cjs:70-74`, which sha256-pins the decision tables for this
+same reason.
+
+This is the right finding for this batch. The "production code" here is prose, and prose
+assertions written positively are vacuous by default — they say what must be present and
+never what must be absent.
+
+**ASK 2 (coverage gap).** The frozen-ledger guard hardcodes the OS-20260918 archive path;
+this ledger's own filled contract is required to keep the old wording and nothing asserts
+it, and once archived its copy lands at an unguarded path too. Suggested fix: glob
+`.agents/archive/*/00-READBEFORE.md` and `.agents/changes/*/00-READBEFORE.md`.
+
+Both ASKs are test-only and in fence. Polish pass dispatched to the same implementer,
+with one addition from the orchestrator: the exact pin closes the in-paragraph mutation
+but not the reviewer's own second variant, so the implementer was asked to cover both —
+without weakening the pin to do it.
