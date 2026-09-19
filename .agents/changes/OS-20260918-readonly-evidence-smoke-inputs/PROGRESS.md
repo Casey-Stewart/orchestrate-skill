@@ -47,7 +47,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⛔ green, residual finding open (P1) | 2026-09-18 | R1 FIX FIRST @b3ce33eb35dab7ac43472faa0f90220ff32a48dd; R2 FIX FIRST @fac37a5163db2bd816ece3b68e936ab534b7f77d; symbolic target namespace regression; current inherited tier; second-round cap, awaiting user; hunter R2 evidence pending; LOG#B01-R2-cap m: rounds=2 asks=0 fence-bounces=0 gate=1/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⛔ green, residual finding open (P1) | 2026-09-18 | R1 FIX FIRST @b3ce33eb35dab7ac43472faa0f90220ff32a48dd; R2 FIX FIRST @fac37a5163db2bd816ece3b68e936ab534b7f77d; symbolic target namespace regression; current inherited tier; second-round cap, awaiting user; hunter R2 one ASK open (global-filter regression coverage); LOG#B01-R2-cap m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
 | B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Blocked by capped B01 dependency; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
@@ -80,6 +80,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|
 | 2026-09-18 | Discovery/interview/plan/pre-flight; baseline 64/64; base f918fe39762c70edb9a3424e54eaa208fd7c5727 | Plan approval pending; planning copy, no scaffold or open wave |
 | 2026-09-18 | User: "Okay, approved." Approved ledger scaffold; contract/plan and source provenance verified; no wave opened | New-mode scaffold STOP; awaiting start instruction |
+| 2026-09-18 | Approved baseline exception consumed; W1 opened; B02 integrated96f48ed and validated65/65; B01 candidatefac37a5 validated156/156 but reached R2 FIX FIRST | B01 second-round cap; waiting for fix again / ship with residual / drop. W2 unopened; C1 not reached |
 
 ## Continue authorization and reconciliation — 2026-09-18
 
@@ -120,6 +121,6 @@ Wave base: ae850a38fa760cb36f0ca83db35e5830ed1cc2ed. B01 codex/readonly-evidence
 
 R2 FIX FIRST at fac37a5163db2bd816ece3b68e936ab534b7f77d. Recursive candidate validation156/156 passes and explicit candidate-directory diff check passes; this is a green candidate with an open P1, not approval to integrate. R1 findings were fixed. The fix introduced rejection of a legal dangling symbolic target: refs/remotes/origin/HEAD -> refs/tags/missing (also refs/custom/missing). Git accepts the target, but discovery discards it as symref:null, labels invalid-symbolic-ref, and exits2. Prior production retained the target. Exact reproduction and before/after evidence: evidence/W1/B01/review-R2/.
 
-The frozen contract section6c requires the second FIX FIRST to leave B01 out of integration and stop after current-wave siblings finish. B02 is already reviewed/integrated/green. No third implementation attempt, W2, or C1 is authorized by the earlier repair-only exception. Choose fix again (one third round with a fresh implementer), ship with this residual (recorded residual plus human smoke step), or drop (dependent B03 then needs re-planning or dropping). The remaining already-dispatched hunter report will be retained before handoff; it does not reopen implementation. No user verdict has been inferred.
+The frozen contract section6c requires the second FIX FIRST to leave B01 out of integration and stop after current-wave siblings finish. B02 is already reviewed/integrated/green. No third implementation attempt, W2, or C1 is authorized by the earlier repair-only exception. Choose fix again (one third round with a fresh implementer), ship with this residual (recorded residual plus human smoke step), or drop (dependent B03 then needs re-planning or dropping). The fresh hunter R2 report is retained under evidence/W1/B01/hunter-R2. It adds one test-only ASK: isolated global-filter coverage; actual candidate behavior is correct, but a local-only probe mutant survives105/105 tests. This does not reopen implementation. No user verdict has been inferred.
 
 Main remains unchanged on main at f918fe39762c70edb9a3424e54eaa208fd7c5727. No main merge or push. Frozen contract and locked plan blobs remain unchanged. C1 input preparation is retained only in external scratch; no checkpoint page or verdict is claimed.

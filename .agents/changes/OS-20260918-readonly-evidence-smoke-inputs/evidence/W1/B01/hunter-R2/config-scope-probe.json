@@ -1,0 +1,84 @@
+{
+  "candidate": {
+    "operation": "worktrees",
+    "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-A3a13x\\repo",
+    "completeness": "partial",
+    "evidence": {
+      "worktrees": [
+        {
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-A3a13x/repo",
+          "head": "e6ce4cbd9633d20d473609ccc82a7fde270717a3",
+          "branch": "refs/heads/main",
+          "cleanliness": "unknown",
+          "status": [],
+          "bare": false,
+          "prunable": null
+        }
+      ]
+    },
+    "diagnostics": [
+      {
+        "code": "unsafe-filter",
+        "message": "Clean/process filters are configured; status was not run because it can execute commands",
+        "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-A3a13x/repo"
+      }
+    ]
+  },
+  "candidateCli": {
+    "operation": "worktrees",
+    "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-A3a13x\\repo",
+    "completeness": "partial",
+    "evidence": {
+      "worktrees": [
+        {
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-A3a13x/repo",
+          "head": "e6ce4cbd9633d20d473609ccc82a7fde270717a3",
+          "branch": "refs/heads/main",
+          "cleanliness": "unknown",
+          "status": [],
+          "bare": false,
+          "prunable": null
+        }
+      ]
+    },
+    "diagnostics": [
+      {
+        "code": "unsafe-filter",
+        "message": "Clean/process filters are configured; status was not run because it can execute commands",
+        "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-A3a13x/repo"
+      }
+    ]
+  },
+  "mutant": {
+    "operation": "worktrees",
+    "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-A3a13x\\repo",
+    "completeness": "complete",
+    "evidence": {
+      "worktrees": [
+        {
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-A3a13x/repo",
+          "head": "e6ce4cbd9633d20d473609ccc82a7fde270717a3",
+          "branch": "refs/heads/main",
+          "cleanliness": "dirty",
+          "status": [
+            {
+              "status": " M",
+              "path": "filtered.txt",
+              "originalPath": null
+            },
+            {
+              "status": "??",
+              "path": "global-filter-ran",
+              "originalPath": null
+            }
+          ],
+          "bare": false,
+          "prunable": null
+        }
+      ]
+    },
+    "diagnostics": []
+  },
+  "mutation": "['config', '--local', '--includes', '--null', '--name-only', '--get-regexp', '^filter[.].*[.](clean|process)$']",
+  "marker": "global clean filter wrote global-filter-ran only in the mutant"
+}
