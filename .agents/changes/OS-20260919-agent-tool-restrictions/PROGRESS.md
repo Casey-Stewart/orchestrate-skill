@@ -39,9 +39,9 @@ checkpoint after W1 would cost the user a second session restart and prove less.
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| 01 | Tool-restricted agent definitions + install docs | `feat/agent-definitions` | 1 | — | 🔄 | 2026-09-19 | S/feature. Creates `.claude/agents/` (absent at base). `qa-runner` keeps Write/Edit by design — evidence files, `subagent-prompts.md:222`; flagged deviation from the request's literal wording. Hands-on at C1. W1 open @7b74811; worktree <temp>/claude/wt-os919/b01. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). R1 SHIP @33a8d5b asks=4 (LOG §B01). Polish @c72368f; scoped re-review R2 SHIP @c72368f (polish touched two definition bodies — prose/citations only, no frontmatter). 4 new polish-phase ASKs → BACKLOG (LOG §B01 polish). Tier: default. |
-| 02 | Contract boot: the prompt is authoritative | `fix/contract-prompt-authority` | 1 | — | 🔄 | 2026-09-19 | S/fix. One paragraph at `templates/00-READBEFORE.md:33-36`. Failing-on-base test: `tests/contract-prompt-authority.test.cjs`. Template only — archive and this ledger's own contract stay as-is. W1 open @7b74811; worktree <temp>/claude/wt-os919/b02. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). Failing-on-base CONFIRMED by the orchestrator at 7b74811: 4 tests, 1 pass, 3 fail. R1 SHIP @1912369 asks=2 (LOG §B02). Polish in flight. Tier: default. |
-| 03 | `subagent_type` per skeleton + missing-agent fallback | `feat/subagent-type-mapping` | 2 | — | ⬜ | 2026-09-19 | S/feature. Seven skeletons → four types. Depends on B01: its cross-reference test asserts `.claude/agents/<type>.md` exists. Adds the degraded-environments fallback. Hands-on at C1. |
+| 01 | Tool-restricted agent definitions + install docs | `feat/agent-definitions` | 1 | — | 🟢 | 2026-09-19 | S/feature. Creates `.claude/agents/` (absent at base). `qa-runner` keeps Write/Edit by design — evidence files, `subagent-prompts.md:222`; flagged deviation from the request's literal wording. Hands-on at C1. W1 open @7b74811; worktree <temp>/claude/wt-os919/b01. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). R1 SHIP @33a8d5b asks=4 (LOG §B01). Merged 15d47cf. Polish @c72368f; scoped re-review R2 SHIP @c72368f (polish touched two definition bodies — prose/citations only, no frontmatter). 4 new polish-phase ASKs → BACKLOG (LOG §B01 polish). Tier: default. m: rounds=0 asks=4 fence-bounces=0 gate=0/0 tip-red=0 |
+| 02 | Contract boot: the prompt is authoritative | `fix/contract-prompt-authority` | 1 | — | 🟢 | 2026-09-19 | S/fix. One paragraph at `templates/00-READBEFORE.md:33-36`. Failing-on-base test: `tests/contract-prompt-authority.test.cjs`. Template only — archive and this ledger's own contract stay as-is. W1 open @7b74811; worktree <temp>/claude/wt-os919/b02. Fence PASS (manual — helper UNKNOWN, see LOG R2/R3). Failing-on-base CONFIRMED by the orchestrator at 7b74811: 4 tests, 1 pass, 3 fail. R1 SHIP @1912369 asks=2 (LOG §B02). Merged 3f441c3. Polish @9cc3375 (test-only — no scoped re-review needed). Tier: default. m: rounds=0 asks=2 fence-bounces=0 gate=0/0 tip-red=0 |
+| 03 | `subagent_type` per skeleton + missing-agent fallback | `feat/subagent-type-mapping` | 2 | — | 🔄 | 2026-09-19 | S/feature. Seven skeletons → four types. Depends on B01: its cross-reference test asserts `.claude/agents/<type>.md` exists. Adds the degraded-environments fallback. Hands-on at C1. W2 open @15d47cf; worktree <temp>/claude/wt-os919/b03. |
 
 ## Checkpoints
 
@@ -70,18 +70,18 @@ without running it.
 
 | Request item | Source | Batch | Version | Status |
 |--------------|--------|-------|---------|--------|
-| `.claude/agents/` directory created | request (change 1) | B01 | — | 🔄 |
-| `implementer` tool list (Read/Write/Edit/Glob/Grep/Bash) | request (change 1) | B01 | — | 🔄 |
-| `reviewer` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🔄 |
-| `test-hunter` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🔄 |
-| `qa-runner` tool list + browser tools | request (change 1) | B01 | — | 🔄 |
-| Artifact/visualize/session/Drive/Gmail dropped from every spawn | request (change 1) | B01 | — | 🔄 |
-| Bash caveat recorded verbatim (read-only stays partly conventional) | request (change 1) | B01 | — | 🔄 |
-| README tells users to install the agents into their own agents folder | user decision 2026-09-19 | B01 | — | 🔄 |
-| `subagent_type:` line on every skeleton (all seven) | request (change 2) | B03 | — | ⬜ |
-| Orchestrator cannot default to general-purpose with `*` | request (change 2) | B03 | — | ⬜ |
-| Fallback for repos without the definitions installed | planning finding, accepted | B03 | — | ⬜ |
-| Contract: prompt authoritative, contract consulted only if incomplete | request (change 3) | B02 | — | 🔄 |
+| `.claude/agents/` directory created | request (change 1) | B01 | — | 🟢 |
+| `implementer` tool list (Read/Write/Edit/Glob/Grep/Bash) | request (change 1) | B01 | — | 🟢 |
+| `reviewer` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🟢 |
+| `test-hunter` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🟢 |
+| `qa-runner` tool list + browser tools | request (change 1) | B01 | — | 🟢 |
+| Artifact/visualize/session/Drive/Gmail dropped from every spawn | request (change 1) | B01 | — | 🟢 |
+| Bash caveat recorded verbatim (read-only stays partly conventional) | request (change 1) | B01 | — | 🟢 |
+| README tells users to install the agents into their own agents folder | user decision 2026-09-19 | B01 | — | 🟢 |
+| `subagent_type:` line on every skeleton (all seven) | request (change 2) | B03 | — | 🔄 |
+| Orchestrator cannot default to general-purpose with `*` | request (change 2) | B03 | — | 🔄 |
+| Fallback for repos without the definitions installed | planning finding, accepted | B03 | — | 🔄 |
+| Contract: prompt authoritative, contract consulted only if incomplete | request (change 3) | B02 | — | 🟢 |
 
 ## Session log
 
@@ -90,3 +90,5 @@ without running it.
 | 2026-09-19 | Scaffold. Verified all three requested changes against the files at `5110f71` (see 00-request.md §Accuracy check): change 3 exact, change 2 substance right with one overstated detail, change 1 correct but scoped narrower than claimed. Interviewed, planned 3 batches / 2 waves / 1 final checkpoint, filled the ledger. Baseline validation green: 187 pass, 0 fail. | User chose "Approved — scaffold only, stop" at plan approval: the ledger is to be read before any implementer runs. Resume with `/orchestrate continue`. |
 | 2026-09-19 | Boot + reconcile: all three rows `⬜`, no batch branches — correct pre-wave state, nothing to correct. Resume-time validation green on the integration tip `7b74811` (node --test exit 0, `git diff --check` clean). **Opened wave 1**: cut `feat/agent-definitions` (B01) and `fix/contract-prompt-authority` (B02) from wave base **`7b74811`**, created their worktrees, spawned both implementers concurrently. | (wave 1 in progress) |
 | 2026-09-19 | **Environment note, not a plan deviation.** `git worktree add` under the session scratchpad failed with `Filename too long`: the scratchpad prefix (~150 chars) plus this repo's deepest tracked path (146 chars, `.agents/archive/OS-20260918-.../evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs`) exceeds the Windows 260-char limit. Worktrees relocated to the short root `<temp>/claude/wt-os919/` — still outside the repo, still disposable, per-worktree setup still n/a. Wave map, fences, gates and checkpoints unchanged. Stale `.git/worktrees/wt-B0*` admin dirs from the archived ledger's run resist `git worktree prune` (permission denied) but are absent from `git worktree list` and block nothing. | — |
+| 2026-09-19 | **Wave 1 gated and integrated.** B01 `R1 SHIP @33a8d5b asks=4` → polish `c72368f` → scoped re-review `R2 SHIP` (polish touched two definition bodies; prose/citations only). B02 `R1 SHIP @1912369 asks=2` → polish `9cc3375` (test-only, no scoped re-review). Fence PASS on both by the manual fallback; B02's failing-on-base proven independently by the orchestrator at `7b74811` (4 tests, 1 pass, 3 fail). Merged `--no-ff`: B02 → `3f441c3` (tip green 193/193), B01 → `15d47cf` (tip green **200/200**, baseline 187 + 13 new). Wave-1 worktrees deregistered. **Opened wave 2**: cut `feat/subagent-type-mapping` (B03) from wave base **`15d47cf`**, worktree created, implementer spawned. | (wave 2 in progress) |
+| 2026-09-19 | Seven residuals recorded for the close-out backlog, none blocking: **BL-001** dead archive guard at `tests/protocol-contract.test.cjs:122`; **BL-002** `check-fence.mjs` rejects the bare `NN` batch ids the plan template permits, so the mechanical fence gate was unusable all change and every batch used the manual fallback; **BL-003** `unsafe-filter` fires on stock Git-for-Windows LFS config rather than resolved per-path attributes; **BL-004**–**BL-007** from B01's scoped re-review (three YAML-invalid `description:` forms still accepted, non-recursive `readdirSync`, "bytes" that measures UTF-16 length, and a missing polish checklist line). BL-004/005 were deliberately not spun into a further polish round — the contract completes the close on a scoped `SHIP`. Detail in LOG §Residual R1–R3 and §B01 polish. | — |
