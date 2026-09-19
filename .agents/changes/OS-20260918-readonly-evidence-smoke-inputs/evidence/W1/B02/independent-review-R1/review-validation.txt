@@ -1,0 +1,80 @@
+**********************
+PowerShell transcript start
+Start time: 20260918202034
+Username: CASEY_5070\fatbo
+RunAs User: CASEY_5070\fatbo
+Configuration Name: 
+Machine: CASEY_5070 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Users\fatbo\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$ErrorActionPreference = 'Stop'
+$reviewRun = 'C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-reviewer-r1-proof'
+New-Item -ItemType Directory -Path $reviewRun -ErrorAction Stop | Out-Null
+Start-Transcript -LiteralPath (Join-Path $reviewRun 'review-validation.txt') | Out-Null
+try {
+$pythonDirectory = 'C:\Users\fatbo\AppData\Local\Programs\Python\Python310'
+$env:Path = $pythonDirectory + ';' + $env:Path
+python -c "import sys,openpyxl; print(sys.executable); print(sys.version); print(openpyxl.__version__); assert sys.version_info[:3] == (3,10,6); assert openpyxl.__version__ == '3.1.5'; assert sys.executable.replace(chr(92),'/').lower() == 'c:/users/fatbo/appdata/local/programs/python/python310/python.exe'"
+if ($LASTEXITCODE -ne 0) {throw 'environment failed'}
+foreach ($name in @('generation-A.xlsx','generation-B.xlsx')) {
+$output = Join-Path $reviewRun $name
+python tests/fixtures/smoke-inputs/generate-orders.py $output
+if ($LASTEXITCODE -ne 0) {throw 'generation failed'}
+python tests/fixtures/smoke-inputs/validate-orders.py $output tests/fixtures/smoke-inputs/orders.requirements.json
+if ($LASTEXITCODE -ne 0) {throw 'generated validation failed'}
+}
+node '../B02-scratch/verify-checkout.cjs' $PWD.Path $reviewRun ae850a38fa760cb36f0ca83db35e5830ed1cc2ed
+if ($LASTEXITCODE -ne 0) {throw 'checkout failed'}
+$committed = Join-Path $reviewRun 'candidate-checkout/tests/fixtures/smoke-inputs/orders.xlsx'
+python tests/fixtures/smoke-inputs/validate-orders.py $committed tests/fixtures/smoke-inputs/orders.requirements.json
+if ($LASTEXITCODE -ne 0) {throw 'committed validation failed'}
+python '../B02-scratch/audit-mutations.py' $PWD.Path $reviewRun
+if ($LASTEXITCODE -ne 0) {throw 'corruptions failed'}
+$existing = Join-Path $reviewRun 'generation-A.xlsx'
+$before = (Get-FileHash -LiteralPath $existing -Algorithm SHA256).Hash
+python tests/fixtures/smoke-inputs/generate-orders.py $existing
+if ($LASTEXITCODE -ne 1) {throw 'overwrite refused status expected 1'}
+if ((Get-FileHash -LiteralPath $existing -Algorithm SHA256).Hash -ne $before) {throw 'overwrite altered file'}
+$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)
+if ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }
+$testFiles | ForEach-Object {Write-Output "SUITE $_"}
+node --test --test-reporter=spec @testFiles
+if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }
+git diff --check codex/readonly-evidence-smoke-inputs-ledger...HEAD
+if ($LASTEXITCODE -ne 0) { throw 'Candidate diff check failed' }
+git status --porcelain
+Write-Output 'PASS reviewer complete validations'
+} finally { Stop-Transcript | Out-Null }
+Process ID: 40240
+PSVersion: 7.6.5
+PSEdition: Core
+GitCommitId: 7.6.5
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+
+
+
+
+
+
+
+
+
+SUITE C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\wt-B02\tests\build-smoke-page.test.cjs
+SUITE C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\wt-B02\tests\git-contract.test.cjs
+SUITE C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\wt-B02\tests\smoke-page.test.cjs
+
+
+
+
+PASS reviewer complete validations
+**********************
+PowerShell transcript end
+End time: 20260918202136
+**********************
