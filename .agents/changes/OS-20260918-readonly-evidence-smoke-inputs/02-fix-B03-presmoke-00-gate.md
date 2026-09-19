@@ -77,3 +77,10 @@ template, every numbered step and all production code are correct and stay untou
 - [x] Regenerate smoke-C1.html from the sidecar and prove the expected delta only.
 - [x] Add the shell-dispatch regression and demonstrate candidate PASS / copied-test base FAIL.
 - [x] Run frozen recursive validation and both explicit regressions, inspect fenced diff, commit clean.
+- [x] polish: F1 - map dispatches per instructed LINE, relocate the second run to another drive letter, and require every dispatch to name its root absolutely.
+- [x] polish: F2 - take the expected worktree from git’s own record for the sidecar branch instead of a suffix match derived from the block.
+- [x] polish: F3 - compare the gate intro and checks byte for byte alongside the commands, and assert the gate semantics on the sidecar.
+- [x] polish: reviewer ASK1 - build the shim list from each instructed line’s first token instead of a hardcoded git/node pair.
+- [x] polish: reviewer ASK2 - name the per-line assertion’s second job, so a PowerShell 3-of-4 is not misread as a broken shell.
+- [x] polish: reviewer ASK3 - record the measured %NAME% and $name path-expansion hazard as a comment, with no assertion.
+- [x] polish: a missing pwsh on Windows now fails loudly instead of skipping half of the gate’s both-shells claim.
