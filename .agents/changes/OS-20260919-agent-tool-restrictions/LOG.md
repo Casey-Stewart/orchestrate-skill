@@ -299,3 +299,69 @@ Both ASKs are test-only and in fence. Polish pass dispatched to the same impleme
 with one addition from the orchestrator: the exact pin closes the in-paragraph mutation
 but not the reviewer's own second variant, so the implementer was asked to cover both —
 without weakening the pin to do it.
+
+### B01 — gate, round 1
+
+**Fence check (6a).** Manual fallback again (helper `UNKNOWN`, R2/R3). Worktree clean;
+seven paths — four `A` under `.claude/agents/`, `A tests/agent-definitions.test.cjs`,
+`M README.md`, `M` the batch's own file — all inside the fence; the batch-file diff is
+nine ticks and no prose. PASS. **6b does not apply**: B01 is a `feature` batch, so there
+is no failing-on-base requirement.
+
+**Review (6c).** One fresh read-only reviewer, default tier, no gate agent. Verdict
+**`R1 SHIP @33a8d5b asks=4`**. Full suite green at 192/192 (baseline 187 + exactly the
+five new tests). It checked the four `tools:` lines byte-for-byte with `cat -A`, confirmed
+`README.md` §Requirements was genuinely left alone (single contiguous hunk; lines 171-178
+unchanged), and verified the implementer's three mutation claims from source rather than
+trusting them, then probed further: a `# tools:` comment, malformed frontmatter,
+reordering, renaming, an added `model:`, an empty description, a deleted file and removal
+of the README caveat all fail correctly.
+
+**Two ASKs that are real holes, not polish.**
+
+*ASK 1 — the test never reads the directory.* Every assertion iterates
+`Object.keys(TOOLS)`, so a fifth file dropped into `.claude/agents/` — say
+`orchestrator.md` with no `tools:` line — passes the whole suite while inheriting the
+entire tool catalog on every spawn. That is precisely the waste this batch exists to
+remove, and the README's `cp .../*.md` would propagate it into the user's
+`~/.claude/agents/` for every project. A whitelist that never checks for strangers is not
+a whitelist.
+
+*ASK 2 — the field regex accepts YAML that isn't YAML.* `:[ \t]*` is zero-or-more, so
+`tools:Read, Glob, Grep, Bash` (no space) still captures a tool list and passes lines
+49/50/51 — but YAML parses no mapping there, so Claude Code loads the definition with no
+`tools` key and the "read-only" reviewer silently inherits everything. The test would be
+green at the exact moment the capability boundary failed open. Same class: an unquoted
+`: ` inside a `description:` value.
+
+Both are the same underlying error — asserting on a hand-rolled parse that is more
+permissive than the real consumer's. Worth remembering whenever a test regexes a format
+something else will parse strictly.
+
+**ASK 3 (doc accuracy).** `qa-runner.md:14` cites `subagent-prompts.md:217`; the quoted
+sentence is at `:218` (`:217` is the browser-check line). Faithfully copied from the batch
+file's own §Decision at line 72 — the error originated at planning time. The orchestrator
+steered the fix to the *second* option the reviewer offered: cite the quoted phrases, not
+line numbers, and do the same for the `:222` citation, because B03 edits that very file in
+wave 2 and will shift every line number in it. Correct-across-edits beats correct-for-now
+in a file read on every spawn.
+
+**ASK 4 (drift).** `reviewer.md:8-9` restates duty 1 of the reviewer skeleton, against the
+batch's own "do not restate the prompt skeletons". Small cost, real drift risk: a later
+change to the skeleton leaves the definition silently contradicting it.
+
+**Judgement calls, both upheld.** (a) The whitespace collapse does not weaken criterion 8
+— `\s+`→`' '` cannot add, drop or reorder a word, it is applied to both sides, and the
+caveat genuinely wraps across lines in all three files, so a raw match would be asserting
+the line-break position rather than the wording. (b) The two assertions added beyond the
+batch's explicit list are in scope and improvements: criteria 6 and 8 are batch criteria,
+and the test spec's prohibition was narrow and specific (`subagent_type:` and
+`subagent-prompts.md` contents, both B03's). Without them, criteria 6 and 8 would rest on
+a human reviewer forever.
+
+**Forward note for B03 — carried into its spawn prompt, not into the locked plan.**
+`README.md:148` now promises that "the prompt skeletons fall back to a general-purpose
+agent". That is vacuously true today, since no skeleton names a `subagent_type` yet. B03
+makes it load-bearing: if an unknown `subagent_type` *errors* rather than falling back,
+this README sentence becomes false the moment B03 lands. B03's implementer must establish
+the actual behaviour and either document the real fallback or flag the README line.
