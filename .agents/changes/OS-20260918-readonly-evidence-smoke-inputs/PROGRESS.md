@@ -47,7 +47,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | R1/R2 FIX FIRST; fresh third-round implementer GPT-6 Astra / xhigh; both rounds’ findings retained; LOG#B01-R3-authorized m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0; verdict 2026-09-18 fix again spent → third round on codex/readonly-evidence-checker @fac37a5163db2bd816ece3b68e936ab534b7f77d |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | Authorized third round; fresh GPT-6 Astra / xhigh implementer/reviewer/hunter; R1/R2 FIX FIRST findings resolved; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; hunter R3 CLEAN; LOG#B01-R3-SHIP m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
 | B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Waiting for authorized B01 third round; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 

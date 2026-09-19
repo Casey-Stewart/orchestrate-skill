@@ -1,0 +1,28 @@
+✖ global clean filters remain unknown and never execute through API or actual CLI (2723.828ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2849.019
+
+✖ failing tests:
+
+test at tests\git-contract.test.cjs:292:1
+✖ global clean filters remain unknown and never execute through API or actual CLI (2723.828ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 2
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\local-only-filter\tests\git-contract.test.cjs:303:12)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

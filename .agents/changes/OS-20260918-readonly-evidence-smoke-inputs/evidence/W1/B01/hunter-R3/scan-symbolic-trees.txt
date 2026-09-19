@@ -1,0 +1,60 @@
+✖ symbolic hints do not expand discovery into target namespaces or scan their trees (3865.3104ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3989.9494
+
+✖ failing tests:
+
+test at tests\git-contract.test.cjs:262:1
+✖ symbolic hints do not expand discovery into target namespaces or scan their trees (3865.3104ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   {
+  +     id: 'OUTSIDE',
+  +     locations: [
+  +       {
+  +         kind: 'ref',
+  +         path: '.agents/changes/OUTSIDE/PROGRESS.md',
+  +         provenance: {
+  +           ancestry: {},
+  +           contractTexts: [
+  +             {
+  +               path: '.agents/changes/OUTSIDE/00-READBEFORE.md',
+  +               text: 'Default branch (protected local ref): refs/heads/main\n' +
+  +                 'Integration branch: refs/heads/chore/fixture-ledger\n' +
+  +                 'Shipment source: local\n' +
+  +                 'Shipment ref: refs/heads/main\n'
+  +             }
+  +           ],
+  +           exists: true,
+  +           lastChange: '335fd8b34666f55c7a03f8b8cce4ea4b17bdf9c8',
+  +           lastChangeTree: 'f227fe468757c9cff9a51102d0b8070a56839a06',
+  +           progressText: '**Identifier**: OUTSIDE\n**State**: ACTIVE\n',
+  +           tree: 'f227fe468757c9cff9a51102d0b8070a56839a06'
+  +         },
+  +         ref: 'refs/remotes/origin/HEAD',
+  +         sha: '335fd8b34666f55c7a03f8b8cce4ea4b17bdf9c8',
+  +         worktrees: []
+  +       }
+  +     ]
+  +   }
+  + ]
+  - []
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\scan-symbolic-trees\tests\git-contract.test.cjs:271:12)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { id: 'OUTSIDE', locations: [Array] } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

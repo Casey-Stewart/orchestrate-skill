@@ -1,0 +1,870 @@
+{
+  "filter-include": {
+    "result": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-cFSlNk\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-cFSlNk/repo",
+            "head": "2158c9938d7266b315d8659da4d8aff27f29ff31",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-cFSlNk/repo"
+        }
+      ]
+    },
+    "cli": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-cFSlNk\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-cFSlNk/repo",
+            "head": "2158c9938d7266b315d8659da4d8aff27f29ff31",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-cFSlNk/repo"
+        }
+      ]
+    },
+    "exit": 2,
+    "markerExists": false,
+    "snapshotUnchanged": true
+  },
+  "filter-global": {
+    "result": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-Z0HU3o\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-Z0HU3o/repo",
+            "head": "0ef85bb9fe83aa5e42c5dc89442d3c683f07ff68",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-Z0HU3o/repo"
+        }
+      ]
+    },
+    "cli": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-Z0HU3o\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-Z0HU3o/repo",
+            "head": "0ef85bb9fe83aa5e42c5dc89442d3c683f07ff68",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-Z0HU3o/repo"
+        }
+      ]
+    },
+    "exit": 2,
+    "markerExists": false,
+    "snapshotUnchanged": true
+  },
+  "filter-worktree": {
+    "result": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-DRIvSe\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-DRIvSe/repo",
+            "head": "78061adab4247297b74fc8fa512b2cf13b7fa213",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-DRIvSe/repo"
+        }
+      ]
+    },
+    "cli": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-DRIvSe\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-DRIvSe/repo",
+            "head": "78061adab4247297b74fc8fa512b2cf13b7fa213",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-DRIvSe/repo"
+        }
+      ]
+    },
+    "exit": 2,
+    "markerExists": false,
+    "snapshotUnchanged": true
+  },
+  "filter-environment": {
+    "result": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-nIYFb1\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-nIYFb1/repo",
+            "head": "2adc2b38c89786d1024995872e2af491268fa250",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-nIYFb1/repo"
+        }
+      ]
+    },
+    "cli": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-nIYFb1\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-nIYFb1/repo",
+            "head": "2adc2b38c89786d1024995872e2af491268fa250",
+            "branch": "refs/heads/main",
+            "cleanliness": "unknown",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": [
+        {
+          "code": "unsafe-filter",
+          "message": "Clean/process filters are configured; status was not run because it can execute commands",
+          "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-nIYFb1/repo"
+        }
+      ]
+    },
+    "exit": 2,
+    "markerExists": false,
+    "snapshotUnchanged": true
+  },
+  "refs-not-an-object": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-al5Q7b\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "e24ca462d02b706523b90341aafe7764a43c67f4",
+            "symref": null
+          },
+          {
+            "ref": "refs/heads/unknown",
+            "sha": null,
+            "symref": null
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-al5Q7b/repo",
+            "head": "e24ca462d02b706523b90341aafe7764a43c67f4",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": [
+        {
+          "code": "ref-inventory-warning",
+          "message": "Git reported a warning while enumerating refs; inventory may be incomplete (stderr withheld)",
+          "command": "for-each-ref",
+          "exit": 0
+        },
+        {
+          "code": "unobserved-loose-ref",
+          "message": "A non-symbolic loose ref was omitted by Git; it is malformed, unavailable or changed during enumeration",
+          "ref": "refs/heads/unknown"
+        }
+      ]
+    },
+    "exit": 2
+  },
+  "refs-empty": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-tQNMK0\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "439ba92beb80fe0e9dc6c2512085477c85f3c5bc",
+            "symref": null
+          },
+          {
+            "ref": "refs/heads/unknown",
+            "sha": null,
+            "symref": null
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-tQNMK0/repo",
+            "head": "439ba92beb80fe0e9dc6c2512085477c85f3c5bc",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": [
+        {
+          "code": "ref-inventory-warning",
+          "message": "Git reported a warning while enumerating refs; inventory may be incomplete (stderr withheld)",
+          "command": "for-each-ref",
+          "exit": 0
+        },
+        {
+          "code": "unobserved-loose-ref",
+          "message": "A non-symbolic loose ref was omitted by Git; it is malformed, unavailable or changed during enumeration",
+          "ref": "refs/heads/unknown"
+        }
+      ]
+    },
+    "exit": 2
+  },
+  "refs-invalidUtf8": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-yBukx3\\repo",
+      "completeness": "partial",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "d43412f5338077182b24eb080705361ff28b08c2",
+            "symref": null
+          },
+          {
+            "ref": "refs/heads/unknown",
+            "sha": null,
+            "symref": null
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-yBukx3/repo",
+            "head": "d43412f5338077182b24eb080705361ff28b08c2",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": [
+        {
+          "code": "ref-inventory-warning",
+          "message": "Git reported a warning while enumerating refs; inventory may be incomplete (stderr withheld)",
+          "command": "for-each-ref",
+          "exit": 0
+        },
+        {
+          "code": "refs-unavailable",
+          "message": "Cannot read loose ref as UTF-8",
+          "ref": "refs/heads/unknown"
+        }
+      ]
+    },
+    "exit": 2
+  },
+  "refs-brokenSymbolic": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-RMTmCx\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "67c4aca519d3a91ed154cafb57b21457611b95ec",
+            "symref": null
+          },
+          {
+            "ref": "refs/heads/unknown",
+            "sha": null,
+            "symref": "refs/heads/missing"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-RMTmCx/repo",
+            "head": "67c4aca519d3a91ed154cafb57b21457611b95ec",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0
+  },
+  "symbolic-refs/tags/missing": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-X47TIi\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "42f1ac4f19fdecd06b1a3304e5469b4c1a2a1870",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/tags/missing"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-X47TIi/repo",
+            "head": "42f1ac4f19fdecd06b1a3304e5469b4c1a2a1870",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "cli": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-X47TIi\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "42f1ac4f19fdecd06b1a3304e5469b4c1a2a1870",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/tags/missing"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-X47TIi/repo",
+            "head": "42f1ac4f19fdecd06b1a3304e5469b4c1a2a1870",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true,
+    "rawRefUnchanged": true
+  },
+  "symbolic-refs/custom/missing": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-i78KWV\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "cdca1bb6173096e62d9d8213b6c2e6f1a56fe48f",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/custom/missing"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-i78KWV/repo",
+            "head": "cdca1bb6173096e62d9d8213b6c2e6f1a56fe48f",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "cli": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-i78KWV\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "cdca1bb6173096e62d9d8213b6c2e6f1a56fe48f",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/custom/missing"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-i78KWV/repo",
+            "head": "cdca1bb6173096e62d9d8213b6c2e6f1a56fe48f",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true,
+    "rawRefUnchanged": true
+  },
+  "symbolic-refs/remotes/absent/main": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-vaGTiC\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "1de8c51831528e63b48e3891c58b87731cca51b1",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/remotes/absent/main"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-vaGTiC/repo",
+            "head": "1de8c51831528e63b48e3891c58b87731cca51b1",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "cli": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-vaGTiC\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "1de8c51831528e63b48e3891c58b87731cca51b1",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/remotes/absent/main"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-vaGTiC/repo",
+            "head": "1de8c51831528e63b48e3891c58b87731cca51b1",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true,
+    "rawRefUnchanged": true
+  },
+  "symbolic-refs/unusual/Unicode-Ω": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-z0Ceqk\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "be81c9f4e506e9bce3c45b2689616994e4ea4f9d",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/unusual/Unicode-Ω"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-z0Ceqk/repo",
+            "head": "be81c9f4e506e9bce3c45b2689616994e4ea4f9d",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "cli": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-z0Ceqk\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "be81c9f4e506e9bce3c45b2689616994e4ea4f9d",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/unusual/Unicode-Ω"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-z0Ceqk/repo",
+            "head": "be81c9f4e506e9bce3c45b2689616994e4ea4f9d",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true,
+    "rawRefUnchanged": true
+  },
+  "symbolic-refs/custom/a@b": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-UlKE6a\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "4839c3258584199b2d8ac8d469bde49ac8df1364",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/custom/a@b"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-UlKE6a/repo",
+            "head": "4839c3258584199b2d8ac8d469bde49ac8df1364",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "cli": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-UlKE6a\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "4839c3258584199b2d8ac8d469bde49ac8df1364",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/custom/a@b"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-UlKE6a/repo",
+            "head": "4839c3258584199b2d8ac8d469bde49ac8df1364",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true,
+    "rawRefUnchanged": true
+  },
+  "symbolic-refs/custom/a.lockx": {
+    "result": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-sIkSQ3\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "6d19f9a90cfe8e9242867be2d22b8bbc6ed18411",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/custom/a.lockx"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-sIkSQ3/repo",
+            "head": "6d19f9a90cfe8e9242867be2d22b8bbc6ed18411",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "cli": {
+      "operation": "discovery",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-sIkSQ3\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "refs": [
+          {
+            "ref": "refs/heads/main",
+            "sha": "6d19f9a90cfe8e9242867be2d22b8bbc6ed18411",
+            "symref": null
+          },
+          {
+            "ref": "refs/remotes/origin/HEAD",
+            "sha": null,
+            "symref": "refs/custom/a.lockx"
+          }
+        ],
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-sIkSQ3/repo",
+            "head": "6d19f9a90cfe8e9242867be2d22b8bbc6ed18411",
+            "branch": "refs/heads/main",
+            "cleanliness": "clean",
+            "status": [],
+            "bare": false,
+            "prunable": null
+          }
+        ],
+        "ledgers": []
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true,
+    "rawRefUnchanged": true
+  },
+  "type-staged": {
+    "result": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-4rwtAj\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-4rwtAj/repo",
+            "head": "82dd8ad83d437ff10788505292d8420767d14743",
+            "branch": "refs/heads/main",
+            "cleanliness": "dirty",
+            "status": [
+              {
+                "status": "T ",
+                "path": "tracked.txt",
+                "originalPath": null
+              }
+            ],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true
+  },
+  "type-unstaged": {
+    "result": {
+      "operation": "worktrees",
+      "repo": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-IdAMRP\\repo",
+      "completeness": "complete",
+      "evidence": {
+        "worktrees": [
+          {
+            "path": "C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-IdAMRP/repo",
+            "head": "4aa31320a4d0edaf799965a7bb26f1f6a583bd66",
+            "branch": "refs/heads/main",
+            "cleanliness": "dirty",
+            "status": [
+              {
+                "status": " T",
+                "path": "tracked.txt",
+                "originalPath": null
+              }
+            ],
+            "bare": false,
+            "prunable": null
+          }
+        ]
+      },
+      "diagnostics": []
+    },
+    "exit": 0,
+    "snapshotUnchanged": true
+  }
+}

@@ -1,0 +1,55 @@
+▶ dangling symbolic hints retain legal targets in every namespace through API and actual CLI
+  ✖ refs/tags/missing (2685.0255ms)
+  ✖ refs/custom/missing (2818.7072ms)
+  ✔ refs/remotes/absent/main (2947.8213ms)
+✖ dangling symbolic hints retain legal targets in every namespace through API and actual CLI (8452.9398ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8574.5239
+
+✖ failing tests:
+
+test at tests\git-contract.test.cjs:248:106
+✖ refs/tags/missing (2685.0255ms)
+  AssertionError [ERR_ASSERTION]: {"operation":"discovery","repo":"C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-8VhwQG\\repo","completeness":"partial","evidence":{"refs":[{"ref":"refs/heads/main","sha":"b19497e15e4415750076f45f21e17a598c7997fb","symref":null},{"ref":"refs/remotes/origin/HEAD","sha":null,"symref":null}],"worktrees":[{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-8VhwQG/repo","head":"b19497e15e4415750076f45f21e17a598c7997fb","branch":"refs/heads/main","cleanliness":"clean","status":[],"bare":false,"prunable":null}],"ledgers":[]},"diagnostics":[{"code":"invalid-symbolic-ref","message":"Malformed symbolic ref","ref":"refs/remotes/origin/HEAD"},null]}
+
+
+  2 !== 0
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\namespace-restriction\tests\git-contract.test.cjs:253:12)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\namespace-restriction\tests\git-contract.test.cjs:248:98)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:248:106
+✖ refs/custom/missing (2818.7072ms)
+  AssertionError [ERR_ASSERTION]: {"operation":"discovery","repo":"C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-git-QcqsOG\\repo","completeness":"partial","evidence":{"refs":[{"ref":"refs/heads/main","sha":"390199a547b5e95c6b1b4cec7d16b68674f38e5c","symref":null},{"ref":"refs/remotes/origin/HEAD","sha":null,"symref":null}],"worktrees":[{"path":"C:/Users/fatbo/AppData/Local/Temp/orchestrate-git-QcqsOG/repo","head":"390199a547b5e95c6b1b4cec7d16b68674f38e5c","branch":"refs/heads/main","cleanliness":"clean","status":[],"bare":false,"prunable":null}],"ledgers":[]},"diagnostics":[{"code":"invalid-symbolic-ref","message":"Malformed symbolic ref","ref":"refs/remotes/origin/HEAD"},null]}
+
+
+  2 !== 0
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\namespace-restriction\tests\git-contract.test.cjs:253:12)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\namespace-restriction\tests\git-contract.test.cjs:248:98)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

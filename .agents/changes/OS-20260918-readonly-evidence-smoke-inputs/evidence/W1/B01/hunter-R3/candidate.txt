@@ -1,0 +1,20 @@
+▶ dangling symbolic hints retain legal targets in every namespace through API and actual CLI
+  ✔ refs/tags/missing (2918.9099ms)
+  ✔ refs/custom/missing (3162.7515ms)
+  ✔ refs/remotes/absent/main (3317.525ms)
+✔ dangling symbolic hints retain legal targets in every namespace through API and actual CLI (9399.9929ms)
+✔ symbolic hints do not expand discovery into target namespaces or scan their trees (3310.2955ms)
+▶ malformed symbolic targets remain unknown without losing valid sibling refs
+  ✔ refs/tags/.hidden (2835.1741ms)
+  ✔ refs/custom/name.lock (2882.7596ms)
+  ✔ refs/tags/double..dot (2879.2919ms)
+✔ malformed symbolic targets remain unknown without losing valid sibling refs (8598.523ms)
+✔ global clean filters remain unknown and never execute through API or actual CLI (4220.9161ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25652.5043

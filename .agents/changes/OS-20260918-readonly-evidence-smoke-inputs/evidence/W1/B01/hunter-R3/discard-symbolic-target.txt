@@ -1,0 +1,108 @@
+▶ dangling symbolic hints retain legal targets in every namespace through API and actual CLI
+  ✖ refs/tags/missing (2702.1516ms)
+  ✖ refs/custom/missing (2789.101ms)
+  ✖ refs/remotes/absent/main (2693.2099ms)
+✖ dangling symbolic hints retain legal targets in every namespace through API and actual CLI (8185.5944ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8309.3163
+
+✖ failing tests:
+
+test at tests\git-contract.test.cjs:248:106
+✖ refs/tags/missing (2702.1516ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+
+    [
+      {
+        ref: 'refs/heads/main',
+        sha: '22557877ff7bd31d50718d599a173a0c9ffc2a0b',
+        symref: null
+  ...
+        sha: null,
+  +     symref: null
+  -     symref: 'refs/tags/missing'
+      }
+    ]
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\discard-symbolic-target\tests\git-contract.test.cjs:256:14)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\discard-symbolic-target\tests\git-contract.test.cjs:248:98)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { ref: 'refs/heads/main', sha: '22557877ff7bd31d50718d599a173a0c9ffc2a0b', symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: null, symref: null } ],
+    expected: [ { ref: 'refs/heads/main', sha: '22557877ff7bd31d50718d599a173a0c9ffc2a0b', symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: null, symref: 'refs/tags/missing' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:248:106
+✖ refs/custom/missing (2789.101ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+
+    [
+      {
+        ref: 'refs/heads/main',
+        sha: 'b6c0f96feac559b51dd54fd425bdd2243ca709b7',
+        symref: null
+  ...
+        sha: null,
+  +     symref: null
+  -     symref: 'refs/custom/missing'
+      }
+    ]
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\discard-symbolic-target\tests\git-contract.test.cjs:256:14)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\discard-symbolic-target\tests\git-contract.test.cjs:248:98)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { ref: 'refs/heads/main', sha: 'b6c0f96feac559b51dd54fd425bdd2243ca709b7', symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: null, symref: null } ],
+    expected: [ { ref: 'refs/heads/main', sha: 'b6c0f96feac559b51dd54fd425bdd2243ca709b7', symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: null, symref: 'refs/custom/missing' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\git-contract.test.cjs:248:106
+✖ refs/remotes/absent/main (2693.2099ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+
+    [
+      {
+        ref: 'refs/heads/main',
+        sha: '42ed57feeba32982ab7309285b62e1752cb95a8b',
+        symref: null
+  ...
+        sha: null,
+  +     symref: null
+  -     symref: 'refs/remotes/absent/main'
+      }
+    ]
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\discard-symbolic-target\tests\git-contract.test.cjs:256:14)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B01-hunter-r3-proof\discard-symbolic-target\tests\git-contract.test.cjs:248:98)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { ref: 'refs/heads/main', sha: '42ed57feeba32982ab7309285b62e1752cb95a8b', symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: null, symref: null } ],
+    expected: [ { ref: 'refs/heads/main', sha: '42ed57feeba32982ab7309285b62e1752cb95a8b', symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: null, symref: 'refs/remotes/absent/main' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
