@@ -2,7 +2,7 @@
 
 **Identifier**: OS-20260918-readonly-evidence-smoke-inputs
 **Started**: 2026-09-18 · **Base**: f918fe39762c70edb9a3424e54eaa208fd7c5727
-**State**: ACTIVE
+**State**: USER-BLOCKED
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 **Smoke page**: —
@@ -50,7 +50,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | tip repair pending: fix/B03-tip @7f25d9a2f6befa6d047def65473b34dfa9da6c88; baseline CRLF test-harness failure; see LOG#resume-20260918 m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | tip repair pending: fix/B03-tip @7f25d9a2f6befa6d047def65473b34dfa9da6c88; baseline CRLF test-harness failure; repair R1 FIX FIRST @70f6baadd702425ef13741fe59d614232e256744 (frozen 6b proof; code review otherwise clean); explicit user amendment required, not capped; see LOG#baseline-repair-r1 m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -93,3 +93,12 @@ User, verbatim: "Do not merge into main or push."
 Discovery: one ACTIVE branch-only ledger on codex/readonly-evidence-smoke-inputs-ledger; main checkout remains on main. Owning integration/scaffold 7f25d9a2f6befa6d047def65473b34dfa9da6c88; local shipment refs/heads/main f918fe39762c70edb9a3424e54eaa208fd7c5727, not-contained (Git exit 1). All planned batch branches absent; no checkpoint verdict pending; both worktrees clean. Ledger provenance tree 6c90f82299b58d05209812d6f920c66082d357f9 matches scaffold. Frozen contract and plan unchanged.
 
 Resume validation: 63/64 Node tests pass; failing name "sections survive the fill verbatim and stay inside the script block". Existing CRLF template checkout exposes LF-only test extraction at tests/build-smoke-page.test.cjs:56. No wave opened. Required reviewed mini-batch fix/B03-tip owns tests/build-smoke-page.test.cjs only, plus permitted checklist edits in its repair batch. Literal python verified via authorized execution: Python 3.10.6, openpyxl 3.1.5, recorded Python310 path. Sandbox PATH denial was resolved, not a missing prerequisite.
+## Baseline repair gate — user decision required
+
+No W1/W2 batch has started and C1 has not been reached. State USER-BLOCKED records a required explicit contract decision before a green tip can be established; it does not claim a second-review cap or a checkpoint verdict.
+
+| Repair | Branch | Candidate | Status | Evidence/metrics |
+|---|---|---|---|---|
+| Baseline CRLF assertion portability | fix/B03-tip | 70f6baadd702425ef13741fe59d614232e256744 | 👤 Explicit user amendment required | Manual fence PASS; reviewer R1 FIX FIRST solely on frozen6b proof; hunter CLEAN; 65/65 candidate tests; m: rounds=1 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+
+Required decision: authorize only fix/B03-tip to use original CRLF harness failure plus independently verified LF-only mutation evidence in place of section6b's copied-tests-on-base failure requirement. No other rule is waived. A successful 23/23 copied-test run is recorded honestly; no setup failure or inconclusive result is claimed. Repair remains unmerged. Fresh review/hunter evidence is under evidence/baseline-repair/. After an explicit amendment is recorded, the reviewed repair still needs merge-tree dry run, merge and full integration validation before W1 opens.
