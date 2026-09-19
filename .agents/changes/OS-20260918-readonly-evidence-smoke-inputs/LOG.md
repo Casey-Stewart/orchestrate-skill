@@ -507,3 +507,7 @@ Reviewed third-round candidate 9f05127c33040d02a08782a5d23c23242021de39 merged a
 ## W2-open
 
 W2 B03 opened from 6e1fb4428e871760d8f31a99606c3ad68db5015f after W1 completion. Branch codex/workflow-input-delivery and isolated wt-B03 created. Frozen contract and plan remain unchanged; edited skill rules only affect future ledgers. B03 owns the smoke-input/builder/page seam and shared docs, no split or new gate. Final C1 remains next planned stop.
+
+## B03-R1-gate
+
+Candidate 7a3ab268a0b318ce080065df628cb1b2386ed980. Conductor manual Git/blob fence PASS against integration 9b3a1a92ca6c00e02f13b9b8d8a8e784035a698a, merge base 6e1fb4428e871760d8f31a99606c3ad68db5015f. All approved paths and both rename endpoints checked; own checklist edits only, no authority changes or fence extensions. Feature batch: repair failing-on-base rule N/A. Candidate validation evidence retained in evidence/W2/B03/R1-candidate. Fresh independent semantic reviewer and separate fresh read-only test hunter follow in parallel, inherited GPT-6 Astra / xhigh. The edited skill does not govern this ledger; all gates remain manual under its frozen contract.

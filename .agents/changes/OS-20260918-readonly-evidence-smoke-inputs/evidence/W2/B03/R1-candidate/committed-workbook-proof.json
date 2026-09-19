@@ -1,0 +1,44 @@
+{
+  "commit": "7a3ab268a0b318ce080065df628cb1b2386ed980",
+  "checkout": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-scratch\\committed-check-0ZD1J0\\checkout",
+  "command": "clone --no-checkout --no-hardlinks; config --local core.autocrlf true; checkout --detach captured SHA",
+  "result": "PASS SHA256(generation A) = SHA256(generation B) = SHA256(committed workbook file bytes)",
+  "hashes": [
+    {
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-scratch\\generation-A.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-scratch\\generation-B.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-scratch\\committed-check-0ZD1J0\\checkout\\tests\\fixtures\\smoke-inputs\\orders.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "attributes": "tests/fixtures/smoke-inputs/orders.xlsx: text: unset\ntests/fixtures/smoke-inputs/orders.xlsx: eol: unset\ntests/fixtures/smoke-inputs/orders.xlsx: filter: unset\ntests/fixtures/smoke-inputs/orders.xlsx: ident: unset\ntests/fixtures/smoke-inputs/orders.xlsx: working-tree-encoding: unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "sha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "attributes": "tests/fixtures/smoke-inputs/orders.requirements.json: text: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: eol: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: filter: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: ident: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: working-tree-encoding: unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "sha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "attributes": "tests/fixtures/smoke-inputs/generate-orders.py: text: unset\ntests/fixtures/smoke-inputs/generate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/generate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/generate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/generate-orders.py: working-tree-encoding: unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "sha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "attributes": "tests/fixtures/smoke-inputs/validate-orders.py: text: unset\ntests/fixtures/smoke-inputs/validate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/validate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/validate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/validate-orders.py: working-tree-encoding: unset"
+    }
+  ],
+  "unprotectedREADME": "CRLF conversion confirmed",
+  "clean": true
+}

@@ -1,0 +1,61 @@
+**********************
+PowerShell transcript start
+Start time: 20260918221554
+Username: CASEY_5070\fatbo
+RunAs User: CASEY_5070\fatbo
+Configuration Name:
+Machine: CASEY_5070 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Users\fatbo\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$pythonDirectory = 'C:/Users/fatbo/AppData/Local/Programs/Python/Python310'
+$env:Path = $pythonDirectory + ';' + $env:Path
+$proofLog = 'C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/excel-validation.txt'
+Start-Transcript -LiteralPath $proofLog
+python -c "import sys, openpyxl; print(sys.executable); print(sys.version); print(openpyxl.__version__)"
+if ($LASTEXITCODE -ne 0) { throw 'Python setup failed' }
+python tests/fixtures/smoke-inputs/validate-orders.py tests/fixtures/smoke-inputs/orders.xlsx tests/fixtures/smoke-inputs/orders.requirements.json
+if ($LASTEXITCODE -ne 0) { throw 'Workbook validation failed' }
+python 'C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/excel-check.py' tests/fixtures/smoke-inputs/orders.xlsx 'C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/corrupt-orders-r2.xlsx'
+if ($LASTEXITCODE -ne 0) { throw 'Independent inspection/corruption setup failed' }
+python tests/fixtures/smoke-inputs/validate-orders.py 'C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/corrupt-orders-r2.xlsx' tests/fixtures/smoke-inputs/orders.requirements.json
+$negativeExit = $LASTEXITCODE
+if ($negativeExit -eq 0) { throw 'Corrupt workbook unexpectedly passed' }
+Write-Output ('Corrupted-workbook rejection: PASS; validator exit=' + $negativeExit)
+Get-FileHash -Algorithm SHA256 -LiteralPath tests/fixtures/smoke-inputs/orders.xlsx,'C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/generation-A.xlsx','C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/generation-B.xlsx' | Format-List
+Stop-Transcript
+Process ID: 31260
+PSVersion: 7.6.5
+PSEdition: Core
+GitCommitId: 7.6.5
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-scratch/excel-validation.txt
+
+
+
+
+Corrupted-workbook rejection: PASS; validator exit=1
+
+Algorithm : SHA256
+Hash      : E5544604E81A378431842516D9DAD722F4BA650CE4B9EFB2850920AC4199469F
+Path      : C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\wt-B03
+            \tests\fixtures\smoke-inputs\orders.xlsx
+
+Algorithm : SHA256
+Hash      : E5544604E81A378431842516D9DAD722F4BA650CE4B9EFB2850920AC4199469F
+Path      : C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-sc
+            ratch\generation-A.xlsx
+
+Algorithm : SHA256
+Hash      : E5544604E81A378431842516D9DAD722F4BA650CE4B9EFB2850920AC4199469F
+Path      : C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-sc
+            ratch\generation-B.xlsx
+
+**********************
+PowerShell transcript end
+End time: 20260918221557
+**********************

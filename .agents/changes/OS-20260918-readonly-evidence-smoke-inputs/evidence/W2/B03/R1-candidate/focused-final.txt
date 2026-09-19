@@ -1,0 +1,22 @@
+✔ Recovery and capped-verdict tables agree exactly after placeholder normalization (2.2014ms)
+✔ template placeholders and registry match in both directions (5.6439ms)
+✔ generated contract bakes helper grammar, outcomes, fallback and full input responsibility (5.3149ms)
+✔ reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact (5.5208ms)
+✔ published helper recipes execute actual CLIs and generated batch grammar passes the real fence (10608.6642ms)
+✔ actual README recursive command and portable form discover nested failure then success; empty primary discovery fails (4583.0029ms)
+✔ real workbook declarations resolve shared stable IDs without mutating metadata (12.3205ms)
+✔ incomplete or ambiguous declarations never become inputs (8.193ms)
+✔ portable input paths reject absolute, traversal and Windows alias spellings (8.7394ms)
+✔ disk checks reject missing files, directories, altered reports and stale raw hashes (23.6806ms)
+✔ LF, CRLF, BOM and whitespace are significant raw bytes (24.4233ms)
+✔ symlink or junction inputs and evidence cannot escape the delivery root (17.6579ms)
+✔ history comparison is metadata-only but requires retention of input and shared evidence across later issues (7.8451ms)
+✔ actual scoped attributes preserve fixture, active and archived raw bytes in a fresh autocrlf checkout (2490.8766ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15287.5949
