@@ -15,7 +15,7 @@ Fresh C1 QA failed step10 at source6c84b930aa4297283f94ce9eeacdff44d2b22ba4: the
 
 ## Checklist
 
-- [ ] Correct all affected human/demo instructions and their revisions without changing inputs or production.
-- [ ] Regenerate all three pages from sidecars and prove expected delta only.
-- [ ] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.
-- [ ] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.
+- [x] Correct all affected human/demo instructions and their revisions without changing inputs or production.
+- [x] Regenerate all three pages from sidecars and prove expected delta only.
+- [x] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.
+- [x] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.
