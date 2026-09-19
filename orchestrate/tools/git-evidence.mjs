@@ -246,9 +246,13 @@ function refsRaw(repo, diagnostics, options) {
           }
           const s = git(repo, ['symbolic-ref', '--quiet', name], options);
           const target = s.ok ? s.text.replace(/\r?\n$/, '') : null;
-          if (!s.ok || !validFullRef(name) || !validFullRef(target)) {
+          // The observed ref belongs to our inventory, but its target may legally
+          // use any refs/ namespace. Validate syntax without following its tree.
+          const targetFormat = target?.startsWith('refs/') ? git(repo, ['check-ref-format', target], options) : null;
+          if (!s.ok || !validFullRef(name) || !targetFormat?.ok) {
             refs.push({ ref: name, sha: null, symref: null });
             diagnostics.push(s.ok ? diagnostic('invalid-symbolic-ref', 'Malformed symbolic ref', { ref: name }) : s.diagnostic);
+            if (targetFormat && !targetFormat.ok && targetFormat.exit !== 1) diagnostics.push(targetFormat.diagnostic);
           } else refs.push({ ref: name, sha: null, symref: target });
         }
       }

@@ -243,3 +243,69 @@ test('submodule status does not enter a nested repository with its own executabl
   for (const result of [r, c.json]) { assert.equal(result.completeness, 'partial'); assert.equal(result.evidence.worktrees[0].cleanliness, 'unknown'); assert.ok(result.diagnostics.some(d => d.code === 'submodule-status-unsupported')); }
   assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before); assert.deepEqual(sub.snapshot(), subBefore);
 });
+
+test('dangling symbolic hints retain legal targets in every namespace through API and actual CLI', async t => {
+  for (const target of ['refs/tags/missing', 'refs/custom/missing', 'refs/remotes/absent/main']) await t.test(target, async t => {
+    const repo = makeRepo(t), ref = 'refs/remotes/origin/HEAD';
+    repo.git('check-ref-format', target); repo.git('symbolic-ref', ref, target);
+    const before = repo.snapshot(), refBytes = fs.readFileSync(path.join(repo.cwd, '.git', ref));
+    const actual = (await api).discovery(options(repo)), command = cli(repo, 'discovery');
+    assert.equal(command.status, 0, command.stdout);
+    for (const result of [actual, command.json]) {
+      const evidence = complete(result);
+      assert.deepEqual(evidence.refs, [{ ref: MAIN, sha: repo.base, symref: null }, { ref, sha: null, symref: target }]);
+      assert.deepEqual(evidence.ledgers, []); assert.deepEqual(result.diagnostics, []);
+    }
+    assert.deepEqual(repo.snapshot(), before); assert.deepEqual(fs.readFileSync(path.join(repo.cwd, '.git', ref)), refBytes);
+  });
+});
+test('symbolic hints do not expand discovery into target namespaces or scan their trees', async t => {
+  const repo = makeRepo(t); writeLedger(repo, { id: 'OUTSIDE' }); const outside = repo.commit('outside namespace ledger');
+  repo.git('update-ref', 'refs/custom/target', outside); repo.git('reset', '--hard', repo.base);
+  repo.git('symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/custom/target');
+  const before = repo.snapshot(), actual = (await api).discovery(options(repo)), command = cli(repo, 'discovery');
+  assert.equal(command.status, 0, command.stdout);
+  for (const result of [actual, command.json]) {
+    const evidence = complete(result);
+    assert.deepEqual(evidence.refs, [{ ref: MAIN, sha: repo.base, symref: null }, { ref: 'refs/remotes/origin/HEAD', sha: outside, symref: 'refs/custom/target' }]);
+    assert.deepEqual(evidence.ledgers, []);
+  }
+  assert.deepEqual(repo.snapshot(), before);
+});
+test('malformed symbolic targets remain unknown without losing valid sibling refs', async t => {
+  for (const target of ['refs/tags/.hidden', 'refs/custom/name.lock', 'refs/tags/double..dot']) await t.test(target, async t => {
+    const repo = makeRepo(t), ref = 'refs/remotes/origin/HEAD';
+    assert.equal(repo.probe('check-ref-format', target).status, 1);
+    repo.write(`.git/${ref}`, `ref: ${target}\n`);
+    const before = repo.snapshot(), refBytes = fs.readFileSync(path.join(repo.cwd, '.git', ref));
+    const actual = (await api).discovery(options(repo)), command = cli(repo, 'discovery');
+    assert.equal(command.status, 2);
+    for (const result of [actual, command.json]) {
+      assert.equal(result.completeness, 'partial');
+      assert.deepEqual(result.evidence.refs.find(r => r.ref === ref), { ref, sha: null, symref: null });
+      assert.deepEqual(result.evidence.refs.find(r => r.ref === MAIN), { ref: MAIN, sha: repo.base, symref: null });
+      assert.ok(result.diagnostics.some(d => d.code === 'git-probe' && d.command === 'symbolic-ref' && d.exit === 128), JSON.stringify(result.diagnostics));
+    }
+    assert.deepEqual(repo.snapshot(), before); assert.deepEqual(fs.readFileSync(path.join(repo.cwd, '.git', ref)), refBytes);
+  });
+});
+test('global clean filters remain unknown and never execute through API or actual CLI', async t => {
+  const repo = makeRepo(t), marker = path.join(repo.cwd, 'global-filter-must-not-run'), script = path.join(repo.root, 'global-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  repo.write('.gitattributes', 'filtered.txt filter=global-marker\n'); repo.write('filtered.txt', 'before\n'); repo.commit('global filter fixture');
+  // --global writes only this disposable fixture's GIT_CONFIG_GLOBAL file.
+  repo.git('config', '--global', 'filter.global-marker.clean', `node "${script.replaceAll('\\', '/')}"`);
+  assert.equal(repo.probe('config', '--local', '--get', 'filter.global-marker.clean').status, 1);
+  repo.write('filtered.txt', 'after!\n'); fs.utimesSync(path.join(repo.cwd, 'filtered.txt'), new Date(0), new Date(0));
+  const before = repo.snapshot(), configBefore = fs.readFileSync(repo.env.GIT_CONFIG_GLOBAL), { worktrees, discovery } = await api;
+  for (const operation of ['worktrees', 'discovery']) {
+    const actual = ({ worktrees, discovery })[operation](options(repo)), command = cli(repo, operation);
+    assert.equal(command.status, 2);
+    for (const result of [actual, command.json]) {
+      assert.equal(result.completeness, 'partial'); assert.equal(result.evidence.worktrees[0].cleanliness, 'unknown');
+      assert.ok(result.diagnostics.some(d => d.code === 'unsafe-filter'));
+    }
+    assert.equal(fs.existsSync(marker), false, `${operation} must not start the global clean command`);
+    assert.deepEqual(repo.snapshot(), before); assert.deepEqual(fs.readFileSync(repo.env.GIT_CONFIG_GLOBAL), configBefore);
+  }
+});
