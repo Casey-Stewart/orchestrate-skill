@@ -458,6 +458,29 @@ test('CLI validates files beside output, preserving old HTML on file, digest, ev
   assert.equal(r.status, 0, r.stderr);
 });
 
+test('CLI reissue refuses to overwrite the existing HTML declared as an issued input', t => {
+  const f = inputPackage(t), previous = sidecar();
+  f.write(previous);
+  let result = f.run();
+  assert.equal(result.status, 0, result.stderr);
+  const issuedBytes = fs.readFileSync(f.out);
+  const prior = path.join(f.root, 'last-issued.json');
+  fs.writeFileSync(prior, JSON.stringify(previous));
+  const current = structuredClone(previous);
+  current.inputs = [{ ...f.d.inputs[0], id: 'prior-page', path: path.basename(f.out),
+    size: issuedBytes.length, sha256: createHash('sha256').update(issuedBytes).digest('hex'),
+    requirements: 'Preserve the issued prior page as an immutable input.',
+    mode: 'read-only', use: 'Read the issued prior page.', reset: 'Recopy the preserved original page.' }];
+  current.sections[0].steps[0].inputs = ['prior-page'];
+  current.sections[0].steps[0].revision++;
+  f.write(current);
+  result = f.run('--previous', prior);
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /output must not overwrite an issued input artifact/);
+  assert.deepEqual(fs.readFileSync(f.out), issuedBytes, 'the entire issued input/output must remain byte-identical');
+  assert.deepEqual(JSON.parse(fs.readFileSync(prior, 'utf8')), previous, 'the exact prior sidecar remains intact');
+});
+
 test('shared stable IDs require EVERY referencing revision for path, bytes and all semantic metadata changes', t => {
   const f = inputPackage(t);
   const edits = [

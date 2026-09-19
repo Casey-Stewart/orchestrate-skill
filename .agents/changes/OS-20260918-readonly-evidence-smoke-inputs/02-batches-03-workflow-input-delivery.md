@@ -118,6 +118,8 @@ opening is a human step unless an actual spreadsheet runner is available.
 - [x] Enforce per-input affected revision invalidation and historical verdicts.
 - [x] Add builder/runtime/doc consistency regression tests and helper documentation.
 - [x] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).
+- [x] polish: Add a real CLI reissue regression that refuses an issued input/output HTML collision and preserves bytes; kill the exact output-guard deletion mutant.
+- [x] polish: Exercise Git diff failure propagation in the actual README runner after passing tests, restore the clean file, and kill the exact diff-propagation deletion mutant.
 
 ## Acceptance criteria
 

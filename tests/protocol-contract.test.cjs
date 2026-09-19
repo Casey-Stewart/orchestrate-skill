@@ -209,6 +209,20 @@ test('actual README recursive command and portable form discover nested failure 
   const failed = run(); assert.match(failed.stderr, /Node test suite failed/);
   repo.write(nested, sentinel(true));
   for (const result of [run(), portable()]) { assert.equal(result.status, 0, result.stderr); assert.match(result.stdout, /pass 3/); }
+  const diffControl = 'tracked-diff-control.txt';
+  repo.write(diffControl, 'clean tracked line\n');
+  repo.commit('passing suites and clean tracked diff control');
+  repo.write(diffControl, 'tracked trailing whitespace  \n');
+  const badDiff = run();
+  assert.ifError(badDiff.error);
+  assert.match(badDiff.stdout, /pass 3/, 'Node tests must pass before the independent Git diff failure');
+  assert.notEqual(badDiff.status, 0, badDiff.stdout + badDiff.stderr);
+  assert.match(badDiff.stdout + badDiff.stderr, /trailing whitespace/);
+  assert.match(badDiff.stderr, /Git diff check failed/);
+  repo.write(diffControl, 'clean tracked line\n');
+  const cleanDiff = run();
+  assert.equal(cleanDiff.status, 0, cleanDiff.stdout + cleanDiff.stderr);
+  assert.match(cleanDiff.stdout, /pass 3/, 'restoring the tracked file must restore successful published validation');
   const enumeration = command.split('\n')[0] + '\n$testFiles | ConvertTo-Json -Compress';
   const result = spawnSync(powershell, ['-NoProfile', '-NonInteractive', '-Command', enumeration], { cwd: repo.cwd, env: repo.env, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
