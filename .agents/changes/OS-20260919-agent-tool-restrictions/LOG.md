@@ -116,3 +116,63 @@ produced three findings that changed the plan (the reach gap, the seven-vs-four 
 the missing fallback). A pre-flight reviewer would have re-read the same files for the
 same purpose. Verdict recorded as `Pre-flight: CLEAN` in the plan, with this note as the
 reason it was not delegated.
+
+## 2026-09-19 — session 2 (wave 1)
+
+### Boot + reconcile
+
+Discovery found one ACTIVE ledger. Every batch row was `⬜` and `git branch --list`
+showed only `chore/agent-tool-restrictions-ledger`, `codex/readonly-evidence-smoke-inputs-ledger`
+and `main` — no batch branch existed, which is the §Recovery table's "`⬜` / no such
+branch → correct state, waits for its wave". Nothing to correct. The main checkout was
+clean and already on the integration branch, so the ledger is edited there directly, as
+the contract's boot step 2 allows.
+
+Resume-time validation on the integration tip `7b74811`: exit 0, `git diff --check` clean.
+
+**Filter defect to avoid repeating.** The quiet-form run used
+`Select-String -Pattern '^# (tests|pass|fail|…)'`, which is the **tap** reporter's shape.
+`--test-reporter=spec` prints `ℹ tests N` / `ℹ pass N` / `ℹ fail N`, so the totals were
+filtered out and only the exit code proved green. Subsequent runs filter on
+`ℹ (tests|pass|fail)` instead. The gate was still satisfied — a non-zero exit would have
+printed the `TESTS_EXIT_NONZERO` marker — but the totals line the contract asks to report
+was lost for this run.
+
+### Wave 1 open
+
+Wave base `7b74811`. Cut `feat/agent-definitions` (B01) and `fix/contract-prompt-authority`
+(B02), created both worktrees, committed the PROGRESS flip as `1d05732`, then spawned both
+implementers concurrently in one message.
+
+### Environment: Windows MAX_PATH forced the worktrees out of the scratchpad
+
+`git worktree add` under the session scratchpad aborted with `Filename too long` partway
+through checkout. Cause, measured rather than guessed: the scratchpad prefix is ~150
+characters and this repo's deepest tracked path is 146
+(`.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs`),
+which clears Windows' 260-character limit before git writes a single archive file.
+
+Chosen fix: a short worktree root, `C:\Users\fatbo\AppData\Local\Temp\claude\wt-os919\`
+(52 characters, leaving ~60 of headroom). Still outside the repo, still disposable,
+per-worktree setup still `n/a`. Rejected `git config core.longpaths true` — it mutates the
+user's repo config persistently to work around a path length this ledger can simply avoid,
+and it would not protect non-git tooling running inside the worktree.
+
+This is an environment fact, **not** a deviation from the locked plan: the wave map,
+fences, gates, checkpoints and merge policy are untouched, and the contract only requires
+worktrees to be isolated and outside the repo.
+
+Two leftovers noted, neither blocking: the first `git worktree add` created
+`feat/agent-definitions` before failing, so the branch was **adopted** at the integration
+tip per step 4's idempotent-cut rule (verified `git rev-parse` equal to `7b74811` first);
+and `.git/worktrees/wt-B0*` admin directories from the archived ledger's run refuse
+`git worktree prune` with `Permission denied` (OneDrive holds them), while being absent
+from `git worktree list` — so they register as pruned and collide with nothing.
+
+### Agent types: the fallback this change exists to remove, in action
+
+No `implementer` subagent type exists yet — B01 is what creates it — so both wave-1
+implementers were spawned as `general-purpose`, inheriting the full tool set. That is
+precisely the degraded path B03 will document, observed from the inside: this session pays
+the 12–15k-per-spawn cost the change removes, and the first session that can spend the
+saving is the one after C1.
