@@ -381,3 +381,8 @@ Reviewer: SHIP, no P0/P1/ASK. Every hunk mapped: exact eight attributes, four Ex
 Hunter: FINDINGS1, ASK, no production change required. Verification audit-mutations.py:64; production validate-orders.py:44. Exact surviving mutation: replace boolean condition with valid = actual == value. All68 existing corruption checks still pass. Types!B2 changed from boolean true to numeric1 passes mutant because1 == True; actual candidate correctly rejects with Types!B2.boolean. Add numeric1 must-fail assertion to verification. Probe artifacts under B02-hunter-probes in scratch. Otherwise independent formula/data-only,47cells/6caches/edgecases/overwrite checks and rehash/attributes controls all sound.
 
 Combined R1 SHIP asks=1. Ordinary verification-only polish; no production behavior change authorized. Append one polish checklist item, extend scratch corruption verification, rerun and capture results. Mechanical close under frozen protocol; no extra reviewer round. Gate metrics1/0; asks counted when closed.
+
+## B02-polish-closed
+
+Manual mechanical close PASS at c78f4270fe678e8dd049a3bf8ff19b80348689bf. Own-batch one appended ticked polish item only since R1; all five shipped artifacts unchanged. ASK closed by69-case negative audit and isolated exact mutant proof; final candidate clone/autocrlf/attributes/triplehash/semantics PASS. No production touching polish; no extra reviewer gate or FIX FIRST round. Evidence: evidence/W1/B02/polish/. Ready for serial integration and full tip validation.
+Evidence-copy whitespace cleanup only: transcript blank metadata and captured diff context whitespace trimmed for git diff --check. Unmodified originals remain in external scratch; no issued input or source file changed.

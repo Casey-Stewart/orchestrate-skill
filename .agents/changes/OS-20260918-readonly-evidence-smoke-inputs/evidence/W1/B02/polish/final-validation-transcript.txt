@@ -1,0 +1,38 @@
+**********************
+PowerShell transcript start
+Start time: 20260918202806
+Username: CASEY_5070\fatbo
+RunAs User: CASEY_5070\fatbo
+Configuration Name:
+Machine: CASEY_5070 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Users\fatbo\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+node -e "const fs=require('fs');const p='.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-02-smoke-input-files.md';const s=fs.readFileSync(p,'utf8');fs.writeFileSync(p,s.replace(/\r\n/g,'\n'));"
+git status --porcelain
+git diff --check
+& 'C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B02-scratch/verify-final-tip.ps1'
+Process ID: 25280
+PSVersion: 7.6.5
+PSEdition: Core
+GitCommitId: 7.6.5
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+
+COMMAND python tests/fixtures/smoke-inputs/generate-orders.py C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-scratch\final-7a94c6ecb95740139896ec3a8137c566\generation-A.xlsx
+
+COMMAND python tests/fixtures/smoke-inputs/generate-orders.py C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-scratch\final-7a94c6ecb95740139896ec3a8137c566\generation-B.xlsx
+
+COMMAND node C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-scratch/verify-checkout.cjs C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B02 C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-scratch\final-7a94c6ecb95740139896ec3a8137c566 ae850a38fa760cb36f0ca83db35e5830ed1cc2ed
+
+COMMAND python tests/fixtures/smoke-inputs/validate-orders.py C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-scratch\final-7a94c6ecb95740139896ec3a8137c566\candidate-checkout\tests\fixtures\smoke-inputs\orders.xlsx tests/fixtures/smoke-inputs/orders.requirements.json
+
+
+PASS final candidate checkout proof; saved evidence C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B02-scratch\final-7a94c6ecb95740139896ec3a8137c566
+**********************
+PowerShell transcript end
+End time: 20260918202812
+**********************

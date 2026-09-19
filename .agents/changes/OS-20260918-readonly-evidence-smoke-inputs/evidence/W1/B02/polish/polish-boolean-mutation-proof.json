@@ -1,0 +1,29 @@
+{
+  "records": [
+    {
+      "label": "candidate",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\polish-e5225e1683e045efa08c828b4164592f\\numeric-one-boolean.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "output": "FAIL requirement Types!B2.boolean: expected True; found 1"
+    },
+    {
+      "label": "permissive equality mutant",
+      "command": [
+        "python",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\polish-e5225e1683e045efa08c828b4164592f\\validate-orders-permissive-mutant.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\polish-e5225e1683e045efa08c828b4164592f\\numeric-one-boolean.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B02\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+      ],
+      "exit": 0,
+      "output": "PASS C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B02-scratch\\polish-e5225e1683e045efa08c828b4164592f\\numeric-one-boolean.xlsx: 3 sheets, 47 declared cells, 6 formulas and numeric caches\nPASS leading-zero text IDs; numeric zero/negative/discount edges; Unicode; date; boolean; empty cells\nPASS Summary!B2 cached total 23.50; Summary!B3 cached order count 4; no macros/external links/errors"
+    }
+  ],
+  "inputSha256": "b61b5fa5efe63ba7fe9ef954a8ed34f716d7b4881ea4356d253c0a61f478032d",
+  "candidateValidatorSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+  "productionUnchanged": true
+}

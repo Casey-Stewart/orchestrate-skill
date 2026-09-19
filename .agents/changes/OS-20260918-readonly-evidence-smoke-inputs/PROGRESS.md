@@ -48,7 +48,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
-| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🔄 | 2026-09-18 | R1 SHIP @6ccc46f76eb8d45ff9a9e24bf99ad45b76bab8dc asks=1; current inherited tier; verification-only polish; LOG#B02-R1-verdict m: rounds=0 asks=0 fence-bounces=0 gate=1/0 tip-red=0 |
+| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🔄 | 2026-09-18 | R1 SHIP; ordinary polish closed @c78f4270fe678e8dd049a3bf8ff19b80348689bf; current inherited tier; LOG#B02-polish-closed m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
 | B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Baseline repair integrated ce1f444; approved repair-only proof exception; see LOG#repair-integrated m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
