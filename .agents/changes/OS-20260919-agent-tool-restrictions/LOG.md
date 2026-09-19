@@ -176,3 +176,73 @@ implementers were spawned as `general-purpose`, inheriting the full tool set. Th
 precisely the degraded path B03 will document, observed from the inside: this session pays
 the 12–15k-per-spawn cost the change removes, and the first session that can spend the
 saving is the one after C1.
+
+### Residual R1 — the archived-ledger guard in `protocol-contract.test.cjs` is dead
+
+Surfaced by B02's implementer as an out-of-fence observation; verified independently by
+the orchestrator.
+
+`tests/protocol-contract.test.cjs:122` guards
+`.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md`, but commit
+`5110f71` ("Archive the completed OS-20260918 ledger") moved that ledger to
+`.agents/archive/…`. The path no longer exists, so the `existsSync` is permanently false
+and the two assertions inside it — `/Python310[\/]python\.exe/` and `/Every generation and
+independent Excel-validation command in this run uses literal/` — never execute. The test
+still passes, which is what makes it dangerous: it advertises a frozen-contract guard that
+cannot fail.
+
+Nothing is broken today — the archived contract still carries both facts (3 matches for
+the Python path) — but a future edit that rewrote them would sail through. The
+`existsSync` wrapper is correct in principle (a clone made after archival need not carry
+the path); only the path is stale.
+
+Out of every batch's fence. Destination: `BACKLOG.md` as **BL-001** at the change-complete
+close-out. B02's own new test guards the archive at the *correct* `.agents/archive/…` path,
+so the boot wording is covered again — but the Python/Excel environment facts are not.
+
+### Residual R2 — `check-fence.mjs` cannot read a ledger this scaffolder produces
+
+Found by the orchestrator when the mechanical fence check (step 6a) returned `UNKNOWN`
+(exit 2) for B02 with `{"code":"authority","message":"Duplicate or malformed batch IDs"}`
+against `01-plan.md`.
+
+Root cause, verified in source: `orchestrate/tools/check-fence.mjs:39` requires every `#`
+cell of the plan's authority table to match `/^B\d{2,}$/`. The archived OS-20260918 plan
+uses `B01` / `B02` / `B03` and parses fine. **This** ledger's plan uses bare `01` / `02` /
+`03`, so the tool throws before it can check anything. `orchestrate/templates/01-plan.md`
+carries only an HTML comment describing the row — it pins no id format and shows no
+example row — so a scaffolding session is free to write either, and this one wrote the
+form the tool rejects.
+
+Effect: the mechanical fence gate is unusable for the whole of this change, on every
+batch, silently degrading step 6a to the manual fallback for all three. The contract
+anticipates exactly this ("Unknown or legacy shapes use the manual gate, never rewritten
+authority"), so the gate still holds — but it holds by hand.
+
+Deliberately NOT worked around. Rewriting the locked `01-plan.md` to satisfy the tool
+would be rewriting authority mid-run, which the contract forbids in the same sentence that
+tells it to fall back. Out of every batch's fence (`templates/01-plan.md` and
+`references/scaffolding.md` belong to no batch here; B03 owns only `references/protocol.md`
+and `references/subagent-prompts.md`). Destination: `BACKLOG.md` as **BL-002**. The fix is
+a pinned example row in the template plus a scaffolding self-check assertion — and a test
+that scaffolds a ledger and runs the real fence over it, which is the class of bug that
+only an end-to-end check catches.
+
+### Residual R3 — the fence helper cannot determine cleanliness on a stock Git for Windows
+
+Same `UNKNOWN`, second cause: four `{"code":"unsafe-filter"}` diagnostics, one per
+worktree — "Clean/process filters are configured; status was not run because it can
+execute commands".
+
+The conservatism is right in principle (the contract forbids executing a clean filter to
+obtain a clean result) but it fires on configuration alone. The only filters here are
+`filter.lfs.*`, which Git for Windows writes into `C:/Program Files/Git/etc/gitconfig` on
+every stock install. The orchestrator resolved the unknown safely without running any
+filter: `.gitattributes` `-filter`s every fixture path, and
+`git ls-files | git check-attr --stdin filter` returns `unset` or `unspecified` for every
+tracked path — no path resolves to `filter: lfs`, so `git status` can execute nothing.
+
+So the helper reports UNKNOWN on essentially every Windows machine, whether or not a
+filter can actually engage. Checking the resolved `filter` **attribute** per path, rather
+than the presence of filter **config**, would keep the safety property and restore the
+mechanical gate. Out of fence. Destination: `BACKLOG.md` as **BL-003**.
