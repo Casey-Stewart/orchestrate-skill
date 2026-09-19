@@ -724,11 +724,10 @@
     <section class="gate" id="s0">
 <p class="gate-eyebrow">Before anything else</p>
 <h3>Step 0 — prove you are on the right build</h3>
-<p>Run this gate from the integration worktree before recording a verdict. The repository has no version file, so the source is identified by its tested commit and a behavioral canary.</p>
-<pre><code>Set-Location -LiteralPath 'C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int'
-git branch --show-current
-git rev-parse HEAD
-node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs' .</code></pre>
+<p>Run this gate before recording a verdict. Paste the whole block as-is: it runs the same way in <code>cmd.exe</code> and in PowerShell, and every line names the integration worktree itself, so your current directory does not matter. The repository has no version file, so the source is identified by its tested commit and a behavioral canary.</p>
+<pre><code>git -C "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int" branch --show-current
+git -C "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int" rev-parse HEAD
+node "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs" "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int"</code></pre>
 <ol class="gate-checks">
   <li>Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>49dfe07c09111197b8739aac2df0cea43c985cdf</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.</li>
   <li>Canary must report <strong>PASS</strong>: the current builder rejects a changed workbook byte and preserves the old HTML; the starting <code>f918fe39762c70edb9a3424e54eaa208fd7c5727</code> builder accepts or ignores that same change. If it behaves the old way, stop and report it.</li>
@@ -2641,4 +2640,4 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr
 })();
 </script>
 
-<!-- smoke-sidecar-sha256:b073e6f5139e07f15a9550b10b3960c9ee4ffecb080f756658daa79dc43fc32b -->
+<!-- smoke-sidecar-sha256:f509fd5c4dfcd59a10855f7fff706e4fd43eef91dbddb62b4225c54fc4047ae6 -->

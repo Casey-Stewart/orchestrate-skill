@@ -8,9 +8,9 @@
   "pageTitle": "C1 smoke run",
   "standfirst": "Two human checks and nine automated checks. Run Step 0 first. When done—or as soon as something fails—press <strong>Copy results as text</strong> and paste it into the task.",
   "gate": {
-    "intro": "Run this gate from the integration worktree before recording a verdict. The repository has no version file, so the source is identified by its tested commit and a behavioral canary.",
+    "intro": "Run this gate before recording a verdict. Paste the whole block as-is: it runs the same way in <code>cmd.exe</code> and in PowerShell, and every line names the integration worktree itself, so your current directory does not matter. The repository has no version file, so the source is identified by its tested commit and a behavioral canary.",
     "commands": [
-      "Set-Location -LiteralPath 'C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int'\ngit branch --show-current\ngit rev-parse HEAD\nnode '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs' ."
+      "git -C \"C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\" branch --show-current\ngit -C \"C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\" rev-parse HEAD\nnode \"C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scripts/c1-canary.mjs\" \"C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\""
     ],
     "checks": [
       "Branch must be <code>codex/readonly-evidence-smoke-inputs-ledger</code>. Tested source commit: <code>49dfe07c09111197b8739aac2df0cea43c985cdf</code>. A later commit containing only checkpoint artifacts is allowed; the canary verifies ancestry and that source files have not changed.",
