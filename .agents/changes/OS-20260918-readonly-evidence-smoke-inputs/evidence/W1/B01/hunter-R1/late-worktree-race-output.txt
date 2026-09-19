@@ -1,0 +1,12 @@
+Candidate: b3ce33eb35dab7ac43472faa0f90220ff32a48dd
+Command: node --test --test-reporter=spec B01-hunter-r1-proof/late-worktree-race.cjs
+Exit: 0
+{"kind":"candidate","status":"UNKNOWN","codes":["worktree-race"],"actualDirt":"M allowed.txt"}
+{"kind":"mutant","status":"PASS","codes":[],"actualDirt":"M allowed.txt"}
+tests 2; pass 2; fail 0
+
+Exact production mutation in the external copy only:
+Delete check-fence.mjs line 203's comparison and worktree-race diagnostic.
+The probe injects an actual working-file edit at the second filesystem observation,
+then runs the real Git status probes without fabricated evidence.
+The candidate remains unchanged and correctly catches this late race.

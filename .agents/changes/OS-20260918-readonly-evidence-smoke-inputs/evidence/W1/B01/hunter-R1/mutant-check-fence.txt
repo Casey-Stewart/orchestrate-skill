@@ -1,0 +1,91 @@
+✔ actual fence CLI PASS is read-only and imported result agrees (5767.9972ms)
+▶ adds modifications deletions and type changes obey literal fence
+  ✔ add inside (2928.4374ms)
+  ✔ add outside (2851.2628ms)
+  ✔ modify inside (3197.5287ms)
+  ✔ modify outside (3141.3941ms)
+  ✔ delete inside (3112.351ms)
+  ✔ delete outside (2930.5439ms)
+  ✔ type inside (3160.5219ms)
+  ✔ type outside (3102.8119ms)
+✔ adds modifications deletions and type changes obey literal fence (24426.7409ms)
+▶ both rename directions and copy sources enforce both raw endpoints
+  ✔ outside.txt -> allowed.txt copy=false (2913.1452ms)
+  ✔ allowed.txt -> outside-new.txt copy=false (3048.2311ms)
+  ✔ outside.txt -> allowed.txt copy=true (2657.5233ms)
+✔ both rename directions and copy sources enforce both raw endpoints (8619.6081ms)
+✔ raw spaces Unicode and option-like filenames are never trimmed or option parsed (4921.6594ms)
+▶ candidate staged unstaged untracked rename and conflicted dirt are violations and remain untouched
+  ✔ staged (4862.8431ms)
+  ✔ unstaged (4409.4711ms)
+  ✔ untracked (4810.5552ms)
+  ✔ rename (4602.1759ms)
+  ✔ conflict (5578.0513ms)
+✔ candidate staged unstaged untracked rename and conflicted dirt are violations and remain untouched (24263.9952ms)
+✔ other worktree dirt is evidence without a batch violation (3213.1308ms)
+▶ missing worktree and changed checkout identity are UNKNOWN, never clean
+  ✔ missing (2010.3713ms)
+  ✔ identity (2391.6187ms)
+✔ missing worktree and changed checkout identity are UNKNOWN, never clean (4402.6056ms)
+✔ captured integration plan wins over forged candidate plan and Files grants (2983.7474ms)
+▶ explicit and row-bound extensions require matching committed Notes and session-log authority
+  ✔ explicit B01 (3030.1605ms)
+  ✔ row-bound (2857.3664ms)
+✔ explicit and row-bound extensions require matching committed Notes and session-log authority (5887.9934ms)
+▶ mismatched ambiguous substring and forged extension records never grant authority
+  ✔ mismatch (2892.1954ms)
+  ✔ duplicate-log (2950.7816ms)
+  ✔ missing-log (2953.7331ms)
+  ✔ substring (3042.9638ms)
+  ✔ candidate-only (3002.9233ms)
+  ✔ other-row (3076.1967ms)
+  ✔ embedded-record (3090.6218ms)
+✔ mismatched ambiguous substring and forged extension records never grant authority (21010.6181ms)
+▶ malformed duplicate glob traversal missing and wrong-linkage authority is explicit UNKNOWN
+  ✔ malformed 0 (2818.189ms)
+  ✔ malformed 1 (2701.5322ms)
+  ✔ malformed 2 (3023.3809ms)
+  ✔ malformed 3 (2808.0523ms)
+  ✔ malformed 4 (3129.7135ms)
+  ✔ malformed 5 (2902.3487ms)
+  ✔ malformed 6 (2874.6626ms)
+  ✔ malformed 7 (2997.0587ms)
+  ✔ invalid encoding (2864.3788ms)
+  ✔ wrong requested filename (790.2442ms)
+✔ malformed duplicate glob traversal missing and wrong-linkage authority is explicit UNKNOWN (26911.0905ms)
+✔ own batch permits ticks and appended polish while retaining all original lines (3254.8756ms)
+▶ own batch rejects every forbidden structural edit with line diagnostics
+  ✔ reword (3383.5827ms)
+  ✔ reset (3332.009ms)
+  ✔ remove (2838.7198ms)
+  ✔ reorder (3088.6777ms)
+  ✔ ordinary (2858.9701ms)
+  ✔ outside (2625.8972ms)
+  ✔ section (3083.1108ms)
+  ✔ title (3238.8952ms)
+  ✔ files (3075.0998ms)
+✔ own batch rejects every forbidden structural edit with line diagnostics (27526.6317ms)
+▶ batch deletion and rename cannot be treated as permitted own-file edits
+  ✔ delete (2829.5208ms)
+  ✔ rename (3487.2789ms)
+✔ batch deletion and rename cannot be treated as permitted own-file edits (6317.3577ms)
+✔ UNKNOWN takes precedence while preserving known violations; invalid CLI flags are structured (4206.9889ms)
+✔ criss-cross merge bases are UNKNOWN and preserve a clean candidate snapshot (3381.4831ms)
+✔ own batch type replacement is rejected even with identical blob bytes (2617.7451ms)
+✔ candidate with no associated worktree and missing integration objects are UNKNOWN (2535.9741ms)
+▶ ref and worktree races during real probes return UNKNOWN
+  ✔ ref (2636.2942ms)
+  ✔ checkout (2461.3325ms)
+✔ ref and worktree races during real probes return UNKNOWN (5098.1058ms)
+✔ unsupported original Checklist shapes are UNKNOWN, not a content verdict (2904.6343ms)
+✔ an inaccessible unrelated worktree is unknown evidence rather than a false clean gate (2606.1263ms)
+✔ authority file type replacement cannot supply a valid plan from a symlink blob (2923.4504ms)
+✔ own batch executable-bit edits are outside permitted checklist-only changes (2534.0148ms)
+ℹ tests 73
+ℹ suites 0
+ℹ pass 73
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 198463.0551
