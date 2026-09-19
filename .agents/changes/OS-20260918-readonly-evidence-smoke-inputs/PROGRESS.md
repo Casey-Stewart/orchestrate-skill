@@ -2,7 +2,7 @@
 
 **Identifier**: OS-20260918-readonly-evidence-smoke-inputs
 **Started**: 2026-09-18 · **Base**: f918fe39762c70edb9a3424e54eaa208fd7c5727
-**State**: USER-BLOCKED
+**State**: ACTIVE
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 **Smoke page**: —
@@ -102,3 +102,10 @@ No W1/W2 batch has started and C1 has not been reached. State USER-BLOCKED recor
 | Baseline CRLF assertion portability | fix/B03-tip | 70f6baadd702425ef13741fe59d614232e256744 | 👤 Explicit user amendment required | Manual fence PASS; reviewer R1 FIX FIRST solely on frozen6b proof; hunter CLEAN; 65/65 candidate tests; m: rounds=1 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 Required decision: authorize only fix/B03-tip to use original CRLF harness failure plus independently verified LF-only mutation evidence in place of section6b's copied-tests-on-base failure requirement. No other rule is waived. A successful 23/23 copied-test run is recorded honestly; no setup failure or inconclusive result is claimed. Repair remains unmerged. Fresh review/hunter evidence is under evidence/baseline-repair/. After an explicit amendment is recorded, the reviewed repair still needs merge-tree dry run, merge and full integration validation before W1 opens.
+## Repair-only exception approved — 2026-09-18
+
+User, verbatim: "Approved"
+
+This answers the immediately preceding proposal: approve an exception for fix/B03-tip only, accepting the reproduced original CRLF harness failure plus independently verified LF-only mutation evidence instead of section6b's copied-tests-on-base failure requirement, then resume W1 -> W2 -> C1. This is the entire exception; no other gate, batch or future repair is exempt. Frozen contract and locked plan files remain unchanged; this explicit user amendment is recorded here.
+
+The amendment resolves reviewer R1's sole P0 for candidate70f6baadd702425ef13741fe59d614232e256744. Reviewer code assessment and separate hunter were clean; no source change since their review. The prior23/23 base-copy PASS remains accurately recorded. Conductor may now perform dry run, merge and integration validation. Earlier user-blocked text is historical. No checkpoint verdict or permission to merge into main/push is implied.
