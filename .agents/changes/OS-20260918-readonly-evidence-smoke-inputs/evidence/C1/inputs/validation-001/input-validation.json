@@ -1,0 +1,254 @@
+{
+  "verdict": "PASS",
+  "command": "node 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts\\c1-input-validation.mjs' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation'",
+  "environment": "C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\r\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\r\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git",
+  "sourceCommit": "1676dc86470bbcb31cdcc97ef4bd75711369f6a8",
+  "scope": "Actual prepared input bytes before first issue. Fresh committed checkout and final checkpoint QA are separate mandatory evidence.",
+  "generation": {
+    "a": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx",
+    "b": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\B.xlsx",
+    "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+    "semanticValidation": true,
+    "overwriteRefused": true
+  },
+  "observations": [
+    {
+      "id": "orders-original",
+      "path": "issue-001/orders.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "size": 8634,
+      "requirements": "Three sheets Orders/Summary/Types; text IDs 0001–0004, numeric/zero/negative/discount/Unicode/date/boolean/empty edges, six formulas with caches, total 23.50 and count 4.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "orders-requirements",
+      "path": "issue-001/orders.requirements.json",
+      "sha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "size": 4115,
+      "requirements": "Independent manifest declares every required sheet, cell, type, format, formula and cached value.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "orders-generator",
+      "path": "issue-001/generate-orders.py",
+      "sha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "size": 9188,
+      "requirements": "Deterministic stdlib generator; refuses existing output paths.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "orders-validator",
+      "path": "issue-001/validate-orders.py",
+      "sha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "size": 9950,
+      "requirements": "Independent openpyxl formula/data-only checks; named failure for corruption.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "workbook-copy-reset",
+      "path": "issue-001/WORKING-COPY.md",
+      "sha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785",
+      "size": 1616,
+      "requirements": "Exact PowerShell source/destination, open, change C2, expected results and reset commands.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "discovery-runner",
+      "path": "issue-001/recursive-discovery/run-validation.ps1",
+      "sha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6",
+      "size": 383,
+      "requirements": "Recursive FullName-sorted discovery, no-suite guard, test failure propagation and diff check.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "discovery-control",
+      "path": "issue-001/recursive-discovery/tests/control.test.cjs",
+      "sha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56",
+      "size": 160,
+      "requirements": "Passing top-level control test.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "discovery-sentinel",
+      "path": "issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "sha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94",
+      "size": 169,
+      "requirements": "Named nested test deliberately fails; correcting only false to true makes it pass.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "discovery-directions",
+      "path": "issue-001/recursive-discovery/README.md",
+      "sha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973",
+      "size": 862,
+      "requirements": "Names the actual nested sentinel and failure/success/empty-suite expectations.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "text-lf",
+      "path": "issue-001/text/lf-input.txt",
+      "sha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "size": 79,
+      "requirements": "UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "text-crlf",
+      "path": "issue-001/text/crlf-input.txt",
+      "sha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7",
+      "size": 82,
+      "requirements": "Same synthetic text content with CRLF bytes; raw identity differs from LF.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "demo-workbook",
+      "path": "issue-002/orders.xlsx",
+      "sha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79",
+      "size": 8636,
+      "requirements": "Reissue demo: C2=3, F2=33.75, Summary!B2=34.75/count 4; other values/types/formulas/styles retained.",
+      "verdict": "PASS"
+    },
+    {
+      "id": "demo-requirements",
+      "path": "issue-002/orders.requirements.json",
+      "sha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269",
+      "size": 6044,
+      "requirements": "Explicit demo requirements reflect the changed quantity and dependent caches.",
+      "verdict": "PASS"
+    }
+  ],
+  "commands": [
+    {
+      "exe": "python",
+      "args": [
+        "-c",
+        "import sys,openpyxl; assert sys.version_info[:3]==(3,10,6); assert openpyxl.__version__==\"3.1.5\"; print(sys.executable); print(sys.version); print(\"openpyxl \"+openpyxl.__version__)"
+      ],
+      "exit": 0,
+      "stdout": "C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\r\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\r\nopenpyxl 3.1.5\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\orders.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\orders.requirements.json"
+      ],
+      "exit": 0,
+      "stdout": "PASS C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\orders.xlsx: 3 sheets, 47 declared cells, 6 formulas and numeric caches\r\nPASS leading-zero text IDs; numeric zero/negative/discount edges; Unicode; date; boolean; empty cells\r\nPASS Summary!B2 cached total 23.50; Summary!B3 cached order count 4; no macros/external links/errors\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\generate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx"
+      ],
+      "exit": 0,
+      "stdout": "Created synthetic Orders workbook: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx (8634 bytes)\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\orders.requirements.json"
+      ],
+      "exit": 0,
+      "stdout": "PASS C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx: 3 sheets, 47 declared cells, 6 formulas and numeric caches\r\nPASS leading-zero text IDs; numeric zero/negative/discount edges; Unicode; date; boolean; empty cells\r\nPASS Summary!B2 cached total 23.50; Summary!B3 cached order count 4; no macros/external links/errors\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\generate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\B.xlsx"
+      ],
+      "exit": 0,
+      "stdout": "Created synthetic Orders workbook: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\B.xlsx (8634 bytes)\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\B.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\orders.requirements.json"
+      ],
+      "exit": 0,
+      "stdout": "PASS C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\B.xlsx: 3 sheets, 47 declared cells, 6 formulas and numeric caches\r\nPASS leading-zero text IDs; numeric zero/negative/discount edges; Unicode; date; boolean; empty cells\r\nPASS Summary!B2 cached total 23.50; Summary!B3 cached order count 4; no macros/external links/errors\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\generate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "FAIL output must be new; refusing to overwrite: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\A.xlsx\r\n"
+    },
+    {
+      "exe": "python",
+      "args": [
+        "-c",
+        "import sys,json,zipfile,importlib.util,xml.etree.ElementTree as ET\nfrom pathlib import Path\nfrom decimal import Decimal,ROUND_HALF_UP\nimport openpyxl\nsys.dont_write_bytecode=True\nvalidator,root,scratch=map(Path,sys.argv[1:])\nms=importlib.util.spec_from_file_location('independent_validator',validator)\nm=importlib.util.module_from_spec(ms);ms.loader.exec_module(m)\nfor issue,total in [('issue-001',Decimal('23.50')),('issue-002',Decimal('34.75'))]:\n spec=json.loads((root/issue/'orders.requirements.json').read_text(encoding='utf-8'))\n assert m.validate(root/issue/'orders.xlsx',spec,openpyxl)==(47,6)\n f=openpyxl.load_workbook(root/issue/'orders.xlsx',data_only=False)\n v=openpyxl.load_workbook(root/issue/'orders.xlsx',data_only=True)\n amounts=[]\n for r in range(2,6):\n  q,p,d=(Decimal(str(f['Orders'].cell(r,c).value)) for c in (3,4,5))\n  amount=(q*p*(1-d)).quantize(Decimal('.01'),rounding=ROUND_HALF_UP)\n  assert Decimal(str(v['Orders'].cell(r,6).value))==amount\n  amounts.append(amount)\n assert sum(amounts)==total and Decimal(str(v['Summary']['B2'].value))==total\n assert v['Summary']['B3'].value==4\n f.close();v.close()\n print(issue+': 47 cells,6 formulas/caches; independent decimal total '+str(total)+',count4')\nns={'s':'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}\nwith zipfile.ZipFile(root/'issue-001/orders.xlsx') as old,zipfile.ZipFile(scratch/'corrupt.xlsx','x') as new:\n for info in old.infolist():\n  data=old.read(info.filename)\n  if info.filename=='xl/worksheets/sheet2.xml':\n   xml=ET.fromstring(data);cell=xml.find('.//s:c[@r=\"B2\"]/s:v',ns)\n   assert cell is not None and cell.text=='23.5'\n   cell.text='999';data=ET.tostring(xml,encoding='utf-8')\n  new.writestr(info,data)\nprint('Created disposable cache corruption')",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z"
+      ],
+      "exit": 0,
+      "stdout": "issue-001: 47 cells,6 formulas/caches; independent decimal total 23.50,count4\r\nissue-002: 47 cells,6 formulas/caches; independent decimal total 34.75,count4\r\nCreated disposable cache corruption\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\validate-orders.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\corrupt.xlsx",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs\\issue-001\\orders.requirements.json"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "FAIL requirement Summary!B2.cached: expected 23.5; found 999\r\n"
+    },
+    {
+      "exe": "python",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts\\verify-demo-preservation.py",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\inputs"
+      ],
+      "exit": 0,
+      "stdout": "{\r\n  \"changedZipMembers\": [\r\n    \"xl/worksheets/sheet1.xml\",\r\n    \"xl/worksheets/sheet2.xml\"\r\n  ],\r\n  \"formulaViewCellDeltas\": [\r\n    [\r\n      \"Orders\",\r\n      \"C2\",\r\n      2,\r\n      3\r\n    ]\r\n  ],\r\n  \"typesFormatsStylesPreserved\": true\r\n}\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts\\c1-discovery-proof.mjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int",
+        "C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation\\input-validation-PhcW8Z\\recursive-discovery.json"
+      ],
+      "exit": 0,
+      "stdout": "PASS: actual README/issued recipe matches; nested failure then success; bare node --test failure then success; sorted recursive paths and empty-suite refusal; originals unchanged\n",
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "-c",
+        "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "1676dc86470bbcb31cdcc97ef4bd75711369f6a8\n",
+      "stderr": ""
+    }
+  ]
+}

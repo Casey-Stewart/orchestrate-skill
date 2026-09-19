@@ -1,0 +1,3 @@
+Synthetic input integrity sentinel
+Café 東京
+Same text; every byte matters.

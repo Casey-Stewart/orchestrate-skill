@@ -1,0 +1,93 @@
+[
+  {
+    "id": "orders-original",
+    "path": "issue-001/orders.xlsx",
+    "requirements": "Three sheets Orders/Summary/Types; text IDs 0001–0004, numeric/zero/negative/discount/Unicode/date/boolean/empty edges, six formulas with caches, total 23.50 and count 4.",
+    "use": "Copy to the named disposable workbook before editing; see WORKING-COPY.md.",
+    "reset": "Close and replace only the working copy from the immutable original."
+  },
+  {
+    "id": "orders-requirements",
+    "path": "issue-001/orders.requirements.json",
+    "requirements": "Independent manifest declares every required sheet, cell, type, format, formula and cached value.",
+    "use": "Read-only requirements for the delivered validator.",
+    "reset": "Use a new disposable package; never edit the issued manifest."
+  },
+  {
+    "id": "orders-generator",
+    "path": "issue-001/generate-orders.py",
+    "requirements": "Deterministic stdlib generator; refuses existing output paths.",
+    "use": "Run with literal python and a new output file path.",
+    "reset": "Generate to another new temporary file."
+  },
+  {
+    "id": "orders-validator",
+    "path": "issue-001/validate-orders.py",
+    "requirements": "Independent openpyxl formula/data-only checks; named failure for corruption.",
+    "use": "Run with literal python, workbook path and requirements path.",
+    "reset": "Restore corrupted working copies from their issued originals."
+  },
+  {
+    "id": "workbook-copy-reset",
+    "path": "issue-001/WORKING-COPY.md",
+    "requirements": "Exact PowerShell source/destination, open, change C2, expected results and reset commands.",
+    "use": "Read and follow for human Excel step.",
+    "reset": "Close and recopy the disposable workbook; original stays unchanged."
+  },
+  {
+    "id": "discovery-runner",
+    "path": "issue-001/recursive-discovery/run-validation.ps1",
+    "requirements": "Recursive FullName-sorted discovery, no-suite guard, test failure propagation and diff check.",
+    "use": "Copy whole recursive-discovery directory into a disposable Git repo and run from its root.",
+    "reset": "Use a fresh directory copied from issued files."
+  },
+  {
+    "id": "discovery-control",
+    "path": "issue-001/recursive-discovery/tests/control.test.cjs",
+    "requirements": "Passing top-level control test.",
+    "use": "Run through the supplied discovery command in a disposable copy.",
+    "reset": "Restore from this original."
+  },
+  {
+    "id": "discovery-sentinel",
+    "path": "issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+    "requirements": "Named nested test deliberately fails; correcting only false to true makes it pass.",
+    "use": "Edit only the disposable copy during the fail/pass proof.",
+    "reset": "Restore this deliberately failing original in a new copy."
+  },
+  {
+    "id": "discovery-directions",
+    "path": "issue-001/recursive-discovery/README.md",
+    "requirements": "Names the actual nested sentinel and failure/success/empty-suite expectations.",
+    "use": "Read-only instructions for delivered runner and files.",
+    "reset": "Use fresh copies; preserve originals."
+  },
+  {
+    "id": "text-lf",
+    "path": "issue-001/text/lf-input.txt",
+    "requirements": "UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity.",
+    "use": "Copy before changing line endings for stale-digest test.",
+    "reset": "Replace disposable copy from immutable original."
+  },
+  {
+    "id": "text-crlf",
+    "path": "issue-001/text/crlf-input.txt",
+    "requirements": "Same synthetic text content with CRLF bytes; raw identity differs from LF.",
+    "use": "Read-only comparison or disposable copy for byte-preservation proof.",
+    "reset": "Replace disposable copy from immutable original."
+  },
+  {
+    "id": "demo-workbook",
+    "path": "issue-002/orders.xlsx",
+    "requirements": "Reissue demo: C2=3, F2=33.75, Summary!B2=34.75/count 4; other values/types/formulas/styles retained.",
+    "use": "Read-only changed-input demo; separate from original human working copy.",
+    "reset": "Keep both issue paths; reset browser demo marks on Before page."
+  },
+  {
+    "id": "demo-requirements",
+    "path": "issue-002/orders.requirements.json",
+    "requirements": "Explicit demo requirements reflect the changed quantity and dependent caches.",
+    "use": "Read-only revised manifest for the preserved demo workbook.",
+    "reset": "Retain issue-001 requirements alongside this new path."
+  }
+]

@@ -1,0 +1,22 @@
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawnSync} from 'node:child_process';import {createHash} from 'node:crypto';
+const repo=path.resolve(process.argv[2]||'.'),ledger=".agents/changes/OS-20260918-readonly-evidence-smoke-inputs",base='f918fe39762c70edb9a3424e54eaa208fd7c5727';
+const source=path.join(repo,ledger);const data=JSON.parse(fs.readFileSync(path.join(source,'smoke-C1.json'),'utf8'));
+const call=(exe,args)=>spawnSync(exe,args,{cwd:repo,encoding:'utf8',shell:false,windowsHide:true,timeout:60000,maxBuffer:8*1024*1024});
+const git=args=>{const r=call('git',args);if(r.error||r.status!==0)throw Error('Git probe failed: '+JSON.stringify(args)+' '+(r.stderr||r.error));return r.stdout.trim();};
+const branch=git(['branch','--show-current']);if(branch!==data.branch)throw Error('Wrong branch: '+branch+' expected '+data.branch);
+const ancestor=call('git',['merge-base','--is-ancestor',data.buildSha,'HEAD']);if(ancestor.status!==0)throw Error('Recorded tested SHA is not an ancestor of this checkout');
+if(git(['diff','--name-only',data.buildSha,'HEAD','--','README.md','orchestrate','tests','.gitattributes']))throw Error('Source changed after the tested SHA; stop and request a refreshed checkpoint');
+if(git(['status','--porcelain','--','README.md','orchestrate','tests','.gitattributes']))throw Error('Source worktree is dirty; stop before the canary');
+const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'orchestrate-c1-canary-'));const copy=path.join(scratch,'checkpoint');fs.cpSync(source,copy,{recursive:true});
+const intact=call(process.execPath,[path.join(repo,'orchestrate/tools/build-smoke-page.mjs'),path.join(copy,'smoke-C1.json'),path.join(copy,'intact-current.html')]);
+if(intact.status!==0)throw Error('The actual delivered inputs do not validate before the canary: '+intact.stderr);
+const input=path.join(copy,'evidence/C1/inputs/issue-001/orders.xlsx');const bytes=fs.readFileSync(input);const changed=Buffer.from(bytes);changed[changed.length-1]^=1;fs.writeFileSync(input,changed);
+const output=path.join(copy,'smoke-C1.html');const oldHTML=fs.readFileSync(output);const current=call(process.execPath,[path.join(repo,'orchestrate/tools/build-smoke-page.mjs'),path.join(copy,'smoke-C1.json'),output]);
+if(current.status===0||!/(sha|digest|hash|mismatch)/i.test(current.stderr))throw Error('Current builder did not reject the stale workbook digest: '+JSON.stringify(current));
+if(!fs.readFileSync(output).equals(oldHTML))throw Error('Rejected build altered the existing HTML');
+const oldBuilder=path.join(scratch,'old-builder.mjs'),oldTemplate=path.join(scratch,'old-template.html');
+for(const [target,p]of[[oldBuilder,'orchestrate/tools/build-smoke-page.mjs'],[oldTemplate,'orchestrate/references/smoke-page-template.html']]){const r=call('git',['show',base+':./'+p]);if(r.status!==0)throw Error('Cannot read starting artifact');fs.writeFileSync(target,r.stdout);}
+const old=call(process.execPath,[oldBuilder,path.join(copy,'smoke-C1.json'),path.join(copy,'baseline-accepted.html'),'--template',oldTemplate]);
+if(old.status!==0)throw Error('Starting builder did not show the opposite canary behavior: '+old.stderr);
+const report={branch,testedSHA:data.buildSha,head:git(['rev-parse','HEAD']),scratch,intactInputsValidated:true,mutatedInput:input,originalSha256:createHash('sha256').update(bytes).digest('hex'),mutatedSha256:createHash('sha256').update(changed).digest('hex'),current:{exit:current.status,stderr:current.stderr.trim(),oldHTMLPreserved:true},starting:{sha:base,exit:old.status,output:old.stdout.trim()},verdict:'PASS: current rejects tampered bytes; starting builder accepts/ignores them'};
+fs.writeFileSync(path.join(scratch,'canary-report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
