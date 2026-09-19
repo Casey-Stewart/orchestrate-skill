@@ -30,10 +30,14 @@ sessions.
    PROGRESS says — unless Notes record a capped tip repair awaiting the user's verdict,
    in which case ask, never re-spawn. Green → follow §Session algorithm.
 
-Implementer sub-agents: read this file + your `02-batches-NN-*.md` batch file ONLY, and
-work ONLY in the worktree your prompt names. The batch file carries the full spec text
-and codebase facts — it is authoritative. Do NOT re-derive scope from the original
-request or any external document.
+Implementer sub-agents: **your spawn prompt is authoritative.** It is self-contained —
+it carries your batch's full text plus every contract excerpt that binds you (file fence,
+conventions, guardrails, prohibitions, validation commands), so do NOT read this contract
+at boot. Consult it only if the prompt is incomplete, contradicts itself, or is missing a
+fact the work needs, and then read only the section you need. Work ONLY in the worktree
+your prompt names. Your batch file carries the full spec text and codebase facts — it is
+authoritative for scope. Do NOT re-derive scope from the original request or any external
+document.
 
 ## Roles, gates, tiers
 

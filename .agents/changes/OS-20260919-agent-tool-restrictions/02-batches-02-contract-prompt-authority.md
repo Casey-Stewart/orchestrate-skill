@@ -133,20 +133,24 @@ first two assertions fail.
 
 ## Checklist
 
-- [ ] Replace lines 33–36 of `orchestrate/templates/00-READBEFORE.md` with wording that
+- [x] Replace lines 33–36 of `orchestrate/templates/00-READBEFORE.md` with wording that
       carries all three required points. Surgical — do not reflow neighbouring text, do
       not renumber or restructure the `## Boot sequence` steps above it, do not touch
       `## Roles, gates, tiers` below it.
-- [ ] Add `tests/contract-prompt-authority.test.cjs` with the four assertion groups above,
+- [x] Add `tests/contract-prompt-authority.test.cjs` with the four assertion groups above,
       including the `existsSync`-guarded archived-ledger check.
-- [ ] Confirm by hand that the new test fails against the base template, then passes after
+- [x] Confirm by hand that the new test fails against the base template, then passes after
       the edit (this is the failing-on-base evidence the gate will ask for; report the
       command and result).
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/agent-tool-restrictions-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence — especially any
       accidental edit under `.agents/`.
-- [ ] Commit on `fix/contract-prompt-authority` — `fix: make the spawn prompt authoritative over the contract at boot (batch 02)`.
+- [x] Commit on `fix/contract-prompt-authority` — `fix: make the spawn prompt authoritative over the contract at boot (batch 02)`.
+- [x] polish: pin the implementer paragraph exactly (assertion strength — reviewer ASK 1),
+      and assert no other passage in the template reinstates a boot-time full read.
+- [x] polish: guard every filled ledger contract by glob over `.agents/archive/*` and
+      `.agents/changes/*` instead of one hardcoded path (coverage gap — reviewer ASK 2).
 
 ## Acceptance criteria
 
