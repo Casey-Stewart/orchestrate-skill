@@ -16,6 +16,11 @@ const mainModel = JSON.parse(read('smoke-C1.json'));
 const steps = model => model.sections.flatMap(section => section.steps);
 const step = (model, n) => steps(model).find(item => item.n === n);
 const plain = html => html.replace(/<[^>]*>/g, '');
+const introduction = html => {
+  const match = html.match(/<p class="standfirst">([\s\S]*?)<\/p>/);
+  assert.ok(match, 'issued page exposes its introduction');
+  return match[1];
+};
 
 async function page(html, storage = {}) {
   const elements = new Map(), timers = new Map();
@@ -92,25 +97,42 @@ async function page(html, storage = {}) {
   };
 }
 
-// Read the action order from the actual displayed prose. The step-1 Pass can
-// precede this route, so start at the last verdict before the note action. Unlike
-// an exact-string expectation, old "Pass and enter" prose really clicks Pass and
-// then fails at the hidden field; omitted/reordered/final-toggled verdicts fail too.
-function noteRoute(prose) {
-  const tokens = [...plain(prose).matchAll(/\bWorks,\s*but\b|\bPass\b|\b(?:enter|add)\s+(?:[“"]keep this note[”"]|a note\b)/gi)]
-    .map(match => /^works/i.test(match[0]) ? 'Works, but' : /^pass$/i.test(match[0]) ? 'Pass' : 'note');
-  assert.equal(tokens.filter(token => token === 'note').length, 1, 'instructions include one note-entry action');
-  const noteIndex = tokens.indexOf('note');
-  assert.ok(noteIndex > 0, 'instructions select a verdict before entering a note');
-  return tokens.slice(noteIndex - 1);
+// Read every verdict and its target from the displayed instructions, including
+// the prerequisite step. Context comes only from a standalone step's heading;
+// whole-route prose must state its own targets. Legacy "both steps Pass" remains
+// executable so the base fails at its actual hidden-field interaction.
+function noteRoute(prose, standaloneStep) {
+  let targets = standaloneStep === undefined ? [] : [standaloneStep];
+  const actions = [];
+  const tokens = /\b(?:enter|add)\s+(?:[“"]keep this note[”"]|a note\b)(?:\s+to (?:demo )?step (\d+))?|\b(?:both steps|(?:its )?two demo steps)\b|\b(?:demo )?step (\d+)\b|\bWorks,\s*but\b|\bPass\b/gi;
+  for (const match of plain(prose).matchAll(tokens)) {
+    const text = match[0];
+    if (/^(?:enter|add)\b/i.test(text)) {
+      const noteTargets = match[1] ? [Number(match[1])] : targets;
+      assert.equal(noteTargets.length, 1, 'note instructions identify exactly one target step');
+      actions.push({ n: noteTargets[0], action: 'note' });
+    } else if (/\b(?:both|two)\b/i.test(text)) {
+      targets = [1, 2];
+    } else if (match[2]) {
+      targets = [Number(match[2])];
+    } else {
+      assert.ok(targets.length, 'each instructed verdict has a stated target step');
+      for (const n of targets) actions.push({ n, action: /^works/i.test(text) ? 'Works, but' : 'Pass' });
+    }
+  }
+  assert.equal(actions.filter(item => item.action === 'note').length, 1, 'instructions include one note-entry action');
+  for (const item of actions) assert.ok([1, 2].includes(item.n), 'instruction target exists in the two-step demo');
+  return actions;
 }
 
-async function followRoute(prose) {
+async function followRoute(prose, standaloneStep) {
   const before = await page(beforeHTML);
-  before.click(1, 'Pass');
-  for (const action of noteRoute(prose)) {
-    if (action === 'note') before.note(2, 'keep this note');
-    else before.click(2, action);
+  // Standalone step 2 omits its prerequisite by design. The main/intro routes
+  // receive no seeded verdicts: they must establish both marks themselves.
+  if (standaloneStep === 2) before.click(1, 'Pass');
+  for (const { n, action } of noteRoute(prose, standaloneStep)) {
+    if (action === 'note') before.note(n, 'keep this note');
+    else before.click(n, action);
   }
   assert.equal(before.el('t-pass').textContent, 2, 'both demo steps finish Pass');
   assert.equal(before.record(2).status, 'pass');
@@ -130,6 +152,7 @@ async function followRoute(prose) {
   assert.deepEqual(after.record(2), record, 'the reissue must not rewrite the unaffected saved verdict or note');
   assert.match(after.copy(), /1\. NOT RE-RUN — previous PASS/);
   assert.match(after.copy(), /2\. PASS — keep this note/);
+  return after;
 }
 
 test('clean Pass hides the note field: the old Pass then note sequence is unusable', async () => {
@@ -140,22 +163,41 @@ test('clean Pass hides the note field: the old Pass then note sequence is unusab
   assert.equal(before.record(2).note, '', 'the rejected hidden-field action cannot fabricate a saved note');
 });
 
-for (const [name, instruction] of [
+for (const [name, instruction, standaloneStep] of [
   ['main human step 2', async () => (await page(mainHTML)).instruction(2)],
-  ['Before standfirst', async () => beforeHTML.match(/<p class="standfirst">([\s\S]*?)<\/p>/)[1]],
-  ['Before step 2', async () => (await page(beforeHTML)).instruction(2)],
-  ['After step 2', async () => (await page(afterHTML)).instruction(2)]
+  ['Before standfirst', async () => introduction(beforeHTML)],
+  ['Before step 2', async () => (await page(beforeHTML)).instruction(2), 2],
+  ['After step 2', async () => (await page(afterHTML)).instruction(2), 2]
 ]) {
   test(name + ' gives a visible note-entry route that survives the real reissue', async () => {
-    await followRoute(await instruction());
+    await followRoute(await instruction(), standaloneStep);
   });
 }
+
+test('emitted After introduction distinguishes visible rerun history from Copy results export', async () => {
+  const shown = introduction(afterHTML);
+  assert.equal(shown, afterModel.standfirst, 'emitted After introduction must match its corrected sidecar');
+  // Replay the introduction's own export claim against the real runtime rather
+  // than restating it here: a stale introduction cannot satisfy a derived check.
+  const claim = plain(shown).match(/Copy results as text reports [“"]([^”"]+)[”"]/);
+  assert.ok(claim, 'the emitted After introduction states what Copy results as text reports');
+  assert.match(plain(shown), /rerun-required history/, 'the emitted After introduction describes the visible step-1 history');
+  const after = await followRoute(introduction(beforeHTML));
+  const history = after.el('step-1').querySelector('.step-history');
+  assert.equal(history.hidden, false, 'the changed step shows rerun history on the page');
+  assert.match(history.textContent, /Run it again/, 'visible history asks for a re-run');
+  assert.doesNotMatch(history.textContent, /NOT RE-RUN/, 'NOT RE-RUN is an export label, never the visible history');
+  assert.ok(after.copy().includes(claim[1]), 'the export must report exactly what the introduction claims: ' + claim[1]);
+  assert.match(after.copy(), /1\. NOT RE-RUN — previous PASS/);
+});
 
 test('sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity', async () => {
   const before = await page(beforeHTML), after = await page(afterHTML), main = await page(mainHTML);
   assert.equal(before.instruction(2), step(beforeModel, 2).do);
   assert.equal(after.instruction(2), step(afterModel, 2).do);
   assert.equal(main.instruction(2), step(mainModel, 2).do);
+  assert.equal(introduction(mainHTML), mainModel.standfirst, 'emitted main introduction matches its sidecar');
+  assert.equal(introduction(beforeHTML), beforeModel.standfirst, 'emitted Before introduction matches its sidecar');
   assert.equal(beforeModel.buildSha, afterModel.buildSha);
   assert.equal(beforeModel.ckptKey, afterModel.ckptKey);
   assert.notEqual(mainModel.ckptKey, beforeModel.ckptKey, 'demo verdicts use isolated storage');

@@ -19,3 +19,6 @@ Fresh C1 QA failed step10 at source6c84b930aa4297283f94ce9eeacdff44d2b22ba4: the
 - [x] Regenerate all three pages from sidecars and prove expected delta only.
 - [x] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.
 - [x] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.
+
+- [x] polish: Replay complete prerequisite verdicts and explicit step targets from the displayed main and Before instructions; reject both hunter route mutations.
+- [x] polish: Verify the emitted After introduction matches its sidecar and distinguishes visible history from exported NOT RE-RUN; reject the hunter stale-introduction mutation.
