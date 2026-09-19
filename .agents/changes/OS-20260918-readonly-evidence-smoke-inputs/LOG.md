@@ -353,3 +353,8 @@ Original implementer follow-up after R1: BLOCKED @70f6baadd702425ef13741fe59d614
 ## repair-exception-approved
 
 User, verbatim: "Approved". Consumed for the proposed fix/B03-tip-only alternative proof. Original CRLF failure plus independently verified LF-only mutation accepted; R1 code review and hunter remain clean at unchanged70f6baadd702425ef13741fe59d614232e256744. No other contract amendment. Discovery rechecked all refs/worktrees, exact owner and main; same ledger grouped on owner and repair branch, retained repair-specific checklist changes visible, no ownership/target conflict, no main shipment. Frozen contract/plan blob identities unchanged.
+
+
+## repair-integrated
+
+Repair70f6baadd702425ef13741fe59d614232e256744 integrated with commits preserved at ce1f4448617a51031981d3180f7a681a5714dd93; dry run tree2bb3974821d690e6e6a3d0ee024554859c925f35, no conflict. Resume before merge reproduced only original63/64 CRLF assertion failure. After merge recursive FullName-sorted validation65/65 and diff check PASS. Exact evidence retained. User-approved exception resolves sole R1 proof finding, source unchanged from clean code/hunter review. Pending marker cleared; no main merge/push.
