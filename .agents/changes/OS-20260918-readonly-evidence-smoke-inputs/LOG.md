@@ -335,3 +335,11 @@ Final staged validation passed: git diff --cached --check is clean; exactly 14
 ledger files staged and no source paths; no unstaged changes; all batch plan copies
 match. Staged frozen-contract content SHA-256 equals the approved draft hash.
 All generated files are free of unfilled template/comment markers.
+
+## resume-20260918
+
+Continue boot examined all non-symbolic local/remote-tracking refs (including feat/tier1-tier2-protocol and origin/main), active-root checkout search, ownership/provenance and exact local shipment refs. One ACTIVE ledger found, at the approved scaffold; main and integration clean; no planned batch branches. No completed/archive copy exists at main. Git confirms integration not contained in main. No drift correction or silent shipment inference.
+
+Resume command: recursive Get-ChildItem tests -Filter *.test.cjs -File -Recurse, Sort-Object FullName, node --test --test-reporter=spec argument array. Result 63 pass / 1 fail of 64. Failure is tests/build-smoke-page.test.cjs:56 TypeError reading match [1], named "sections survive the fill verbatim and stay inside the script block". Existing LF-only regexp meets CRLF checkout (system core.autocrlf=true). Frozen contract repair-first rule applies before W1. Repair branch fix/B03-tip cut at scaffold, same reviewed mini-batch flow, fence tests/build-smoke-page.test.cjs only. Repair authority does not alter frozen contract/plan or W1 concurrency.
+
+Recorded literal python environment successfully reverified through authorized execution at Python310: 3.10.6/openpyxl 3.1.5. No substitute interpreter, package install, main checkout change, merge toward main or push.

@@ -50,7 +50,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | tip repair pending: fix/B03-tip @7f25d9a2f6befa6d047def65473b34dfa9da6c88; baseline CRLF test-harness failure; see LOG#resume-20260918 m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -81,3 +81,15 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|
 | 2026-09-18 | Discovery/interview/plan/pre-flight; baseline 64/64; base f918fe39762c70edb9a3424e54eaa208fd7c5727 | Plan approval pending; planning copy, no scaffold or open wave |
 | 2026-09-18 | User: "Okay, approved." Approved ledger scaffold; contract/plan and source provenance verified; no wave opened | New-mode scaffold STOP; awaiting start instruction |
+
+## Continue authorization and reconciliation — 2026-09-18
+
+User, verbatim: "This is explicit authorization to start W1 and implement the approved plan. Use Codex sub-agents for implementers, fresh independent reviewers, separate test hunters, and checkpoint QA according to the ledger."
+
+User, verbatim: "Execute W1: B01+B02 concurrently, then W2: B03, proceeding autonomously to final checkpoint C1 unless the contract requires an earlier stop."
+
+User, verbatim: "Do not merge into main or push."
+
+Discovery: one ACTIVE branch-only ledger on codex/readonly-evidence-smoke-inputs-ledger; main checkout remains on main. Owning integration/scaffold 7f25d9a2f6befa6d047def65473b34dfa9da6c88; local shipment refs/heads/main f918fe39762c70edb9a3424e54eaa208fd7c5727, not-contained (Git exit 1). All planned batch branches absent; no checkpoint verdict pending; both worktrees clean. Ledger provenance tree 6c90f82299b58d05209812d6f920c66082d357f9 matches scaffold. Frozen contract and plan unchanged.
+
+Resume validation: 63/64 Node tests pass; failing name "sections survive the fill verbatim and stay inside the script block". Existing CRLF template checkout exposes LF-only test extraction at tests/build-smoke-page.test.cjs:56. No wave opened. Required reviewed mini-batch fix/B03-tip owns tests/build-smoke-page.test.cjs only, plus permitted checklist edits in its repair batch. Literal python verified via authorized execution: Python 3.10.6, openpyxl 3.1.5, recorded Python310 path. Sandbox PATH denial was resolved, not a missing prerequisite.
