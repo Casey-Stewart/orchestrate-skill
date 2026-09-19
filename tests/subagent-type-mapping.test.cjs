@@ -61,34 +61,38 @@ function parse(text) {
   }
   assert.equal(open, -1, 'unbalanced ``` fence — the parse below would be wrong');
   const pick = predicate => lines.flatMap((line, at) => !fenced[at] && predicate(line) ? [{ line, at }] : []);
+  const headings = pick(l => l.startsWith('## '));
+  // The half-open line range of one `##` section, by heading text.
+  const bounds = heading => {
+    const k = headings.findIndex(h => h.line === heading);
+    assert.notEqual(k, -1, 'missing heading: ' + heading);
+    return [headings[k].at, k + 1 < headings.length ? headings[k + 1].at : lines.length];
+  };
   return {
-    lines,
-    headings: pick(l => l.startsWith('## ')),
+    lines, fenced, headings, bounds,
+    // A section's body as text, and its top-level bullets with their continuation
+    // lines. Both are cut from the fence-aware line map rather than by splitting raw
+    // text on `\n## ` or `\n- `, so a heading or bullet pasted into a fenced body
+    // stays body — every reader of this file goes through one of these.
+    section: heading => { const [s, e] = bounds(heading); return lines.slice(s + 1, e).join('\n'); },
+    bullets: heading => {
+      const [s, e] = bounds(heading), found = [];
+      for (let i = s + 1; i < e; i++) {
+        if (!fenced[i] && lines[i].startsWith('- ')) found.push([lines[i].slice(2)]);
+        else if (found.length) found[found.length - 1].push(lines[i]);
+      }
+      return found.map(b => b.join('\n'));
+    },
     spawns: pick(l => SPAWN.test(l)).map(s => ({ ...s, type: SPAWN.exec(s.line)[1] })),
     promptBlocks: blocks.filter(b => /^You /.test(b.first)),
   };
 }
 const doc = parse(prompts);
-
-// The half-open line range of one `##` section, by heading text.
-function bounds(heading) {
-  const k = doc.headings.findIndex(h => h.line === heading);
-  assert.notEqual(k, -1, 'missing heading: ' + heading);
-  return [doc.headings[k].at, k + 1 < doc.headings.length ? doc.headings[k + 1].at : doc.lines.length];
-}
-
-// A `##` section of either file, as text: for the prose assertions below.
-function section(text, heading) {
-  const start = text.indexOf('\n' + heading + '\n');
-  assert.notEqual(start, -1, 'missing heading: ' + heading);
-  const body = text.slice(start + heading.length + 2);
-  const next = body.indexOf('\n## ');
-  return next === -1 ? body : body.slice(0, next);
-}
+const proto = parse(protocol);
 
 test('every skeleton names its agent type above its prompt block', () => {
   for (const { heading, type, opens } of SKELETONS) {
-    const [start, end] = bounds(heading);
+    const [start, end] = doc.bounds(heading);
     const block = doc.promptBlocks.find(b => b.open > start && b.open < end);
     assert.ok(block, heading + ' has no prompt block');
     assert.ok(block.first.startsWith(opens),
@@ -116,10 +120,10 @@ test('the spawn lines are one consistent form, in the mapped order', () => {
   // and its prompt block — must there be no second spelling of it. Prose elsewhere in
   // the file may discuss the field however it likes.
   for (const { heading } of SKELETONS) {
-    const [start] = bounds(heading);
+    const [start] = doc.bounds(heading);
     const block = doc.promptBlocks.find(b => b.open > start);
     for (let i = start + 1; i < block.open; i++) {
-      if (doc.lines[i].includes('subagent_type:')) {
+      if (!doc.fenced[i] && doc.lines[i].includes('subagent_type:')) {
         assert.match(doc.lines[i], SPAWN, heading + ' carries a second spelling: ' + doc.lines[i]);
       }
     }
@@ -141,7 +145,7 @@ test('every named type resolves to a shipped definition', () => {
 test('§Spawning rules binds the orchestrator to the named type', () => {
   // Selected on both marks the rule carries, so that a future bullet mentioning the
   // field in passing is not mistaken for a second copy of this rule.
-  const bullets = section(prompts, '## Spawning rules (orchestrator)').split(/\n- /)
+  const bullets = doc.bullets('## Spawning rules (orchestrator)')
     .filter(b => b.includes('subagent_type') && /wildcard/i.test(b));
   assert.equal(bullets.length, 1, '§Spawning rules needs exactly one rule about the agent type');
   const bullet = flow(bullets[0]);
@@ -153,7 +157,7 @@ test('§Spawning rules binds the orchestrator to the named type', () => {
 });
 
 test('§Degraded environments documents the undefined-agent-types fallback', () => {
-  const bullets = section(protocol, '## Degraded environments').split(/\n- /)
+  const bullets = proto.bullets('## Degraded environments')
     .filter(b => b.includes('subagent_type') && b.includes('general-purpose'));
   assert.equal(bullets.length, 1, '§Degraded environments needs exactly one undefined-types bullet');
   const bullet = flow(bullets[0]);
@@ -168,8 +172,8 @@ test('§Degraded environments documents the undefined-agent-types fallback', () 
   // file that does not exist or to a project README that says nothing about agents.
   assert.match(bullet, /\.claude\/agents/, 'the bullet must say what to install and where');
   assert.match(bullet, /restart/i, 'and that Claude Code must be restarted before they load');
-  assert.doesNotMatch(bullet, /`README\.md`/,
-    'no bare README.md pointer — it dangles for every reader outside the skill repo');
+  assert.doesNotMatch(bullet, /README\.md/,
+    'no bare README.md pointer, backticked or not — it dangles for every reader outside the skill repo');
 });
 
 // Without the definitions these three lines are the ONLY thing holding a read-only role
@@ -185,7 +189,7 @@ const PROSE = new Map([
 
 test('the prose read-only rules survive in every read-only skeleton', () => {
   for (const [heading, rule] of PROSE) {
-    assert.ok(flow(section(prompts, heading)).includes(rule),
+    assert.ok(flow(doc.section(heading)).includes(rule),
       heading + ' lost its prose read-only rule: ' + rule);
   }
 });

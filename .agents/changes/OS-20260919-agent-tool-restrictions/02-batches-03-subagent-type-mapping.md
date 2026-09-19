@@ -170,6 +170,8 @@ content). It must assert:
       `git status --porcelain`; revert anything outside the fence.
 - [x] Commit on `feat/subagent-type-mapping` — `feat: name the agent type per skeleton and document the missing-agent fallback (batch 03)`.
 - [x] polish: correct the README fallback sentence — an unknown subagent_type errors, the orchestrator substitutes general-purpose itself
+- [x] polish: make `section()` fence-aware — replace the three `section(prompts, …)` call sites used by tests 5/6/7 with `bounds()`-derived slices
+- [x] polish: drop the backticks from the anti-regression README pattern so an unbackticked pointer is caught too
 
 ## Acceptance criteria
 
