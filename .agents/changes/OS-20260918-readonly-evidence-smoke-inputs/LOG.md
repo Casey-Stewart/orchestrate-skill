@@ -847,3 +847,71 @@ page still carries a gate block that cannot be pasted into the user's shell, and
 repair is already implemented, fence-clean and reviewed-pending. Landing it makes the
 permanent artifact honest; abandoning it would leave a known-broken gate in a ledger whose
 whole point is that any future session can drive it from the files alone.
+
+## C1-gate-repair-R1-SHIP
+
+Reviewer R1 SHIP @193e27f50c3e1b3977c71a2dea44049c22cea855, no P0 and no P1, three ASKs.
+Separate fresh hunter FINDINGS 3, all ASK, none requiring a production change. Six ASKs
+total; both roles ran on Claude Opus 5, fresh and independent, in parallel.
+
+Conductor 6a fence PASS, run before either role: worktree clean; three-dot diff against the
+integration branch is exactly 02-fix-B03-presmoke-00-gate.md (ticks only, 5/5),
+c1-gate-portability.test.cjs (added), smoke-C1.html and smoke-C1.json; both demo pages and
+both demo sidecars untouched, as required since their gates carry an empty commands array.
+
+The criterion that protects the user's already-recorded verdict was verified independently
+by the conductor and again by the reviewer: strip only gate.intro and gate.commands and the
+ENTIRE sidecar is byte-identical to the issued one — all 11 steps across do/pass/aside/
+inputs/revision/pre, plus buildSha, ckptKey, branch, sections, inputs and gate.checks. The
+reviewer additionally rebuilt the page in memory from the committed sidecar and got a
+raw-identical 170146 bytes, proving the HTML is builder output and not hand-edited.
+
+Failing-on-base confirmed twice independently, both at exit 1 with 4 of 7 failing: the
+cmd.exe arm reproduces the user's verbatim "'Set-Location' is not recognized as an internal
+or external command", the relocation arm reproduces the quotes welded into the filename, the
+PowerShell arm fails 3-of-4 dispatches, and the two-shell comparison fails on the argv
+mismatch. The reviewer also piped the block from the EMITTED page into a real cmd.exe and a
+real pwsh from an unrelated directory: both exit 0 with the correct branch, matching HEAD and
+canary PASS.
+
+The hunter's F1 is the substantive one and is exactly the kind of gap a hunter exists to
+find. A `cd "<wt-int>"` line followed by relative `git` and canary invocations SURVIVES the
+suite 7/7, because the assertion counts total dispatches rather than mapping per line: `cd`
+dispatches nothing while an `&&` line dispatches twice, so the count balances. It measured
+the consequence rather than asserting it — starting on D:, cmd.exe runs `cd "C:/…/wt-int"`
+with status 0, empty stderr and the working directory STILL on D:, so a user on any non-C:
+drive would silently gate their own directory, with no "not recognized" text for the
+unknown-command check to catch. That is the reported bug returning through a door the new
+test leaves open.
+
+F2: the expected root is derived from the block itself — only a suffix check — so renaming
+the target everywhere to wt-int-stale, or pointing all three lines at the main checkout on
+main at f918fe3, both pass 7/7. The gate would then prove its claim about the wrong tree.
+F3: the sidecar-to-page equality covers only gate.commands, and gate.checks are compared by
+COUNT, so reverting the emitted intro to the old Set-Location advice, or weakening
+gate.checks to "Canary output is informational" in the sidecar, both survive — the page the
+user reads could tell them to do the thing that broke.
+
+Reviewer ASK1 overlaps F1 from the other side: the shim list is hardcoded to git and node
+while the count assertion demands every line dispatch something, so a future portable line
+calling anything else fails with a false diagnosis. ASK2 asks for a comment naming the count
+assertion's second job, since the PowerShell arm's 3-of-4 failure on base is a policy check
+(Set-Location is a real cmdlet, so nothing external is dispatched) and a later reader could
+misread it as PowerShell being broken. ASK3 needs no code: measured in both real shells,
+spaces and apostrophes in a worktree path survive intact, but a `%…%` segment breaks cmd.exe
+and a `$…` segment breaks PowerShell, both expanding inside double quotes. gate.commands is
+authored data with no escaping layer, so this is recorded for future path choice rather than
+fixed.
+
+Also recorded from the hunter's coverage analysis: with pwsh stripped from PATH the suite
+reports exit 0, 4 passed, 3 skipped — green on a machine where the entire PowerShell half
+went unverified. The skip reason is printed, which is honest, but nothing fails.
+
+All six are test-only, so this is an ordinary polish pass under the frozen rules, not a FIX
+FIRST round and not a new review round. Production stays untouched; an ASK never licenses a
+behavior change.
+
+Housekeeping: an empty untracked file named `node` had appeared in the protected main
+checkout during this session — the tree was clean at session start, so it was this session's
+debris, not the user's. Inspected (0 bytes, untracked, created today) and removed; the main
+checkout is clean again and remains on main at f918fe3.
