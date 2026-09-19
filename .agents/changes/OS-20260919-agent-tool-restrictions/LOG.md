@@ -478,3 +478,51 @@ read from outside it — the dangling `README.md`, and "the generic `test-hunter
 told to sweep both new reference-file additions for any other phrasing that only makes
 sense to a reader sitting in the orchestrate-skill clone. That is the class this change
 keeps producing, because its product is a skill consumed elsewhere.
+
+### B03 — round 2: SHIP
+
+Fresh reviewer (not round 1's), given the five findings and `git diff edcce9c..HEAD`.
+Verdict **`R2 SHIP @86d41d6`**, all five marked **FIX VERIFIED**, suite 207/207.
+
+**The P1 is genuinely closed, and closed twice over.** The §Degraded bullet now ends in
+an *action* with two concrete destinations — copy the skill repo's `.claude/agents/*.md`
+into `~/.claude/agents/` (or one project's `.claude/agents/`), then restart — so there is
+no filename left to resolve from an unrelated repo. `grep -rn README
+orchestrate/references/` is empty. The reviewer confirmed by mutation that restoring the
+exact round-1 clause now fails the suite, and that deleting the install clause fails too.
+The test that had pinned the defect now pins the requirement.
+
+**Finding 3's survivor is dead.** With each skeleton's opening line pinned in a
+`SKELETONS` table and blocks resolved by the `/^You /` prompt-block rule rather than
+"first fence", deleting Implementer's main block fails 2 tests, Reviewer's fails 3,
+Convergence's fails 2. The reviewer verified this on a scratch copy outside the worktree,
+leaving the worktree clean for integration — the right instinct, and worth noting as the
+correct way to mutation-check something you are about to merge.
+
+**The deliberate non-change was upheld.** The implementer declined to rewrap the
+`see protocol.md §Degraded environments` cross-reference that splits across lines, on the
+grounds that a fix round should not carry unrequested reflow hunks. The reviewer agreed
+and went further: the assertion reads `flow(bullet)` so it matches anyway, every other
+long cross-reference in the file wraps the same way, and the Bash caveat in `README.md`
+wraps identically — so it is the repo's existing idiom, not a new wart. Declining to
+"improve" something outside the requested scope during a fix round was the correct call.
+
+**Two new ASKs, and the first is instructive.** `section()` — a sibling helper used by
+tests 5, 6 and 7 — still splits on a raw `\n## ` and is **not** fence-aware. So the
+round-1 finding-2 defect class survives in a second place: pasting a `## ` line into the
+Reviewer's, Test hunter's or Plan pre-flight's prompt body truncates the section and
+fails "the prose read-only rules survive" spuriously. The reviewer reproduced all three.
+The trigger is not hypothetical — it is exactly the ledger markdown those skeletons
+instruct an orchestrator to paste.
+
+That is the lesson worth keeping from this batch: **fixing the reported instance while
+leaving its twin in a sibling helper is how a defect class survives a fix round.** The
+polish brief asks for a sweep of every other helper in the file, not just the two call
+sites named.
+
+ASK B is belt-and-braces: the anti-regression guard matches only the *backticked*
+`` `README.md` ``, so an unbackticked "see README.md: …" would slip past it. The
+substantive assertions still carry the requirement, so nothing is currently wrong.
+
+Polish dispatched. Both ASKs live in the test file alone, so the polish is expected to
+close mechanically without a second scoped re-review.
