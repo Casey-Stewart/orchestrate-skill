@@ -8,7 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-W1 is stopped at B01’s second FIX FIRST. B01 is capped and unmerged; B02 is integrated and green. W2 has not opened and C1 has not been reached. A user verdict is required before further B01 implementation or dependent work.
+B01 third round is authorized and in progress with a fresh implementer at GPT-6 Astra / xhigh. B02 remains integrated and green. W2 waits for B01 integration; C1 has not been reached.
 
 ## Plan approval and integration worktree
 
@@ -47,9 +47,9 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⛔ green, residual finding open (P1) | 2026-09-18 | R1 FIX FIRST @b3ce33eb35dab7ac43472faa0f90220ff32a48dd; R2 FIX FIRST @fac37a5163db2bd816ece3b68e936ab534b7f77d; symbolic target namespace regression; current inherited tier; second-round cap, awaiting user; hunter R2 one ASK open (global-filter regression coverage); LOG#B01-R2-cap m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | R1/R2 FIX FIRST; fresh third-round implementer GPT-6 Astra / xhigh; both rounds’ findings retained; LOG#B01-R3-authorized m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0; verdict 2026-09-18 fix again spent → third round on codex/readonly-evidence-checker @fac37a5163db2bd816ece3b68e936ab534b7f77d |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Blocked by capped B01 dependency; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Waiting for authorized B01 third round; branch not created; W2 unopened m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -61,14 +61,15 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | Date | Checkpoint | Verdict | User notes |
 |---|---|---|---|
+| 2026-09-18 | B01 | fix again (consumed once) | "OKay, yeah do another round. Same level" |
 
 ## Item → batch coverage audit
 
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
-| 1a checker behavior and tests | request | B01 | — | ⛔ |
+| 1a checker behavior and tests | request | B01 | — | 🔄 |
 | 1b gate wiring and authority | request | B03 | — | ⬜ |
-| 2a Git helper and actual-helper scenarios | request | B01 | — | ⛔ |
+| 2a Git helper and actual-helper scenarios | request | B01 | — | 🔄 |
 | 2b evidence-only workflow use | request | B03 | — | ⬜ |
 | 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🟢 |
 | 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | ⬜ |
@@ -124,3 +125,11 @@ R2 FIX FIRST at fac37a5163db2bd816ece3b68e936ab534b7f77d. Recursive candidate va
 The frozen contract section6c requires the second FIX FIRST to leave B01 out of integration and stop after current-wave siblings finish. B02 is already reviewed/integrated/green. No third implementation attempt, W2, or C1 is authorized by the earlier repair-only exception. Choose fix again (one third round with a fresh implementer), ship with this residual (recorded residual plus human smoke step), or drop (dependent B03 then needs re-planning or dropping). The fresh hunter R2 report is retained under evidence/W1/B01/hunter-R2. It adds one test-only ASK: isolated global-filter coverage; actual candidate behavior is correct, but a local-only probe mutant survives105/105 tests. This does not reopen implementation. No user verdict has been inferred.
 
 Main remains unchanged on main at f918fe39762c70edb9a3424e54eaa208fd7c5727. No main merge or push. Frozen contract and locked plan blobs remain unchanged. C1 input preparation is retained only in external scratch; no checkpoint page or verdict is claimed.
+
+## B01 third round authorized — 2026-09-18
+
+User, verbatim: "OKay, yeah do another round. Same level"
+
+This explicitly authorizes one third B01 round with a fresh implementer on the retained batch branch at GPT-6 Astra (`gpt-6-astra`), `xhigh` effort, matching both prior rounds as verified in local session records. Both rounds’ findings and current diff are supplied; fresh independent reviewer and separate hunter follow the existing manual fence gate. Authorization consumed once in the B01 Notes marker. If this third round returns FIX FIRST, stop again with ship/drop choices; no fourth round is authorized. No other frozen rule changes.
+
+Discovery found one active ledger across all non-symbolic local/remote refs; older copies are proven by equal ledger-subtree trees and ledger-changing commit ancestry. Main and integration/candidate trees are clean; B02 is integrated, B01 is not, B03 is absent. Shipment local refs/heads/main is not-contained. Frozen contract/plan blobs unchanged. Resume validation65/65 and diff check PASS. Evidence: evidence/W1/B01/third-round/. Existing integration worktree reused.

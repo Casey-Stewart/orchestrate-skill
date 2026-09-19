@@ -487,3 +487,7 @@ Commands, from the candidate worktree:
 `node ../B01-hunter-r2-proof/config-scope-mutant.cjs <absolute-candidate-worktree>` — exit 0; verifies original/mutant distinction and mutant-suite exit 0.
 
 All W1 gates are now recorded. B02 is integrated and green; B01 is clean/unmerged and capped at fac37a5163db2bd816ece3b68e936ab534b7f77d. Stop for the user’s B01 verdict under the frozen contract. No third-round implementer, W2 branch or C1 issue was created. User choice fix again requires a fresh implementer on this branch, both rounds’ findings and current diff; it is not inferred from the earlier baseline-repair-only approval.
+
+## B01-R3-authorized
+
+User verdict, verbatim: "OKay, yeah do another round. Same level". Consumed once: third round on codex/readonly-evidence-checker @fac37a5163db2bd816ece3b68e936ab534b7f77d. Fresh implementer inherits GPT-6 Astra / xhigh, confirmed same setting as both earlier passes. Fix legal symbolic-ref target handling and global-filter coverage ASK; retain R1 fixes and inspect current diff. Manual gate and fresh independent reviewer/hunter remain mandatory. Resume discovery/reconciliation and65/65 validation passed; main and frozen source unchanged. W2 remains unopened until B01 passes and integrates. No fourth round or main merge/push is authorized.

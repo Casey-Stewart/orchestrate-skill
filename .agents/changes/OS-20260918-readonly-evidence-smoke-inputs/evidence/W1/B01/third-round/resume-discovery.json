@@ -1,0 +1,51 @@
+{
+  "integration": "a8c4a9657cc8aff3de3d9fa66fd9b0ef55a4e218",
+  "candidate": "fac37a5163db2bd816ece3b68e936ab534b7f77d",
+  "shipment": "f918fe39762c70edb9a3424e54eaa208fd7c5727",
+  "shipmentSource": "local",
+  "shipmentRef": "refs/heads/main",
+  "shipmentContained": false,
+  "b01Integrated": false,
+  "b02Integrated": true,
+  "b03Absent": true,
+  "frozen": {
+    "contract": "0add94797721d18049d4c7492daa5d6ea488dcda",
+    "plan": "5b145f8819af05db6bc166d2364b031942673007"
+  },
+  "discoveries": [
+    {
+      "ref": "refs/heads/codex/readonly-evidence-checker",
+      "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/PROGRESS.md",
+      "state": "**State**: ACTIVE",
+      "last": "b3ce33eb35dab7ac43472faa0f90220ff32a48dd",
+      "tree": "37f651651d6cfb679881518d0c95a5460c661c5b",
+      "ancestorOfIntegration": false,
+      "classification": "Known unmerged B01 checklist-only ledger copy; visible and reconciled under owning integration contract"
+    },
+    {
+      "ref": "refs/heads/codex/readonly-evidence-smoke-inputs-ledger",
+      "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/PROGRESS.md",
+      "state": "**State**: ACTIVE",
+      "last": "a8c4a9657cc8aff3de3d9fa66fd9b0ef55a4e218",
+      "tree": "d7e987c6c1702b979235ab6c28ee1ac2a094e1ed",
+      "ancestorOfIntegration": true
+    },
+    {
+      "ref": "refs/heads/codex/smoke-input-files",
+      "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/PROGRESS.md",
+      "state": "**State**: ACTIVE",
+      "last": "c78f4270fe678e8dd049a3bf8ff19b80348689bf",
+      "tree": "e63de52a8d4fc38abb43d3fcd00906a53abf7997",
+      "ancestorOfIntegration": true
+    },
+    {
+      "ref": "refs/heads/fix/B03-tip",
+      "file": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/PROGRESS.md",
+      "state": "**State**: ACTIVE",
+      "last": "70f6baadd702425ef13741fe59d614232e256744",
+      "tree": "3c962b71789d12df639c5313f2fec05e5693d3f1",
+      "ancestorOfIntegration": true
+    }
+  ],
+  "worktrees": "worktree C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\nHEAD f918fe39762c70edb9a3424e54eaa208fd7c5727\nbranch refs/heads/main\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\nHEAD a8c4a9657cc8aff3de3d9fa66fd9b0ef55a4e218\nbranch refs/heads/codex/readonly-evidence-smoke-inputs-ledger\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B01\nHEAD fac37a5163db2bd816ece3b68e936ab534b7f77d\nbranch refs/heads/codex/readonly-evidence-checker\n\n"
+}
