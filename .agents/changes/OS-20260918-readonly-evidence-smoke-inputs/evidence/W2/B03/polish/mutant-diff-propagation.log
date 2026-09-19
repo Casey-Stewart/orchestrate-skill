@@ -1,0 +1,76 @@
+✔ every template slot is filled, and the builder fills no slot the template lacks (2.936ms)
+✔ the same sidecar always produces the same bytes (1.1595ms)
+✔ sections survive the fill verbatim and stay inside the script block (LF template) (0.6832ms)
+✔ sections survive the fill verbatim and stay inside the script block (CRLF template) (0.5636ms)
+✔ facts render in the documented order, with the old version struck through (0.6008ms)
+✔ the gate renders the documented structure (0.2745ms)
+✔ derived headings can be overridden without touching the template (0.7371ms)
+✔ a sidecar that would produce a broken run sheet is refused (0.5438ms)
+✔ ordinary punctuation in a plain name never breaks the generated script (4.7927ms)
+✔ embedded data cannot introduce HTML parser tokens and round-trips unchanged (3.4575ms)
+✔ step and section numbers must be ones the page can tell apart (0.2755ms)
+✔ keys and provenance that the page cannot use are refused (0.5434ms)
+✔ checkpoint storage keys cannot be coerced from other JSON types (0.2047ms)
+✔ reissues append after existing steps, in the final section or new sections (0.7017ms)
+✔ reissues reject deletion, renumbering, reordering, and insertion before old steps (0.5618ms)
+✔ instruction changes require revision increases even on the same build (1.1822ms)
+✔ changing section instructions requires increasing every affected existing revision (1.1095ms)
+✔ later reissues cannot lose previous revision increases, including by omission (0.526ms)
+✔ page facts, evidence, and JSON key order do not invalidate unchanged instructions (0.413ms)
+✔ checkpoint identity is stable and a clean sheet requires an explicit new storage key (0.4593ms)
+✔ the command line writes the page, or explains why it did not (241.2431ms)
+✔ CLI reissues require the last issued snapshot and preserve the old page on failure (1234.4793ms)
+✔ legacy pages require a reproducible baseline before their first guarded reissue (163.8779ms)
+✔ imported builder requires actual root/bytes and never accepts supplied digests on faith (15.1261ms)
+✔ CLI validates files beside output, preserving old HTML on file, digest, evidence and metadata failures (898.443ms)
+✔ CLI reissue refuses to overwrite the existing HTML declared as an issued input (191.9878ms)
+✔ shared stable IDs require EVERY referencing revision for path, bytes and all semantic metadata changes (41.8361ms)
+✔ shared validation report identity changes invalidate all input consumers and require its historical bytes (15.9513ms)
+✔ LF/CRLF-only reissue refuses stale bytes then enforces new paths, all revisions and multi-issue history (709.7148ms)
+✔ Recovery and capped-verdict tables agree exactly after placeholder normalization (1.9682ms)
+✔ template placeholders and registry match in both directions (5.6196ms)
+✔ generated contract bakes helper grammar, outcomes, fallback and full input responsibility (5.3868ms)
+✔ reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact (5.9953ms)
+✔ published helper recipes execute actual CLIs and generated batch grammar passes the real fence (10070.8985ms)
+✖ actual README recursive command and portable form discover nested failure then success; empty primary discovery fails (4240.059ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 34
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14433.153
+
+✖ failing tests:
+
+test at tests\protocol-contract.test.cjs:183:1
+✖ actual README recursive command and portable form discover nested failure then success; empty primary discovery fails (4240.059ms)
+  AssertionError [ERR_ASSERTION]: ✔ top-level discovery control (0.7814ms)
+  ✔ UNIQUE nested discovery sentinel (1.1864ms)
+  ✔ last discovery control (0.7471ms)
+  ℹ tests 3
+  ℹ suites 0
+  ℹ pass 3
+  ℹ fail 0
+  ℹ cancelled 0
+  ℹ skipped 0
+  ℹ todo 0
+  ℹ duration_ms 83.6959
+  tracked-diff-control.txt:1: trailing whitespace.
+  +tracked trailing whitespace
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-polish\mutant-diff-propagation\tests\protocol-contract.test.cjs:219:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 0,
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }

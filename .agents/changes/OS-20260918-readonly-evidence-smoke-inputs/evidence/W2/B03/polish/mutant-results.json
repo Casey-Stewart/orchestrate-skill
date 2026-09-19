@@ -1,0 +1,73 @@
+{
+  "source": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03",
+  "baseline": "PASS",
+  "bothExactMutants": "KILLED",
+  "runs": [
+    {
+      "name": "baseline",
+      "command": "C:\\Program Files\\nodejs\\node.exe --test --test-reporter=spec tests/build-smoke-page.test.cjs tests/protocol-contract.test.cjs",
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-polish\\baseline",
+      "exit": 0,
+      "tail": [
+        "✔ template placeholders and registry match in both directions (6.1863ms)",
+        "✔ generated contract bakes helper grammar, outcomes, fallback and full input responsibility (7.0285ms)",
+        "✔ reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact (6.4737ms)",
+        "✔ published helper recipes execute actual CLIs and generated batch grammar passes the real fence (9864.9714ms)",
+        "✔ actual README recursive command and portable form discover nested failure then success; empty primary discovery fails (6043.4246ms)",
+        "ℹ tests 35",
+        "ℹ suites 0",
+        "ℹ pass 35",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 16031.4754",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-output-guard",
+      "command": "C:\\Program Files\\nodejs\\node.exe --test --test-reporter=spec tests/build-smoke-page.test.cjs tests/protocol-contract.test.cjs",
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-polish\\mutant-output-guard",
+      "exit": 1,
+      "tail": [
+        "  0 !== 1",
+        "  ",
+        "      at TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-polish\\mutant-output-guard\\tests\\build-smoke-page.test.cjs:479:10)",
+        "      at Test.runInAsyncScope (node:async_hooks:214:14)",
+        "      at Test.run (node:internal/test_runner/test:1047:25)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: 0,",
+        "    expected: 1,",
+        "    operator: 'strictEqual',",
+        "    diff: 'simple'",
+        "  }",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-diff-propagation",
+      "command": "C:\\Program Files\\nodejs\\node.exe --test --test-reporter=spec tests/build-smoke-page.test.cjs tests/protocol-contract.test.cjs",
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-polish\\mutant-diff-propagation",
+      "exit": 1,
+      "tail": [
+        "      at Test.runInAsyncScope (node:async_hooks:214:14)",
+        "      at Test.run (node:internal/test_runner/test:1047:25)",
+        "      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)",
+        "      at Test.postRun (node:internal/test_runner/test:1173:19)",
+        "      at Test.run (node:internal/test_runner/test:1101:12)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: 0,",
+        "    expected: 0,",
+        "    operator: 'notStrictEqual',",
+        "    diff: 'simple'",
+        "  }",
+        ""
+      ]
+    }
+  ]
+}

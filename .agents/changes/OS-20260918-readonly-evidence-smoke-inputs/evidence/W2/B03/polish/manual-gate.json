@@ -1,0 +1,355 @@
+{
+  "verdict": "PASS",
+  "method": "Frozen manual conductor Git/blob check; new checker not used",
+  "id": "B03",
+  "integration": "709b002f987c232ed5b6da67e8d5fe093350b168",
+  "candidate": "800c0fac5735d7ed262eff86390ddae1d1ca249c",
+  "branch": "codex/workflow-input-delivery",
+  "mergeBase": "6e1fb4428e871760d8f31a99606c3ad68db5015f",
+  "fence": [
+    "README.md",
+    "orchestrate/SKILL.md",
+    "orchestrate/references/protocol.md",
+    "orchestrate/references/scaffolding.md",
+    "orchestrate/references/execution-models.md",
+    "orchestrate/references/subagent-prompts.md",
+    "orchestrate/references/smoke-page.md",
+    "orchestrate/references/smoke-page-template.html",
+    "orchestrate/templates/00-READBEFORE.md",
+    "orchestrate/templates/01-plan.md",
+    "orchestrate/templates/02-batch.md",
+    "orchestrate/templates/PROGRESS.md",
+    "orchestrate/tools/smoke-inputs.mjs",
+    "tests/smoke-inputs.test.cjs",
+    "orchestrate/tools/build-smoke-page.mjs",
+    "tests/build-smoke-page.test.cjs",
+    "tests/smoke-page.test.cjs",
+    "tests/protocol-contract.test.cjs"
+  ],
+  "extensions": [],
+  "changes": [
+    {
+      "status": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "README.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/SKILL.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/references/execution-models.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/references/protocol.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/references/scaffolding.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/references/smoke-page-template.html"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/references/smoke-page.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/references/subagent-prompts.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/templates/00-READBEFORE.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/templates/01-plan.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/templates/02-batch.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/templates/PROGRESS.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "orchestrate/tools/build-smoke-page.mjs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "orchestrate/tools/smoke-inputs.mjs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/build-smoke-page.test.cjs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/protocol-contract.test.cjs"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/smoke-inputs.test.cjs"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/smoke-page.test.cjs"
+      ]
+    }
+  ],
+  "batchEdits": [
+    {
+      "line": 111,
+      "type": "tick"
+    },
+    {
+      "line": 112,
+      "type": "tick"
+    },
+    {
+      "line": 113,
+      "type": "tick"
+    },
+    {
+      "line": 114,
+      "type": "tick"
+    },
+    {
+      "line": 115,
+      "type": "tick"
+    },
+    {
+      "line": 116,
+      "type": "tick"
+    },
+    {
+      "line": 117,
+      "type": "tick"
+    },
+    {
+      "line": 118,
+      "type": "tick"
+    },
+    {
+      "line": 119,
+      "type": "tick"
+    },
+    {
+      "line": 120,
+      "type": "tick"
+    },
+    {
+      "line": 121,
+      "type": "polish",
+      "text": "- [x] polish: Add a real CLI reissue regression that refuses an issued input/output HTML collision and preserves bytes; kill the exact output-guard deletion mutant."
+    },
+    {
+      "line": 122,
+      "type": "polish",
+      "text": "- [x] polish: Exercise Git diff failure propagation in the actual README runner after passing tests, restore the clean file, and kill the exact diff-propagation deletion mutant."
+    }
+  ],
+  "frozen": {
+    "contract": "0add94797721d18049d4c7492daa5d6ea488dcda",
+    "plan": "5b145f8819af05db6bc166d2364b031942673007"
+  },
+  "clean": true,
+  "worktreeAssociation": "worktree C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\nHEAD f918fe39762c70edb9a3424e54eaa208fd7c5727\nbranch refs/heads/main\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\nHEAD 709b002f987c232ed5b6da67e8d5fe093350b168\nbranch refs/heads/codex/readonly-evidence-smoke-inputs-ledger\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03\nHEAD 800c0fac5735d7ed262eff86390ddae1d1ca249c\nbranch refs/heads/codex/workflow-input-delivery\n\n",
+  "fixDiff": "M\t.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md\nM\ttests/build-smoke-page.test.cjs\nM\ttests/protocol-contract.test.cjs\n",
+  "batchDiff": "diff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md\nindex cfe867a..ff3a1ab 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md\n@@ -108,16 +108,18 @@ opening is a human step unless an actual spreadsheet runner is available.\n \n ## Checklist\n \n-- [ ] Wire/document helper probes and mechanical gate without changing decisions.\n-- [ ] Bake conductor input responsibilities into skill/references/templates/prompts.\n-- [ ] Implement and test smoke-input declarations, disk validation and per-step identities.\n-- [ ] Integrate input-byte validation and retained artifacts into smoke builder.\n-- [ ] Test raw delivered-byte hashes, LF/CRLF-only tampering and fresh autocrlf=true checkout preservation for active/archived input copies.\n-- [ ] Keep the machine-local Python path out of reusable templates while preserving this ledger's explicit environment fact.\n-- [ ] Render exact file links and use/reset instructions in existing page design.\n-- [ ] Enforce per-input affected revision invalidation and historical verdicts.\n-- [ ] Add builder/runtime/doc consistency regression tests and helper documentation.\n-- [ ] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).\n+- [x] Wire/document helper probes and mechanical gate without changing decisions.\n+- [x] Bake conductor input responsibilities into skill/references/templates/prompts.\n+- [x] Implement and test smoke-input declarations, disk validation and per-step identities.\n+- [x] Integrate input-byte validation and retained artifacts into smoke builder.\n+- [x] Test raw delivered-byte hashes, LF/CRLF-only tampering and fresh autocrlf=true checkout preservation for active/archived input copies.\n+- [x] Keep the machine-local Python path out of reusable templates while preserving this ledger's explicit environment fact.\n+- [x] Render exact file links and use/reset instructions in existing page design.\n+- [x] Enforce per-input affected revision invalidation and historical verdicts.\n+- [x] Add builder/runtime/doc consistency regression tests and helper documentation.\n+- [x] Replace README.md:177's fixed Node command with Get-ChildItem -Recurse, Sort-Object FullName and preserved failure propagation; prove nested tests/unit/*.test.cjs discovery with an actual failing-then-passing disposable sentinel; also publish the portable `node --test` form (bare, no directory argument — `node --test tests` fails on Node 22).\n+- [x] polish: Add a real CLI reissue regression that refuses an issued input/output HTML collision and preserves bytes; kill the exact output-guard deletion mutant.\n+- [x] polish: Exercise Git diff failure propagation in the actual README runner after passing tests, restore the clean file, and kill the exact diff-propagation deletion mutant.\n \n ## Acceptance criteria\n \n",
+  "commands": [
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "refs/heads/codex/readonly-evidence-smoke-inputs-ledger"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03",
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "show",
+        "709b002f987c232ed5b6da67e8d5fe093350b168:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03",
+      "args": [
+        "branch",
+        "--show-current"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "refs/heads/codex/workflow-input-delivery"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "merge-base",
+        "--all",
+        "709b002f987c232ed5b6da67e8d5fe093350b168",
+        "800c0fac5735d7ed262eff86390ddae1d1ca249c"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "diff",
+        "--name-status",
+        "-z",
+        "-M",
+        "709b002f987c232ed5b6da67e8d5fe093350b168...800c0fac5735d7ed262eff86390ddae1d1ca249c"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "show",
+        "6e1fb4428e871760d8f31a99606c3ad68db5015f:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "show",
+        "800c0fac5735d7ed262eff86390ddae1d1ca249c:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "709b002f987c232ed5b6da67e8d5fe093350b168:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "rev-parse",
+        "709b002f987c232ed5b6da67e8d5fe093350b168:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "diff",
+        "--name-status",
+        "-M",
+        "7a3ab268a0b318ce080065df628cb1b2386ed980..800c0fac5735d7ed262eff86390ddae1d1ca249c"
+      ],
+      "exit": 0
+    },
+    {
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "args": [
+        "diff",
+        "6e1fb4428e871760d8f31a99606c3ad68db5015f",
+        "800c0fac5735d7ed262eff86390ddae1d1ca249c",
+        "--",
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-batches-03-workflow-input-delivery.md"
+      ],
+      "exit": 0
+    }
+  ]
+}
