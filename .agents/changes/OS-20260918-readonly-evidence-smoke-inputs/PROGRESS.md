@@ -49,7 +49,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🟢 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair pending: step 10, fix/B03-presmoke-10 @9b40054dfc9571af25267050640f66bc00e7e619 m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🟢 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -83,6 +83,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | 2026-09-18 | User: "Okay, approved." Approved ledger scaffold; contract/plan and source provenance verified; no wave opened | New-mode scaffold STOP; awaiting start instruction |
 | 2026-09-18 | Approved baseline exception consumed; W1 opened; B02 integrated96f48ed and validated65/65; B01 candidatefac37a5 validated156/156 but reached R2 FIX FIRST | B01 second-round cap; waiting for fix again / ship with residual / drop. W2 unopened; C1 not reached |
 | 2026-09-19 | Reconciled: pre-smoke repair fix/B03-presmoke-10 in flight, reviewed SHIP @f2c2cee asks=2, worktree DIRTY with an uncommitted crashed polish draft and two unticked polish items; tip green (Node exit 0, diff check exit 0); resumed a FRESH polish implementer per the dirty-worktree Recovery row | Polish pass in flight; C1 not reissued, no verdict requested |
+| 2026-09-19 | Polish closed @af57f93 (6/6 ticked); conductor 6a fence PASS, six reviewed pages byte-identical to f2c2cee, 6b re-proved on base 9b40054 (exit 1, 6/7 fail by assertion), mutations A and C now fail; polished tip 187/187 + diff check + 7/7 regression; merge-tree 2db7fc98 conflict-free; merged f4815225 and tip revalidated 187/187 + 7/7 | C1 close-out next: re-run the invalidated pre-smoke steps, rebuild the pages at the tested SHA, then STOP for the user's C1 verdict |
 
 ## Continue authorization and reconciliation — 2026-09-18
 
@@ -180,3 +181,45 @@ it by execution, not trust it. Fence unchanged — c1-demo-instructions.test.cjs
 checklist ticks/appends; the six reviewed page files must stay byte-identical to f2c2cee.
 No production change is authorized by an ASK. No checkpoint has been reached or reissued
 and no user verdict is requested or inferred. No main merge or push.
+
+## C1 repair step 10 integrated — 2026-09-19
+
+Polish closed at af57f93ee80ebfaf76779e936603b01547316877. The conductor ran the
+mechanical close itself rather than accepting the implementer's claims.
+
+6a fence PASS. Worktree clean. `git diff --name-status -M f2c2cee..HEAD` is exactly two
+paths — c1-demo-instructions.test.cjs and the repair's own batch file — so the frozen
+ordinary-polish MECHANICAL closure applies: test/prose only, no production path, no
+scoped re-review, no new FIX FIRST round, and the recorded R1 SHIP is untouched. The
+whole-repair diff against the integration branch is exactly the seven approved fence
+paths plus the own batch file. Batch-file changes are ticks and appends only; 6/6.
+The six reviewed pages are byte-identical to the reviewed f2c2cee by blob id, so the
+reviewer's SHIP still covers precisely the artifacts it reviewed.
+
+6b failing-on-base re-proved on the POLISHED file, not inherited: detached worktree at
+repair base 9b40054dfc9571af25267050640f66bc00e7e619, setup n/a, TEST-ONLY file copied
+in, base pages untouched. Exit 1, tests 7, pass 1, fail 6, by
+`AssertionError: the instructed route must expose the note field before entering text` —
+an assertion failure on the named behavior, not a crash or setup failure.
+
+Both hunter ASKs verified genuinely closed by re-applying the mutations that previously
+survived 6/6, to disposable copies only: A `wrong-prerequisite-verdict` now exit 1,
+3 failures (`both demo steps finish Pass`); C `stale-after-visible-instructions` now
+exit 1, 1 failure (`emitted After introduction must match its corrected sidecar`);
+unmutated candidate exit 0, 7/7. Evidence: evidence/C1/repair-10/polish-close.md.
+
+Validation on the polished tip: 187/187, `git diff --check` exit 0, explicit ledger
+regression 7/7. Merge-tree dry run 2db7fc98b956d1959ace2b1449e214cac3fb964c, conflict
+free. Merged with commits preserved at f48152253cf9b1d9d8e4354a8d2c00fe760e4631;
+integration tip revalidated 187/187, diff check exit 0, regression 7/7. The pre-smoke
+repair pending marker is retired in this commit, as the contract requires.
+
+B03 stays 🟢. No batch row changes status: a failed pre-smoke step is a defect caught
+before the user's time was spent, never ❌. No checkpoint has been reached, no page has
+been issued, and no user verdict is requested or inferred. No main merge or push.
+
+Close-out still owed before C1 can be issued: re-run the pre-smoke steps the repair
+invalidated (the step-0 gate plus 9, 10, 11 — steps 3-8 carry over at revision 1 because
+the repair touched none of their covered files), advance buildSha to the tested
+integration SHA, rebuild all three pages through the reviewed builder from their
+sidecars, flip the covered rows 🟢 -> 🧪, then STOP with the combined script.

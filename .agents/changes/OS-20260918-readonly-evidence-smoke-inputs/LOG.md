@@ -608,3 +608,78 @@ TEST-ONLY copy onto base 9b40054 still fails by assertion, the two-path fence, t
 byte-identity requirement on the six reviewed pages, the frozen validation commands plus
 the explicit ledger regression, conventions, prohibitions and the fixed report shape.
 No production change is authorized; a production need is a BLOCKED report, not an edit.
+
+## C1-repair10-integrated
+
+Fresh polish implementer (Claude Opus 5 this session; the Codex CLI is absent, so the
+recorded GPT-6 Astra / xhigh tier could not be reproduced) committed af57f93 on
+fix/B03-presmoke-10, parent f2c2cee. It reported reading the crashed predecessor's
+uncommitted draft, reproducing its claims, keeping its core and adding two
+strengthenings of its own: a derived export claim — extracting the After introduction's
+own `Copy results as text reports "…"` clause and asserting the real export contains
+exactly that string while the visible history does not, instead of a hard-coded regex —
+and extending the introduction/sidecar comparison to the main and Before pages, not only
+After. It reported those additions catching two mutations the draft missed: reverting the
+After page AND its sidecar together (which defeats HTML/sidecar equality on its own), and
+a Before introduction drifting from its sidecar while the route stays executable.
+
+Conductor verification, run independently rather than accepted:
+
+- 6a fence. `git status --porcelain` empty. `git diff --name-status -M f2c2cee..HEAD` =
+  02-fix-B03-presmoke-10.md, c1-demo-instructions.test.cjs — two test/prose paths, so the
+  mechanical polish closure applies and no scoped re-review is owed. Full repair diff
+  `codex/readonly-evidence-smoke-inputs-ledger...HEAD` = the seven approved fence paths
+  plus the own batch file, no rename endpoint outside the fence, no extension. Batch-file
+  diff = four spec ticks plus the two appended polish items, now ticked; 6/6.
+- Page identity. Blob ids at HEAD equal those at the reviewed f2c2cee for all six pages:
+  smoke-C1.json 34d8435c, smoke-C1.html 11eb4700, smoke-C1-demo-before.json c8a9b7e3,
+  smoke-C1-demo-before.html 28187aee, smoke-C1-demo-after.json 8a60ffc1,
+  smoke-C1-demo-after.html 32cd3381. The R1 SHIP therefore still covers exactly what it
+  reviewed, and the polish changed no reviewed artifact.
+- 6b, re-proved on the polished file because the polish changed the test. Detached
+  worktree at 9b40054, setup n/a, only the TEST-ONLY file copied in, base pages verified
+  untouched, no production code imported. Exit 1; tests 7, pass 1, fail 6; first failure
+  `AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before
+  entering text` (actual true, expected false). The single pass is the test documenting
+  the unusable clean-Pass route, which correctly holds on the base too.
+  The session scratchpad could not host this worktree — checkout aborted with
+  `Filename too long` on the deepest evidence paths — so a short path was used and
+  removed afterwards.
+- Surviving-mutation spot check, on disposable copies only, never the worktree.
+  A `wrong-prerequisite-verdict` (4 files, `mark demo step 1 Pass.` ->
+  `mark demo step 1 Works, but.`): exit 1, tests 7, pass 4, fail 3, first failure
+  `both demo steps finish Pass` — a runtime consequence, which is what the hunter asked
+  for, not a prose literal. C `stale-after-visible-instructions` (After HTML standfirst
+  reverted, sidecar deliberately left correct): exit 1, tests 7, pass 6, fail 1,
+  `emitted After introduction must match its corrected sidecar`. Both previously survived
+  6/6. Restoring both files: exit 0, 7/7. B shares A's mechanism; the implementer reported
+  it failing identically and A was the one re-verified here. The implementer's other eight
+  mutation results are its own evidence and were not re-verified.
+- Validation on the polished tip: 6 suites, 187 passed, 0 failed, 0 skipped, Node exit 0;
+  `git diff --check` exit 0; explicit ledger regression 7/7 exit 0; worktree clean.
+
+Integration: merge-tree dry run 2db7fc98b956d1959ace2b1449e214cac3fb964c, conflict free.
+`git merge --no-ff` at f48152253cf9b1d9d8e4354a8d2c00fe760e4631, commits preserved;
+8 files changed, 239 insertions, 25 deletions, c1-demo-instructions.test.cjs created.
+Tip revalidated: 187/187, diff check exit 0, regression 7/7. Branch ancestry confirms
+integration. The `pre-smoke repair pending:` marker is removed in the commit recording
+this merge, per the contract's marker rule.
+
+Repair metrics: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0. B03's own row token is
+unchanged — it measures B03, not this repair.
+
+Still owed before C1 is issued. The repair rewrote the delivery prose in all six page
+files, so under §Smoke checkpoints every pre-verified label whose covered files it touched
+is invalidated and must be re-run: the step-0 gate (its canary prints the tip, which has
+moved), step 9 (its disposable package is built from the C1 sidecars), step 10 (the step
+that failed) and step 11 (it exercises the generated demo pages and their saved verdicts).
+Steps 3-8 cover the Git evidence helpers, fence checks, literal-python workbook semantics,
+reproduction, fresh-checkout byte preservation and recursive discovery — none of which the
+repair touched — so their revision-1 evidence stays applicable and the page will label it
+carried-over, exactly as the frozen delivery rules intend. Steps 1 and 2 remain human;
+step 2 is the prose the repair corrected, so its revision advances 1 -> 2 along with both
+demo step 2 revisions, as the repair fence already recorded. buildSha advances from
+6c84b930aa4297283f94ce9eeacdff44d2b22ba4 to the tested integration SHA before the page
+commit, and all three pages are rebuilt through the reviewed builder from their sidecars
+with explicit inputRoot and the last issued sidecar as `--previous`; no page is
+hand-edited.
