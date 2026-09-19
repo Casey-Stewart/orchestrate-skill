@@ -8,7 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 B03 is now in progress. C1 has not been reached.
+W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 B03 is reviewed, polished, integrated and green. C1 close-out is now preparing its actual inputs and independent QA; no checkpoint verdict has been requested yet.
 
 ## Plan approval and integration worktree
 
@@ -49,7 +49,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🔄 | 2026-09-18 | R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; fresh GPT-6 Astra / xhigh; LOG#B03-polish-closed m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🟢 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -68,11 +68,11 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
 | 1a checker behavior and tests | request | B01 | — | 🟢 |
-| 1b gate wiring and authority | request | B03 | — | 🔄 |
+| 1b gate wiring and authority | request | B03 | — | 🟢 |
 | 2a Git helper and actual-helper scenarios | request | B01 | — | 🟢 |
-| 2b evidence-only workflow use | request | B03 | — | 🔄 |
+| 2b evidence-only workflow use | request | B03 | — | 🟢 |
 | 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🟢 |
-| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | 🔄 |
+| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | 🟢 |
 | Starting protocol freeze, scheduling/cap and historical baseline evidence | run requirement | B00 conductor | — | baked and source provenance verified at scaffold |
 
 ## Session log

@@ -1,0 +1,7 @@
+C:\Users\fatbo\AppData\Local\Programs\Python\Python310\python.exe
+3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]
+3.1.5
+PASS tests\fixtures\smoke-inputs\orders.xlsx: 3 sheets, 47 declared cells, 6 formulas and numeric caches
+PASS leading-zero text IDs; numeric zero/negative/discount edges; Unicode; date; boolean; empty cells
+PASS Summary!B2 cached total 23.50; Summary!B3 cached order count 4; no macros/external links/errors
+PASS: merged workbook raw SHA256=e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f
