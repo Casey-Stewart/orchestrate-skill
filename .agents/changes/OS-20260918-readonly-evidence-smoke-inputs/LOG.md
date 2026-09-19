@@ -915,3 +915,74 @@ Housekeeping: an empty untracked file named `node` had appeared in the protected
 checkout during this session — the tree was clean at session start, so it was this session's
 debris, not the user's. Inspected (0 bytes, untracked, created today) and removed; the main
 checkout is clean again and remains on main at f918fe3.
+
+## C1-gate-repair-integrated
+
+Polish closed at 6bd47802bedd8f604427fd68861fe8d4bc6d3c29, 12/12 checklist, zero unticked.
+All seven ASKs closed and each proved by the mutation that previously survived, measured on
+disposable copies: F1 cd-plus-relative-paths 7/7 -> exit 1 with 3 failures; F2a stale-root
+rename and F2b main-checkout retarget each 7/7 -> exit 1 with 5; F3a/b/c intro and checks
+drift 7/7 -> exit 1; reviewer ASK1 inverted correctly (a portable `whoami` line that used to
+produce a FALSE failure now passes, because the shim is built from the line's own first
+token); ASK2 and ASK3 were comments; and the missing-pwsh case went from green-with-3-skips
+to exit 1 with 3 failures and zero skips.
+
+Conductor mechanical close, run independently. Worktree clean. `git diff --name-status -M
+193e27f5..HEAD` = the test file and the batch file only, both test/prose paths, so the frozen
+ordinary-polish mechanical closure applies and no scoped re-review is owed. Full fence
+unchanged at the four expected paths. smoke-C1.json blob b342ae75fadc27b1550258373bc2d6b2c2658491
+and smoke-C1.html blob 0c76e3d74371707ad13de7d9cec5333402344c00 are byte-identical to the
+reviewed 193e27f5, so the R1 SHIP still covers exactly what it reviewed and the user's
+recorded C1 verdict is untouched.
+
+The conductor re-ran the headline mutation itself rather than accept it on report: the
+cd-plus-relative variant now fails exit 1, 4 pass / 3 fail, with `cmd.exe line 1 (cd "…")
+launched git; every instructed line must dispatch a command this shell can actually run`
+and, from a genuine D: staging directory, `the gate points a shell at D:\c1-gate-wUOuNd\work,
+which is not a git worktree that knows branch codex/readonly-evidence-smoke-inputs-ledger`.
+The drive-laundering case the hunter measured is caught live on a real second volume.
+
+Validation on the polished tip: 187/187, diff check exit 0, c1-demo-instructions 7/7,
+c1-gate-portability 7/7, zero skipped — the zero confirms the pwsh-required change is
+active rather than silently skipping. Merge-tree fcbb87b3cf68a0d5c077fea6c10bc4ec31b7cc0d
+conflict free; merged at 35926ec6c70178276ea1a689643e0a29ce27e65b with commits preserved.
+Tip revalidated identically, and step 0 re-run PASS, which a pre-smoke repair requires;
+evidence in evidence/C1/step-00-gate-rerun.md.
+
+Repair metrics: rounds=0 asks=6 fence-bounces=0 gate=6/0 tip-red=0. B03's own row token is
+unchanged — it measures B03, not this repair. The `pre-smoke repair pending:` marker is
+retired in the commit recording this merge; the three remaining occurrences of that phrase in
+PROGRESS are historical narrative in the session-record sections, not live markers in the
+Notes cell §Recovery reads.
+
+Accepted trade-off, recorded rather than buried. Closing F2 required the regression to check
+the gate's target against git's own worktree records, because a wrong-but-EXISTING repository
+can only be detected by looking at the real thing. The cost is that
+c1-gate-portability.test.cjs now depends on the wt-int worktree existing and still holding the
+integration branch. It is ledger-local and never runs in the frozen recursive suite, so it
+cannot redden ordinary validation; but invoked directly after a prune it fails with a
+confusing wrong-worktree message. The close-out therefore proposes deleting merged BRANCHES
+while explicitly excluding the wt-int worktree from cleanup.
+
+## change-COMPLETE
+
+Every batch ✅, none dropped, final checkpoint passed on the user's verdict. Coverage audit
+shows zero unaccounted items, built from PROGRESS rows plus Git because the convergence pass
+is off for this ledger — the hand-over says so, as required. Version and changelog are `none`
+and no such files exist, so that work is skipped deliberately and stated. One new bug class
+distilled into the contract's Repo conventions: delivered instructions must be executable in
+the reader's actual environment, proven by a runtime-backed test, enforced by
+c1-demo-instructions.test.cjs and c1-gate-portability.test.cjs. Three residuals filed as
+OS-BL-001 through OS-BL-003.
+
+Scoreboard worth keeping. Two defects reached the user across this change, and both were the
+same class: instructions that could not be followed in the environment the reader actually
+had. Neither was caught by a reviewer, a hunter or a pre-smoke run — the step-10 route was
+caught by the QA runner only because it drove the real runtime, and the gate was caught by
+the user's own terminal. The guardrail and its two enforcing tests exist because of that, and
+the C1 checkpoint metric records escaped=1 rather than a flattering zero.
+
+No merge toward main and no push, per the user's recorded instruction. Local refs/heads/main
+stays at f918fe39762c70edb9a3424e54eaa208fd7c5727; origin/main is 18 commits behind it, so
+the user's earlier review-fix work is committed locally and unpushed. Both decisions are
+theirs.

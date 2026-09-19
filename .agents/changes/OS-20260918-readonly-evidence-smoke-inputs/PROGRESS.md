@@ -2,7 +2,7 @@
 
 **Identifier**: OS-20260918-readonly-evidence-smoke-inputs
 **Started**: 2026-09-18 · **Base**: f918fe39762c70edb9a3424e54eaa208fd7c5727
-**State**: FINAL CHECKPOINT PASSED — gate repair in flight
+**State**: COMPLETE
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 **Smoke page**: smoke-C1.html (ledger-relative, with smoke-C1-demo-before.html and smoke-C1-demo-after.html)
@@ -53,7 +53,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ✅ | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | ✅ | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ✅ | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated; pre-smoke repair pending: step 00, fix/B03-presmoke-00 @8d27e891fc0a4e7882590232eeec96f993f9a59f; R1 SHIP @193e27f50c3e1b3977c71a2dea44049c22cea855 asks=6 m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ✅ | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated; pre-smoke repair step 00 INTEGRATED 35926ec6c70178276ea1a689643e0a29ce27e65b (fix/B03-presmoke-00; R1 SHIP @193e27f asks=6; polish closed @6bd4780; step 0 re-run PASS; repair m: rounds=0 asks=6 fence-bounces=0 gate=6/0 tip-red=0); LOG#C1-gate-repair-integrated m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
@@ -90,6 +90,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | 2026-09-19 | Reconciled: pre-smoke repair fix/B03-presmoke-10 in flight, reviewed SHIP @f2c2cee asks=2, worktree DIRTY with an uncommitted crashed polish draft and two unticked polish items; tip green (Node exit 0, diff check exit 0); resumed a FRESH polish implementer per the dirty-worktree Recovery row | Polish pass in flight; C1 not reissued, no verdict requested |
 | 2026-09-19 | Polish closed @af57f93 (6/6 ticked); conductor 6a fence PASS, six reviewed pages byte-identical to f2c2cee, 6b re-proved on base 9b40054 (exit 1, 6/7 fail by assertion), mutations A and C now fail; polished tip 187/187 + diff check + 7/7 regression; merge-tree 2db7fc98 conflict-free; merged f4815225 and tip revalidated 187/187 + 7/7 | C1 close-out next: re-run the invalidated pre-smoke steps, rebuild the pages at the tested SHA, then STOP for the user's C1 verdict |
 | 2026-09-19 | C1 close-out: advanced all three page build identities to tested SHA 49dfe07, rebuilt every page through the reviewed builder, re-ran the invalidated pre-smoke items (gate, 9, 10, 11) — all PASS, including the step 10 that failed before — recorded carried-over evidence for steps 3-8, and issued C1 | STOP at checkpoint C1: the user's verdict on human steps 1 and 2 is required |
+| 2026-09-19 | C1 PASSED on the user's verdict; opened, gated and integrated the step-00 gate portability repair (reviewer SHIP, hunter FINDINGS 3, six test-only ASKs closed and each proved by the mutation that previously survived); re-ran step 0 PASS at the merged tip; final coverage audit, distillation and residuals recorded | CHANGE COMPLETE. Awaiting the user's separate decisions on merging into local main and on pushing; neither is authorized. |
 
 ## Continue authorization and reconciliation — 2026-09-18
 
@@ -371,3 +372,83 @@ tested SHA really is checkpoint artifacts only, exactly as the gate text claims.
 The gate CONTENT is therefore sound; only the shell portability of the command block was
 defective, which is what fix/B03-presmoke-00 addresses. No numbered step verdict is implied
 by this gate run.
+
+## CHANGE COMPLETE — 2026-09-19
+
+Final checkpoint C1 passed on the user's recorded verdict; every batch is ✅ and no batch
+was dropped. The step-00 gate portability repair integrated at
+35926ec6c70178276ea1a689643e0a29ce27e65b after a conflict-free merge-tree
+fcbb87b3cf68a0d5c077fea6c10bc4ec31b7cc0d. Tip revalidated: 6 suites, 187/187, 0 skipped,
+Node exit 0; `git diff --check` exit 0; both ledger regressions 7/7 with 0 skipped. Step 0
+was re-run at the merged tip, as a pre-smoke repair requires — PASS, evidence in
+evidence/C1/step-00-gate-rerun.md.
+
+### Final coverage audit — zero unaccounted
+
+The convergence pass is OFF for this ledger, so this audit is built from the PROGRESS rows
+plus Git rather than from an independent read of the tip against every plan item. Saying so
+is part of the hand-over.
+
+| Request item | Batch | Resolution |
+|---|---|---|
+| 1a checker behavior and tests | B01 | merged dd32593ae06215f61abed695625024aa0c04b9b0 |
+| 1b gate wiring and authority | B03 | merged a70f302a8b46c5191ff8daddb3652e8d9bc6e471 |
+| 2a Git helper and actual-helper scenarios | B01 | merged dd32593ae06215f61abed695625024aa0c04b9b0 |
+| 2b evidence-only workflow use | B03 | merged a70f302a8b46c5191ff8daddb3652e8d9bc6e471 |
+| 3a reproducible Excel, scoped attributes, triple hashes, byte preservation, semantic validation | B02 | merged 96f48ed17931053e7c70aed58ba9e581c9e4e560 |
+| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery, reusable-path boundary | B03 | merged a70f302a8b46c5191ff8daddb3652e8d9bc6e471 |
+| Starting protocol freeze, scheduling/cap, historical baseline evidence | B00 conductor | baked at scaffold; source provenance verified |
+
+Repairs, all merged: fix/B03-tip ce1f4448617a51031981d3180f7a681a5714dd93 (baseline CRLF
+portability, under the user's recorded repair-only exception); fix/B03-presmoke-10
+f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (unusable note-entry route); fix/B03-presmoke-00
+35926ec6c70178276ea1a689643e0a29ce27e65b (gate not runnable in the user's shell). No item is
+unaccounted, no fold-ins were taken into this change, and nothing was dropped.
+
+### Version and changelog
+
+The contract records version files, bump cadence and changelog as `none`, and no such files
+exist in this repository. Per the frozen rule, version and changelog work is skipped at
+close-out, and this line is the required statement that it was skipped deliberately. Build
+identity is carried by the tested SHA and the behavioral canary instead, which is why the
+canary exists at all.
+
+### Distillation
+
+One new bug class was distilled into the contract's Repo conventions section: delivered
+instructions must be executable in the reader's actual environment, proven by a
+runtime-backed test rather than prose review. It escaped twice in this run and the USER
+found it both times, which is exactly why it earns a guardrail. It points at the two
+ledger-local tests that now enforce it.
+
+### Residuals
+
+OS-BL-001 (C1 human step wording — the user's works-but), OS-BL-002 (cleared demo verdicts
+leave inert records; needs a production template change no gate authorized), OS-BL-003 (a
+ledger evidence path exceeding Git's default Windows path limit, which forced short worktree
+roots for both repairs). All three are in bugs-2026-09-17.md with current evidence.
+
+### Cleanup proposal — for the user, not done
+
+Merged and safe to delete: codex/readonly-evidence-checker, codex/smoke-input-files,
+codex/workflow-input-delivery, fix/B03-tip, fix/B03-presmoke-10, fix/B03-presmoke-00, and
+feat/tier1-tier2-protocol (already contained in local main). This ledger could be moved to
+.agents/archive/ with `git mv`. Neither is done here.
+
+**Do NOT prune the wt-int worktree.** Closing hunter finding F2 required
+c1-gate-portability.test.cjs to check the gate's target against git's own worktree records,
+so that regression now depends on wt-int existing and still holding
+codex/readonly-evidence-smoke-inputs-ledger. It is ledger-local and never runs in the frozen
+recursive suite, but invoked directly after a prune it would go red with "the gate points a
+shell at … which is not a git worktree that knows branch …". That coupling is inherent to
+detecting a wrong-but-existing repository, and it is recorded here so a future session reads
+it as expected rather than as a defect.
+
+### Shipment
+
+Local refs/heads/main is UNCHANGED at f918fe39762c70edb9a3424e54eaa208fd7c5727 and does not
+contain the integration branch. origin/main is at a891df7b4ab864db3a63132b44750726fa78598b,
+18 commits behind local main — the user's earlier review-fix work is committed locally and
+has never been pushed. Nothing in this run was merged toward main and nothing was pushed, in
+keeping with the user's recorded instruction "Do not merge into main or push." Merging and
+pushing are two separate decisions that remain entirely the user's.

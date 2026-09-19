@@ -197,6 +197,10 @@ three lines say `none`, skip version/changelog work at close-out and say so.
 
 Keep the smoke page design unchanged except required input links and instructions. Preserve exact Recovery/verdict-table agreement after placeholder normalization. Keep template placeholders and registry consistent. Node tools run on Windows with shell-free argument arrays. Tests use disposable local repos, isolated configuration and synthetic files. The existing Markdown ledger remains the sole workflow record. No plan.json migration, production recovery engine or unrelated redesign.
 
+Distilled at close-out (2026-09-19), one new bug class this change uncovered:
+
+- **Delivered instructions must be executable in the reader's actual environment, proven by a runtime-backed test — never by prose review.** This class escaped twice here and both times the USER found it, not a gate: the C1 step-2 note route told a clean user to mark Pass then type a note, which the settled runtime makes impossible (the note field is hidden after a clean Pass), and the step-0 gate block assumed a PowerShell prompt, so it failed in the user's cmd.exe on `Set-Location`, on single-quoted paths cmd does not strip, and on an assumed working directory. Enforced by `c1-demo-instructions.test.cjs` (drives the real generated page runtime along the instructed route) and `c1-gate-portability.test.cjs` (pipes the emitted gate block through real cmd.exe and real PowerShell, mapping every instructed line to a dispatch and checking the target against git's own worktree records). Both are ledger-local by design; a future checkpoint should carry equivalents rather than reuse these.
+
 ## Hard prohibitions
 
 - No scope creep: modify ONLY the files in your batch file's fence. Anything else you
