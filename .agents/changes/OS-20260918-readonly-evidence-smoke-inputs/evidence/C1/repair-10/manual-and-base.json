@@ -1,0 +1,285 @@
+{
+  "verdict": "PASS",
+  "method": "Frozen manual conductor Git/blob gate and TEST-ONLY copy to pre-repair base",
+  "integration": "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7",
+  "candidate": "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134",
+  "base": "9b40054dfc9571af25267050640f66bc00e7e619",
+  "branch": "fix/B03-presmoke-10",
+  "allowed": [
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs",
+    ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md"
+  ],
+  "changes": [
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md"
+      ]
+    },
+    {
+      "type": "A",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+      ]
+    },
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html"
+      ]
+    },
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json"
+      ]
+    },
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html"
+      ]
+    },
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json"
+      ]
+    },
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html"
+      ]
+    },
+    {
+      "type": "M",
+      "paths": [
+        ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json"
+      ]
+    }
+  ],
+  "checklist": "4/4",
+  "worktreeAssociation": "worktree C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\nHEAD f918fe39762c70edb9a3424e54eaa208fd7c5727\nbranch refs/heads/main\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\nHEAD 1dd66e8a8c313cf2731f8dd552bdfa347f2101b7\nbranch refs/heads/codex/readonly-evidence-smoke-inputs-ledger\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair\nHEAD f2c2ceeb73a8adeee5dd2249a97df84bb1a19134\nbranch refs/heads/fix/B03-presmoke-10\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair-base\nHEAD 9b40054dfc9571af25267050640f66bc00e7e619\ndetached",
+  "candidateRun": {
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair",
+    "args": [
+      "--test",
+      "--test-reporter=spec",
+      ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+    ],
+    "exit": 0,
+    "error": null,
+    "stdout": "✔ clean Pass hides the note field: the old Pass then note sequence is unusable (4.7852ms)\n✔ main human step 2 gives a visible note-entry route that survives the real reissue (9.1187ms)\n✔ Before standfirst gives a visible note-entry route that survives the real reissue (2.8291ms)\n✔ Before step 2 gives a visible note-entry route that survives the real reissue (3.3846ms)\n✔ After step 2 gives a visible note-entry route that survives the real reissue (2.7582ms)\n✔ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.4721ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 106.3481\n",
+    "stderr": ""
+  },
+  "baseRun": {
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base",
+    "args": [
+      "--test",
+      "--test-reporter=spec",
+      ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs"
+    ],
+    "exit": 1,
+    "error": null,
+    "stdout": "✔ clean Pass hides the note field: the old Pass then note sequence is unusable (4.7814ms)\n✖ main human step 2 gives a visible note-entry route that survives the real reissue (6.4162ms)\n✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.1721ms)\n✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.5558ms)\n✖ After step 2 gives a visible note-entry route that survives the real reissue (2.8935ms)\n✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.4032ms)\nℹ tests 6\nℹ suites 0\nℹ pass 1\nℹ fail 5\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 136.9156\n\n✖ failing tests:\n\ntest at .agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:149:3\n✖ main human step 2 gives a visible note-entry route that survives the real reissue (6.4162ms)\n  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text\n  \n  true !== false\n  \n      at Object.note (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:84:14)\n      at followRoute (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:112:35)\n      at async TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:150:5)\n      at async Test.run (node:internal/test_runner/test:1054:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: true,\n    expected: false,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n\ntest at .agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:149:3\n✖ Before standfirst gives a visible note-entry route that survives the real reissue (1.1721ms)\n  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text\n  \n  true !== false\n  \n      at Object.note (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:84:14)\n      at followRoute (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:112:35)\n      at async TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:150:5)\n      at async Test.run (node:internal/test_runner/test:1054:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: true,\n    expected: false,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n\ntest at .agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:149:3\n✖ Before step 2 gives a visible note-entry route that survives the real reissue (1.5558ms)\n  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text\n  \n  true !== false\n  \n      at Object.note (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:84:14)\n      at followRoute (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:112:35)\n      at async TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:150:5)\n      at async Test.run (node:internal/test_runner/test:1054:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: true,\n    expected: false,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n\ntest at .agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:149:3\n✖ After step 2 gives a visible note-entry route that survives the real reissue (2.8935ms)\n  AssertionError [ERR_ASSERTION]: the instructed route must expose the note field before entering text\n  \n  true !== false\n  \n      at Object.note (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:84:14)\n      at followRoute (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:112:35)\n      at async TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:150:5)\n      at async Test.run (node:internal/test_runner/test:1054:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: true,\n    expected: false,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n\ntest at .agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:154:1\n✖ sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity (3.4032ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  1 !== 2\n  \n      at TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\c1-demo-instructions.test.cjs:164:10)\n      at async Test.run (node:internal/test_runner/test:1054:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 1,\n    expected: 2,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+    "stderr": ""
+  },
+  "calls": [
+    {
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair",
+      "exit": 0,
+      "stdout": "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "branch",
+        "--show-current"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair",
+      "exit": 0,
+      "stdout": "fix/B03-presmoke-10\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "merge-base",
+        "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "9b40054dfc9571af25267050640f66bc00e7e619\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "rev-parse",
+        "refs/heads/main"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "f918fe39762c70edb9a3424e54eaa208fd7c5727\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "show",
+        "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "# Repair B03 pre-smoke step 10\n\n**Type**: fix; **Weight**: L; **Branch**: fix/B03-presmoke-10\n\n**Files**: smoke-C1.json, smoke-C1.html, smoke-C1-demo-before.json, smoke-C1-demo-before.html, smoke-C1-demo-after.json, smoke-C1-demo-after.html, c1-demo-instructions.test.cjs — all relative to this ledger. Own batch file: checklist ticks only. This is the conductor-recorded complete repair fence; no production, input, evidence, plan, contract, PROGRESS or LOG changes.\n\n## Spec and acceptance\n\nFresh C1 QA failed step10 at source6c84b930aa4297283f94ce9eeacdff44d2b22ba4: the human Step2 and Before demo tell a clean user to mark Pass then enter a note, but the settled runtime hides the note field after a clean Pass. See evidence/C1/initial-qa/step-10.md. Runtime behavior is correct with Works, but -> enter keep this note -> Pass; After correctly invalidates changed step1, retaining unaffected step2 Pass and note. Exact NOT RE-RUN is in Copy results; visible history requests a rerun. Repair the delivery prose only; do not change the production template or engine.\n\n1. Make main human Step2 and both demo pages precisely follow the usable note-entry route. Label visible rerun/history and Copy results export accurately. Keep After control step2 identical to Before. Preserve demo step1 Before revision1 and After revision2, same ckptKey/buildSha; advance main Step2 and both demo Step2 revisions from1 to2 for corrected instructions. Other revisions and build identity stay unchanged until conductor close-out. No input identities/paths/bytes, validation metadata, generated-page design or real verdicts change.\n2. Regenerate each HTML from corrected JSON through the reviewed builder with explicit inputRoot and previous snapshot when applicable; retain snapshots outside worktree. No hand-edited HTML.\n3. Add ledger-local test-only c1-demo-instructions.test.cjs that exercises the actual generated runtime and instruction route: it must expose the old unusable Pass->note route, validate the corrected visible note-entry route plus saved note/Pass and reissue invalidation/export. Avoid a vacuous exact-prose-only assertion. It must run under node --test from any supplied checkout and fail by assertion on the pre-repair tip when this TEST-ONLY file is copied there. No C1-dependent file in reusable tests/. No fixture edits or import of proposed production code into the base probe.\n4. Run the frozen full recursive tests + literal git diff --check, plus the new ledger regression explicitly. Full command: Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName, throw if empty, node --test --test-reporter=spec @testFiles, throw on nonzero; git diff --check, throw on nonzero. Capture full logs outside repo. Report actual command/exit/tail, commit, checklist. The conductor independently runs manual fence and copied-test failing-on-base, then fresh reviewer and separate test hunter. No earlier baseline exception applies.\n\n## Checklist\n\n- [ ] Correct all affected human/demo instructions and their revisions without changing inputs or production.\n- [ ] Regenerate all three pages from sidecars and prove expected delta only.\n- [ ] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.\n- [ ] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "diff",
+        "--name-status",
+        "-z",
+        "-M",
+        "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7...f2c2ceeb73a8adeee5dd2249a97df84bb1a19134"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md\u0000A\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs\u0000M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html\u0000M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json\u0000M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html\u0000M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json\u0000M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html\u0000M\u0000.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json\u0000",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "show",
+        "9b40054dfc9571af25267050640f66bc00e7e619:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "# Repair B03 pre-smoke step 10\n\n**Type**: fix; **Weight**: L; **Branch**: fix/B03-presmoke-10\n\n**Files**: smoke-C1.json, smoke-C1.html, smoke-C1-demo-before.json, smoke-C1-demo-before.html, smoke-C1-demo-after.json, smoke-C1-demo-after.html, c1-demo-instructions.test.cjs — all relative to this ledger. Own batch file: checklist ticks only. This is the conductor-recorded complete repair fence; no production, input, evidence, plan, contract, PROGRESS or LOG changes.\n\n## Spec and acceptance\n\nFresh C1 QA failed step10 at source6c84b930aa4297283f94ce9eeacdff44d2b22ba4: the human Step2 and Before demo tell a clean user to mark Pass then enter a note, but the settled runtime hides the note field after a clean Pass. See evidence/C1/initial-qa/step-10.md. Runtime behavior is correct with Works, but -> enter keep this note -> Pass; After correctly invalidates changed step1, retaining unaffected step2 Pass and note. Exact NOT RE-RUN is in Copy results; visible history requests a rerun. Repair the delivery prose only; do not change the production template or engine.\n\n1. Make main human Step2 and both demo pages precisely follow the usable note-entry route. Label visible rerun/history and Copy results export accurately. Keep After control step2 identical to Before. Preserve demo step1 Before revision1 and After revision2, same ckptKey/buildSha; advance main Step2 and both demo Step2 revisions from1 to2 for corrected instructions. Other revisions and build identity stay unchanged until conductor close-out. No input identities/paths/bytes, validation metadata, generated-page design or real verdicts change.\n2. Regenerate each HTML from corrected JSON through the reviewed builder with explicit inputRoot and previous snapshot when applicable; retain snapshots outside worktree. No hand-edited HTML.\n3. Add ledger-local test-only c1-demo-instructions.test.cjs that exercises the actual generated runtime and instruction route: it must expose the old unusable Pass->note route, validate the corrected visible note-entry route plus saved note/Pass and reissue invalidation/export. Avoid a vacuous exact-prose-only assertion. It must run under node --test from any supplied checkout and fail by assertion on the pre-repair tip when this TEST-ONLY file is copied there. No C1-dependent file in reusable tests/. No fixture edits or import of proposed production code into the base probe.\n4. Run the frozen full recursive tests + literal git diff --check, plus the new ledger regression explicitly. Full command: Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName, throw if empty, node --test --test-reporter=spec @testFiles, throw on nonzero; git diff --check, throw on nonzero. Capture full logs outside repo. Report actual command/exit/tail, commit, checklist. The conductor independently runs manual fence and copied-test failing-on-base, then fresh reviewer and separate test hunter. No earlier baseline exception applies.\n\n## Checklist\n\n- [ ] Correct all affected human/demo instructions and their revisions without changing inputs or production.\n- [ ] Regenerate all three pages from sidecars and prove expected delta only.\n- [ ] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.\n- [ ] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "show",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "# Repair B03 pre-smoke step 10\n\n**Type**: fix; **Weight**: L; **Branch**: fix/B03-presmoke-10\n\n**Files**: smoke-C1.json, smoke-C1.html, smoke-C1-demo-before.json, smoke-C1-demo-before.html, smoke-C1-demo-after.json, smoke-C1-demo-after.html, c1-demo-instructions.test.cjs — all relative to this ledger. Own batch file: checklist ticks only. This is the conductor-recorded complete repair fence; no production, input, evidence, plan, contract, PROGRESS or LOG changes.\n\n## Spec and acceptance\n\nFresh C1 QA failed step10 at source6c84b930aa4297283f94ce9eeacdff44d2b22ba4: the human Step2 and Before demo tell a clean user to mark Pass then enter a note, but the settled runtime hides the note field after a clean Pass. See evidence/C1/initial-qa/step-10.md. Runtime behavior is correct with Works, but -> enter keep this note -> Pass; After correctly invalidates changed step1, retaining unaffected step2 Pass and note. Exact NOT RE-RUN is in Copy results; visible history requests a rerun. Repair the delivery prose only; do not change the production template or engine.\n\n1. Make main human Step2 and both demo pages precisely follow the usable note-entry route. Label visible rerun/history and Copy results export accurately. Keep After control step2 identical to Before. Preserve demo step1 Before revision1 and After revision2, same ckptKey/buildSha; advance main Step2 and both demo Step2 revisions from1 to2 for corrected instructions. Other revisions and build identity stay unchanged until conductor close-out. No input identities/paths/bytes, validation metadata, generated-page design or real verdicts change.\n2. Regenerate each HTML from corrected JSON through the reviewed builder with explicit inputRoot and previous snapshot when applicable; retain snapshots outside worktree. No hand-edited HTML.\n3. Add ledger-local test-only c1-demo-instructions.test.cjs that exercises the actual generated runtime and instruction route: it must expose the old unusable Pass->note route, validate the corrected visible note-entry route plus saved note/Pass and reissue invalidation/export. Avoid a vacuous exact-prose-only assertion. It must run under node --test from any supplied checkout and fail by assertion on the pre-repair tip when this TEST-ONLY file is copied there. No C1-dependent file in reusable tests/. No fixture edits or import of proposed production code into the base probe.\n4. Run the frozen full recursive tests + literal git diff --check, plus the new ledger regression explicitly. Full command: Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName, throw if empty, node --test --test-reporter=spec @testFiles, throw on nonzero; git diff --check, throw on nonzero. Capture full logs outside repo. Report actual command/exit/tail, commit, checklist. The conductor independently runs manual fence and copied-test failing-on-base, then fresh reviewer and separate test hunter. No earlier baseline exception applies.\n\n## Checklist\n\n- [x] Correct all affected human/demo instructions and their revisions without changing inputs or production.\n- [x] Regenerate all three pages from sidecars and prove expected delta only.\n- [x] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.\n- [x] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "rev-parse",
+        "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "0add94797721d18049d4c7492daa5d6ea488dcda\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "rev-parse",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "0add94797721d18049d4c7492daa5d6ea488dcda\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "rev-parse",
+        "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "5b145f8819af05db6bc166d2364b031942673007\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "rev-parse",
+        "f2c2ceeb73a8adeee5dd2249a97df84bb1a19134:./.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/01-plan.md"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "5b145f8819af05db6bc166d2364b031942673007\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "diff",
+        "1dd66e8a8c313cf2731f8dd552bdfa347f2101b7...f2c2ceeb73a8adeee5dd2249a97df84bb1a19134"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "diff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md\nindex c974c57..55a151a 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/02-fix-B03-presmoke-10.md\n@@ -15,7 +15,7 @@ Fresh C1 QA failed step10 at source6c84b930aa4297283f94ce9eeacdff44d2b22ba4: the\n \n ## Checklist\n \n-- [ ] Correct all affected human/demo instructions and their revisions without changing inputs or production.\n-- [ ] Regenerate all three pages from sidecars and prove expected delta only.\n-- [ ] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.\n-- [ ] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.\n+- [x] Correct all affected human/demo instructions and their revisions without changing inputs or production.\n+- [x] Regenerate all three pages from sidecars and prove expected delta only.\n+- [x] Add runtime-backed instruction regression and demonstrate candidate PASS / copied-test base assertion FAIL.\n+- [x] Run frozen recursive validation and explicit regression, inspect fenced diff, commit clean.\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs\nnew file mode 100644\nindex 0000000..472e377\n--- /dev/null\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/c1-demo-instructions.test.cjs\n@@ -0,0 +1,169 @@\n+// Ledger-local delivery regression: execute the issued scripts, never a copy of\n+// their verdict logic. This file travels with the checkpoint when it is archived.\n+const assert = require('node:assert/strict');\n+const fs = require('node:fs');\n+const path = require('node:path');\n+const test = require('node:test');\n+const vm = require('node:vm');\n+\n+const read = name => fs.readFileSync(path.join(__dirname, name), 'utf8');\n+const beforeHTML = read('smoke-C1-demo-before.html');\n+const afterHTML = read('smoke-C1-demo-after.html');\n+const mainHTML = read('smoke-C1.html');\n+const beforeModel = JSON.parse(read('smoke-C1-demo-before.json'));\n+const afterModel = JSON.parse(read('smoke-C1-demo-after.json'));\n+const mainModel = JSON.parse(read('smoke-C1.json'));\n+const steps = model => model.sections.flatMap(section => section.steps);\n+const step = (model, n) => steps(model).find(item => item.n === n);\n+const plain = html => html.replace(/<[^>]*>/g, '');\n+\n+async function page(html, storage = {}) {\n+  const elements = new Map(), timers = new Map();\n+  let copied = '', timerId = 0;\n+  class Element {\n+    constructor(tag = 'div') {\n+      this.tagName = tag; this.children = []; this.style = {}; this.attrs = {};\n+      this.listeners = {}; this.value = ''; this.hidden = false;\n+    }\n+    set id(value) { this._id = value; elements.set(value, this); }\n+    get id() { return this._id; }\n+    set innerHTML(value) {\n+      this._html = value; this.children = [];\n+      for (const match of value.matchAll(/<(\\w+)[^>]*\\bid=\"([^\"]+)\"/g)) {\n+        const child = new Element(match[1]); child.id = match[2]; this.appendChild(child);\n+      }\n+    }\n+    get innerHTML() { return this._html || ''; }\n+    appendChild(child) { this.children.push(child); return child; }\n+    removeChild(child) { this.children = this.children.filter(item => item !== child); }\n+    setAttribute(key, value) { this.attrs[key] = value; }\n+    getAttribute(key) { return this.attrs[key]; }\n+    addEventListener(event, fn) { this.listeners[event] = fn; }\n+    querySelectorAll(selector) {\n+      const found = [];\n+      const matches = node => selector.startsWith('.')\n+        ? (node.className || '').split(' ').includes(selector.slice(1)) : node.tagName === selector;\n+      const walk = node => {\n+        for (const child of node.children) { if (matches(child)) found.push(child); walk(child); }\n+      };\n+      walk(this); return found;\n+    }\n+    querySelector(selector) {\n+      const [first, ...rest] = selector.split(' ');\n+      const found = this.querySelectorAll(first)[0];\n+      return rest.length ? found?.querySelector(rest.join(' ')) || null : found || null;\n+    }\n+    scrollIntoView() {}\n+    select() {}\n+  }\n+  for (const match of html.split('<script>')[0].matchAll(/<(\\w+)[^>]*\\bid=\"([^\"]+)\"/g)) {\n+    const el = new Element(match[1]); el.id = match[2];\n+  }\n+  const document = { createElement: tag => new Element(tag), getElementById: id => elements.get(id) || null,\n+    activeElement: null, body: new Element('body') };\n+  const script = html.match(/<script>([\\s\\S]*?)<\\/script>/);\n+  assert.ok(script, 'issued page contains the real runtime script');\n+  vm.runInNewContext(script[1], {\n+    window: { localStorage: { getItem: key => storage[key] || null, setItem: (key, value) => { storage[key] = value; } } },\n+    document, Date,\n+    navigator: { clipboard: { writeText: value => { copied = value; return Promise.resolve(); } } },\n+    setTimeout: fn => { timers.set(++timerId, fn); return timerId; }, clearTimeout: id => timers.delete(id)\n+  });\n+  await Promise.resolve();\n+  const el = id => elements.get(id);\n+  return {\n+    storage, el,\n+    click(n, label) {\n+      const button = el('step-' + n).querySelectorAll('.vbtn').find(item => item.textContent === label);\n+      assert.ok(button, 'the real page exposes a ' + label + ' verdict button');\n+      button.listeners.click();\n+    },\n+    note(n, value) {\n+      // A fake DOM must enforce the user-visible boundary that the older harness\n+      // omitted: dispatching input directly on a hidden textarea is not a UI route.\n+      assert.equal(el('step-' + n).querySelector('.note-wrap').hidden, false,\n+        'the instructed route must expose the note field before entering text');\n+      const field = el('note-' + n); field.value = value; field.listeners.input();\n+      const pending = [...timers.values()]; timers.clear(); pending.forEach(fn => fn());\n+    },\n+    instruction(n) { return el('step-' + n).querySelector('.step-do').innerHTML; },\n+    copy() { el('btn-copy').listeners.click(); return copied; },\n+    record(n) { return JSON.parse(storage[beforeModel.ckptKey + '-run'] || '{}')[n]; }\n+  };\n+}\n+\n+// Read the action order from the actual displayed prose. The step-1 Pass can\n+// precede this route, so start at the last verdict before the note action. Unlike\n+// an exact-string expectation, old \"Pass and enter\" prose really clicks Pass and\n+// then fails at the hidden field; omitted/reordered/final-toggled verdicts fail too.\n+function noteRoute(prose) {\n+  const tokens = [...plain(prose).matchAll(/\\bWorks,\\s*but\\b|\\bPass\\b|\\b(?:enter|add)\\s+(?:[“\"]keep this note[”\"]|a note\\b)/gi)]\n+    .map(match => /^works/i.test(match[0]) ? 'Works, but' : /^pass$/i.test(match[0]) ? 'Pass' : 'note');\n+  assert.equal(tokens.filter(token => token === 'note').length, 1, 'instructions include one note-entry action');\n+  const noteIndex = tokens.indexOf('note');\n+  assert.ok(noteIndex > 0, 'instructions select a verdict before entering a note');\n+  return tokens.slice(noteIndex - 1);\n+}\n+\n+async function followRoute(prose) {\n+  const before = await page(beforeHTML);\n+  before.click(1, 'Pass');\n+  for (const action of noteRoute(prose)) {\n+    if (action === 'note') before.note(2, 'keep this note');\n+    else before.click(2, action);\n+  }\n+  assert.equal(before.el('t-pass').textContent, 2, 'both demo steps finish Pass');\n+  assert.equal(before.record(2).status, 'pass');\n+  assert.equal(before.record(2).note, 'keep this note');\n+  assert.match(before.copy(), /2\\. PASS — keep this note/);\n+  const record = before.record(2);\n+  const reloaded = await page(beforeHTML, before.storage);\n+  assert.equal(reloaded.el('note-2').value, 'keep this note', 'the saved note survives a reload');\n+  const after = await page(afterHTML, reloaded.storage);\n+  assert.equal(after.el('t-rerun').textContent, 1, 'changed workbook step requires rerun');\n+  assert.equal(after.el('t-pass').textContent, 1, 'unchanged control remains a current Pass');\n+  assert.equal(after.el('step-1').getAttribute('data-status'), '');\n+  const history = after.el('step-1').querySelector('.step-history');\n+  assert.equal(history.hidden, false);\n+  assert.match(history.textContent, /Run it again/);\n+  assert.equal(after.el('note-2').value, 'keep this note');\n+  assert.deepEqual(after.record(2), record, 'the reissue must not rewrite the unaffected saved verdict or note');\n+  assert.match(after.copy(), /1\\. NOT RE-RUN — previous PASS/);\n+  assert.match(after.copy(), /2\\. PASS — keep this note/);\n+}\n+\n+test('clean Pass hides the note field: the old Pass then note sequence is unusable', async () => {\n+  const before = await page(beforeHTML);\n+  before.click(2, 'Pass');\n+  assert.equal(before.el('step-2').querySelector('.note-wrap').hidden, true);\n+  assert.throws(() => before.note(2, 'keep this note'), /must expose the note field/);\n+  assert.equal(before.record(2).note, '', 'the rejected hidden-field action cannot fabricate a saved note');\n+});\n+\n+for (const [name, instruction] of [\n+  ['main human step 2', async () => (await page(mainHTML)).instruction(2)],\n+  ['Before standfirst', async () => beforeHTML.match(/<p class=\"standfirst\">([\\s\\S]*?)<\\/p>/)[1]],\n+  ['Before step 2', async () => (await page(beforeHTML)).instruction(2)],\n+  ['After step 2', async () => (await page(afterHTML)).instruction(2)]\n+]) {\n+  test(name + ' gives a visible note-entry route that survives the real reissue', async () => {\n+    await followRoute(await instruction());\n+  });\n+}\n+\n+test('sidecars and issued instructions agree while the demo preserves build/key and unaffected step identity', async () => {\n+  const before = await page(beforeHTML), after = await page(afterHTML), main = await page(mainHTML);\n+  assert.equal(before.instruction(2), step(beforeModel, 2).do);\n+  assert.equal(after.instruction(2), step(afterModel, 2).do);\n+  assert.equal(main.instruction(2), step(mainModel, 2).do);\n+  assert.equal(beforeModel.buildSha, afterModel.buildSha);\n+  assert.equal(beforeModel.ckptKey, afterModel.ckptKey);\n+  assert.notEqual(mainModel.ckptKey, beforeModel.ckptKey, 'demo verdicts use isolated storage');\n+  assert.equal(step(beforeModel, 1).revision, 1);\n+  assert.equal(step(afterModel, 1).revision, 2);\n+  assert.equal(step(mainModel, 2).revision, 2);\n+  assert.equal(step(beforeModel, 2).revision, 2);\n+  assert.deepEqual(step(beforeModel, 2), step(afterModel, 2));\n+  assert.match(step(mainModel, 2).pass, /Copy results as text reports “1\\. NOT RE-RUN/);\n+  assert.match(afterModel.standfirst, /Copy results as text reports “1\\. NOT RE-RUN/);\n+});\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html\nindex cfef64f..32cd338 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.html\n@@ -676,7 +676,7 @@\n   <div class=\"masthead-in\">\n     <p class=\"eyebrow\">Checkpoint C1 · batches B03 demonstration</p>\n     <h1>Input reissue demonstration — After</h1>\n-    <p class=\"standfirst\">The workbook input has changed on the same build. Step 1 must say NOT RE-RUN; step 2 must keep its Pass and note. Return to the real C1 page after inspecting this demonstration.</p>\n+    <p class=\"standfirst\">The workbook input has changed on the same build. Step 1 has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. Step 2 keeps its Pass and “keep this note”. Return to the real C1 page after inspecting this demonstration.</p>\n \n     <dl class=\"facts\">\n <div class=\"fact\"><dt>Branch</dt><dd><code>codex/readonly-evidence-smoke-inputs-ledger</code></dd></div>\n@@ -844,9 +844,9 @@\n       },\n       {\n         \"n\": 2,\n-        \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\",\n+        \"do\": \"Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.\",\n         \"pass\": \"This input and its step revision stay unchanged in the After page; the Pass and note should survive.\",\n-        \"revision\": 1,\n+        \"revision\": 2,\n         \"inputs\": [\n           \"demo-control\"\n         ],\n@@ -1530,4 +1530,4 @@\n })();\n </script>\n \n-<!-- smoke-sidecar-sha256:028df27f150a40b5ed1ae96005d166724791607f890c3cf472fe3c79cf16e8a1 -->\n+<!-- smoke-sidecar-sha256:9f8494031631d6018ebbf137d3ad43732cb280e86896b4a459c9f01a6fe99749 -->\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json\nindex c46c2d6..8a60ffc 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-after.json\n@@ -7,7 +7,7 @@\n   \"ckptKey\": \"OS-20260918-readonly-evidence-smoke-inputs-C1-demo\",\n   \"pageTitle\": \"C1 input reissue — After\",\n   \"headline\": \"Input reissue demonstration — After\",\n-  \"standfirst\": \"The workbook input has changed on the same build. Step 1 must say NOT RE-RUN; step 2 must keep its Pass and note. Return to the real C1 page after inspecting this demonstration.\",\n+  \"standfirst\": \"The workbook input has changed on the same build. Step 1 has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. Step 2 keeps its Pass and “keep this note”. Return to the real C1 page after inspecting this demonstration.\",\n   \"gate\": {\n     \"intro\": \"This is a disposable demonstration using the same tested build and a separate browser storage key.\",\n     \"commands\": [],\n@@ -91,9 +91,9 @@\n         },\n         {\n           \"n\": 2,\n-          \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\",\n+          \"do\": \"Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.\",\n           \"pass\": \"This input and its step revision stay unchanged in the After page; the Pass and note should survive.\",\n-          \"revision\": 1,\n+          \"revision\": 2,\n           \"inputs\": [\n             \"demo-control\"\n           ]\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html\nindex 11a46d3..28187ae 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.html\n@@ -676,7 +676,7 @@\n   <div class=\"masthead-in\">\n     <p class=\"eyebrow\">Checkpoint C1 · batches B03 demonstration</p>\n     <h1>Input reissue demonstration — Before</h1>\n-    <p class=\"standfirst\">These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.</p>\n+    <p class=\"standfirst\">These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.</p>\n \n     <dl class=\"facts\">\n <div class=\"fact\"><dt>Branch</dt><dd><code>codex/readonly-evidence-smoke-inputs-ledger</code></dd></div>\n@@ -844,9 +844,9 @@\n       },\n       {\n         \"n\": 2,\n-        \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\",\n+        \"do\": \"Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.\",\n         \"pass\": \"This input and its step revision stay unchanged in the After page; the Pass and note should survive.\",\n-        \"revision\": 1,\n+        \"revision\": 2,\n         \"inputs\": [\n           \"demo-control\"\n         ],\n@@ -1530,4 +1530,4 @@\n })();\n </script>\n \n-<!-- smoke-sidecar-sha256:0a6935af2a8328e2bad7a725fd6860b90fdd692c3d778f7ca57559270426549b -->\n+<!-- smoke-sidecar-sha256:b6a2714830cbbbbf94fa9f38bf14119f39be4d08ac6e6c3a87630cdb3e642ea5 -->\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json\nindex 1e6bf29..c8a9b7e 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1-demo-before.json\n@@ -7,7 +7,7 @@\n   \"ckptKey\": \"OS-20260918-readonly-evidence-smoke-inputs-C1-demo\",\n   \"pageTitle\": \"C1 input reissue — Before\",\n   \"headline\": \"Input reissue demonstration — Before\",\n-  \"standfirst\": \"These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.\",\n+  \"standfirst\": \"These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.\",\n   \"gate\": {\n     \"intro\": \"This is a disposable demonstration using the same tested build and a separate browser storage key.\",\n     \"commands\": [],\n@@ -91,9 +91,9 @@\n         },\n         {\n           \"n\": 2,\n-          \"do\": \"Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.\",\n+          \"do\": \"Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.\",\n           \"pass\": \"This input and its step revision stay unchanged in the After page; the Pass and note should survive.\",\n-          \"revision\": 1,\n+          \"revision\": 2,\n           \"inputs\": [\n             \"demo-control\"\n           ]\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html\nindex 3801b48..11eb470 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.html\n@@ -851,10 +851,10 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr\n       },\n       {\n         \"n\": 2,\n-        \"do\": \"Follow the workbook and instruction links. Open \\u003ca href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration\\u003c/a>, mark its two demo steps Pass, and add “keep this note” to demo step 2. Then open \\u003ca href=\\\"smoke-C1-demo-after.html\\\">the After demonstration\\u003c/a> in the same browser.\",\n-        \"pass\": \"Files and copy/reset directions are usable. The changed-input demo step says NOT RE-RUN, while the unaffected step retains Pass and its note. Demo marks are separate from this C1 verdict.\",\n+        \"do\": \"Follow the workbook and instruction links. Open \\u003ca href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration\\u003c/a> and mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open \\u003ca href=\\\"smoke-C1-demo-after.html\\\">the After demonstration\\u003c/a> in the same browser and press Copy results as text.\",\n+        \"pass\": \"Files and copy/reset directions are usable. On After, the changed-input demo step has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. The unaffected step retains Pass and “keep this note”. Demo marks are separate from this C1 verdict.\",\n         \"aside\": \"Runner: human. The demo changes synthetic files and isolated browser marks only.\",\n-        \"revision\": 1,\n+        \"revision\": 2,\n         \"inputs\": [\n           \"orders-original\",\n           \"workbook-copy-reset\",\n@@ -2587,4 +2587,4 @@ node '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/scr\n })();\n </script>\n \n-<!-- smoke-sidecar-sha256:9525e8d30462a709e681d8bb86df67846a802d77fce701a4fb3df7cc36b4c53f -->\n+<!-- smoke-sidecar-sha256:eb696897678cdd1c9c86251e850a4c6a01e6d464be81e7724d9428465ee4f4c4 -->\ndiff --git a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json\nindex d0e5b1c..34d8435 100644\n--- a/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json\n+++ b/.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/smoke-C1.json\n@@ -36,10 +36,10 @@\n         },\n         {\n           \"n\": 2,\n-          \"do\": \"Follow the workbook and instruction links. Open <a href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration</a>, mark its two demo steps Pass, and add “keep this note” to demo step 2. Then open <a href=\\\"smoke-C1-demo-after.html\\\">the After demonstration</a> in the same browser.\",\n-          \"pass\": \"Files and copy/reset directions are usable. The changed-input demo step says NOT RE-RUN, while the unaffected step retains Pass and its note. Demo marks are separate from this C1 verdict.\",\n+          \"do\": \"Follow the workbook and instruction links. Open <a href=\\\"smoke-C1-demo-before.html\\\">the Before demonstration</a> and mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open <a href=\\\"smoke-C1-demo-after.html\\\">the After demonstration</a> in the same browser and press Copy results as text.\",\n+          \"pass\": \"Files and copy/reset directions are usable. On After, the changed-input demo step has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. The unaffected step retains Pass and “keep this note”. Demo marks are separate from this C1 verdict.\",\n           \"aside\": \"Runner: human. The demo changes synthetic files and isolated browser marks only.\",\n-          \"revision\": 1,\n+          \"revision\": 2,\n           \"inputs\": [\n             \"orders-original\",\n             \"workbook-copy-reset\",\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "worktree",
+        "add",
+        "--detach",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-C1-repair-base",
+        "9b40054dfc9571af25267050640f66bc00e7e619"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "HEAD is now at 9b40054 Record C1 pre-smoke instruction failure and repair fence\n",
+      "stderr": "Preparing worktree (detached HEAD 9b40054)\n"
+    },
+    {
+      "args": [
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int",
+      "exit": 0,
+      "stdout": "worktree C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\nHEAD f918fe39762c70edb9a3424e54eaa208fd7c5727\nbranch refs/heads/main\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/18/01a0b671-3325-77d3-b360-845f09da4bdc/orchestrate-run/wt-int\nHEAD 1dd66e8a8c313cf2731f8dd552bdfa347f2101b7\nbranch refs/heads/codex/readonly-evidence-smoke-inputs-ledger\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair\nHEAD f2c2ceeb73a8adeee5dd2249a97df84bb1a19134\nbranch refs/heads/fix/B03-presmoke-10\n\nworktree C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-C1-repair-base\nHEAD 9b40054dfc9571af25267050640f66bc00e7e619\ndetached\n\n",
+      "stderr": ""
+    }
+  ],
+  "cleanup": "Initial remove without core.longpaths failed; explicit git -c core.longpaths=true worktree remove exit0; path and registration verified absent. Gate and copied-test results passed before cleanup."
+}
