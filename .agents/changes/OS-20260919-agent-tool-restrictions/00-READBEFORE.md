@@ -345,6 +345,42 @@ they are treated as source, not prose.
 - **No build step, no package manager, no third-party dependency.** Do not add one.
 - Commit messages are conventional (`type: summary (batch NN)`).
 
+### Guardrails distilled from OS-20260919 (agent tool restrictions)
+
+Bug classes this change actually produced. Each names the class and the mechanism that
+now enforces it.
+
+- **Skill source written from inside this repo, read from outside it.** A cross-reference
+  to `README.md` dangles for every consumer, because the install carries `orchestrate/`
+  alone; so does "the definition this repo ships". Point at an *action* the reader can
+  perform anywhere, not a path only this clone resolves. Enforced by
+  `tests/subagent-type-mapping.test.cjs` (the §Degraded bullet must name `.claude/agents`
+  + a restart, and must not name `README.md`).
+- **A test that asserts on a hand-rolled parse more permissive than the real consumer's.**
+  A `:[ 	]*` field regex accepted `tools:Read, Glob` that YAML reads as a bare scalar —
+  green at the exact moment the capability boundary failed open. Match the strictness of
+  whatever actually consumes the file. Enforced by the frontmatter guards in
+  `tests/agent-definitions.test.cjs`.
+- **Positive-only assertions on prose.** Where the "production code" is wording, a suite
+  that only asserts what must be PRESENT is defeated by appending a sentence. Pin the
+  passage, and scan the rest of the document for contradicting directives. Enforced by
+  the exact paragraph pin plus the directive scan in `tests/contract-prompt-authority.test.cjs`.
+- **A whitelist that never enumerates its directory.** Iterating a hardcoded list of
+  expected files lets an unexpected fifth file pass every assertion. Compare the actual
+  listing. Enforced by the directory `deepEqual` in `tests/agent-definitions.test.cjs`.
+- **A test that pins the defect.** `assert.match(bullet, /README\.md/)` made a dangling
+  pointer the *definition* of correctness, so the suite was green because of the bug.
+  When a fix changes what "correct" means, check whether an existing assertion encodes
+  the old meaning.
+- **A defect class fixed in the reported instance and left in its sibling.** The heading
+  scan was made fence-aware while `section()` next to it was not, so the same bug still
+  reached three tests. On any parser fix, grep for every other reader of the same
+  document.
+- **Vacuous-until-later documentation.** A sentence can be true when written and false
+  when a later batch lands (here: "the skeletons fall back to a general-purpose agent",
+  true only while no skeleton named a type). When a batch makes a claim load-bearing,
+  re-check the claims written before it.
+
 Source: `README.md` (Install, validation recipe), and the Repo conventions section of
 the archived ledger's contract. There is no project `CLAUDE.md` at scaffold time.
 
