@@ -8,8 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-Scaffolded on codex/readonly-evidence-smoke-inputs-ledger. No wave is open.
-B01–B03 remain not started; the new-mode scaffold stops before implementation.
+W1 is open: B01+B02 execute concurrently from the recorded green wave base. B03 waits for W1.
 
 ## Plan approval and integration worktree
 
@@ -48,8 +47,8 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
-| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | ⬜ | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🔄 | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🔄 | 2026-09-18 | m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 | B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ⬜ | 2026-09-18 | Baseline repair integrated ce1f444; approved repair-only proof exception; see LOG#repair-integrated m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
 
 ## Checkpoints
@@ -111,3 +110,8 @@ This answers the immediately preceding proposal: approve an exception for fix/B0
 The amendment resolves reviewer R1's sole P0 for candidate70f6baadd702425ef13741fe59d614232e256744. Reviewer code assessment and separate hunter were clean; no source change since their review. The prior23/23 base-copy PASS remains accurately recorded. Conductor may now perform dry run, merge and integration validation. Earlier user-blocked text is historical. No checkpoint verdict or permission to merge into main/push is implied.
 
 Repair integrated at ce1f4448617a51031981d3180f7a681a5714dd93 after clean merge-tree dry run; recursive integration validation65/65, diff check PASS. Pending repair marker removed. Earlier blocker text is historical and resolved by the recorded user exception. No additional review round or waiver. W1 is ready to open.
+
+
+## W1 opened — 2026-09-18
+
+Wave base: ae850a38fa760cb36f0ca83db35e5830ed1cc2ed. B01 codex/readonly-evidence-checker and B02 codex/smoke-input-files both cut exactly from this green integration tip with isolated worktrees under C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run. This commit is the wave-open crash marker. All earlier gates resolved; no unanswered checkpoint. Implementers run concurrently on current inherited model. B03 remains not started until both pass manual fence, reviewer/hunter and integration validation. Existing .gitattributes effective-independence checks remain mandatory.

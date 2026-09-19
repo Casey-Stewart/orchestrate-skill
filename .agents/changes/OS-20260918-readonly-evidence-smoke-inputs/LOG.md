@@ -358,3 +358,8 @@ User, verbatim: "Approved". Consumed for the proposed fix/B03-tip-only alternati
 ## repair-integrated
 
 Repair70f6baadd702425ef13741fe59d614232e256744 integrated with commits preserved at ce1f4448617a51031981d3180f7a681a5714dd93; dry run tree2bb3974821d690e6e6a3d0ee024554859c925f35, no conflict. Resume before merge reproduced only original63/64 CRLF assertion failure. After merge recursive FullName-sorted validation65/65 and diff check PASS. Exact evidence retained. User-approved exception resolves sole R1 proof finding, source unchanged from clean code/hunter review. Pending marker cleared; no main merge/push.
+
+
+## W1-open
+
+W1 B01+B02 opened concurrently at ae850a38fa760cb36f0ca83db35e5830ed1cc2ed after repaired integration validation65/65. Planned branches previously absent; both cut exactly from wave base. Per-worktree setup n/a. No map/fence deviation. Implementer briefs contain complete frozen batch specs and binding role instructions.
