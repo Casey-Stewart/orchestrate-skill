@@ -72,8 +72,8 @@ template, every numbered step and all production code are correct and stay untou
 
 ## Checklist
 
-- [ ] Correct the emitted gate so both shells run it verbatim, preserving what it verifies.
-- [ ] Prove every step, revision and pre block is byte-identical to the issued sidecar.
-- [ ] Regenerate smoke-C1.html from the sidecar and prove the expected delta only.
-- [ ] Add the shell-dispatch regression and demonstrate candidate PASS / copied-test base FAIL.
-- [ ] Run frozen recursive validation and both explicit regressions, inspect fenced diff, commit clean.
+- [x] Correct the emitted gate so both shells run it verbatim, preserving what it verifies.
+- [x] Prove every step, revision and pre block is byte-identical to the issued sidecar.
+- [x] Regenerate smoke-C1.html from the sidecar and prove the expected delta only.
+- [x] Add the shell-dispatch regression and demonstrate candidate PASS / copied-test base FAIL.
+- [x] Run frozen recursive validation and both explicit regressions, inspect fenced diff, commit clean.
