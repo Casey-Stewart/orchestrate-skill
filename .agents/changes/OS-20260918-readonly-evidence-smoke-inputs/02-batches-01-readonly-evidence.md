@@ -93,12 +93,12 @@ never exit 0; document deterministic precedence.
 
 ## Checklist
 
-- [ ] Extract the reusable disposable Git fixture and implement evidence API/CLI.
-- [ ] Test every planned consumer CLI invocation, result shape and error/exit contract.
-- [ ] Convert all fourteen existing Git scenarios to assert actual helper outputs.
-- [ ] Implement trusted-authority, path/rename and cleanliness fence checks.
-- [ ] Implement structural own-batch edit validation and explicit unknowns.
-- [ ] Add adversarial tests and prove helper/checker read-only behavior.
+- [x] Extract the reusable disposable Git fixture and implement evidence API/CLI.
+- [x] Test every planned consumer CLI invocation, result shape and error/exit contract.
+- [x] Convert all fourteen existing Git scenarios to assert actual helper outputs.
+- [x] Implement trusted-authority, path/rename and cleanliness fence checks.
+- [x] Implement structural own-batch edit validation and explicit unknowns.
+- [x] Add adversarial tests and prove helper/checker read-only behavior.
 
 ## Acceptance criteria
 
