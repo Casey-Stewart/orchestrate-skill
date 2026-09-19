@@ -1,0 +1,206 @@
+{
+  "source": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/wt-B03",
+  "candidate": "7a3ab268a0b318ce080065df628cb1b2386ed980",
+  "runs": [
+    {
+      "name": "baseline",
+      "status": 0,
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\baseline\\tests\\smoke-inputs.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\baseline\\tests\\build-smoke-page.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\baseline\\tests\\smoke-page.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\baseline\\tests\\protocol-contract.test.cjs"
+      ],
+      "tail": [
+        "✔ verdict clears remain newer than saved passes even within one millisecond (1.7721ms)",
+        "✔ note edits are stamped immediately and delayed persistence sends that exact timestamp (1.3479ms)",
+        "✔ equal, missing, malformed, and empty snapshots never rewrite an existing local result (1.0546ms)",
+        "✔ genuinely newer remote results replace the entire record and survive an older echo (0.9959ms)",
+        "✔ a newer remote edit waits for note blur and is applied without combining two records (0.9265ms)",
+        "✔ continued typing advances beyond a deferred remote update and preserves the local verdict (0.8419ms)",
+        "ℹ tests 71",
+        "ℹ suites 0",
+        "ℹ pass 71",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 16601.9118",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-output-guard",
+      "status": 0,
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-output-guard\\tests\\smoke-inputs.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-output-guard\\tests\\build-smoke-page.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-output-guard\\tests\\smoke-page.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-output-guard\\tests\\protocol-contract.test.cjs"
+      ],
+      "tail": [
+        "✔ verdict clears remain newer than saved passes even within one millisecond (1.9666ms)",
+        "✔ note edits are stamped immediately and delayed persistence sends that exact timestamp (0.9995ms)",
+        "✔ equal, missing, malformed, and empty snapshots never rewrite an existing local result (1.2572ms)",
+        "✔ genuinely newer remote results replace the entire record and survive an older echo (1.1284ms)",
+        "✔ a newer remote edit waits for note blur and is applied without combining two records (0.9802ms)",
+        "✔ continued typing advances beyond a deferred remote update and preserves the local verdict (0.8864ms)",
+        "ℹ tests 71",
+        "ℹ suites 0",
+        "ℹ pass 71",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 17055.3647",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-diff-propagation",
+      "status": 0,
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-diff-propagation\\tests\\protocol-contract.test.cjs"
+      ],
+      "tail": [
+        "✔ Recovery and capped-verdict tables agree exactly after placeholder normalization (2.2504ms)",
+        "✔ template placeholders and registry match in both directions (6.8541ms)",
+        "✔ generated contract bakes helper grammar, outcomes, fallback and full input responsibility (6.4574ms)",
+        "✔ reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact (10.4727ms)",
+        "✔ published helper recipes execute actual CLIs and generated batch grammar passes the real fence (12456.2107ms)",
+        "✔ actual README recursive command and portable form discover nested failure then success; empty primary discovery fails (4832.2707ms)",
+        "ℹ tests 6",
+        "ℹ suites 0",
+        "ℹ pass 6",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 17418.0305",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-normalize-hash",
+      "status": 1,
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-name-pattern=LF, CRLF, BOM and whitespace",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-normalize-hash\\tests\\smoke-inputs.test.cjs"
+      ],
+      "tail": [
+        "test at tests\\smoke-inputs.test.cjs:122:1",
+        "✖ LF, CRLF, BOM and whitespace are significant raw bytes (16.6802ms)",
+        "  AssertionError [ERR_ASSERTION]: Missing expected exception: the hash itself must reject normalization even when byte size metadata was updated",
+        "      at TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-normalize-hash\\tests\\smoke-inputs.test.cjs:132:12)",
+        "      at Test.runInAsyncScope (node:async_hooks:214:14)",
+        "      at Test.run (node:internal/test_runner/test:1047:25)",
+        "      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: undefined,",
+        "    expected: /SHA-256 mismatch/,",
+        "    operator: 'throws',",
+        "    diff: 'simple'",
+        "  }",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-resolved-identities",
+      "status": 1,
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-name-pattern=shared stable IDs|real input reissue",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-resolved-identities\\tests\\build-smoke-page.test.cjs",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-resolved-identities\\tests\\smoke-page.test.cjs"
+      ],
+      "tail": [
+        "",
+        "test at tests\\smoke-page.test.cjs:139:1",
+        "✖ real input reissue flows through builder, displayed files and saved verdicts on the same build (35.2989ms)",
+        "  AssertionError [ERR_ASSERTION]: Missing expected exception.",
+        "      at TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-resolved-identities\\tests\\smoke-page.test.cjs:180:10)",
+        "      at async Test.run (node:internal/test_runner/test:1054:7)",
+        "      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: undefined,",
+        "    expected: /step 1:.*increment revision/,",
+        "    operator: 'throws',",
+        "    diff: 'simple'",
+        "  }",
+        ""
+      ]
+    },
+    {
+      "name": "mutant-history",
+      "status": 1,
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-name-pattern=LF/CRLF-only reissue",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-history\\tests\\build-smoke-page.test.cjs"
+      ],
+      "tail": [
+        "  ",
+        "  0 !== 1",
+        "  ",
+        "      at TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\mutant-history\\tests\\build-smoke-page.test.cjs:520:58)",
+        "      at Test.runInAsyncScope (node:async_hooks:214:14)",
+        "      at Test.run (node:internal/test_runner/test:1047:25)",
+        "      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: 0,",
+        "    expected: 1,",
+        "    operator: 'strictEqual',",
+        "    diff: 'simple'",
+        "  }",
+        ""
+      ]
+    }
+  ],
+  "outputProbes": [
+    {
+      "label": "output-baseline",
+      "status": 1,
+      "stdout": "",
+      "stderr": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\output-baseline-package\\current.json: output must not overwrite an issued input artifact\n",
+      "originalSha256": "6adb97073fc68c63c7c4885c58d52d14159463a2a859ab94e8af5ad02e4b1b69",
+      "afterSha256": "6adb97073fc68c63c7c4885c58d52d14159463a2a859ab94e8af5ad02e4b1b69",
+      "preserved": true
+    },
+    {
+      "label": "output-mutant",
+      "status": 0,
+      "stdout": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\output-mutant-package\\smoke-c1.html: 51236 bytes, 0 unfilled slots\n",
+      "stderr": "",
+      "originalSha256": "6adb97073fc68c63c7c4885c58d52d14159463a2a859ab94e8af5ad02e4b1b69",
+      "afterSha256": "b22120aa7b6e4da7be7780b73f3320cd593339f9d25e2bd08a1b2afb8bd98525",
+      "preserved": false
+    }
+  ],
+  "diffProbes": [
+    {
+      "label": "diff-baseline",
+      "status": 1,
+      "stdout": "✔ passing control (0.671ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 66.1698\ntracked.txt:1: trailing whitespace.\n+trailing whitespace  \n",
+      "stderr": "Exception: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\diff-baseline-package\\runner.ps1:6\r\nLine |\r\n   6 |  if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }\r\n     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Git diff check failed\r\n"
+    },
+    {
+      "label": "diff-mutant",
+      "status": 0,
+      "stdout": "✔ passing control (0.6335ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 64.8622\ntracked.txt:1: trailing whitespace.\n+trailing whitespace  \n",
+      "stderr": ""
+    }
+  ]
+}

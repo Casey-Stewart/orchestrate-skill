@@ -1,0 +1,26 @@
+✖ LF, CRLF, BOM and whitespace are significant raw bytes (16.6802ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 108.3888
+
+✖ failing tests:
+
+test at tests\smoke-inputs.test.cjs:122:1
+✖ LF, CRLF, BOM and whitespace are significant raw bytes (16.6802ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception: the hash itself must reject normalization even when byte size metadata was updated
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-hunter-r1-proof\mutant-normalize-hash\tests\smoke-inputs.test.cjs:132:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /SHA-256 mismatch/,
+    operator: 'throws',
+    diff: 'simple'
+  }

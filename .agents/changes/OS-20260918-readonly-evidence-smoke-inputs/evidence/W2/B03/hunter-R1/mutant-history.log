@@ -1,0 +1,29 @@
+✖ LF/CRLF-only reissue refuses stale bytes then enforces new paths, all revisions and multi-issue history (262.5136ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 364.7817
+
+✖ failing tests:
+
+test at tests\build-smoke-page.test.cjs:508:1
+✖ LF/CRLF-only reissue refuses stale bytes then enforces new paths, all revisions and multi-issue history (262.5136ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  0 !== 1
+
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-hunter-r1-proof\mutant-history\tests\build-smoke-page.test.cjs:520:58)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

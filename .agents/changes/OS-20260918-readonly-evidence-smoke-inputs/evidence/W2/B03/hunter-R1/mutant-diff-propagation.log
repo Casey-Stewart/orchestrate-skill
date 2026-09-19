@@ -1,0 +1,14 @@
+✔ Recovery and capped-verdict tables agree exactly after placeholder normalization (2.2504ms)
+✔ template placeholders and registry match in both directions (6.8541ms)
+✔ generated contract bakes helper grammar, outcomes, fallback and full input responsibility (6.4574ms)
+✔ reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact (10.4727ms)
+✔ published helper recipes execute actual CLIs and generated batch grammar passes the real fence (12456.2107ms)
+✔ actual README recursive command and portable form discover nested failure then success; empty primary discovery fails (4832.2707ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17418.0305

@@ -1,0 +1,20 @@
+[
+  {
+    "label": "output-baseline",
+    "status": 1,
+    "stdout": "",
+    "stderr": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\output-baseline-package\\current.json: output must not overwrite an issued input artifact\n",
+    "originalSha256": "6adb97073fc68c63c7c4885c58d52d14159463a2a859ab94e8af5ad02e4b1b69",
+    "afterSha256": "6adb97073fc68c63c7c4885c58d52d14159463a2a859ab94e8af5ad02e4b1b69",
+    "preserved": true
+  },
+  {
+    "label": "output-mutant",
+    "status": 0,
+    "stdout": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\output-mutant-package\\smoke-c1.html: 51236 bytes, 0 unfilled slots\n",
+    "stderr": "",
+    "originalSha256": "6adb97073fc68c63c7c4885c58d52d14159463a2a859ab94e8af5ad02e4b1b69",
+    "afterSha256": "b22120aa7b6e4da7be7780b73f3320cd593339f9d25e2bd08a1b2afb8bd98525",
+    "preserved": false
+  }
+]

@@ -511,3 +511,11 @@ W2 B03 opened from 6e1fb4428e871760d8f31a99606c3ad68db5015f after W1 completion.
 ## B03-R1-gate
 
 Candidate 7a3ab268a0b318ce080065df628cb1b2386ed980. Conductor manual Git/blob fence PASS against integration 9b3a1a92ca6c00e02f13b9b8d8a8e784035a698a, merge base 6e1fb4428e871760d8f31a99606c3ad68db5015f. All approved paths and both rename endpoints checked; own checklist edits only, no authority changes or fence extensions. Feature batch: repair failing-on-base rule N/A. Candidate validation evidence retained in evidence/W2/B03/R1-candidate. Fresh independent semantic reviewer and separate fresh read-only test hunter follow in parallel, inherited GPT-6 Astra / xhigh. The edited skill does not govern this ledger; all gates remain manual under its frozen contract.
+
+## B03-R1-SHIP
+
+Fresh independent reviewer SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980, no semantic findings; 49 hunks mapped, full recursive186/186 and diff check PASS, literal-python semantics/corruption/reproduction and actual committed fresh-checkout bytes independently verified. Separate fresh hunter FINDINGS2, both test-only ASKs, no production change. Same inherited GPT-6 Astra / xhigh for both. Reports and executable evidence retained under evidence/W2/B03/review-R1 and hunter-R1.
+
+Polish ASKs, verbatim from hunter: (1) protect the issued-input/output collision guard with a real CLI regression: valid reissue with output HTML declared as an issued input must refuse with the issued-artifact diagnostic and preserve complete bytes; exact guard-deletion mutant currently survives71tests. (2) exercise Git diff failure propagation in the actual published validation runner: passing Node suite plus tracked whitespace damage must exit nonzero with Git diff check failed; restored clean file passes; exact propagation-deletion mutant currently survives6protocoltests. Full findings, source/test lines and probes are preserved in hunter-R1/report.md. Current production correctly rejects both concrete bad cases.
+
+Resume the SAME implementer for test-only polish, append/tick two polish checklist items, commit, run validation and frozen manual fence closure. No production change is authorized by these ASKs. This is not a FIX FIRST round; no scoped re-review is needed if only tests and own permitted checklist change. B03 remains unmerged pending mechanical polish closure.

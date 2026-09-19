@@ -1,0 +1,226 @@
+[
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+    "exit": 0,
+    "stdout": "7a3ab268a0b318ce080065df628cb1b2386ed980\n",
+    "stderr": ""
+  },
+  {
+    "command": "python",
+    "args": [
+      "-c",
+      "import sys,openpyxl; print(sys.executable); print(sys.version); print(openpyxl.__version__); assert sys.version_info[:3]==(3,10,6); assert openpyxl.__version__==\"3.1.5\""
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+    "exit": 0,
+    "stdout": "C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\r\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\r\n3.1.5\r\n",
+    "stderr": ""
+  },
+  {
+    "command": "python",
+    "args": [
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\generate-orders.py",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\generated-A.xlsx"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+    "exit": 0,
+    "stdout": "Created synthetic Orders workbook: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\generated-A.xlsx (8634 bytes)\r\n",
+    "stderr": ""
+  },
+  {
+    "command": "python",
+    "args": [
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\generate-orders.py",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\generated-B.xlsx"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+    "exit": 0,
+    "stdout": "Created synthetic Orders workbook: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\generated-B.xlsx (8634 bytes)\r\n",
+    "stderr": ""
+  },
+  {
+    "command": "python",
+    "args": [
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\validate-orders.py",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\orders.xlsx",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\orders.requirements.json"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+    "exit": 0,
+    "stdout": "PASS C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\orders.xlsx: 3 sheets, 47 declared cells, 6 formulas and numeric caches\r\nPASS leading-zero text IDs; numeric zero/negative/discount edges; Unicode; date; boolean; empty cells\r\nPASS Summary!B2 cached total 23.50; Summary!B3 cached order count 4; no macros/external links/errors\r\n",
+    "stderr": ""
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "clone",
+      "--no-checkout",
+      "--no-hardlinks",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout"
+    ],
+    "cwd": "C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/B03-reviewer-r1-proof",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Cloning into 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout'...\ndone.\n"
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "config",
+      "--local",
+      "core.autocrlf",
+      "true"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "config",
+      "--get",
+      "core.autocrlf"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "true\n",
+    "stderr": ""
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "checkout",
+      "--detach",
+      "7a3ab268a0b318ce080065df628cb1b2386ed980"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "HEAD is now at 7a3ab26 feat: validate and deliver immutable checkpoint smoke inputs\n"
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "check-attr",
+      "text",
+      "eol",
+      "filter",
+      "ident",
+      "working-tree-encoding",
+      "--",
+      "tests/fixtures/smoke-inputs/generate-orders.py"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "tests/fixtures/smoke-inputs/generate-orders.py: text: unset\ntests/fixtures/smoke-inputs/generate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/generate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/generate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/generate-orders.py: working-tree-encoding: unset\n",
+    "stderr": ""
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "check-attr",
+      "text",
+      "eol",
+      "filter",
+      "ident",
+      "working-tree-encoding",
+      "--",
+      "tests/fixtures/smoke-inputs/orders.requirements.json"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "tests/fixtures/smoke-inputs/orders.requirements.json: text: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: eol: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: filter: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: ident: unset\ntests/fixtures/smoke-inputs/orders.requirements.json: working-tree-encoding: unset\n",
+    "stderr": ""
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "check-attr",
+      "text",
+      "eol",
+      "filter",
+      "ident",
+      "working-tree-encoding",
+      "--",
+      "tests/fixtures/smoke-inputs/orders.xlsx"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "tests/fixtures/smoke-inputs/orders.xlsx: text: unset\ntests/fixtures/smoke-inputs/orders.xlsx: eol: unset\ntests/fixtures/smoke-inputs/orders.xlsx: filter: unset\ntests/fixtures/smoke-inputs/orders.xlsx: ident: unset\ntests/fixtures/smoke-inputs/orders.xlsx: working-tree-encoding: unset\n",
+    "stderr": ""
+  },
+  {
+    "command": "git",
+    "args": [
+      "-c",
+      "core.longpaths=true",
+      "-c",
+      "safe.directory=C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+      "check-attr",
+      "text",
+      "eol",
+      "filter",
+      "ident",
+      "working-tree-encoding",
+      "--",
+      "tests/fixtures/smoke-inputs/validate-orders.py"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\checkout",
+    "exit": 0,
+    "stdout": "tests/fixtures/smoke-inputs/validate-orders.py: text: unset\ntests/fixtures/smoke-inputs/validate-orders.py: eol: unset\ntests/fixtures/smoke-inputs/validate-orders.py: filter: unset\ntests/fixtures/smoke-inputs/validate-orders.py: ident: unset\ntests/fixtures/smoke-inputs/validate-orders.py: working-tree-encoding: unset\n",
+    "stderr": ""
+  },
+  {
+    "command": "python",
+    "args": [
+      "-c",
+      "import openpyxl,sys,datetime,decimal,zipfile\np=sys.argv[1]; f=openpyxl.load_workbook(p,data_only=False); v=openpyxl.load_workbook(p,data_only=True)\nassert f.sheetnames==['Orders','Summary','Types']\nassert f['Orders']['A2'].value=='0001' and f['Orders']['A2'].data_type=='s'\nassert f['Orders']['F2'].value=='=C2*D2*(1-E2)' and v['Orders']['F2'].value==22.5\nassert f['Summary']['B2'].value=='=SUM(Orders!F2:F5)' and v['Summary']['B2'].value==23.5\nassert f['Summary']['B3'].value=='=COUNTA(Orders!A2:A5)' and v['Summary']['B3'].value==4\nassert f['Types']['A2'].value==datetime.datetime(2026,9,18)\nassert f['Types']['B2'].value is True and f['Types']['B2'].data_type=='b'\nassert f['Types']['C2'].value is None\ntotal=sum(decimal.Decimal(str(f['Orders'].cell(r,3).value))*decimal.Decimal(str(f['Orders'].cell(r,4).value))*(1-decimal.Decimal(str(f['Orders'].cell(r,5).value))) for r in range(2,6))\nassert total==decimal.Decimal('23.5')\nwith zipfile.ZipFile(p) as src,zipfile.ZipFile(sys.argv[2],'w') as dst:\n for entry in src.infolist():\n  b=src.read(entry.filename)\n  if entry.filename=='xl/worksheets/sheet1.xml':\n   b=b.replace(b'<c r=\"C2\"><v>2</v></c>',b'<c r=\"C2\"><v>3</v></c>')\n  dst.writestr(entry,b)\nprint('Independent semantics passed; deliberate corruption created')",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03\\tests\\fixtures\\smoke-inputs\\orders.xlsx",
+      "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-reviewer-r1-proof\\corrupt.xlsx"
+    ],
+    "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\wt-B03",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 5, in <module>\r\nAssertionError\r\n"
+  }
+]

@@ -1,0 +1,41 @@
+✖ shared stable IDs require EVERY referencing revision for path, bytes and all semantic metadata changes (17.2781ms)
+✖ real input reissue flows through builder, displayed files and saved verdicts on the same build (35.2989ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 139.0299
+
+✖ failing tests:
+
+test at tests\build-smoke-page.test.cjs:462:1
+✖ shared stable IDs require EVERY referencing revision for path, bytes and all semantic metadata changes (17.2781ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-hunter-r1-proof\mutant-resolved-identities\tests\build-smoke-page.test.cjs:480:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /step 1:.*resolved inputs changed.*increment revision/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests\smoke-page.test.cjs:139:1
+✖ real input reissue flows through builder, displayed files and saved verdicts on the same build (35.2989ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\B03-hunter-r1-proof\mutant-resolved-identities\tests\smoke-page.test.cjs:180:10)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /step 1:.*increment revision/,
+    operator: 'throws',
+    diff: 'simple'
+  }

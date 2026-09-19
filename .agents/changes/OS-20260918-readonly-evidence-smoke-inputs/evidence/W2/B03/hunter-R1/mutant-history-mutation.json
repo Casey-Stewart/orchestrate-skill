@@ -1,0 +1,5 @@
+{
+  "file": "orchestrate/tools/build-smoke-page.mjs",
+  "from": "  compareInputHistory(currentInputs, previousInputs);",
+  "to": "  // MUTANT: drop immutable history comparison."
+}

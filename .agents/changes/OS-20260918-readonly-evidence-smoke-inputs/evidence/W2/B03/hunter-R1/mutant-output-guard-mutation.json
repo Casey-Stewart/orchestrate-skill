@@ -1,0 +1,5 @@
+{
+  "file": "orchestrate/tools/build-smoke-page.mjs",
+  "from": "      if (sameFile(out, resolve(inputRoot, artifact.path))) throw new Error(\"output must not overwrite an issued input artifact\");",
+  "to": "      // MUTANT: omit issued artifact overwrite guard."
+}

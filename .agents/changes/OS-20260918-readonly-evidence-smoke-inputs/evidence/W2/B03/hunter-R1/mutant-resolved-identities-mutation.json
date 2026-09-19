@@ -1,0 +1,5 @@
+{
+  "file": "orchestrate/tools/build-smoke-page.mjs",
+  "from": "!isDeepStrictEqual(previousInputs.byStep.get(n), currentInputs.byStep.get(n))",
+  "to": "!isDeepStrictEqual(previousInputs.byStep.get(n).map(input => input.id), currentInputs.byStep.get(n).map(input => input.id))"
+}

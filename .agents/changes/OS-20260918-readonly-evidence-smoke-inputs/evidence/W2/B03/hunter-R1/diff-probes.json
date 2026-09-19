@@ -1,0 +1,14 @@
+[
+  {
+    "label": "diff-baseline",
+    "status": 1,
+    "stdout": "✔ passing control (0.671ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 66.1698\ntracked.txt:1: trailing whitespace.\n+trailing whitespace  \n",
+    "stderr": "Exception: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\B03-hunter-r1-proof\\diff-baseline-package\\runner.ps1:6\r\nLine |\r\n   6 |  if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }\r\n     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Git diff check failed\r\n"
+  },
+  {
+    "label": "diff-mutant",
+    "status": 0,
+    "stdout": "✔ passing control (0.6335ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 64.8622\ntracked.txt:1: trailing whitespace.\n+trailing whitespace  \n",
+    "stderr": ""
+  }
+]

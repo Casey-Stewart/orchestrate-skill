@@ -49,7 +49,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 |---|---|---|---|---|---|---|---|
 | B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🟢 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 | B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🟢 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🔄 | 2026-09-18 | W2 opened from 6e1fb4428e871760d8f31a99606c3ad68db5015f; isolated wt-B03; inherited GPT-6 Astra / xhigh; LOG#W2-open m: rounds=0 asks=0 fence-bounces=0 gate=0/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🔄 | 2026-09-18 | R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980 asks=2 (separate hunter); fresh GPT-6 Astra / xhigh; test-only polish pending; LOG#B03-R1-SHIP m: rounds=0 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 

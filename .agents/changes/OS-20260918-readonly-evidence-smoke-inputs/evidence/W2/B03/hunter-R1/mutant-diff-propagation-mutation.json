@@ -1,0 +1,5 @@
+{
+  "file": "README.md",
+  "from": "if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }",
+  "to": "# MUTANT: omit Git diff failure propagation."
+}
