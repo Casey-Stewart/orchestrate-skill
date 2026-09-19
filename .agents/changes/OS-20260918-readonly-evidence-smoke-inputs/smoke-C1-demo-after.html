@@ -676,7 +676,7 @@
   <div class="masthead-in">
     <p class="eyebrow">Checkpoint C1 · batches B03 demonstration</p>
     <h1>Input reissue demonstration — After</h1>
-    <p class="standfirst">The workbook input has changed on the same build. Step 1 must say NOT RE-RUN; step 2 must keep its Pass and note. Return to the real C1 page after inspecting this demonstration.</p>
+    <p class="standfirst">The workbook input has changed on the same build. Step 1 has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. Step 2 keeps its Pass and “keep this note”. Return to the real C1 page after inspecting this demonstration.</p>
 
     <dl class="facts">
 <div class="fact"><dt>Branch</dt><dd><code>codex/readonly-evidence-smoke-inputs-ledger</code></dd></div>
@@ -844,9 +844,9 @@
       },
       {
         "n": 2,
-        "do": "Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.",
+        "do": "Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.",
         "pass": "This input and its step revision stay unchanged in the After page; the Pass and note should survive.",
-        "revision": 1,
+        "revision": 2,
         "inputs": [
           "demo-control"
         ],
@@ -1530,4 +1530,4 @@
 })();
 </script>
 
-<!-- smoke-sidecar-sha256:028df27f150a40b5ed1ae96005d166724791607f890c3cf472fe3c79cf16e8a1 -->
+<!-- smoke-sidecar-sha256:9f8494031631d6018ebbf137d3ad43732cb280e86896b4a459c9f01a6fe99749 -->

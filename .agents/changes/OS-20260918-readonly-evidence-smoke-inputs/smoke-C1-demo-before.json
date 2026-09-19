@@ -7,7 +7,7 @@
   "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1-demo",
   "pageTitle": "C1 input reissue — Before",
   "headline": "Input reissue demonstration — Before",
-  "standfirst": "These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.",
+  "standfirst": "These demonstration marks are separate from the real C1 verdict. Mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open the After page in this same browser.",
   "gate": {
     "intro": "This is a disposable demonstration using the same tested build and a separate browser storage key.",
     "commands": [],
@@ -91,9 +91,9 @@
         },
         {
           "n": 2,
-          "do": "Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.",
+          "do": "Inspect the unchanged text input. To record this demonstration step, select Works, but, enter “keep this note” in the visible note field, then select Pass.",
           "pass": "This input and its step revision stay unchanged in the After page; the Pass and note should survive.",
-          "revision": 1,
+          "revision": 2,
           "inputs": [
             "demo-control"
           ]

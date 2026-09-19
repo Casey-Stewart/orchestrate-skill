@@ -36,10 +36,10 @@
         },
         {
           "n": 2,
-          "do": "Follow the workbook and instruction links. Open <a href=\"smoke-C1-demo-before.html\">the Before demonstration</a>, mark its two demo steps Pass, and add “keep this note” to demo step 2. Then open <a href=\"smoke-C1-demo-after.html\">the After demonstration</a> in the same browser.",
-          "pass": "Files and copy/reset directions are usable. The changed-input demo step says NOT RE-RUN, while the unaffected step retains Pass and its note. Demo marks are separate from this C1 verdict.",
+          "do": "Follow the workbook and instruction links. Open <a href=\"smoke-C1-demo-before.html\">the Before demonstration</a> and mark demo step 1 Pass. For demo step 2, select Works, but, enter “keep this note” in the visible note field, then select Pass. Open <a href=\"smoke-C1-demo-after.html\">the After demonstration</a> in the same browser and press Copy results as text.",
+          "pass": "Files and copy/reset directions are usable. On After, the changed-input demo step has rerun-required history; Copy results as text reports “1. NOT RE-RUN — previous PASS”. The unaffected step retains Pass and “keep this note”. Demo marks are separate from this C1 verdict.",
           "aside": "Runner: human. The demo changes synthetic files and isolated browser marks only.",
-          "revision": 1,
+          "revision": 2,
           "inputs": [
             "orders-original",
             "workbook-copy-reset",
