@@ -56,14 +56,15 @@ the exact commands and results. It supplies the same fixed files for C1 QA.
 
 ## Checklist
 
-- [ ] Add narrowly scoped .gitattributes for exact fixture bytes and active/archived checkpoint inputs; no renormalization.
-- [ ] Generate and check in orders.xlsx plus its explicit requirements.
-- [ ] Prove raw SHA256(A) = SHA256(B) = SHA256(committed workbook file bytes), separately from semantic validation.
-- [ ] Verify fresh core.autocrlf=true checkout hashes for fixtures, issued/archived package copies and LF/CRLF sentinels.
-- [ ] Check effective attributes for every B01 fence path remain unchanged; no B01 checkout/byte churn.
-- [ ] Add deterministic generator and independent openpyxl validation.
-- [ ] Verify example formulas, cached results, types and all edge cases.
-- [ ] Exercise fixed consumer commands, deterministic generation and a corrupted-workbook rejection.
+- [x] Add narrowly scoped .gitattributes for exact fixture bytes and active/archived checkpoint inputs; no renormalization.
+- [x] Generate and check in orders.xlsx plus its explicit requirements.
+- [x] Prove raw SHA256(A) = SHA256(B) = SHA256(committed workbook file bytes), separately from semantic validation.
+- [x] Verify fresh core.autocrlf=true checkout hashes for fixtures, issued/archived package copies and LF/CRLF sentinels.
+- [x] Check effective attributes for every B01 fence path remain unchanged; no B01 checkout/byte churn.
+- [x] Add deterministic generator and independent openpyxl validation.
+- [x] Verify example formulas, cached results, types and all edge cases.
+- [x] Exercise fixed consumer commands, deterministic generation and a corrupted-workbook rejection.
+- [x] polish: Verify numeric 1 is rejected for the declared boolean Types!B2, including a permissive equality-only validator mutation.
 
 ## Acceptance criteria
 
