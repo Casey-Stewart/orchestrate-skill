@@ -171,8 +171,8 @@ verdicts: fix again (the authorized third round above) / ship with the residual 
 Run by the ORCHESTRATOR, in parallel with the reviewer, only when the batch added or
 changed tests. A repo-local hunter (named in the contract's gate-agent list, e.g. a
 `vacuous-test-hunter` under `.claude/agents/`) replaces this skeleton and reads its own
-catalog first. The generic `test-hunter` definition this repo ships is this skeleton's
-own type, not such a replacement.
+catalog first. The generic `test-hunter` the skill ships is this skeleton's own type,
+not such a replacement.
 
 **Spawn with** `subagent_type: test-hunter`.
 
