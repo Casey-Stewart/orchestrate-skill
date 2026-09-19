@@ -2,7 +2,7 @@
 
 **Identifier**: OS-20260918-readonly-evidence-smoke-inputs
 **Started**: 2026-09-18 · **Base**: f918fe39762c70edb9a3424e54eaa208fd7c5727
-**State**: AT-CHECKPOINT C1
+**State**: FINAL CHECKPOINT PASSED — gate repair in flight
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 **Smoke page**: smoke-C1.html (ledger-relative, with smoke-C1-demo-before.html and smoke-C1-demo-after.html)
@@ -51,32 +51,33 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|---|---|---|---|---|---|---|
-| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | 🧪 | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
-| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | 🧪 | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
-| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | 🧪 | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated; pre-smoke repair pending: step 00, fix/B03-presmoke-00 @8d27e891fc0a4e7882590232eeec96f993f9a59f m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
+| B01 | Read-only Git evidence and fence checks | codex/readonly-evidence-checker | 1 | — | ✅ | 2026-09-18 | Integrated dd32593ae06215f61abed695625024aa0c04b9b0; R3 SHIP @9f05127c33040d02a08782a5d23c23242021de39; fresh GPT-6 Astra / xhigh; hunter CLEAN; all prior findings resolved; LOG#B01-integrated m: rounds=2 asks=0 fence-bounces=0 gate=2/0 tip-red=0 |
+| B02 | Reproducible Excel artifacts | codex/smoke-input-files | 1 | — | ✅ | 2026-09-18 | Integrated96f48ed17931053e7c70aed58ba9e581c9e4e560; R1 SHIP current inherited tier; polish closed; LOG#B02-integrated m: rounds=0 asks=1 fence-bounces=0 gate=1/0 tip-red=0 |
+| B03 | Workflow, generated contract and smoke-page integration | codex/workflow-input-delivery | 2 | — | ✅ | 2026-09-18 | Integrated a70f302a8b46c5191ff8daddb3652e8d9bc6e471; R1 SHIP @7a3ab268a0b318ce080065df628cb1b2386ed980; two test-only ASKs closed @800c0fac5735d7ed262eff86390ddae1d1ca249c; GPT-6 Astra / xhigh; LOG#B03-integrated; pre-smoke repair step 10 INTEGRATED f48152253cf9b1d9d8e4354a8d2c00fe760e4631 (fix/B03-presmoke-10; R1 SHIP @f2c2cee asks=2; polish closed @af57f93; repair m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0); LOG#C1-repair10-integrated; pre-smoke repair pending: step 00, fix/B03-presmoke-00 @8d27e891fc0a4e7882590232eeec96f993f9a59f m: rounds=0 asks=2 fence-bounces=0 gate=2/0 tip-red=0 |
 
 ## Checkpoints
 
 | Checkpoint | After wave | Covers | Why here | Status | Verdict |
 |---|---|---|---|---|---|
-| C1 | 2 | B01, B02, B03 | Final; W2 owns hands-on smoke-page/input delivery | 🧪 | awaiting user; issued 2026-09-19 @49dfe07c09111197b8739aac2df0cea43c985cdf m: pre-smoke=9/2 human-smoke-min=? escaped=? |
+| C1 | 2 | B01, B02, B03 | Final; W2 owns hands-on smoke-page/input delivery | ✅ | PASS 2026-09-19 (verdict log); issued @49dfe07c09111197b8739aac2df0cea43c985cdf m: pre-smoke=9/2 human-smoke-min=unreported escaped=1 |
 
 ## Smoke-test verdict log
 
 | Date | Checkpoint | Verdict | User notes |
 |---|---|---|---|
 | 2026-09-18 | B01 | fix again (consumed once) | "OKay, yeah do another round. Same level" |
+| 2026-09-19 | C1 | pass (steps 1 and 2) | "Okay, then yeah I did both steps right. I was just confused by the wording, but that IS what I did and it DID pass both of those." — preceded by "I had already done steps 1 and 2 I think? The steps were weird, but I THINK it passed." The hedged first message was NOT recorded as a verdict; the conductor asked for the Copy-results paste and for what was weird, and recorded only the unambiguous confirmation. No paste was supplied, so the page's stored marks are not independently confirmed — the verdict rests on the user's words. The wording confusion is a works-but, filed as OS-BL-001, and does not block the pass. |
 
 ## Item → batch coverage audit
 
 | Request item | Source | Batch | Version | Status |
 |---|---|---|---|---|
-| 1a checker behavior and tests | request | B01 | — | 🧪 |
-| 1b gate wiring and authority | request | B03 | — | 🧪 |
-| 2a Git helper and actual-helper scenarios | request | B01 | — | 🧪 |
-| 2b evidence-only workflow use | request | B03 | — | 🧪 |
-| 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | 🧪 |
-| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | 🧪 |
+| 1a checker behavior and tests | request | B01 | — | ✅ |
+| 1b gate wiring and authority | request | B03 | — | ✅ |
+| 2a Git helper and actual-helper scenarios | request | B01 | — | ✅ |
+| 2b evidence-only workflow use | request | B03 | — | ✅ |
+| 3a reproducible Excel, scoped attributes, triple hashes, byte preservation and semantic validation | request | B02 | — | ✅ |
+| 3b raw-byte validation, conductor delivery, invalidation, recursive discovery and reusable-path boundary | request | B03 | — | ✅ |
 | Starting protocol freeze, scheduling/cap and historical baseline evidence | run requirement | B00 conductor | — | baked and source provenance verified at scaffold |
 
 ## Session log

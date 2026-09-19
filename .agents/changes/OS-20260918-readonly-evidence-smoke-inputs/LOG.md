@@ -804,3 +804,46 @@ Recording note: the first attempt to write this record died in the conductor's o
 commit that landed carried only the new batch file. The PROGRESS marker and this entry
 follow in the next commit, still before the repair branch is cut and before any implementer
 is spawned, so the marker accompanies the spawn as the contract requires.
+
+## C1-verdict-pass
+
+Checkpoint C1 PASSED. The user first wrote: "I had already done steps 1 and 2 I think?
+The steps were weird, but I THINK it passed." That was NOT recorded as a verdict — a
+hedged pass is not a pass, and "the steps were weird" is the shape of a blocked or a
+works-but. The conductor asked for the page's Copy-results paste and for what exactly was
+weird, spelling out the four verdicts. The user then confirmed: "Okay, then yeah I did
+both steps right. I was just confused by the wording, but that IS what I did and it DID
+pass both of those."
+
+Only the unambiguous second message is recorded as the verdict, and both messages are
+quoted verbatim in the verdict log so the sequence is auditable. No Copy-results paste was
+supplied, so the page's stored marks were never independently confirmed: the verdict rests
+on the user's words, and the log says so rather than implying machine confirmation. The
+conductor did not mark anything on the user's behalf and did not infer a pass from the
+earlier hedge.
+
+The wording confusion is a works-but under the frozen four-verdict rule — performed as
+specified, passed, but the user wants it different — so it never blocks the pass and is
+filed as OS-BL-001 rather than treated as a failure.
+
+Rows B01, B02 and B03 flip 🧪 -> ✅ along with every request-item coverage row. The C1
+checkpoint row completes its metrics token: `m: pre-smoke=9/2 human-smoke-min=unreported
+escaped=1`. `human-smoke-min` is recorded as unreported rather than invented — the user
+never stated a duration. `escaped=1` counts the step-0 gate portability defect: the user
+found it, and no gate caught it. The wording confusion is not counted as escaped, because
+it is a works-but and not a defect. Recording escaped=0 here would have flattered the run.
+
+State moves to FINAL CHECKPOINT PASSED, not COMPLETE: the step-00 gate repair is gated but
+unmerged, and its `pre-smoke repair pending:` marker still sits in B03's Notes. Completion
+waits on that repair landing, the marker retiring, and the change-complete close-out —
+final coverage audit, distillation and the branch-deletion proposal. Three residuals are
+already filed: OS-BL-001 (step wording), OS-BL-002 (cleared demo verdicts leave inert
+records — needs a production template change no gate authorized), OS-BL-003 (a ledger
+evidence path exceeding Git's default Windows path limit, which forced short worktree
+roots for both repairs).
+
+Note on ordering: the checkpoint passing does not retire the gate repair. The committed
+page still carries a gate block that cannot be pasted into the user's shell, and the
+repair is already implemented, fence-clean and reviewed-pending. Landing it makes the
+permanent artifact honest; abandoning it would leave a known-broken gate in a ledger whose
+whole point is that any future session can drive it from the files alone.
