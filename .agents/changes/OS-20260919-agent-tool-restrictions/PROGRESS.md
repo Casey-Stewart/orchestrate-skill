@@ -39,8 +39,8 @@ checkpoint after W1 would cost the user a second session restart and prove less.
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| 01 | Tool-restricted agent definitions + install docs | `feat/agent-definitions` | 1 | — | ⬜ | 2026-09-19 | S/feature. Creates `.claude/agents/` (absent at base). `qa-runner` keeps Write/Edit by design — evidence files, `subagent-prompts.md:222`; flagged deviation from the request's literal wording. Hands-on at C1. |
-| 02 | Contract boot: the prompt is authoritative | `fix/contract-prompt-authority` | 1 | — | ⬜ | 2026-09-19 | S/fix. One paragraph at `templates/00-READBEFORE.md:33-36`. Failing-on-base test: `tests/contract-prompt-authority.test.cjs`. Template only — archive and this ledger's own contract stay as-is. |
+| 01 | Tool-restricted agent definitions + install docs | `feat/agent-definitions` | 1 | — | 🔄 | 2026-09-19 | S/feature. Creates `.claude/agents/` (absent at base). `qa-runner` keeps Write/Edit by design — evidence files, `subagent-prompts.md:222`; flagged deviation from the request's literal wording. Hands-on at C1. W1 open @7b74811; worktree <temp>/claude/wt-os919/b01. |
+| 02 | Contract boot: the prompt is authoritative | `fix/contract-prompt-authority` | 1 | — | 🔄 | 2026-09-19 | S/fix. One paragraph at `templates/00-READBEFORE.md:33-36`. Failing-on-base test: `tests/contract-prompt-authority.test.cjs`. Template only — archive and this ledger's own contract stay as-is. W1 open @7b74811; worktree <temp>/claude/wt-os919/b02. |
 | 03 | `subagent_type` per skeleton + missing-agent fallback | `feat/subagent-type-mapping` | 2 | — | ⬜ | 2026-09-19 | S/feature. Seven skeletons → four types. Depends on B01: its cross-reference test asserts `.claude/agents/<type>.md` exists. Adds the degraded-environments fallback. Hands-on at C1. |
 
 ## Checkpoints
@@ -70,21 +70,23 @@ without running it.
 
 | Request item | Source | Batch | Version | Status |
 |--------------|--------|-------|---------|--------|
-| `.claude/agents/` directory created | request (change 1) | B01 | — | ⬜ |
-| `implementer` tool list (Read/Write/Edit/Glob/Grep/Bash) | request (change 1) | B01 | — | ⬜ |
-| `reviewer` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | ⬜ |
-| `test-hunter` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | ⬜ |
-| `qa-runner` tool list + browser tools | request (change 1) | B01 | — | ⬜ |
-| Artifact/visualize/session/Drive/Gmail dropped from every spawn | request (change 1) | B01 | — | ⬜ |
-| Bash caveat recorded verbatim (read-only stays partly conventional) | request (change 1) | B01 | — | ⬜ |
-| README tells users to install the agents into their own agents folder | user decision 2026-09-19 | B01 | — | ⬜ |
+| `.claude/agents/` directory created | request (change 1) | B01 | — | 🔄 |
+| `implementer` tool list (Read/Write/Edit/Glob/Grep/Bash) | request (change 1) | B01 | — | 🔄 |
+| `reviewer` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🔄 |
+| `test-hunter` tool list (Read/Glob/Grep/Bash, no Write/Edit) | request (change 1) | B01 | — | 🔄 |
+| `qa-runner` tool list + browser tools | request (change 1) | B01 | — | 🔄 |
+| Artifact/visualize/session/Drive/Gmail dropped from every spawn | request (change 1) | B01 | — | 🔄 |
+| Bash caveat recorded verbatim (read-only stays partly conventional) | request (change 1) | B01 | — | 🔄 |
+| README tells users to install the agents into their own agents folder | user decision 2026-09-19 | B01 | — | 🔄 |
 | `subagent_type:` line on every skeleton (all seven) | request (change 2) | B03 | — | ⬜ |
 | Orchestrator cannot default to general-purpose with `*` | request (change 2) | B03 | — | ⬜ |
 | Fallback for repos without the definitions installed | planning finding, accepted | B03 | — | ⬜ |
-| Contract: prompt authoritative, contract consulted only if incomplete | request (change 3) | B02 | — | ⬜ |
+| Contract: prompt authoritative, contract consulted only if incomplete | request (change 3) | B02 | — | 🔄 |
 
 ## Session log
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
 | 2026-09-19 | Scaffold. Verified all three requested changes against the files at `5110f71` (see 00-request.md §Accuracy check): change 3 exact, change 2 substance right with one overstated detail, change 1 correct but scoped narrower than claimed. Interviewed, planned 3 batches / 2 waves / 1 final checkpoint, filled the ledger. Baseline validation green: 187 pass, 0 fail. | User chose "Approved — scaffold only, stop" at plan approval: the ledger is to be read before any implementer runs. Resume with `/orchestrate continue`. |
+| 2026-09-19 | Boot + reconcile: all three rows `⬜`, no batch branches — correct pre-wave state, nothing to correct. Resume-time validation green on the integration tip `7b74811` (node --test exit 0, `git diff --check` clean). **Opened wave 1**: cut `feat/agent-definitions` (B01) and `fix/contract-prompt-authority` (B02) from wave base **`7b74811`**, created their worktrees, spawned both implementers concurrently. | (wave 1 in progress) |
+| 2026-09-19 | **Environment note, not a plan deviation.** `git worktree add` under the session scratchpad failed with `Filename too long`: the scratchpad prefix (~150 chars) plus this repo's deepest tracked path (146 chars, `.agents/archive/OS-20260918-.../evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs`) exceeds the Windows 260-char limit. Worktrees relocated to the short root `<temp>/claude/wt-os919/` — still outside the repo, still disposable, per-worktree setup still n/a. Wave map, fences, gates and checkpoints unchanged. Stale `.git/worktrees/wt-B0*` admin dirs from the archived ledger's run resist `git worktree prune` (permission denied) but are absent from `git worktree list` and block nothing. | — |
