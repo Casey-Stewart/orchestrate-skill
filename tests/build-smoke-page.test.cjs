@@ -48,14 +48,18 @@ test('the same sidecar always produces the same bytes', () => {
   assert.notEqual(build(), build({ buildSha: 'b'.repeat(40) }));
 });
 
-test('sections survive the fill verbatim and stay inside the script block', () => {
-  const data = sidecar({ sections: sidecar().sections.map(s => ({ ...s,
-    steps: s.steps.map(step => ({ ...step, aside: 'Close the </script> tag reader trap' })) })) });
-  const html = builder.buildSmokePage(data, template);
-  assert.equal(html.includes('</script> tag reader trap'), false, 'a prose `</script>` must not close the block');
-  const embedded = html.match(/var SECTIONS = (\[[\s\S]*?\]);\n/)[1];
-  assert.deepEqual(JSON.parse(embedded.replace(/<\\\//g, '</')), data.sections);
-});
+for (const [label, newline] of [['LF', '\n'], ['CRLF', '\r\n']]) {
+  test(`sections survive the fill verbatim and stay inside the script block (${label} template)`, () => {
+    const data = sidecar({ sections: sidecar().sections.map(s => ({ ...s,
+      steps: s.steps.map(step => ({ ...step, aside: 'Close the </script> tag reader trap' })) })) });
+    const html = builder.buildSmokePage(data, template.replace(/\r?\n/g, newline));
+    assert.equal(html.includes('</script> tag reader trap'), false, 'a prose `</script>` must not close the block');
+    const match = html.match(/var SECTIONS = (\[[\s\S]*?\]);\r?\n/);
+    assert.ok(match, 'the generated page must contain the complete SECTIONS assignment');
+    const embedded = match[1];
+    assert.deepEqual(JSON.parse(embedded.replace(/<\\\//g, '</')), data.sections);
+  });
+}
 
 test('facts render in the documented order, with the old version struck through', () => {
   const html = build();
