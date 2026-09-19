@@ -10,8 +10,8 @@ Resume validation is 63/64: "sections survive the fill verbatim and stay inside 
 
 ## Checklist
 
-- [ ] Make the embedded-section assertion work for LF and CRLF, with explicit coverage of both variants.
-- [ ] Run the full recursive sorted Node suite and git diff --check; commit cleanly.
+- [x] Make the embedded-section assertion work for LF and CRLF, with explicit coverage of both variants.
+- [x] Run the full recursive sorted Node suite and git diff --check; commit cleanly.
 
 ## Acceptance
 
