@@ -1,0 +1,84 @@
+{
+  "testedSHA": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "environment": "Windows; Node v22.22.3; Git 2.52.0.windows.1; PowerShell 7.6.5; literal python C:/Users/fatbo/AppData/Local/Programs/Python/Python310/python.exe, Python 3.10.6 / openpyxl 3.1.5; Codex In-app Browser via CUA at http://127.0.0.1:8765/.",
+  "step0": "PASS",
+  "steps": [
+    {
+      "n": 3,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-03.md"
+    },
+    {
+      "n": 4,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-04.md"
+    },
+    {
+      "n": 5,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-05.md"
+    },
+    {
+      "n": 6,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-06.md"
+    },
+    {
+      "n": 7,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-07.md"
+    },
+    {
+      "n": 8,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-08.md"
+    },
+    {
+      "n": 9,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-09.md"
+    },
+    {
+      "n": 10,
+      "verdict": "FAIL",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-10.md"
+    },
+    {
+      "n": 11,
+      "verdict": "PASS",
+      "file": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\step-11.md"
+    }
+  ],
+  "finding": "Current human Step2 / Before demo prose omits the supported Works-but→note→Pass note-entry route; exact prose currently unusable.",
+  "retainedFiles": [
+    "canary.log",
+    "checkout-proof.json",
+    "checkout.log",
+    "demo-after-bottom.png",
+    "demo-after-copy.txt",
+    "demo-after-diagnostic.txt",
+    "demo-after-rerun.png",
+    "demo-before-diagnostic.txt",
+    "demo-before-note.png",
+    "demo-cleared.txt",
+    "demo-pass-no-note.png",
+    "demo-pass-no-note.txt",
+    "demo-reset-before.png",
+    "demo-reset-before.txt",
+    "discovery-proof.json",
+    "discovery.log",
+    "excel-proof.json",
+    "excel.log",
+    "git-fence-tests.exit.txt",
+    "git-fence-tests.log",
+    "independent-link-check.mjs",
+    "link-proof.json",
+    "links.log",
+    "main-browser-links.json",
+    "main-initial.png",
+    "reissue-proof.json",
+    "reissue.log",
+    "tested-model-initial.json",
+    "write-initial-evidence.mjs"
+  ]
+}

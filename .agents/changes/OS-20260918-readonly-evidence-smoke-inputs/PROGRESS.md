@@ -8,7 +8,7 @@
 **Smoke page**: —
 **Rule**: statuses here are claims; **git is truth**.
 
-W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 B03 is reviewed, polished, integrated and green. C1 close-out is now preparing its actual inputs and independent QA; no checkpoint verdict has been requested yet.
+W1 is complete: B01 and B02 are reviewed, integrated and green. B01 passed its explicitly authorized third round. W2 B03 is reviewed, polished, integrated and green. C1 initial QA completed: eight agent steps PASS and step10 FAIL for note-entry instructions; step11 is a diagnostic runtime PASS. A reviewed pre-smoke repair is opening; no checkpoint verdict has been requested.
 
 ## Plan approval and integration worktree
 

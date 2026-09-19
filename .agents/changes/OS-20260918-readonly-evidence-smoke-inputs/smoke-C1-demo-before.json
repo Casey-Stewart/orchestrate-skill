@@ -1,0 +1,104 @@
+{
+  "change": "Changed-input reissue demonstration",
+  "checkpoint": 1,
+  "batches": "B03 demonstration",
+  "branch": "codex/readonly-evidence-smoke-inputs-ledger",
+  "buildSha": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "ckptKey": "OS-20260918-readonly-evidence-smoke-inputs-C1-demo",
+  "pageTitle": "C1 input reissue — Before",
+  "headline": "Input reissue demonstration — Before",
+  "standfirst": "These two demonstration marks are separate from the real C1 verdict. Mark both steps Pass and add a note to step 2, then open the After page in this same browser.",
+  "gate": {
+    "intro": "This is a disposable demonstration using the same tested build and a separate browser storage key.",
+    "commands": [],
+    "checks": [
+      "Tested source commit: <code>6c84b930aa4297283f94ce9eeacdff44d2b22ba4</code>. Return to the real C1 page to record your checkpoint verdict."
+    ]
+  },
+  "inputs": [
+    {
+      "id": "demo-orders",
+      "path": "evidence/C1/inputs/issue-001/orders.xlsx",
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "size": 8634,
+      "requirements": "Three sheets Orders/Summary/Types; text IDs 0001–0004, numeric/zero/negative/discount/Unicode/date/boolean/empty edges, six formulas with caches, total 23.50 and count 4.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/input-validation.json",
+        "sha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+        "size": 18641,
+        "command": "node 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts\\c1-input-validation.mjs' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation'",
+        "exitCode": 0,
+        "result": "PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.",
+        "env": "C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\r\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\r\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git"
+      },
+      "mode": "working-copy",
+      "use": "Copy to the named disposable workbook before editing; see WORKING-COPY.md.",
+      "reset": "Close and replace only the working copy from the immutable original."
+    },
+    {
+      "id": "demo-spec",
+      "path": "evidence/C1/inputs/issue-001/orders.requirements.json",
+      "sha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "size": 4115,
+      "requirements": "Independent manifest declares every required sheet, cell, type, format, formula and cached value.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/input-validation.json",
+        "sha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+        "size": 18641,
+        "command": "node 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts\\c1-input-validation.mjs' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation'",
+        "exitCode": 0,
+        "result": "PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.",
+        "env": "C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\r\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\r\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git"
+      },
+      "mode": "read-only",
+      "use": "Read-only requirements for the delivered validator.",
+      "reset": "Use a new disposable package; never edit the issued manifest."
+    },
+    {
+      "id": "demo-control",
+      "path": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "sha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "size": 79,
+      "requirements": "UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/input-validation.json",
+        "sha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+        "size": 18641,
+        "command": "node 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts\\c1-input-validation.mjs' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\18\\01a0b671-3325-77d3-b360-845f09da4bdc\\orchestrate-run\\wt-int\\.agents\\changes\\OS-20260918-readonly-evidence-smoke-inputs\\evidence\\C1\\scripts' 'C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe' 'C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-validation'",
+        "exitCode": 0,
+        "result": "PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records.",
+        "env": "C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\r\n3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]\r\nopenpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git"
+      },
+      "mode": "working-copy",
+      "use": "Copy before changing line endings for stale-digest test.",
+      "reset": "Replace disposable copy from immutable original."
+    }
+  ],
+  "sections": [
+    {
+      "n": 1,
+      "title": "Two independent checks",
+      "steps": [
+        {
+          "n": 1,
+          "do": "Inspect the linked workbook and requirements, then mark this demonstration step Pass.",
+          "pass": "Original workbook: Orders!C2=2; Orders!F2=22.50; Summary!B2=23.50; count=4.",
+          "revision": 1,
+          "inputs": [
+            "demo-orders",
+            "demo-spec"
+          ]
+        },
+        {
+          "n": 2,
+          "do": "Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.",
+          "pass": "This input and its step revision stay unchanged in the After page; the Pass and note should survive.",
+          "revision": 1,
+          "inputs": [
+            "demo-control"
+          ]
+        }
+      ]
+    }
+  ]
+}

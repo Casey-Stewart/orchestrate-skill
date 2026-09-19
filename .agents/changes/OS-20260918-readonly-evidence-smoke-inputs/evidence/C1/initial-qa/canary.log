@@ -1,0 +1,21 @@
+{
+  "branch": "codex/readonly-evidence-smoke-inputs-ledger",
+  "testedSHA": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "head": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "scratch": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-c1-canary-S1tNOM",
+  "intactInputsValidated": true,
+  "mutatedInput": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-c1-canary-S1tNOM\\checkpoint\\evidence\\C1\\inputs\\issue-001\\orders.xlsx",
+  "originalSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+  "mutatedSha256": "5833d64b164814fe1ddc5f2f9240d0adff043ead7a62f81e3acae9160cc6ea8b",
+  "current": {
+    "exit": 1,
+    "stderr": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-c1-canary-S1tNOM\\checkpoint\\smoke-C1.json: input artifact evidence/C1/inputs/issue-001/orders.xlsx: SHA-256 mismatch for raw file bytes",
+    "oldHTMLPreserved": true
+  },
+  "starting": {
+    "sha": "f918fe39762c70edb9a3424e54eaa208fd7c5727",
+    "exit": 0,
+    "output": "C:\\Users\\fatbo\\AppData\\Local\\Temp\\orchestrate-c1-canary-S1tNOM\\checkpoint\\baseline-accepted.html: 56299 bytes, 0 unfilled slots"
+  },
+  "verdict": "PASS: current rejects tampered bytes; starting builder accepts/ignores them"
+}

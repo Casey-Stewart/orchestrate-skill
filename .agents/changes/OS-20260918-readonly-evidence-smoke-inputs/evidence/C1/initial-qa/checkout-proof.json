@@ -1,0 +1,2020 @@
+{
+  "verdict": "PASS",
+  "testedCommit": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "run": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\issued-byte-proof-7mtRBH",
+  "actualClone": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\issued-byte-proof-7mtRBH\\actual-checkout",
+  "archiveClone": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\issued-byte-proof-7mtRBH\\archive-checkout",
+  "actual": [
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "sourceSha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785",
+      "checkoutSha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "sourceSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkoutSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "sourceSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkoutSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "sourceSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkoutSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "sourceSha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973",
+      "checkoutSha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "sourceSha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6",
+      "checkoutSha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "sourceSha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56",
+      "checkoutSha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "sourceSha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94",
+      "checkoutSha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "sourceSha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7",
+      "checkoutSha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "sourceSha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "checkoutSha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "sourceSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkoutSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "sourceSha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269",
+      "checkoutSha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "sourceSha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79",
+      "checkoutSha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "sourceSha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+      "checkoutSha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "sourceSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkoutSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "sourceSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkoutSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "sourceSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkoutSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "sourceSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkoutSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    }
+  ],
+  "archived": [
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "sourceSha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785",
+      "checkoutSha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "sourceSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkoutSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "sourceSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkoutSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "sourceSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkoutSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "sourceSha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973",
+      "checkoutSha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "sourceSha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6",
+      "checkoutSha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "sourceSha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56",
+      "checkoutSha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "sourceSha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94",
+      "checkoutSha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "sourceSha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7",
+      "checkoutSha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "sourceSha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "checkoutSha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "sourceSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkoutSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "sourceSha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269",
+      "checkoutSha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "sourceSha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79",
+      "checkoutSha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "sourceSha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+      "checkoutSha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "sourceSha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785",
+      "checkoutSha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "sourceSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "checkoutSha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "sourceSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "checkoutSha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "sourceSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "checkoutSha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "sourceSha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973",
+      "checkoutSha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "sourceSha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6",
+      "checkoutSha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "sourceSha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56",
+      "checkoutSha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "sourceSha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94",
+      "checkoutSha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "sourceSha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7",
+      "checkoutSha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "sourceSha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "checkoutSha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "sourceSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "checkoutSha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "sourceSha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269",
+      "checkoutSha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "sourceSha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79",
+      "checkoutSha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "sourceSha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+      "checkoutSha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "sourceSha256": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8",
+      "checkoutSha256": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "sourceSha256": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87",
+      "checkoutSha256": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "sourceSha256": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8",
+      "checkoutSha256": "c3f9c8c283a2b1f2f1896f27a01cbe3cddc0c9d93f752e4639035a0f5b36f6e8"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "sourceSha256": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87",
+      "checkoutSha256": "6f4792b265fe72790b344fd3ef5294701d9d087bed9fce815c0f4bbad6d2ed87"
+    }
+  ],
+  "actualAttributes": [
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/OS-20260918-readonly-evidence-smoke-inputs/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/generate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": "tests/fixtures/smoke-inputs/validate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    }
+  ],
+  "archiveAttributes": [
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/generate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-001/validate-orders.py",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "diff",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-002/orders.xlsx",
+      "attribute": "merge",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/validation-001/input-validation.json",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/changes/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/lf.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "text",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "eol",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "filter",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "ident",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "working-tree-encoding",
+      "value": "unset"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "diff",
+      "value": "unspecified"
+    },
+    {
+      "path": ".agents/archive/BYTE-CHECK/evidence/C1/inputs/issue-control/nested/crlf.txt",
+      "attribute": "merge",
+      "value": "unspecified"
+    }
+  ],
+  "controls": {
+    "actualReadmeLfToCrlf": true,
+    "archiveControlLfToCrlf": true
+  },
+  "note": "Raw SHA256 over file buffers; no normalization of protected bytes. Local core.autocrlf=true set before first checkout."
+}

@@ -1,0 +1,117 @@
+- banner:
+  - paragraph: Checkpoint C1 · batches B03 demonstration
+  - heading "Input reissue demonstration — After" [level=1]
+  - paragraph: The workbook input has changed on the same build. Step 1 must say NOT RE-RUN; step 2 must keep its Pass and note. Return to the real C1 page after inspecting this demonstration.
+  - term: Branch
+  - definition:
+    - code: codex/readonly-evidence-smoke-inputs-ledger
+  - term: Tip
+  - definition:
+    - code: 6c84b93
+  - img "Run progress"
+  - paragraph:
+    - generic: passed 1
+    - generic: failed 0
+    - generic: blocked 0
+    - generic: works, but 0
+    - generic: carried over 0
+    - generic: re-run 1
+    - generic: pre-verified 0
+    - generic: unmarked 0
+    - generic: of 2
+- complementary:
+  - heading "Sections" [level=2]
+  - navigation:
+    - link "1 Two independent checks 1/2":
+      - /url: "#sec-1"
+      - generic: "1"
+      - generic: Two independent checks
+      - generic: 1/2
+  - button "Jump to next step to run"
+  - paragraph: Saving to this browser only.
+- main:
+  - paragraph: Before anything else
+  - heading "Step 0 — prove you are on the right build" [level=3]
+  - paragraph: This is a disposable demonstration using the same tested build and a separate browser storage key.
+  - list:
+    - text: "Tested source commit:"
+    - code: 6c84b930aa4297283f94ce9eeacdff44d2b22ba4
+    - text: . Return to the real C1 page to record your checkpoint verdict.
+  - generic: Section 1
+  - heading "Two independent checks" [level=3]
+  - generic: "1"
+  - paragraph: Inspect the linked workbook and requirements, then mark this demonstration step Pass.
+  - generic: Pass
+  - paragraph: "Changed workbook: Orders!C2=3; Orders!F2=33.75; Summary!B2=34.75; count=4. The prior Pass is historical until this step is rerun."
+  - paragraph:
+    - text: "Input demo-orders (read-only):"
+    - link "evidence/C1/inputs/issue-002/orders.xlsx":
+      - /url: evidence/C1/inputs/issue-002/orders.xlsx
+  - paragraph: "Requirements: Reissue demo: C2=3, F2=33.75, Summary!B2=34.75/count 4; other values/types/formulas/styles retained."
+  - paragraph: "Use: Read-only changed-input demo; separate from original human working copy."
+  - paragraph: "Reset: Keep both issue paths; reset browser demo marks on Before page."
+  - paragraph: "SHA-256: 9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79 · 8636 bytes"
+  - paragraph:
+    - text: "Input validation: PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records. (C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe 3.10.6 (tags/v3.10.6:9c7b4bd, Aug 1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)] openpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git; exit 0) —"
+    - link "evidence/C1/inputs/validation-001/input-validation.json":
+      - /url: evidence/C1/inputs/validation-001/input-validation.json
+  - paragraph:
+    - text: "Input demo-spec (read-only):"
+    - link "evidence/C1/inputs/issue-002/orders.requirements.json":
+      - /url: evidence/C1/inputs/issue-002/orders.requirements.json
+  - paragraph: "Requirements: Explicit demo requirements reflect the changed quantity and dependent caches."
+  - paragraph: "Use: Read-only revised manifest for the preserved demo workbook."
+  - paragraph: "Reset: Retain issue-001 requirements alongside this new path."
+  - paragraph: "SHA-256: e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269 · 6044 bytes"
+  - paragraph:
+    - text: "Input validation: PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records. (C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe 3.10.6 (tags/v3.10.6:9c7b4bd, Aug 1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)] openpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git; exit 0) —"
+    - link "evidence/C1/inputs/validation-001/input-validation.json":
+      - /url: evidence/C1/inputs/validation-001/input-validation.json
+  - button "Pass step 1": Pass
+  - button "Fail step 1": Fail
+  - button "Blocked step 1": Blocked
+  - button "Works, but step 1": Works, but
+  - button "Clear the verdict on step 1": clear
+  - paragraph: PASS (carried over from build 6c84b930aa4297283f94ce9eeacdff44d2b22ba4). Step changed or its earlier build/revision is unknown. Run it again and select a verdict.
+  - generic: "2"
+  - paragraph: Inspect the unchanged text input. Mark this demonstration step Pass and enter “keep this note”.
+  - generic: Pass
+  - paragraph: This input and its step revision stay unchanged in the After page; the Pass and note should survive.
+  - paragraph:
+    - text: "Input demo-control (working-copy):"
+    - link "evidence/C1/inputs/issue-001/text/lf-input.txt":
+      - /url: evidence/C1/inputs/issue-001/text/lf-input.txt
+  - paragraph: "Requirements: UTF8 synthetic text with LF line endings and Unicode; raw SHA256 identity."
+  - paragraph: "Use: Copy before changing line endings for stale-digest test."
+  - paragraph: "Reset: Replace disposable copy from immutable original."
+  - paragraph: "SHA-256: fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434 · 79 bytes"
+  - paragraph:
+    - text: "Input validation: PASS: independent workbook semantics, generation and corruption checks, demo semantics, exact instructions and recursive/text inputs validated; see per-file records. (C:\\Users\\fatbo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe 3.10.6 (tags/v3.10.6:9c7b4bd, Aug 1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)] openpyxl 3.1.5; Node v22.22.3; Windows PowerShell and Git; exit 0) —"
+    - link "evidence/C1/inputs/validation-001/input-validation.json":
+      - /url: evidence/C1/inputs/validation-001/input-validation.json
+  - button "Pass step 2" [pressed]: Pass
+  - button "Fail step 2": Fail
+  - button "Blocked step 2": Blocked
+  - button "Works, but step 2": Works, but
+  - button "Clear the verdict on step 2": clear
+  - generic: What you actually saw
+  - textbox "What you actually saw":
+    - /placeholder: What happened instead?
+    - text: keep this note
+  - heading "The four verdicts" [level=3]
+  - paragraph:
+    - strong: Pass
+    - text: means it did what the step says.
+    - strong: Fail
+    - text: means it did something else, and the note should say what.
+  - paragraph:
+    - strong: Blocked
+    - text: means the step could not be performed as written, because a button is not there or a dialog closes when it should not. That is a defect in the step rather than in the app, and it is worth knowing separately.
+  - paragraph:
+    - strong: Works, but
+    - text: means the step passed exactly as described and you want the thing itself to be different. It is not a failure and it does not count against the build. It goes to the backlog.
+  - paragraph:
+    - text: If a section flagged
+    - strong: Touches your data
+    - text: looks wrong, stop there and say so before continuing.
+  - button "Copy results as text"

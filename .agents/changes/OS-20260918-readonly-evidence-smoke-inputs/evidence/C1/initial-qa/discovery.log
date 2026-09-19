@@ -1,0 +1,1 @@
+PASS: actual README/issued recipe matches; nested failure then success; bare node --test failure then success; sorted recursive paths and empty-suite refusal; originals unchanged

@@ -1,0 +1,102 @@
+{
+  "verdict": "PASS",
+  "scratch": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU",
+  "publishedRecipeSha256": "feb26275c3825f7131ac5e77db0c63176f731bdda3fafd9fda58ad1ad98df20d",
+  "names": [
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\tests\\control.test.cjs",
+    "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\tests\\unit\\discovery-sentinel.test.cjs"
+  ],
+  "commands": [
+    {
+      "exe": "git",
+      "args": [
+        "init",
+        "--initial-branch=main"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working",
+      "exit": 0,
+      "stdout": "Initialized empty Git repository in C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/C1-QA/recursive-discovery-IhzMTU/working/.git/\n",
+      "stderr": ""
+    },
+    {
+      "exe": "C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\published-validation.ps1"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working",
+      "exit": 1,
+      "stdout": "✔ C1 ordinary top-level discovery control (0.8739ms)\n✖ C1 nested discovery sentinel must be observed (1.7134ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 122.6781\n\n✖ failing tests:\n\ntest at tests\\unit\\discovery-sentinel.test.cjs:3:1\n✖ C1 nested discovery sentinel must be observed (1.7134ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  false !== true\n  \n      at TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\tests\\unit\\discovery-sentinel.test.cjs:3:68)\n      at Test.runInAsyncScope (node:async_hooks:214:14)\n      at Test.run (node:internal/test_runner/test:1047:25)\n      at Test.start (node:internal/test_runner/test:944:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: false,\n    expected: true,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+      "stderr": "Exception: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\published-validation.ps1:4\r\nLine |\r\n   4 |  if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }\r\n     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Node test suite failed\r\n"
+    },
+    {
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working",
+      "exit": 1,
+      "stdout": "TAP version 13\n# Subtest: C1 ordinary top-level discovery control\nok 1 - C1 ordinary top-level discovery control\n  ---\n  duration_ms: 0.9015\n  type: 'test'\n  ...\n# Subtest: C1 nested discovery sentinel must be observed\nnot ok 2 - C1 nested discovery sentinel must be observed\n  ---\n  duration_ms: 1.6664\n  type: 'test'\n  location: 'C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-QA\\\\recursive-discovery-IhzMTU\\\\working\\\\tests\\\\unit\\\\discovery-sentinel.test.cjs:3:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    Expected values to be strictly equal:\n    \n    false !== true\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: true\n  actual: false\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\tests\\unit\\discovery-sentinel.test.cjs:3:68)\n    Test.runInAsyncScope (node:async_hooks:214:14)\n    Test.run (node:internal/test_runner/test:1047:25)\n    Test.start (node:internal/test_runner/test:944:17)\n    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)\n  ...\n1..2\n# tests 2\n# suites 0\n# pass 1\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 121.692\n",
+      "stderr": ""
+    },
+    {
+      "exe": "C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\published-validation.ps1"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working",
+      "exit": 0,
+      "stdout": "✔ C1 ordinary top-level discovery control (1.298ms)\n✔ C1 nested discovery sentinel must be observed (1.0529ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 122.7577\n",
+      "stderr": ""
+    },
+    {
+      "exe": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--test"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working",
+      "exit": 0,
+      "stdout": "TAP version 13\n# Subtest: C1 ordinary top-level discovery control\nok 1 - C1 ordinary top-level discovery control\n  ---\n  duration_ms: 1.2624\n  type: 'test'\n  ...\n# Subtest: C1 nested discovery sentinel must be observed\nok 2 - C1 nested discovery sentinel must be observed\n  ---\n  duration_ms: 1.0091\n  type: 'test'\n  ...\n1..2\n# tests 2\n# suites 0\n# pass 2\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 130.7657\n",
+      "stderr": ""
+    },
+    {
+      "exe": "C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "@(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName) | ConvertTo-Json -Compress"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working",
+      "exit": 0,
+      "stdout": "[\"C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-QA\\\\recursive-discovery-IhzMTU\\\\working\\\\tests\\\\control.test.cjs\",\"C:\\\\Users\\\\fatbo\\\\.codex\\\\visualizations\\\\2026\\\\09\\\\19\\\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\\\orchestrate-run\\\\C1-QA\\\\recursive-discovery-IhzMTU\\\\working\\\\tests\\\\unit\\\\discovery-sentinel.test.cjs\"]\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "git",
+      "args": [
+        "init",
+        "--initial-branch=main"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\empty",
+      "exit": 0,
+      "stdout": "Initialized empty Git repository in C:/Users/fatbo/.codex/visualizations/2026/09/19/01a0b6ff-10c1-7a00-8e0c-38f750a79d0f/orchestrate-run/C1-QA/recursive-discovery-IhzMTU/empty/.git/\n",
+      "stderr": ""
+    },
+    {
+      "exe": "C:/Users/fatbo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\published-validation.ps1"
+      ],
+      "cwd": "C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\empty",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Exception: C:\\Users\\fatbo\\.codex\\visualizations\\2026\\09\\19\\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\\orchestrate-run\\C1-QA\\recursive-discovery-IhzMTU\\working\\published-validation.ps1:2\r\nLine |\r\n   2 |  . f ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }\r\n     |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | No Node test suites discovered\r\n"
+    }
+  ],
+  "issuedOriginalUnchanged": true
+}

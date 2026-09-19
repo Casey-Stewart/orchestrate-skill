@@ -1,0 +1,140 @@
+{
+  "verdict": "PASS",
+  "testedCommit": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "branch": "codex/readonly-evidence-smoke-inputs-ledger",
+  "head": "6c84b930aa4297283f94ce9eeacdff44d2b22ba4",
+  "declaredFileCount": 14,
+  "renderedLinkCount": 108,
+  "uniqueOtherLinkedFileCount": 2,
+  "records": [
+    {
+      "path": "evidence/C1/inputs/issue-001/orders.xlsx",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/orders.xlsx",
+      "status": 200,
+      "size": 8634,
+      "sha256": "e5544604e81a378431842516d9dad722f4ba650ce4b9efb2850920ac4199469f",
+      "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
+      "path": "evidence/C1/inputs/validation-001/input-validation.json",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/validation-001/input-validation.json",
+      "status": 200,
+      "size": 18641,
+      "sha256": "2f7a3e9ed0586be6e04c821728a0b9032259ce26c404672e77be037ec1a0cc0b",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/orders.requirements.json",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/orders.requirements.json",
+      "status": 200,
+      "size": 4115,
+      "sha256": "9da20914003ac1beb67fbe61d51135bf443246ec9dd79ce9032915c8464cc3c8",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/generate-orders.py",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/generate-orders.py",
+      "status": 200,
+      "size": 9188,
+      "sha256": "43cd0f5e9603e5094a43c3ea92754b3a23ac9d141dcf300ea5ebca7eb0bc2b7d",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/validate-orders.py",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/validate-orders.py",
+      "status": 200,
+      "size": 9950,
+      "sha256": "67a5d8a59919782626b6548501c35df3990ce944ce38b931ad939e30e6071cc8",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/WORKING-COPY.md",
+      "status": 200,
+      "size": 1616,
+      "sha256": "b72e4a32f53e0fe749c22b1bfdf04d105cd8b019c107daf51f879185fe9fc785",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+      "status": 200,
+      "size": 383,
+      "sha256": "a89a02cf061f0082fd0095920a68ec9ba9ccf50a67167e4043febb7843d715c6",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+      "status": 200,
+      "size": 160,
+      "sha256": "10be5fc902bcdae931d0324c4a98076eb1371f8acf44825fa4795b85b247ac56",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+      "status": 200,
+      "size": 169,
+      "sha256": "32aa0ff21ab4219c9f1aba0256d068a6f1005657d37465a5c8a1522439ca9e94",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+      "status": 200,
+      "size": 862,
+      "sha256": "36a93994ccd171864a12c10190de10c922a7b62ae6c78e6dce28948d13009973",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/text/lf-input.txt",
+      "status": 200,
+      "size": 79,
+      "sha256": "fa9c34bb9c8cf1a5a5ba837d1051b7309f214d2261a340f13023027856a78434",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-001/text/crlf-input.txt",
+      "status": 200,
+      "size": 82,
+      "sha256": "a21a2a52054bb3626dce24e5e73529aef3d3db59067760d6a1078223bcd13fc7",
+      "contentType": "text/plain; charset=utf-8"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-002/orders.xlsx",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-002/orders.xlsx",
+      "status": 200,
+      "size": 8636,
+      "sha256": "9593238e46b232b9c8a0c69e2983b1cd4c33715cf8ae9ab830f82df23eda1d79",
+      "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
+      "path": "evidence/C1/inputs/issue-002/orders.requirements.json",
+      "url": "http://127.0.0.1:8765/evidence/C1/inputs/issue-002/orders.requirements.json",
+      "status": 200,
+      "size": 6044,
+      "sha256": "e8a5da25deb7a8afd56f2bffd4e1ada6427eede70f664b1a9678a9a656546269",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "path": "smoke-C1-demo-before.html",
+      "status": 200,
+      "size": 58039,
+      "sha256": "62ecc485b021ff6132d8ce9e9361d20d3edf6eab24f80880d4ae53a4f60e24f7"
+    },
+    {
+      "path": "smoke-C1-demo-after.html",
+      "status": 200,
+      "size": 58005,
+      "sha256": "de505b63f7f7ca3b8c420298bea6285d77d6b99d34e99aba3d9710c14c440f99"
+    }
+  ],
+  "workingCopyInstructions": "Read: exact immutable source, disposable destination, open/edit/recalc expectations and reset copy; no native Excel claim.",
+  "environment": {
+    "node": "v22.22.3",
+    "git": "git version 2.52.0.windows.1"
+  }
+}

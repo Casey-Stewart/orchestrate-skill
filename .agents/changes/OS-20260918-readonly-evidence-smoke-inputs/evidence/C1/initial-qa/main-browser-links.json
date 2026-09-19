@@ -1,0 +1,434 @@
+[
+  {
+    "href": "#sec-1",
+    "text": "1Workbook and delivered files0/2"
+  },
+  {
+    "href": "#sec-2",
+    "text": "2Git evidence and fence checks0/2"
+  },
+  {
+    "href": "#sec-3",
+    "text": "3Workbook validation and byte preservation0/3"
+  },
+  {
+    "href": "#sec-4",
+    "text": "4Input delivery and reissue behavior0/4"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "the original workbook"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+    "text": "the exact working-copy instructions"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+    "text": "evidence/C1/inputs/issue-001/WORKING-COPY.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "smoke-C1-demo-before.html",
+    "text": "the Before demonstration"
+  },
+  {
+    "href": "smoke-C1-demo-after.html",
+    "text": "the After demonstration"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+    "text": "evidence/C1/inputs/issue-001/WORKING-COPY.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-002/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-002/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-001/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/validate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/validate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-001/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/generate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/generate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/validate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/validate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-001/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/generate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/generate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/validate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/validate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+    "text": "evidence/C1/inputs/issue-001/WORKING-COPY.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/README.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/lf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/crlf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/crlf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-002/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-002/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/README.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/lf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/crlf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/crlf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-001/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/generate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/generate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/validate-orders.py",
+    "text": "evidence/C1/inputs/issue-001/validate-orders.py"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/WORKING-COPY.md",
+    "text": "evidence/C1/inputs/issue-001/WORKING-COPY.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/run-validation.ps1"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/tests/control.test.cjs"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/tests/unit/discovery-sentinel.test.cjs"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/recursive-discovery/README.md",
+    "text": "evidence/C1/inputs/issue-001/recursive-discovery/README.md"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/lf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/crlf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/crlf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-002/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-002/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-001/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-001/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.xlsx",
+    "text": "evidence/C1/inputs/issue-002/orders.xlsx"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-002/orders.requirements.json",
+    "text": "evidence/C1/inputs/issue-002/orders.requirements.json"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  },
+  {
+    "href": "evidence/C1/inputs/issue-001/text/lf-input.txt",
+    "text": "evidence/C1/inputs/issue-001/text/lf-input.txt"
+  },
+  {
+    "href": "evidence/C1/inputs/validation-001/input-validation.json",
+    "text": "evidence/C1/inputs/validation-001/input-validation.json"
+  }
+]
