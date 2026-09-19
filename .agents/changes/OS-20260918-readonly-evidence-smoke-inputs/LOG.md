@@ -549,3 +549,62 @@ Fresh reviewer SHIP f2c2ceeb73a8adeee5dd2249a97df84bb1a19134;15hunks mapped,6/6 
 ASK1: instruction executor ignores earlier prerequisite verdict and step targets, allowing wrong-step or wrong-initial-verdict mutations to survive6/6; actual UI witness yields previous WORKS,BUT or step2 NOT RUN. Derive the full displayed route for main/Before; prerequisite seeding only for standalone step2 tests. ASK2: emitted After introduction can revert to misleading old wording while sidecar stays correct and6/6survives; assert displayed introduction/sidecar agreement and accurate visible-history/export distinction. Exact full reports/mutations/witnesses retained.
 
 Same implementer closes ordinary test-only polish: c1-demo-instructions.test.cjs and own two appended polish checklist ticks only. Six reviewed source pages remain unchanged. Full recursive validation and explicit regression, exact three surviving mutations must fail. No new FIX FIRST round, no production change, no new plan/fence amendment or waiver. Manual fence/mechanical closure follows.
+
+## C1-repair10-polish-resume
+
+Session boot on 2026-09-19. Integration tip e8cba7b8c0c51b8aee2361fcc3b59a3ac28a47f4,
+clean. Branch inventory: codex/readonly-evidence-checker 9f05127,
+codex/smoke-input-files c78f427, codex/workflow-input-delivery 800c0fa,
+fix/B03-tip 70f6baa, fix/B03-presmoke-10 f2c2cee, main f918fe3 (18 behind the
+integration branch). Worktrees: the protected main checkout on main, wt-int on the
+integration branch, wt-C1-repair on fix/B03-presmoke-10. Shipment source `local`,
+ref refs/heads/main @f918fe39762c70edb9a3424e54eaa208fd7c5727; `git merge-base
+--is-ancestor <integration-tip> <shipment-sha>` exit 1 = not contained. No silent merge,
+no row flip, no cleanup proposal.
+
+Recovery row selection, matched top to bottom. B03's Notes carry the
+`pre-smoke repair pending: step 10, fix/B03-presmoke-10 @9b40054…` marker with no later
+spent ship/drop, so the in-flight-repair row applies; its "commits after `@<sha>` but not
+integrated" arm delegates to the 🔄 rows on that branch. The clean-worktree
+`SHIP … asks=` row does NOT match, because `git status --porcelain` in wt-C1-repair
+reports two modified files. The `commits after @<sha> … every polish: item ticked` row
+does not match either: there are no commits after f2c2cee and neither polish item is
+ticked. First real match is the dirty-worktree row — "Resume the implementer — a fresh
+agent, the original is gone — at the first unticked item".
+
+The crashed draft, inspected before handing it over:
+- 02-fix-B03-presmoke-10.md: +3 lines, exactly the two appended `- [ ] polish:` items
+  for hunter ASK1 (route replay with prerequisite verdicts and explicit step targets)
+  and ASK2 (emitted After introduction vs sidecar, visible history vs export). Both
+  unticked. Original four spec ticks untouched.
+- c1-demo-instructions.test.cjs: +56/-21. It rewrites `noteRoute` to parse verdict
+  targets ("both steps", "demo step N", explicit note targets) instead of hardcoding
+  step 2, threads a `standaloneStep` parameter so only the standalone step-2 cases seed
+  the step-1 Pass prerequisite, adds an `introduction()` helper reading
+  `<p class="standfirst">`, returns the After page handle from `followRoute`, and adds a
+  test asserting the emitted After introduction equals `afterModel.standfirst` with the
+  visible history saying "Run it again" while the export says "1. NOT RE-RUN — previous
+  PASS". Direction matches both ASKs; it is unverified and uncommitted, so it was handed
+  over as a DRAFT the fresh implementer must prove by execution, never trust.
+
+Resume-time validation on the integration tip: 6 suites discovered by the frozen
+recursive FullName-sorted command, `node --test --test-reporter=spec` exit 0,
+`git diff --check` exit 0. Tip green; no `fix/<batch>-tip` repair is owed, so step 2
+passes straight to the in-flight pre-smoke repair.
+
+Tier: the Codex CLI is absent from this environment (`codex` not on PATH; the usual npm,
+Programs and ~/.codex install locations checked and empty), so the recorded GPT-6 Astra /
+xhigh tier cannot be reproduced. Under the contract's "if tiers are unavailable, use the
+default and keep the gate shape" clause, this session's fresh roles inherit Claude
+Opus 5. Gate shape is unchanged: fresh independent implementer now, then the mechanical
+6a fence check and, only if a production path is touched, a fresh scoped re-review.
+
+Polish spawn contents: both hunter ASKs verbatim, the three surviving mutations with
+their exact file/line before/after text (wrong-prerequisite-verdict and wrong-note-step
+across smoke-C1.html/json and smoke-C1-demo-before.html/json;
+stale-after-visible-instructions in smoke-C1-demo-after.html only, sidecar left correct),
+the requirement that the twelve already-detected mutations keep failing and that the
+TEST-ONLY copy onto base 9b40054 still fails by assertion, the two-path fence, the
+byte-identity requirement on the six reviewed pages, the frozen validation commands plus
+the explicit ledger regression, conventions, prohibitions and the fixed report shape.
+No production change is authorized; a production need is a BLOCKED report, not an edit.

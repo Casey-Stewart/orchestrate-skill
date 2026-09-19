@@ -82,6 +82,7 @@ the contract/05-byte-validation-and-scope.md. New residuals use OS-BL-NNN and cu
 | 2026-09-18 | Discovery/interview/plan/pre-flight; baseline 64/64; base f918fe39762c70edb9a3424e54eaa208fd7c5727 | Plan approval pending; planning copy, no scaffold or open wave |
 | 2026-09-18 | User: "Okay, approved." Approved ledger scaffold; contract/plan and source provenance verified; no wave opened | New-mode scaffold STOP; awaiting start instruction |
 | 2026-09-18 | Approved baseline exception consumed; W1 opened; B02 integrated96f48ed and validated65/65; B01 candidatefac37a5 validated156/156 but reached R2 FIX FIRST | B01 second-round cap; waiting for fix again / ship with residual / drop. W2 unopened; C1 not reached |
+| 2026-09-19 | Reconciled: pre-smoke repair fix/B03-presmoke-10 in flight, reviewed SHIP @f2c2cee asks=2, worktree DIRTY with an uncommitted crashed polish draft and two unticked polish items; tip green (Node exit 0, diff check exit 0); resumed a FRESH polish implementer per the dirty-worktree Recovery row | Polish pass in flight; C1 not reissued, no verdict requested |
 
 ## Continue authorization and reconciliation — 2026-09-18
 
@@ -143,3 +144,39 @@ Wave base: 6e1fb4428e871760d8f31a99606c3ad68db5015f. B01 and B02 are integrated 
 Repair base 9b40054dfc9571af25267050640f66bc00e7e619; branch fix/B03-presmoke-10; worktree C:\Users\fatbo\.codex\visualizations\2026\09\19\01a0b6ff-10c1-7a00-8e0c-38f750a79d0f\orchestrate-run\wt-C1-repair. Complete conductor-authoritative repair fence is in 02-fix-B03-presmoke-10.md. Frozen contract/plan stay byte-identical. GPT-6 Astra / xhigh inherited, fresh implementer and fresh independent reviewer/hunter. No user checkpoint reached; rows remain green. Only trailing blank EOF in retained QA Markdown/scripts was trimmed for diff-check; raw proof/input bytes unchanged.
 
 C1 repair10 R1 SHIP @f2c2ceeb73a8adeee5dd2249a97df84bb1a19134 asks=2; fresh reviewer and separate fresh hunter complete. Same implementer ordinary test-only polish pending; frozen pre-smoke repair marker remains.
+
+## C1 repair polish resumed — 2026-09-19
+
+Discovery found one ACTIVE ledger. Boot reconciliation on the integration branch
+codex/readonly-evidence-smoke-inputs-ledger @e8cba7b8c0c51b8aee2361fcc3b59a3ac28a47f4.
+Shipment resolved from the locked source: local refs/heads/main
+@f918fe39762c70edb9a3424e54eaa208fd7c5727; ancestry test exit 1 = NOT contained, so
+nothing was merged silently and no row flips. Main checkout untouched on main.
+
+B03 Notes carry `pre-smoke repair pending: step 10, fix/B03-presmoke-10
+@9b40054dfc9571af25267050640f66bc00e7e619`. Git: branch fix/B03-presmoke-10 exists at
+f2c2ceeb73a8adeee5dd2249a97df84bb1a19134 (one commit after the marker's base), not an
+ancestor of the integration branch -> the §Recovery in-flight-repair row directs
+"resume / gate it per the 🔄 rows on that branch". Among those rows the first match is
+the DIRTY-WORKTREE row, not the clean `SHIP … asks=` row: wt-C1-repair has two modified,
+uncommitted files — 02-fix-B03-presmoke-10.md (two appended `- [ ] polish:` items, both
+UNTICKED) and c1-demo-instructions.test.cjs (+56/-21). A polish agent died before
+committing. Verdict: resume the implementer with a FRESH agent at the first unticked
+item. This is not a review round and does not touch the recorded R1 SHIP.
+
+Resume-time validation on the integration tip: recursive FullName-sorted discovery found
+6 suites, `node --test` exit 0, `git diff --check` exit 0 — tip green, so no `-tip`
+repair is owed.
+
+Tier note, recorded honestly: every earlier role ran on Codex GPT-6 Astra / xhigh. The
+Codex CLI is not present in this session's environment (`codex` absent from PATH and from
+the checked install locations), so this session's fresh implementer, reviewer and hunter
+inherit this session's own model, Claude Opus 5. The contract's tier clause — "if tiers
+are unavailable, use the default and keep the gate shape" — governs; every gate keeps its
+shape and independence. No gate is waived or merged.
+
+The uncommitted draft is handed over as a DRAFT only: the fresh implementer must verify
+it by execution, not trust it. Fence unchanged — c1-demo-instructions.test.cjs plus own
+checklist ticks/appends; the six reviewed page files must stay byte-identical to f2c2cee.
+No production change is authorized by an ASK. No checkpoint has been reached or reissued
+and no user verdict is requested or inferred. No main merge or push.
