@@ -64,6 +64,7 @@ without running it.
 
 | Date | Checkpoint | Verdict | User notes |
 |------|------------|---------|------------|
+| 2026-09-19 | C1 (ship) | **authorization** | The user's exact words, in the session that acted on them: "Merge to main, push to origin, delete the merged batch branches." This is the record required by the merge/push policy; the scaffold-time default (stop at the integration branch) is superseded by it. Scope: merge `chore/agent-tool-restrictions-ledger` into `refs/heads/main`, push `main` to `origin`, delete the three merged batch branches. No other branch is pushed and nothing is released — this repo builds, packages and publishes nothing. |
 | 2026-09-19 | C1 | **pass** | Verbatim: "C1 smoke run — Tool-restricted agent definitions and per-skeleton agent types / Current build: 168b9d867ff4464092a584e92113c0a03d82de63 / Section 1 — Restart — do this first / 1. PASS / Section 2 — The four roles report their own tools / 2. PASS / 3. PASS / 4. PASS / 5. PASS / Section 3 — End to end — skeleton names a type, the type exists, the type is restricted / 6. PASS / 7. PASS / Section 4 — What a user without the definitions will read / 8. PASS / 9. PASS / Current-build verdicts: passed 9 · failed 0 · blocked 0 · works-but 0 · carried over (unchanged) 0 · needs re-run 0 · pre-verified only 0 · not run 0 of 9". No merge or push authorization was given in this message; `main` and `origin` remain untouched. |
 
 ## Item → batch coverage audit
