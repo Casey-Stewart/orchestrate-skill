@@ -160,19 +160,19 @@ this fence for that reason.**
 - [x] **[BL-002]** Rewrite the authority files in `tests/protocol-contract.test.cjs:132`
       to render from the shipped `01-plan.md` and `PROGRESS.md` templates, and run the
       real `check-fence.mjs` over the result. Own commit.
-- [ ] Prove failing-on-base for BL-002: check out the batch base, apply ONLY the new test,
+- [x] Prove failing-on-base for BL-002: check out the batch base, apply ONLY the new test,
       and record that it goes red with the fence's own `Duplicate or malformed batch IDs`
       reaching the assertion — quote the actual failure text in the report.
-- [ ] Prove failing-on-base for BL-001 **in a throwaway clone, never in this repository**
+- [x] Prove failing-on-base for BL-001 **in a throwaway clone, never in this repository**
       (the contract forbids modifying `.agents/archive/`): delete the single line
       containing `Every generation and independent Excel-validation command in this run
       uses literal` and record that the guard goes red. Use that sentence, not the
       `Python310` line — five lines contain `Python310` and three match the asserted
       regex, so removing one proves nothing.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `fix/ledger-batch-id-grammar` — `fix: pin Bnn batch ids in the ledger templates and revive the archive guard (batch 02)`.
+- [x] Commit on `fix/ledger-batch-id-grammar` — `fix: pin Bnn batch ids in the ledger templates and revive the archive guard (batch 02)`.
 
 ## Acceptance criteria
 
