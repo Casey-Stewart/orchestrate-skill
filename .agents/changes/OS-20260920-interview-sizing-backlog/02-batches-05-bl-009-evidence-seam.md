@@ -51,21 +51,21 @@ untested however correct it is."* Demonstrate both mutations in the implementer 
 
 ## Checklist
 
-- [ ] Add an internal seam — an export, or an injectable probe — that lets a test drive
+- [x] Add an internal seam — an export, or an injectable probe — that lets a test drive
       `safeResolvedFilters()` down the two guard paths, without adding any CLI subcommand or flag.
-- [ ] Cover the guard at `git-evidence.mjs:110`: the path where the index inventory cannot be
+- [x] Cover the guard at `git-evidence.mjs:110`: the path where the index inventory cannot be
       obtained. Assert the helper reports `unknown` and does NOT run `git status`.
-- [ ] Cover the guard at `:119`: the record-count mismatch. Assert the same fail-closed outcome.
-- [ ] Add a live control so the absence of a marker means something — a case in which the helper DOES
+- [x] Cover the guard at `:119`: the record-count mismatch. Assert the same fail-closed outcome.
+- [x] Add a live control so the absence of a marker means something — a case in which the helper DOES
       proceed, so "status was not run" is a real observation rather than a fixture that could never
       have run it.
-- [ ] Confirm the `--help` text and the seven published recipes are byte-unchanged.
+- [x] Confirm the `--help` text and the seven published recipes are byte-unchanged.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-009-evidence-seam` — `fix: a test seam for the unreachable evidence guards (batch 05)`.
+- [x] Commit on `fix/bl-009-evidence-seam` — `fix: a test seam for the unreachable evidence guards (batch 05)`.
 
 ## Acceptance criteria
 

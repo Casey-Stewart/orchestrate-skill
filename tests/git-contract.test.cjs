@@ -453,3 +453,87 @@ test('global clean filters remain unknown and never execute through API or actua
     assert.deepEqual(repo.snapshot(), before); assert.deepEqual(fs.readFileSync(repo.env.GIT_CONFIG_GLOBAL), configBefore);
   }
 });
+
+// Two fail-closed guards in the filter probe are unreachable from any repository: a corrupt
+// index fails every ls-files call, so the worktrees walk reports `unknown` whether or not
+// the enumeration guard fires, and real check-attr emits exactly three fields per input
+// path and always names the attribute it was asked for. Both are therefore driven through
+// the helper's own surface below, so disarming either reddens this file rather than passing
+// unnoticed while the probe starts reporting `clean` and running status.
+test('the attribute report classifier refuses a miscounted, misnamed or unsafely valued record', async t => {
+  const { filterReportVerdict } = await api;
+  const malformed = { code: 'invalid-attributes', message: 'Malformed attribute report' };
+  const unexpected = { code: 'invalid-attributes', message: 'Unexpected attribute in report' };
+  const unsafe = { code: 'unsafe-filter', message: 'An inspected path resolves to a filter attribute; status was not run because it can execute commands' };
+  const record = (file, attribute, value) => `${file}\0${attribute}\0${value}\0`;
+  const report = (count, value = 'unspecified') => Array.from({ length: count }, (_, i) => record(`path ${i}.txt`, 'filter', value)).join('');
+  // The count boundary, pinned on both sides: exactly three fields per enumerated path is
+  // the only accepted shape, and one field more or one field fewer is not. Loosening the
+  // guard in either direction is caught, not only strengthening it.
+  for (const count of [0, 1, 2, 3]) {
+    assert.equal(filterReportVerdict(count, report(count)), null, `${count} well-formed records must be accepted`);
+    assert.deepEqual(filterReportVerdict(count, report(count) + 'stray\0'), malformed, `${count} records plus a stray field must be refused`);
+    assert.deepEqual(filterReportVerdict(count + 1, report(count)), malformed, `${count} records where ${count + 1} paths were enumerated must be refused`);
+    if (!count) continue;
+    assert.deepEqual(filterReportVerdict(count, report(count).slice(0, -'unspecified\0'.length)), malformed, `${count} records missing a value field must be refused`);
+    assert.deepEqual(filterReportVerdict(count, report(count).slice(0, -1)), malformed, `${count} records without the terminating NUL must be refused`);
+  }
+  // The name guard classifies every record, not only the first: the misnamed one is last.
+  assert.deepEqual(filterReportVerdict(1, record('p.txt', 'diff', 'unspecified')), unexpected, 'a report about another attribute must be refused');
+  assert.deepEqual(filterReportVerdict(3, report(2) + record('p2.txt', 'text', 'unspecified')), unexpected, 'a misnamed trailing record must be refused');
+  // The safe-value whitelist, written out here rather than read back from the tool, swept
+  // whole against a domain of its neighbours: exactly these two values may be accepted, so
+  // admitting a third one goes red even if the pattern and the list are edited together.
+  const safe = ['unspecified', 'unset'];
+  assert.equal(new Set(safe).size, 2, 'the whitelist is a two-member set');
+  const domain = [...safe, 'set', 'marker', 'lfs', 'crlf', '', ' ', 'Unspecified', 'UNSET', 'unspecified ', ' unset', 'unspecifie', 'unsets', 'unset,unspecified', 'true', 'false', 'unspecified\n'];
+  assert.equal(new Set(domain).size, domain.length, 'the swept domain has no duplicates');
+  assert.deepEqual(domain.filter(value => filterReportVerdict(1, record('p.txt', 'filter', value)) === null), safe, 'no value outside the whitelist may be accepted');
+  for (const value of domain.filter(value => !safe.includes(value))) {
+    assert.deepEqual(filterReportVerdict(1, record('p.txt', 'filter', value)), unsafe, `a ${JSON.stringify(value)} filter attribute must refuse`);
+    assert.deepEqual(filterReportVerdict(3, report(2) + record('p2.txt', 'filter', value)), unsafe, `a trailing ${JSON.stringify(value)} filter attribute must refuse`);
+  }
+});
+test('the filter probe refuses an unreadable inventory and proceeds on a readable one', async t => {
+  const { safeResolvedFilters, worktrees } = await api;
+  // Live control, first: a readable repository with a driver configured that no path
+  // resolves to. The probe says safe, status really runs, and real dirt comes back. Without
+  // it, the refusal below would be an observation about a fixture that could never have
+  // proceeded, and `status: []` would prove nothing at all.
+  const live = makeRepo(t); live.git('config', 'filter.marker.clean', 'node --version');
+  live.write('tracked.txt', 'before\n'); live.commit('live control fixture');
+  live.write('tracked.txt', 'after!\n'); fs.utimesSync(path.join(live.cwd, 'tracked.txt'), new Date(0), new Date(0));
+  const proceeds = [];
+  assert.equal(safeResolvedFilters(live.cwd, proceeds, { env: live.env }), true, 'a readable inventory resolving to no driver is safe');
+  assert.deepEqual(proceeds, []);
+  const proceeded = complete(worktrees(options(live)));
+  assert.equal(proceeded.worktrees[0].cleanliness, 'dirty');
+  assert.deepEqual(proceeded.worktrees[0].status, [{ status: ' M', path: 'tracked.txt', originalPath: null }]);
+  // The guard: the enumeration the classification depends on cannot be read at all. Only
+  // the verdict is mutation-sensitive here — a corrupt index fails the later index
+  // inventory too, so the walk answers `unknown` even with this guard disarmed, which is
+  // exactly why the guard has to be driven directly rather than through the walk.
+  const broken = makeRepo(t); broken.write('tracked.txt', 'before\n'); broken.commit('broken index fixture');
+  fs.writeFileSync(path.join(broken.cwd, '.git/index'), 'this is not a Git index');
+  const refusals = [];
+  assert.equal(safeResolvedFilters(broken.cwd, refusals, { env: broken.env }), false, 'an unreadable inventory must refuse, never report safe');
+  assert.equal(refusals.length, 1, JSON.stringify(refusals));
+  assert.equal(refusals[0].code, 'git-probe'); assert.equal(refusals[0].command, 'ls-files');
+  assert.equal(path.resolve(refusals[0].path), path.resolve(broken.cwd));
+  const refused = worktrees(options(broken));
+  assert.notEqual(refused.completeness, 'complete');
+  assert.equal(refused.evidence.worktrees[0].cleanliness, 'unknown');
+  assert.deepEqual(refused.evidence.worktrees[0].status, [], 'status must not have been run');
+});
+test('a refusing verdict reaches the caller as the diagnostic the classifier produced', async t => {
+  const { safeResolvedFilters, filterReportVerdict } = await api;
+  const repo = makeRepo(t);
+  repo.write('.gitattributes', 'filtered.txt filter=marker\n'); repo.write('filtered.txt', 'before\n'); repo.commit('resolving fixture');
+  const diagnostics = [], before = repo.snapshot();
+  assert.equal(safeResolvedFilters(repo.cwd, diagnostics, { env: repo.env }), false);
+  // One call site consumes the verdict, so this pins the whole refusal wire: a verdict no
+  // repository can produce travels it exactly as this reachable one does, gaining the
+  // inspected path and nothing else.
+  assert.deepEqual(diagnostics, [{ ...filterReportVerdict(1, 'filtered.txt\0filter\0marker\0'), path: repo.cwd }]);
+  assert.deepEqual(repo.snapshot(), before);
+});

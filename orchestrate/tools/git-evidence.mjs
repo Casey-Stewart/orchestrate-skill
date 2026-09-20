@@ -100,7 +100,27 @@ export function parseStatus(text) {
   }
   return entries;
 }
-function safeResolvedFilters(repo, diagnostics, options) {
+// Classifying the report is pure text work, so it is separated to be driven directly by a
+// unit test: real check-attr emits exactly three fields per input path and always names the
+// attribute asked for, leaving the first two guards below unreachable from any repository.
+// Exported for that test only; it reads a report and returns a diagnostic or null, so no
+// caller gains a way to make a resolving path look safe.
+export function filterReportVerdict(pathCount, text) {
+  const fields = text.split('\0');
+  if (fields.pop() !== '' || fields.length !== pathCount * 3) return diagnostic('invalid-attributes', 'Malformed attribute report');
+  for (let i = 0; i < fields.length; i += 3) {
+    if (fields[i + 1] !== 'filter') return diagnostic('invalid-attributes', 'Unexpected attribute in report');
+    // `unspecified` and `unset` (a `-filter` attribute) select no driver and are safe.
+    // Any other value names one, and a bare `set` could resolve to one.
+    if (fields[i + 2] !== 'unspecified' && fields[i + 2] !== 'unset') return diagnostic('unsafe-filter', 'An inspected path resolves to a filter attribute; status was not run because it can execute commands');
+  }
+  return null;
+}
+// Exported for the same reason: a unit test can watch this verdict directly, where the
+// worktrees walk above it collapses every refusal into the same `unknown`. Running it
+// executes ls-files and check-attr only; it never runs status and never returns true on a
+// probe it could not read, so an outside caller cannot use it to bypass the refusal.
+export function safeResolvedFilters(repo, diagnostics, options) {
   // Enumerate exactly what status inspects under --untracked-files=all: tracked paths plus
   // untracked non-ignored ones. Status never inspects an ignored path's content, so a
   // filter attribute there cannot make a driver run; --exclude-standard applies the very
@@ -115,14 +135,8 @@ function safeResolvedFilters(repo, diagnostics, options) {
   // survive; -z output is NUL-separated path/attribute/value triples, never tab-delimited.
   const attributes = git(repo, ['check-attr', 'filter', '-z', '--stdin'], { ...options, input: listing.bytes });
   if (!attributes.ok) { diagnostics.push({ ...attributes.diagnostic, path: repo }); return false; }
-  const fields = attributes.text.split('\0');
-  if (fields.pop() !== '' || fields.length !== paths.length * 3) { diagnostics.push(diagnostic('invalid-attributes', 'Malformed attribute report', { path: repo })); return false; }
-  for (let i = 0; i < fields.length; i += 3) {
-    if (fields[i + 1] !== 'filter') { diagnostics.push(diagnostic('invalid-attributes', 'Unexpected attribute in report', { path: repo })); return false; }
-    // `unspecified` and `unset` (a `-filter` attribute) select no driver and are safe.
-    // Any other value names one, and a bare `set` could resolve to one.
-    if (fields[i + 2] !== 'unspecified' && fields[i + 2] !== 'unset') { diagnostics.push(diagnostic('unsafe-filter', 'An inspected path resolves to a filter attribute; status was not run because it can execute commands', { path: repo })); return false; }
-  }
+  const verdict = filterReportVerdict(paths.length, attributes.text);
+  if (verdict) { diagnostics.push({ ...verdict, path: repo }); return false; }
   return true;
 }
 function safeStatusPrerequisites(repo, diagnostics, options) {
