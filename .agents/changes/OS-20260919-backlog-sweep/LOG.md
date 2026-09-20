@@ -168,3 +168,107 @@ not scope or coverage errors — they were *steps and criteria that would have p
 proving nothing*, in a change whose entire subject is guards that pass while proving
 nothing. Two of them (1 and 3) were in the batch that fixes BL-001. The plan pre-flight
 earned its round here.
+
+## 2026-09-20 — wave 1 gates
+
+### B03 — SHIP, polished, integrated at `6766642`
+
+Fence 0 violations. Strong-tier reviewer SHIP with 2 ASKs; test-hunter 5 findings, all
+test-only. The reviewer did the work the L weight was for: it probed a live repository and
+established that `git status` does not execute a driver for an untracked path at all —
+only index entries reach `convert_to_git`, and `--cached` enumerates every one of them
+(confirmed for unmerged paths at all stages, index-but-deleted paths, and tracked-but-
+ignored paths). So the `--others --exclude-standard` half of the enumeration is extra
+conservatism rather than load-bearing, and the ignored-path decision was safe.
+
+**Canary verified by the orchestrator, not taken on report** — old and new tool against
+this repository at the same moment: old exit 2 / partial / five `unknown` / five
+`unsafe-filter`; new exit 0 / complete / five `clean` / zero diagnostics.
+
+Polish closed all seven ASKs and came back `DONE_WITH_CONCERNS` on ASK 1, correctly: two
+of the five fail-closed guards in `safeResolvedFilters()` cannot be killed by any fixture.
+A corrupt `.git/index` fails BOTH `ls-files` calls, so the index inventory still returns
+unknown and the mutation survives; and real Git emits exactly one `check-attr` record per
+input line always, so the count guard is unreachable. Closing them needs a production seam
+in a shipped tool — a fence decision and a separate batch. The implementer stopped rather
+than make the change, which is what the polish rule asks for. → backlog.
+
+Two corrections the implementer made to the gates' own findings, both verified live and
+both right:
+
+- The hunter's `-z` exploit does not reproduce: `git check-attr --stdin` unquotes C-style
+  input when not in `-z` mode, so a quoted non-ASCII path still resolves. The added test is
+  still load-bearing (dropping `-z` from either command goes red) but the stated failure
+  mode was wrong.
+- **`git status` short-circuits on a size change** in `ce_match_stat_basic` and never calls
+  `convert_to_git`, so an unequal-size edit can never reach a driver. The implementer's
+  first live canary failed for this reason. It means the suite's three pre-existing refusal
+  tests are live only because their fixtures happen to write `after!` over `before` — the
+  same seven bytes. That is an undocumented load-bearing detail of every filter test in
+  this repository.
+
+### B01 — round cap reached, third round authorized
+
+R1 FIX FIRST on three P1s: the new double-quote branch skipped ANY backslash pair where
+YAML defines a closed escape set; BL-005's recursion never executed (no subdirectory
+exists, so `return []` stayed green); and the case table asserted only on the predicate's
+return value, so `definition()` could stop calling it entirely with the suite green.
+
+R2 verified all three FIX VERIFIED — including a differential test of the predicate against
+PyYAML 6.0.3 over **299,592 exhaustive values, zero false acceptances** — and then found a
+new P1 of the same family: `assert.deepEqual`'s custom message is APPENDED to its diff, not
+substituted for it, so `err.message.includes('subdir/orchestrator.md')` is satisfied by the
+auto-generated diff regardless of the message. The comment asserting otherwise was simply
+false on Node 22. Replacing `unknown.join(', ')` with `unknown.length` keeps the suite
+20/20 green. **The criterion round 1 flagged as "asserted nowhere" was still asserted by
+nothing that could fail, one round after being fixed.**
+
+Two rounds is the cap, so the batch stopped for the user's verdict. They chose "Fix again —
+authorized third round"; a fresh implementer on the strong tier took the P1 and the seven
+ASKs.
+
+**Adjudication recorded**: the two gates disagreed on whether leading YAML indicator
+characters (`@`, backtick, `*`, `[`, `%`) belong in this batch. The hunter called them P1;
+the reviewer scoped them out as predating the batch and lying outside BL-004's named
+colon-and-quote family. The reviewer was right — BL-004 names three forms and the batch
+fence is one file, so widening mid-round is the scope creep the fence exists to prevent.
+Filed as a new backlog entry instead.
+
+### B02 — SHIP, then a polish that overreached
+
+R1 SHIP with 7 ASKs (5 hunter, 2 reviewer), the sharpest being that the end-to-end test
+hard-coded the id in its substitution map, so the fence PASS never depended on the id in
+the template's example row.
+
+The polish closed all seven but also changed something no ask authorized: it narrowed the
+subject of the two PRE-EXISTING self-check greps from "the new ledger directory" to "the
+new ledger's `*.md`", relaxing the placeholder and comment checks. Inert today — step 8
+instantiates only `templates/*.md` — but ledgers accumulate non-`.md` at their root later
+(`smoke-C1.html`, `smoke-C1.json`, `c1-*.test.cjs` in the archive). The scoped re-review
+also found the new clause guard anchors on a semicolon nothing asserts: replace two
+semicolons with full stops and shorten the clause, and the rule names neither the plan nor
+PROGRESS while the suite stays green. FIX FIRST → redo. A scoped re-review is not a round
+and consumes no cap.
+
+The implementer's own judgement beat the orchestrator's instruction here: told to add
+`<slug>` to the grep list, they established that `<slug>` legitimately survives scaffolding
+(the contract ships a manual-fallback recipe containing it, so it is in every real ledger)
+and used `<title>` instead. Independently confirmed by the re-review.
+
+### Residuals accumulating for the close-out backlog
+
+1. Leading YAML indicator characters in an unquoted frontmatter value are accepted and are
+   YAML errors — same end state as BL-004, different family. Both B01 gates found it;
+   adjudicated out of scope.
+2. Two fail-closed guards in `safeResolvedFilters()` are regression-unprotected because no
+   fixture can reach them; closing them needs a production seam.
+3. The scaffolder self-check's greps do not ignore fenced or inline code spans, so a ledger
+   that documents templating work trips them — this one does, sixteen times.
+4. `protocol.md`'s manual-fallback prose states the filter rule but, unlike its neighbours,
+   does not name `git check-attr filter` for a human working the fallback by hand.
+5. `tests/build-smoke-page.test.cjs:531` failed once during B02's scoped re-review and did
+   not reproduce on re-run, in a fresh clone, or standalone. Outside every fence this wave.
+   An intermittent in a suite this change did not touch — worth a watch, not a fix.
+6. Ledger wording, not a defect: BL-006's acceptance criterion asks for an assertion that is
+   red at base, which a units-and-wording fix cannot satisfy while the definitions are
+   byte-identical at base. The perturbation reading is the only workable one.
