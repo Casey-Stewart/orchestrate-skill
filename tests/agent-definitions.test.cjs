@@ -3,6 +3,7 @@
 // exist to remove — so every list is asserted literally.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const ROOT = path.resolve(__dirname, '..');
@@ -148,25 +149,49 @@ for (const probe of FRONTMATTER_CASES) {
 // the whole catalog — has to fail here or it ships unnoticed. The walk recurses because
 // that glob is not the only reader: it leaves a nested definition on the floor, while a
 // build that loads nested definitions picks up the very file the install skipped.
-const definitionFiles = (dir = '') =>
-  fs.readdirSync(path.join(ROOT, '.claude/agents', dir), { withFileTypes: true }).flatMap(entry => {
+const definitionFiles = (base, dir = '') =>
+  fs.readdirSync(path.join(base, dir), { withFileTypes: true }).flatMap(entry => {
     const rel = dir ? dir + '/' + entry.name : entry.name;
-    if (entry.isDirectory()) return definitionFiles(rel);
+    if (entry.isDirectory()) return definitionFiles(base, rel);
     return entry.name.endsWith('.md') ? [rel] : [];
   });
 
-test('the directory holds exactly the four known definitions', () => {
-  const present = definitionFiles().sort();
+// Split from the test so the walk and this message can also be run against a tree that
+// actually holds a nested definition. The shipped directory never will, and a failure path
+// no test can enter is the whitelist bug over again, one level up.
+function assertKnownDefinitions(base) {
+  const present = definitionFiles(base).sort();
   const known = Object.keys(TOOLS).map(n => n + '.md').sort();
   const unknown = present.filter(f => !known.includes(f));
   // A custom message replaces deepEqual's diff, so the paths have to be named in it.
   assert.deepEqual(unknown, [],
-    '.claude/agents/ holds ' + unknown.join(', ') + ', which this test knows no tool list for. Nested is '
-    + 'the worse case: `mkdir -p ~/.claude/agents && cp orchestrate-skill/.claude/agents/*.md '
+    'unknown definition under .claude/agents/: ' + unknown.join(', ') + ', which this test knows no tool '
+    + 'list for. Nested is the worse case: `mkdir -p ~/.claude/agents && cp orchestrate-skill/.claude/agents/*.md '
     + '~/.claude/agents/` leaves it behind, but a build that recurses loads it with no `tools:` line');
   assert.deepEqual(present, known,
     '.claude/agents/ must hold exactly the definitions this test knows the tool list for; found '
     + (present.join(', ') || 'nothing'));
+}
+
+test('the directory holds exactly the four known definitions', () => {
+  assertKnownDefinitions(path.join(ROOT, '.claude/agents'));
+});
+
+test('the walk reaches a nested definition and names its relative path', t => {
+  const temp = fs.realpathSync(os.tmpdir()), base = fs.mkdtempSync(path.join(temp, 'agent-definitions-'));
+  t.after(() => { assert.equal(path.dirname(fs.realpathSync(base)), temp);
+    fs.rmSync(base, { recursive: true, maxRetries: 8, retryDelay: 100 }); });
+  for (const name of Object.keys(TOOLS)) fs.writeFileSync(path.join(base, name + '.md'), '');
+  fs.mkdirSync(path.join(base, 'empty'));
+  fs.writeFileSync(path.join(base, 'notes.txt'), 'not a definition');
+  fs.mkdirSync(path.join(base, 'subdir'));
+  fs.writeFileSync(path.join(base, 'subdir', 'orchestrator.md'), 'hello\n');
+  assert.deepEqual(definitionFiles(base).sort(),
+    Object.keys(TOOLS).map(n => n + '.md').concat('subdir/orchestrator.md').sort(),
+    'the walk must reach nested .md files and only .md files — an empty subdirectory is not a finding');
+  assert.throws(() => assertKnownDefinitions(base),
+    err => err instanceof assert.AssertionError && err.message.includes('subdir/orchestrator.md'),
+    'a nested definition must fail the whitelist, with its path relative to .claude/agents/ in the message');
 });
 
 test('every role ships a definition whose frontmatter names and describes it', () => {
