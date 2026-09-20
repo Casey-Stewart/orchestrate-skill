@@ -160,8 +160,10 @@ const FRONTMATTER_CASES = [
     field: { key: 'description', value: '"Ok \\x41 and \\u0041: fine"' } },
   { line: 'description: "Emoji \\U0001F600: ok"',
     field: { key: 'description', value: '"Emoji \\U0001F600: ok"' } },
-  // U+10FFFF is the last code point there is, so this is the boundary of the range check
-  // below: widen the check by one and this row goes with it.
+  // U+10FFFF is the last code point there is. This row holds the boundary from the strict
+  // side only — narrow the check to `>=` and it goes red — so the `\U00110000` row below
+  // holds the loose side. An off-by-one either way is caught, not just the one that costs
+  // nothing.
   { line: 'description: "Max \\U0010FFFF: ok"',
     field: { key: 'description', value: '"Max \\U0010FFFF: ok"' } },
   // Every single-character alternative in YAML_ESCAPE, in one value, so that dropping any
@@ -195,7 +197,13 @@ const FRONTMATTER_CASES = [
   // check is the rest of it.
   { line: 'description: "Above \\U41424344: here"',
     reason: /code point above U\+10FFFF that YAML cannot build/ },
-  // The whitelist is a whitelist: a digit and a letter that are not in it stay out of it.
+  // The FIRST code point that does not exist, one past the last one that does. Loosening the
+  // bound to `> 0x110000` is the edit someone makes while fixing an off-by-one, and every
+  // other row here survives it — this is the one that goes red.
+  { line: 'description: "First \\U00110000: no"',
+    reason: /code point above U\+10FFFF that YAML cannot build/ },
+  // Two named members of the complement, as documentation. The sweep below is what actually
+  // holds the boundary: these two rows leave `\q` and ninety others free.
   { line: 'description: "Digit \\7 here"', reason: /escapes \\7, which YAML does not define/ },
   { line: 'description: "Letter \\z here"', reason: /escapes \\z, which YAML does not define/ },
   // PyYAML accepts this one; YAML 1.2 does not, because `s-separate-in-line` wants the space
@@ -235,6 +243,32 @@ for (const probe of FRONTMATTER_CASES) {
       '`' + probe.line + '` must fail the document parse too — a predicate the consumer never calls guards nothing');
   });
 }
+
+// The whitelist's negative side, swept rather than sampled. Two named rejects pinned two
+// characters and left every other one free: adding `q` to the class was green. The member
+// list is written out here rather than derived from YAML_ESCAPE, because a check that reads
+// the thing it is checking agrees with any edit made to both at once.
+const ESCAPE_MEMBERS = '0abtnvfre "/\\N_LP\t';
+
+test('the escape whitelist admits exactly the characters YAML defines', () => {
+  let swept = 0;
+  for (let code = 0x20; code <= 0x7e; code++) {
+    const c = String.fromCharCode(code);
+    // `QQ` fills the slot after the escape so that `\x`, `\u` and `\U` fail for want of hex
+    // digits rather than by running into the closing quote.
+    const accepted = typeof frontmatterField('description: "A\\' + c + 'QQ"') === 'object';
+    swept += 1;
+    assert.equal(accepted, ESCAPE_MEMBERS.includes(c), '`\\' + c + '` must be '
+      + (ESCAPE_MEMBERS.includes(c) ? 'accepted' : 'rejected') + ' as a double-quoted escape: '
+      + 'YAML defines exactly ' + JSON.stringify(ESCAPE_MEMBERS) + ', and a definition carrying '
+      + 'any other pair does not load at all');
+  }
+  assert.equal(swept, 95, 'the sweep must cover every printable ASCII character, not a sample');
+  assert.equal(ESCAPE_MEMBERS.length, 18, 'YAML 1.2 defines eighteen single-character escapes');
+  // TAB is a member but is not printable, so it is swept here rather than left to its own row.
+  assert.equal(typeof frontmatterField('description: "A\\\tQQ"'), 'object',
+    'a literal TAB is YAML 1.2 rule 57\'s own escape and belongs to the set');
+});
 
 // The block parse has three failure paths of its own that no one-line case can reach, and a
 // line filter that decides which lines reach the predicate at all. Widening that filter to

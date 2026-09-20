@@ -158,6 +158,8 @@ forms still walk through it.
 - [x] polish: [C2] reword the cost comment — a false rejection is loud and local, a false acceptance is silent inheritance, so reject on doubt.
 - [x] polish: [C3] put a nested `reviewer.md` in the fixture, so a basename whitelist no longer passes the path-and-reason assertion.
 - [x] polish: drop the unreachable carriage return from the trailing strip; the field regex excludes line terminators and rejects the line first.
+- [x] polish: [P1] pin the code-point bound from the loose side as well — the first code point that does not exist now has its own reject row.
+- [x] polish: [ASK] sweep every printable ASCII character against an independently written member list, instead of sampling two rejects.
 
 ## Acceptance criteria
 
