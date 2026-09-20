@@ -288,7 +288,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }
 This is the recipe `README.md` designates for ledger validation; Node’s bare `node --test`
 discovery is a portable convenience only and is NOT the gate. `node --test tests/` is neither —
 Node’s directory-argument discovery differs and the suite fails. Baseline at the ledger base
-`efc4eec`: **260 pass, 0 fail**, ~3.1 minutes (Node v22.22.3). Report the totals line plus failing
+`efc4eec`: **260 pass, 0 fail**, ~3.3 minutes (Node v22.22.3). Report the totals line plus failing
 test NAMES; read full output only on failure.
 
 **Where the helpers run.** `orchestrate/tools/check-fence.mjs` and `orchestrate/tools/git-evidence.mjs`
