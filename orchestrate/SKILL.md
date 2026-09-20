@@ -172,7 +172,8 @@ Ordinary synthetic preparation adds no user gate.
 Read [references/scaffolding.md](references/scaffolding.md) and the files in
 [templates/](templates/), then: preconditions (git repo; tree state) → detect repo
 facts (validation commands and their quiet form, versioning, gate agents, runners,
-backlog id scheme) → ONE consolidated interview round → plan the batches (explore; batch
+backlog id scheme) → interview (back-to-back AskUserQuestion calls, as many as
+the gaps need) → plan the batches (explore; batch
 table with weights and file fences; item→batch coverage) → structure for throughput per
 [references/execution-models.md](references/execution-models.md): reshape fences for
 disjointness, build the wave map (widest safe waves), classify each batch hands-on vs
@@ -182,7 +183,7 @@ eligible fold-ins per scaffolding.md; the user picks at plan approval) → indep
 plan PRE-FLIGHT (a fresh read-only sub-agent; blocking findings fixed before the user
 sees the plan) → front-load user gates (design/UX approvals resolved at planning time
 via mockups, or scheduled as wave 1 — never mid-run) → user approves plan + wave map +
-checkpoints + fold-ins in one pass → fill the templates into
+checkpoints + weights + fold-ins in one pass → fill the templates into
 `.agents/changes/<CHANGE_ID>/` (incl. `LOG.md`) → self-check (grep the new directory
 for `{{` and `<!--`, and its `*.md` for `<title>` — zero hits; `**State**: ACTIVE` present;
 every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`) → scaffold commit on
