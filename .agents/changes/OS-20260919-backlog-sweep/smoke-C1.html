@@ -800,45 +800,45 @@ node "C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestra
     "steps": [
       {
         "n": 1,
-        "do": "Run \u003ccode>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"\u003c/code>, then \u003ccode>git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin\u003c/code> from the repository root.",
-        "pass": "The first lists \u003ccode>filter.lfs.clean\u003c/code> and \u003ccode>filter.lfs.process\u003c/code> — stock Git for Windows. The second returns only \u003ccode>unspecified\u003c/code> or \u003ccode>unset\u003c/code>: no path resolves to a filter.",
-        "aside": "Runner: agent, pre-verified. This is the exact situation BL-003 describes — a driver configured system-wide that no file actually uses — and the gate's canary passed anyway. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should; say so rather than recording a pass. This is the claim no test in the suite can make, because every fixture sets \u003ccode>GIT_CONFIG_NOSYSTEM=1\u003c/code> and an empty global config precisely to isolate your real configuration away.",
-        "revision": 1
+        "do": "Run \u003ccode>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"\u003c/code>. Then run this, which inspects every tracked and untracked path and reports only the answer:\u003cbr>\u003cbr>\u003ccode>node -e \"const {execSync}=require('child_process');const out=execSync('git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin',{shell:true,maxBuffer:64e6}).toString();const f=out.split('\u0000');if(f[f.length-1]==='')f.pop();let p=0,bad=[];for(let i=0;i+2&lt;=f.length;i+=3){p++;const v=f[i+2];if(v!=='unspecified'&amp;&amp;v!=='unset')bad.push(f[i]+' -&gt; '+v);}console.log('paths inspected:',p);console.log('paths resolving to a filter:',bad.length);if(bad.length)console.log(bad.join('\n'));\"\u003c/code>",
+        "pass": "The first lists \u003ccode>filter.lfs.clean\u003c/code> and \u003ccode>filter.lfs.process\u003c/code> — stock Git for Windows. The second reports a non-zero \u003cstrong>paths inspected\u003c/strong> and \u003cstrong>paths resolving to a filter: 0\u003c/strong>. If any path did resolve, it is named.",
+        "aside": "Runner: agent, pre-verified — 375 paths inspected, 0 resolving. This is the exact situation BL-003 describes: a filter driver configured machine-wide that \u003cem>no file actually uses\u003c/em>. The old code refused on the first fact alone, which is why the helper was unusable on every stock Windows install; the new code asks the second question. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should — say so rather than recording a pass. This is the claim no test in the suite can make, because every fixture sets \u003ccode>GIT_CONFIG_NOSYSTEM=1\u003c/code> and an empty global config precisely to isolate your real configuration away. The raw pipeline prints one record per path — 1,125 NUL-separated fields here — which is why this step summarises instead.",
+        "revision": 2
       },
       {
         "n": 2,
-        "do": "Run the full validation recipe from Section 5, then find these three tests in its output: \u003ccode>configured clean and process filters never execute through API or actual CLI status probes\u003c/code>, \u003ccode>global clean filters remain unknown and never execute through API or actual CLI\u003c/code>, and \u003ccode>configured filters leave the fence UNKNOWN without executing a command or changing bytes\u003c/code>.",
+        "do": "Run the full validation recipe (Section 4, Step 8), then find these three tests in its output: \u003ccode>configured clean and process filters never execute through API or actual CLI status probes\u003c/code>, \u003ccode>global clean filters remain unknown and never execute through API or actual CLI\u003c/code>, and \u003ccode>configured filters leave the fence UNKNOWN without executing a command or changing bytes\u003c/code>.",
         "pass": "All three pass. One unit = one named test; expect three.",
         "aside": "Runner: agent, pre-verified. This is the refusal half of the fix. A helper that stopped refusing when a path \u003cem>does\u003c/em> resolve to a filter would have stopped protecting anything — the point was to narrow the trigger, not remove it. An independent gate confirmed these still bind by mutating the new code to always return safe: all three went red.",
-        "revision": 1
+        "revision": 2
       }
     ]
   },
   {
     "n": 2,
     "title": "BL-001 and BL-002 — guards that can now fail",
-    "need": "A writable temp directory for Step 3, which clones this repository and deletes the clone afterwards. Nothing in this repository is modified.",
+    "need": "A writable temp directory for Step 5, which clones this repository and deletes the clone afterwards. Nothing in this repository is modified.",
     "steps": [
       {
         "n": 3,
         "do": "Run \u003ccode>node --test tests/protocol-contract.test.cjs\u003c/code> and find \u003ccode>published helper recipes execute actual CLIs and generated batch grammar passes the real fence\u003c/code>.",
         "pass": "It passes, and the file reports \u003ccode>pass 7 / fail 0\u003c/code>.",
         "aside": "Runner: agent, pre-verified. That test builds a disposable ledger by lifting the \u003ccode>Bnn\u003c/code> example row out of each shipped template's instruction comment — exactly as a scaffolder does — then runs the real \u003ccode>check-fence.mjs\u003c/code> over the result. It is \u003cem>red\u003c/em> on the base templates, because there is no row to lift. That is BL-002 closed end to end. A live fence run against this change's own batch branches returned \u003ccode>\"status\":\"PASS\"\u003c/code> with zero violations and zero unknowns on 2026-09-20 — the first mechanical PASS in this repository's history, recorded in PROGRESS and LOG. Do not try to reproduce that one now: \u003ccode>check-fence.mjs\u003c/code> needs a live candidate worktree and the batch worktrees were removed when the wave closed.",
-        "revision": 1
+        "revision": 2
       },
       {
         "n": 4,
         "do": "Read the \u003ccode>Notes\u003c/code> cell of each batch row in this ledger's \u003ccode>PROGRESS.md\u003c/code>, then the same in \u003ccode>.agents/changes/OS-20260919-agent-tool-restrictions/PROGRESS.md\u003c/code>.",
         "pass": "\u003cstrong>None\u003c/strong> of the previous ledger's three rows records a mechanical fence result — two read \u003ccode>Fence PASS (manual — helper UNKNOWN, see LOG R2/R3)\u003c/code> and the third \u003ccode>Fence PASS (manual, extended fence)\u003c/code>. In this ledger, B02's row records a mechanical \u003ccode>PASS\u003c/code>.",
         "aside": "Runner: agent, pre-verified. The previous ledger is the before picture, preserved: its mechanical gate was unusable for an entire change and every batch silently fell back to the manual one. B01 and B03 also read \u003ccode>manual\u003c/code> here, for reasons their own Notes give — B03 ran before its own fix landed, and B01's mechanical run tripped the wrapped-\u003ccode>polish:\u003c/code>-line tool defect described in the LOG. Only B02's row is expected to show a mechanical result.",
-        "revision": 1
+        "revision": 2
       },
       {
         "n": 5,
         "do": "In a throwaway clone — never in this repository — run \u003ccode>git clone . \"$env:TEMP\\os919c1\"\u003c/code>. In the clone, delete the one line containing \u003ccode>Every generation and independent Excel-validation command in this run uses literal\u003c/code> from \u003ccode>.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md\u003c/code>, run the validation recipe there, then \u003ccode>git -C \"$env:TEMP\\os919c1\" checkout -- .\u003c/code> and re-run. Finally \u003ccode>Remove-Item -Recurse -Force \"$env:TEMP\\os919c1\"\u003c/code>.",
         "pass": "RED in the clone while the line is missing, naming \u003ccode>reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact\u003c/code>; green after the restore. In \u003cem>this\u003c/em> repository \u003ccode>git status --porcelain\u003c/code> stays empty throughout.",
         "aside": "Runner: agent, pre-verified — it went red, then green, and this repository was untouched. The contract forbids an agent to modify \u003ccode>.agents/archive/\u003c/code>, which is why this runs in a clone. Use the Excel sentence, which occurs exactly once — \u003cstrong>not\u003c/strong> the \u003ccode>Python310\u003c/code> line: five lines contain it and three match the asserted regex, so deleting one proves nothing. That trap was caught at plan pre-flight, before any code was written.",
-        "revision": 1
+        "revision": 2
       }
     ]
   },
@@ -1547,4 +1547,4 @@ node "C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestra
 })();
 </script>
 
-<!-- smoke-sidecar-sha256:0d36a95cef82d06a160b3e90f8974f2436af9c77803c4d9c7df789e77a4946a3 -->
+<!-- smoke-sidecar-sha256:3e5d5034eb3f267730b4939895c96c477a5a11fa1dd1d6ac8f8a3c5e9b0cec7c -->

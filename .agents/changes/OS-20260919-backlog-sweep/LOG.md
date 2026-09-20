@@ -471,3 +471,38 @@ allowance again. Guidance lives in `orchestrate/references/smoke-page.md`; the b
 criterion — the orchestrator verified containment by hand before the question was asked,
 and the two commits since `e79d378` touch only ledger artifacts — but having to trust that
 manual check IS the defect. Fixing the skill is its own change, not a reopened wave.
+
+### Residual 11 — the hand-over page was never proofed, and it showed
+
+The user hit three defects in the issued page within minutes of starting the run, all mine:
+
+1. **Step 1 printed 1,125 NUL-separated fields** and asked the tester to confirm none of
+   them said anything but `unspecified`/`unset`. A pass criterion that requires eyeballing
+   375 records is not a check; it is a step a tester marks PASS without really reading.
+   Replaced with a command that reports `paths inspected` and `paths resolving to a
+   filter`, naming any offender.
+2. **Step 2 pointed at "Section 5", which does not exist.** The markdown draft had five
+   sections; the page has four. I restructured and did not re-check cross-references.
+3. **Section 2's prerequisite named "Step 3"** for the clone, which is Step 5 — same cause.
+
+**Why they survived.** The QA runner pre-verified the MARKDOWN draft. When the contract
+deviation was corrected and the content was restructured into the HTML sidecar, the page
+itself was never run past anyone — I treated the rebuild as a format change when it was
+also a re-authoring. Pre-smoke evidence attached to a document that no longer existed.
+
+**What caught them.** The user, one step at a time, during the run. Nothing mechanical
+would have: the builder validates slots, schema and revisions, not whether a cross-
+reference resolves or whether a pass criterion is humanly checkable.
+
+**Worth fixing in the skill**: `build-smoke-page.mjs` could reject a sidecar whose prose
+names a `Section N` or `Step N` that the sidecar does not contain — a cheap, purely
+structural check that would have caught two of these three. The third (a step whose output
+a human cannot reasonably verify) is a judgement call, but the `Runner: agent` tag is a
+hint: a step only an agent can really check should say so, rather than being handed to a
+human as though it were verifiable by eye.
+
+**Note in the builder's favour.** It refused the silent reissue (`requires --previous`),
+and then refused again because editing section 2's `need` changed the instruction context
+for steps 3-5 without their revisions moving. Both refusals were correct and both are the
+reissue discipline the spec asks for. The tooling here is sound; it was the authoring and
+the gate prose that were weak.

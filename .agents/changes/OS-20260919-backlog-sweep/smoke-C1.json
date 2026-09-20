@@ -26,45 +26,45 @@
       "steps": [
         {
           "n": 1,
-          "do": "Run <code>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"</code>, then <code>git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin</code> from the repository root.",
-          "pass": "The first lists <code>filter.lfs.clean</code> and <code>filter.lfs.process</code> — stock Git for Windows. The second returns only <code>unspecified</code> or <code>unset</code>: no path resolves to a filter.",
-          "aside": "Runner: agent, pre-verified. This is the exact situation BL-003 describes — a driver configured system-wide that no file actually uses — and the gate's canary passed anyway. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should; say so rather than recording a pass. This is the claim no test in the suite can make, because every fixture sets <code>GIT_CONFIG_NOSYSTEM=1</code> and an empty global config precisely to isolate your real configuration away.",
-          "revision": 1
+          "do": "Run <code>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"</code>. Then run this, which inspects every tracked and untracked path and reports only the answer:<br><br><code>node -e \"const {execSync}=require('child_process');const out=execSync('git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin',{shell:true,maxBuffer:64e6}).toString();const f=out.split('\u0000');if(f[f.length-1]==='')f.pop();let p=0,bad=[];for(let i=0;i+2&lt;=f.length;i+=3){p++;const v=f[i+2];if(v!=='unspecified'&amp;&amp;v!=='unset')bad.push(f[i]+' -&gt; '+v);}console.log('paths inspected:',p);console.log('paths resolving to a filter:',bad.length);if(bad.length)console.log(bad.join('\n'));\"</code>",
+          "pass": "The first lists <code>filter.lfs.clean</code> and <code>filter.lfs.process</code> — stock Git for Windows. The second reports a non-zero <strong>paths inspected</strong> and <strong>paths resolving to a filter: 0</strong>. If any path did resolve, it is named.",
+          "aside": "Runner: agent, pre-verified — 375 paths inspected, 0 resolving. This is the exact situation BL-003 describes: a filter driver configured machine-wide that <em>no file actually uses</em>. The old code refused on the first fact alone, which is why the helper was unusable on every stock Windows install; the new code asks the second question. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should — say so rather than recording a pass. This is the claim no test in the suite can make, because every fixture sets <code>GIT_CONFIG_NOSYSTEM=1</code> and an empty global config precisely to isolate your real configuration away. The raw pipeline prints one record per path — 1,125 NUL-separated fields here — which is why this step summarises instead.",
+          "revision": 2
         },
         {
           "n": 2,
-          "do": "Run the full validation recipe from Section 5, then find these three tests in its output: <code>configured clean and process filters never execute through API or actual CLI status probes</code>, <code>global clean filters remain unknown and never execute through API or actual CLI</code>, and <code>configured filters leave the fence UNKNOWN without executing a command or changing bytes</code>.",
+          "do": "Run the full validation recipe (Section 4, Step 8), then find these three tests in its output: <code>configured clean and process filters never execute through API or actual CLI status probes</code>, <code>global clean filters remain unknown and never execute through API or actual CLI</code>, and <code>configured filters leave the fence UNKNOWN without executing a command or changing bytes</code>.",
           "pass": "All three pass. One unit = one named test; expect three.",
           "aside": "Runner: agent, pre-verified. This is the refusal half of the fix. A helper that stopped refusing when a path <em>does</em> resolve to a filter would have stopped protecting anything — the point was to narrow the trigger, not remove it. An independent gate confirmed these still bind by mutating the new code to always return safe: all three went red.",
-          "revision": 1
+          "revision": 2
         }
       ]
     },
     {
       "n": 2,
       "title": "BL-001 and BL-002 — guards that can now fail",
-      "need": "A writable temp directory for Step 3, which clones this repository and deletes the clone afterwards. Nothing in this repository is modified.",
+      "need": "A writable temp directory for Step 5, which clones this repository and deletes the clone afterwards. Nothing in this repository is modified.",
       "steps": [
         {
           "n": 3,
           "do": "Run <code>node --test tests/protocol-contract.test.cjs</code> and find <code>published helper recipes execute actual CLIs and generated batch grammar passes the real fence</code>.",
           "pass": "It passes, and the file reports <code>pass 7 / fail 0</code>.",
           "aside": "Runner: agent, pre-verified. That test builds a disposable ledger by lifting the <code>Bnn</code> example row out of each shipped template's instruction comment — exactly as a scaffolder does — then runs the real <code>check-fence.mjs</code> over the result. It is <em>red</em> on the base templates, because there is no row to lift. That is BL-002 closed end to end. A live fence run against this change's own batch branches returned <code>\"status\":\"PASS\"</code> with zero violations and zero unknowns on 2026-09-20 — the first mechanical PASS in this repository's history, recorded in PROGRESS and LOG. Do not try to reproduce that one now: <code>check-fence.mjs</code> needs a live candidate worktree and the batch worktrees were removed when the wave closed.",
-          "revision": 1
+          "revision": 2
         },
         {
           "n": 4,
           "do": "Read the <code>Notes</code> cell of each batch row in this ledger's <code>PROGRESS.md</code>, then the same in <code>.agents/changes/OS-20260919-agent-tool-restrictions/PROGRESS.md</code>.",
           "pass": "<strong>None</strong> of the previous ledger's three rows records a mechanical fence result — two read <code>Fence PASS (manual — helper UNKNOWN, see LOG R2/R3)</code> and the third <code>Fence PASS (manual, extended fence)</code>. In this ledger, B02's row records a mechanical <code>PASS</code>.",
           "aside": "Runner: agent, pre-verified. The previous ledger is the before picture, preserved: its mechanical gate was unusable for an entire change and every batch silently fell back to the manual one. B01 and B03 also read <code>manual</code> here, for reasons their own Notes give — B03 ran before its own fix landed, and B01's mechanical run tripped the wrapped-<code>polish:</code>-line tool defect described in the LOG. Only B02's row is expected to show a mechanical result.",
-          "revision": 1
+          "revision": 2
         },
         {
           "n": 5,
           "do": "In a throwaway clone — never in this repository — run <code>git clone . \"$env:TEMP\\os919c1\"</code>. In the clone, delete the one line containing <code>Every generation and independent Excel-validation command in this run uses literal</code> from <code>.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md</code>, run the validation recipe there, then <code>git -C \"$env:TEMP\\os919c1\" checkout -- .</code> and re-run. Finally <code>Remove-Item -Recurse -Force \"$env:TEMP\\os919c1\"</code>.",
           "pass": "RED in the clone while the line is missing, naming <code>reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact</code>; green after the restore. In <em>this</em> repository <code>git status --porcelain</code> stays empty throughout.",
           "aside": "Runner: agent, pre-verified — it went red, then green, and this repository was untouched. The contract forbids an agent to modify <code>.agents/archive/</code>, which is why this runs in a clone. Use the Excel sentence, which occurs exactly once — <strong>not</strong> the <code>Python310</code> line: five lines contain it and three match the asserted regex, so deleting one proves nothing. That trap was caught at plan pre-flight, before any code was written.",
-          "revision": 1
+          "revision": 2
         }
       ]
     },
