@@ -29,7 +29,11 @@ const flow = text => text.replace(/\s+/g, ' ');
 // A double-quoted YAML scalar has a closed escape set; any other pair is a ScannerError on
 // the whole document. `description: "Writes to C:\Users\me"` is the trap, because
 // quoting is exactly what this guard tells an author to do to get a colon into a value.
-const YAML_ESCAPE = /^\\([0abtnvfre "/\\N_LP]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/;
+// The hex counts are exact in BOTH directions, and the cases below pin them both ways:
+// `\x41` is an escape and `\x4` is a ScannerError, so a short-but-hex run is the same trap
+// with fewer characters. YAML 1.2 rule 57 is `ns-esc-horizontal-tab ::= "t" | x09`, so a
+// literal TAB is an escape in its own right and the class carries \t beside the letter t.
+const YAML_ESCAPE = /^\\([0abtnvfre "/\\N_LP\t]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/;
 
 // Every frontmatter line goes through this one predicate, and the FRONTMATTER_CASES table
 // below pins its verdicts. A regex guard here used to demand a space after an inner colon
@@ -40,9 +44,13 @@ const YAML_ESCAPE = /^\\([0abtnvfre "/\\N_LP]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[
 // rather than by a missing key. Returns the parsed field, or a string saying what YAML
 // would choke on.
 function frontmatterField(line) {
-  const field = /^([A-Za-z_][A-Za-z0-9_-]*):[ \t]+(\S.*)$/.exec(line);
+  const field = /^([A-Za-z_][A-Za-z0-9_-]*): +(\S.*)$/.exec(line);
   if (!field) return 'is not a single-line `key: value` mapping';
-  const value = field[2].replace(/[ \t\r]+$/, '');
+  // A TAB is separation nowhere on this line — YAML stops on one rather than skipping it,
+  // whether it sits after the colon, after the value or in front of a comment — so it is
+  // never stripped and never stepped over out here. Inside a quoted scalar it is ordinary
+  // content, which is why the escape class above carries it and this does not.
+  const value = field[2].replace(/[ \r]+$/, '');
   if (value[0] === '"' || value[0] === "'") {
     // Quotes only quote when the value starts with one, so this is the one branch where a
     // `: ` is legal — and a quote that never closes runs off the end of the document.
@@ -60,9 +68,18 @@ function frontmatterField(line) {
       else break;
     }
     if (i >= value.length) return 'never closes its opening ' + quote + ' quote — a YAML error';
-    if (value.slice(i + 1).trim() !== '') return 'has content after its closing ' + quote + ' quote';
-    return { key: field[1], value };
+    // YAML does take a comment after the closing quote, behind a space. Anything else out
+    // there is a second node on the line, and a tab out there is not separation at all, so
+    // the tail is empty or it is a ` #` comment. That comment is not part of the scalar, so
+    // it is dropped rather than folded into the value. An unquoted value takes no comment
+    // here: a `#` in one stays part of the scalar for this parse.
+    const tail = value.slice(i + 1);
+    if (tail !== '' && !/^ +#/.test(tail)) {
+      return 'has content after its closing ' + quote + ' quote — YAML takes only a space-separated `#` comment there';
+    }
+    return { key: field[1], value: value.slice(0, i + 1) };
   }
+  if (/\t/.test(value)) return 'carries a TAB outside a quoted scalar, which YAML will not skip';
   // In a plain scalar a `: ` ends the scalar, and a `:` at end of line reads the same way:
   // either makes YAML look for a second mapping key on the line and error on the document.
   if (/:$/.test(value)) return 'ends its unquoted value with `:` — YAML reads a second key there';
@@ -111,6 +128,23 @@ const FRONTMATTER_CASES = [
     field: { key: 'description', value: "'it''s fine: really'" } },
   { line: 'description: "She said \\"go: now\\" once"',
     field: { key: 'description', value: '"She said \\"go: now\\" once"' } },
+  // A trailing `#` comment is valid YAML and is not part of the scalar, so a value that
+  // carries one has to be accepted AND handed back without it — a false rejection blocks a
+  // legitimate definition, which costs exactly what a false acceptance costs.
+  { line: 'description: "Reviews a batch: hunk by hunk" # keep it short',
+    field: { key: 'description', value: '"Reviews a batch: hunk by hunk"' } },
+  // Well-formed escapes, pinning the hex counts from above: drop an alternative from
+  // YAML_ESCAPE and these stop parsing.
+  { line: 'description: "Ok \\x41 and \\u0041: fine"',
+    field: { key: 'description', value: '"Ok \\x41 and \\u0041: fine"' } },
+  { line: 'description: "Emoji \\U0001F600: ok"',
+    field: { key: 'description', value: '"Emoji \\U0001F600: ok"' } },
+  { line: 'description: "Tab \\\tescape: ok"',
+    field: { key: 'description', value: '"Tab \\\tescape: ok"' } },
+  { line: 'description: "Quoted\ttab: also fine"',
+    field: { key: 'description', value: '"Quoted\ttab: also fine"' } },
+  { line: 'description: "Spaced" ',
+    field: { key: 'description', value: '"Spaced"' } },
   { line: 'description: Runs the steps:', reason: /ends its unquoted value with/ },
   { line: 'description: "unterminated', reason: /never closes its opening/ },
   { line: 'description: a "b: c" d', reason: /carries an unquoted/ },
@@ -119,6 +153,19 @@ const FRONTMATTER_CASES = [
     reason: /escapes \\U, which YAML does not define/ },
   { line: 'description: "Matches \\d+: the count"',
     reason: /escapes \\d, which YAML does not define/ },
+  // Short hex runs, pinning the same counts from below: loosen {2}, {4} or {8} to accept a
+  // shorter run and these three start passing, while YAML still errors on every one.
+  { line: 'description: "Short \\x4: y"', reason: /escapes \\x, which YAML does not define/ },
+  { line: 'description: "Uni \\u12: z"', reason: /escapes \\u, which YAML does not define/ },
+  { line: 'description: "Path \\U0041: here"', reason: /escapes \\U, which YAML does not define/ },
+  // The four places a TAB reaches this line from. YAML errors on every one of them, and the
+  // escape class carrying \t is only safe while they stay rejected: otherwise `"\<TAB>"` is
+  // the key that opens them, which is how a fix becomes a hole.
+  { line: 'description: "Tabbed"\t# not a comment to YAML',
+    reason: /has content after its closing " quote/ },
+  { line: 'description: "Closed"\t', reason: /has content after its closing " quote/ },
+  { line: 'description:\tTabbed separator', reason: /is not a single-line/ },
+  { line: 'description: Plain\ttab', reason: /carries a TAB outside a quoted scalar/ },
   { line: 'tools:Read, Glob', reason: /is not a single-line/ },
 ];
 
@@ -143,6 +190,44 @@ for (const probe of FRONTMATTER_CASES) {
   });
 }
 
+// The block parse has three failure paths of its own that no one-line case can reach, and a
+// line filter that decides which lines reach the predicate at all. Widening that filter to
+// skip a line YAML errors on — anything indented, anything without a colon — reopens the
+// BL-004 hole one level up, where the predicate never sees the line to reject it. Every
+// document below is well formed apart from the one line named, so only that line can fail.
+const DOCUMENT_CASES = [
+  { name: 'a document with no --- opener', text: 'name: reviewer\ntools: Read, Glob\n',
+    reason: /must open with --- delimited YAML frontmatter/ },
+  { name: 'an indented frontmatter line',
+    text: '---\nname: reviewer\n  tools: Read, Glob\n---\n\nbody\n',
+    reason: /is not a single-line `key: value` mapping/, quotes: '  tools: Read, Glob' },
+  { name: 'a frontmatter line carrying no colon',
+    text: '---\nname: reviewer\njust prose here\n---\n\nbody\n',
+    reason: /is not a single-line `key: value` mapping/, quotes: 'just prose here' },
+  { name: 'a key declared twice',
+    text: '---\nname: reviewer\nname: qa-runner\n---\n\nbody\n',
+    reason: /declares name: twice/ },
+];
+
+for (const probe of DOCUMENT_CASES) {
+  test('the document parse rejects ' + probe.name, () => {
+    assert.throws(() => frontmatterFields(probe.text, 'synthetic.md'), err =>
+      err instanceof assert.AssertionError && probe.reason.test(err.message)
+      && (!probe.quotes || err.message.endsWith(probe.quotes)),
+      probe.name + ' must fail the block parse, naming the line it choked on');
+  });
+}
+
+// The other half of the filter: a blank line inside a block mapping is legal YAML and must
+// be skipped, not fed to a predicate that would reject it. And the body handed back starts
+// after the closing ---, so a `tools:` line in the frontmatter can never satisfy a body check.
+test('the document parse skips blank lines and returns a body with the block removed', () => {
+  const { fields, body } = frontmatterFields('---\nname: reviewer\n\ntools: Read, Glob\n---\n\nprose\n', 'synthetic.md');
+  assert.equal(fields.get('name'), 'reviewer', 'a blank line must not end the block parse');
+  assert.equal(fields.get('tools'), 'Read, Glob', 'fields after a blank line still have to be read');
+  assert.equal(body, '\nprose\n', 'the body must begin after the closing ---, carrying none of the frontmatter');
+});
+
 // Every other test iterates the known roles, so an unlisted file would never be read.
 // The README's `cp .claude/agents/*.md ~/.claude/agents/` installs whatever is in the
 // directory for every project, so a fifth definition — with no `tools:` line, inheriting
@@ -163,7 +248,9 @@ function assertKnownDefinitions(base) {
   const present = definitionFiles(base).sort();
   const known = Object.keys(TOOLS).map(n => n + '.md').sort();
   const unknown = present.filter(f => !known.includes(f));
-  // A custom message replaces deepEqual's diff, so the paths have to be named in it.
+  // deepEqual APPENDS its diff to a custom message rather than replacing it, so the paths
+  // land in `err.message` either way and only the first line is this message. The test that
+  // reads it asserts on that line alone, or the diff would answer for it.
   assert.deepEqual(unknown, [],
     'unknown definition under .claude/agents/: ' + unknown.join(', ') + ', which this test knows no tool '
     + 'list for. Nested is the worse case: `mkdir -p ~/.claude/agents && cp orchestrate-skill/.claude/agents/*.md '
@@ -189,9 +276,14 @@ test('the walk reaches a nested definition and names its relative path', t => {
   assert.deepEqual(definitionFiles(base).sort(),
     Object.keys(TOOLS).map(n => n + '.md').concat('subdir/orchestrator.md').sort(),
     'the walk must reach nested .md files and only .md files — an empty subdirectory is not a finding');
-  assert.throws(() => assertKnownDefinitions(base),
-    err => err instanceof assert.AssertionError && err.message.includes('subdir/orchestrator.md'),
-    'a nested definition must fail the whitelist, with its path relative to .claude/agents/ in the message');
+  // The first line is the custom message with no diff appended, so this pins what that
+  // message says: the relative path, and the reason a nested definition is the worse case.
+  assert.throws(() => assertKnownDefinitions(base), err => {
+    const message = err.message.split('\n')[0];
+    return err instanceof assert.AssertionError && message.includes('subdir/orchestrator.md')
+      && /a build that recurses loads it with no `tools:` line/.test(message);
+  }, 'a nested definition must fail the whitelist on the unknown-path assertion, with its path '
+    + 'relative to .claude/agents/ and the reason it matters both in the message itself');
 });
 
 test('every role ships a definition whose frontmatter names and describes it', () => {
@@ -243,6 +335,11 @@ test('no definition has grown into a document', () => {
   for (const name of Object.keys(TOOLS)) {
     const { file } = definition(name);
     const bytes = fs.readFileSync(path.join(ROOT, file)).length;
+    // The ceiling sits well above every file today, so the ceiling alone cannot tell bytes
+    // from UTF-16 units. Pin the unit against the filesystem: reading through `read()` would
+    // under-count a CRLF or em-dash file and this goes red before the ceiling ever notices.
+    assert.equal(bytes, fs.statSync(path.join(ROOT, file)).size,
+      file + ' must be measured in bytes on disk, not in normalized UTF-16 units');
     assert.ok(bytes <= 4096, file + ' is ' + bytes + ' bytes on disk; keep definitions under 4 KiB');
   }
 });
