@@ -341,3 +341,35 @@ Its mutation table is the cleanest evidence produced this change: all nine membe
 one-at-a-time removal; the both-at-once edit is caught by the length assertion; the duplicate trick
 is caught by `new Set(...).size`; and moving the reason to line 2 of the message reddens 4 tests,
 proving `split('\n')[0]` load-bearing — the BL-004 round-2 trap, tested rather than assumed.
+
+### B04 — polish, and a scoped re-review the contract required
+
+Polish `9bf3b54` closed both ASKs. **It touched production files**, so the mechanical close does not
+apply: this contract's §Repo conventions state that markdown under `orchestrate/` is "source, not
+prose", which makes `protocol.md` and `templates/00-READBEFORE.md` production files for the purpose
+of the polish rule, and a fresh scoped re-review of `6b7897c..HEAD` was spawned rather than closing
+on the orchestrator's own reading. The orchestrator warned the implementer of this before the pass,
+so the cost was expected and not a surprise finding.
+
+The implementer's own mutation evidence, re-run against the COMMITTED tree: the gate's negation
+mutation (`**never**` inserted in both documents) now exits 1 against the clause pin, as does each
+single-sided negation, while the mirror and both SHA-256 pins remain blind to all three — which is
+precisely the gap ASK-1 named.
+
+**It added an assertion nobody asked for, with a stated reason.** `startsWith` satisfies only half
+the *positive-only assertions on prose* guardrail: a contradicting directive placed BESIDE an intact
+rule ("Do not run git check-attr yourself.") passes every positive pin. So the polish also sweeps the
+manual-fallback section with `assert.doesNotMatch(..., /(?:never|not|avoid|skip)\b[^.;:]*\bgit
+check-attr\b/i)`, with its own live control. The `[^.;:]*` class keeps the match inside one clause —
+without it the neighbouring "Never execute such filter drivers…" sentence false-positives across the
+sentence boundary, which is the sentence ASK-2 had just edited. Unprompted additions are exactly what
+a scoped re-review exists to examine, and that is where it went.
+
+**A process lesson the implementer volunteered, worth more than the batch.** Its first mutation round
+ran BEFORE committing the ASK-2 edit, and `git checkout HEAD -- <doc>` silently reverted the
+uncommitted real edit along with the mutation. It caught this on the next `--numstat`, re-applied,
+re-ran the full suite, committed, and re-ran every mutation against the committed tree. Generalised:
+**restore-by-checkout is only safe once the real edit is committed** — otherwise the mutation harness
+quietly eats the work it was meant to be testing, and every subsequent verdict describes a tree
+nobody intended. This is the same family as the `Set-Content` transport defect recorded above: the
+apparatus that verifies the work can corrupt the work, and its output looks identical either way.
