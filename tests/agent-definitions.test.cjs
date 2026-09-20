@@ -98,6 +98,18 @@ function frontmatterField(line) {
     }
     return { key: field[1], value: value.slice(0, i + 1) };
   }
+  // A plain scalar may not OPEN with a YAML indicator. `@` and a backtick are reserved, `*`
+  // opens an alias, `%` a directive, `!` a tag, `[` and `{` a flow collection and `- ` a block
+  // sequence entry — PyYAML 6.0.3 raises on all eight, and the end state is BL-004's over again:
+  // the document does not parse, no definition loads, and a "read-only" role inherits the whole
+  // catalog. The check is ANCHORED, because every one of these is ordinary content once anything
+  // precedes it — `Runs the a*b case` is a plain scalar YAML reads as written — and quoting the
+  // value makes any of them scalar content too. The dash carries its space: `- x` is a sequence
+  // entry, `-x` is an ordinary scalar. `?` is the ninth member and the one judgement call here,
+  // since PyYAML takes `?x` while `? x` is a complex-key indicator; this parse rejects on doubt,
+  // a false rejection costing one typed quote where a false acceptance costs the whole catalog.
+  const indicator = /^(- |[@`*%[{!?])/.exec(value);
+  if (indicator) return 'opens its unquoted value with `' + indicator[0] + '`, a YAML indicator character';
   if (/\t/.test(value)) return 'carries a TAB outside a quoted scalar, which YAML will not skip';
   // In a plain scalar a `: ` ends the scalar, and a `:` at end of line reads the same way:
   // either makes YAML look for a second mapping key on the line and error on the document.
@@ -180,6 +192,13 @@ const FRONTMATTER_CASES = [
     field: { key: 'description', value: '"Quoted\ttab: also fine"' } },
   { line: 'description: "Spaced" ',
     field: { key: 'description', value: '"Spaced"' } },
+  // The dash is the one two-character member of the indicator family, and it needs both rows:
+  // a leading `-` is an indicator only when a space follows it, so `-x` is an ordinary plain
+  // scalar. Drop the space from the pattern and the first row goes red, widen the pattern to
+  // any leading dash and the second one does.
+  { line: 'description: -x is a plain scalar',
+    field: { key: 'description', value: '-x is a plain scalar' } },
+  { line: 'description: - x opens a block sequence', reason: /opens its unquoted value with `- `/ },
   { line: 'description: Runs the steps:', reason: /ends its unquoted value with/ },
   { line: 'description: "unterminated', reason: /never closes its opening/ },
   { line: 'description: a "b: c" d', reason: /carries an unquoted/ },
@@ -268,6 +287,45 @@ test('the escape whitelist admits exactly the characters YAML defines', () => {
   // TAB is a member but is not printable, so it is swept here rather than left to its own row.
   assert.equal(typeof frontmatterField('description: "A\\\tQQ"'), 'object',
     'a literal TAB is YAML 1.2 rule 57\'s own escape and belongs to the set');
+});
+
+// The indicator family's members, written out here rather than read off the pattern in the
+// predicate, for the reason ESCAPE_MEMBERS is: a check that derives its domain from the thing it
+// is checking agrees with any edit made to both at once, and the size assertion below is what
+// catches that edit. `- ` is two characters on purpose.
+const INDICATOR_MEMBERS = ['@', '`', '*', '%', '[', '{', '- ', '?', '!'];
+
+test('an unquoted value may not open with a YAML indicator, and may carry one anywhere else', () => {
+  assert.equal(INDICATOR_MEMBERS.length, 9, 'nine forms open a YAML node where a plain scalar was '
+    + 'meant; a tenth gets its own case here, not a quietly wider pattern over there');
+  assert.equal(new Set(INDICATOR_MEMBERS).size, INDICATOR_MEMBERS.length,
+    'a duplicated member would shorten the sweep while the size assertion still counted nine');
+  for (const member of INDICATOR_MEMBERS) {
+    const line = 'description: ' + member + 'Runs a batch';
+    const verdict = frontmatterField(line);
+    assert.equal(typeof verdict, 'string', '`' + line + '` is a YAML error: the document would not '
+      + 'parse, no definition would load, and a "read-only" role would inherit the whole catalog');
+    assert.equal(verdict, 'opens its unquoted value with `' + member + '`, a YAML indicator character',
+      '`' + line + '` must be rejected naming the character it opens with and why that is an error');
+    // Through the consumer's own door, and reading the FIRST LINE alone: any diff a future
+    // assertion appends down there carries the line text with it and would satisfy a
+    // whole-message check no matter what the message itself said.
+    assert.throws(() => frontmatterFields('---\n' + line + '\n---\n\nbody\n', 'synthetic.md'), err => {
+      const first = err.message.split('\n')[0];
+      return err instanceof assert.AssertionError && first.includes('a YAML indicator character')
+        && first.endsWith(line);
+    }, '`' + line + '` must fail the document parse too — a predicate the consumer never calls guards nothing');
+    // The other side of the boundary, driven from the same list: these characters are content
+    // once anything precedes them, and quoting makes them content too. A pattern that rejected
+    // them anywhere would reject `Runs the a*b case`, which YAML reads exactly as written.
+    for (const value of ['Runs a ' + member + 'batch case', '"' + member + 'Runs a batch"']) {
+      const ok = 'description: ' + value;
+      assert.deepEqual(frontmatterField(ok), { key: 'description', value },
+        '`' + ok + '` is valid YAML and has to parse as written');
+      assert.equal(frontmatterFields('---\n' + ok + '\n---\n\nbody\n', 'synthetic.md').fields.get('description'),
+        value, '`' + ok + '` has to survive the document parse, not just the predicate');
+    }
+  }
 });
 
 // The block parse has three failure paths of its own that no one-line case can reach, and a

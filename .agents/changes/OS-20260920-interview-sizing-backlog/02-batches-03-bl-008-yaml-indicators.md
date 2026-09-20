@@ -64,24 +64,24 @@ leading and when the value is quoted.
 
 ## Checklist
 
-- [ ] Add the indicator-character rejection to `frontmatterField`’s unquoted branch, keeping the
+- [x] Add the indicator-character rejection to `frontmatterField`’s unquoted branch, keeping the
       quoted branch untouched and keeping every line routed through `frontmatterFields()`.
-- [ ] Write the nine-member list as data, independently of the matching pattern, and assert its size
+- [x] Write the nine-member list as data, independently of the matching pattern, and assert its size
       so a both-at-once edit is caught.
-- [ ] Sweep the whole domain: every member rejected at the head of an unquoted value, driven from the
+- [x] Sweep the whole domain: every member rejected at the head of an unquoted value, driven from the
       list rather than from hand-written examples.
-- [ ] Pin the other side of the boundary: the same characters accepted when not leading, and accepted
+- [x] Pin the other side of the boundary: the same characters accepted when not leading, and accepted
       when the value is quoted — including `-x` versus `- x` as distinct cases.
-- [ ] Assert the rejection reason from the FIRST LINE of the error message, never from a `deepEqual`
+- [x] Assert the rejection reason from the FIRST LINE of the error message, never from a `deepEqual`
       diff that would satisfy the check by accident.
-- [ ] Confirm the four shipped definitions under `.claude/agents/` still load, so the fix rejects
+- [x] Confirm the four shipped definitions under `.claude/agents/` still load, so the fix rejects
       nothing that currently ships.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-008-yaml-indicators` — `fix: leading YAML indicator characters in frontmatter (batch 03)`.
+- [x] Commit on `fix/bl-008-yaml-indicators` — `fix: leading YAML indicator characters in frontmatter (batch 03)`.
 
 ## Acceptance criteria
 
