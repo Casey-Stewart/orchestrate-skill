@@ -184,7 +184,8 @@ sees the plan) → front-load user gates (design/UX approvals resolved at planni
 via mockups, or scheduled as wave 1 — never mid-run) → user approves plan + wave map +
 checkpoints + fold-ins in one pass → fill the templates into
 `.agents/changes/<CHANGE_ID>/` (incl. `LOG.md`) → self-check (grep the new directory
-for `{{` and `<!--` — zero hits; `**State**: ACTIVE` present) → scaffold commit on
+for `{{` and `<!--` — zero hits; `**State**: ACTIVE` present; every `#` cell of the
+plan's and PROGRESS's batch tables reads `Bnn`) → scaffold commit on
 `chore/<slug>-ledger` (which becomes the integration branch) → STOP and report.
 
 ## Mode: continue

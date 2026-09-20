@@ -154,7 +154,7 @@ this fence for that reason.**
       record in the report why it was rejected).
 - [x] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/01-plan.md`.
 - [x] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/PROGRESS.md`.
-- [ ] **[BL-002]** Extend the step-9 self-check in `orchestrate/references/scaffolding.md`
+- [x] **[BL-002]** Extend the step-9 self-check in `orchestrate/references/scaffolding.md`
       and the matching one-liner in `orchestrate/SKILL.md:186-187` with the id-format
       clause, covering BOTH tables. Own commit.
 - [ ] **[BL-002]** Rewrite the authority files in `tests/protocol-contract.test.cjs:132`

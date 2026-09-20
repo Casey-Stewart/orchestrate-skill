@@ -78,7 +78,8 @@
    and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
 9. **Self-check** — grep the new ledger directory for `{{` and for `<!--`: **zero hits**.
    `**State**: ACTIVE` present in PROGRESS; the pre-flight verdict line present in the
-   plan. Any hit is an unfilled slot; fix before committing.
+   plan; every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`.
+   Any hit is an unfilled slot; fix before committing.
 10. **Scaffold commit** — batch 00 = the ledger itself (plus the ids written onto
     accepted fold-ins in the backlog file), committed on `chore/{{CHANGE_SLUG}}-ledger`,
     which becomes the INTEGRATION BRANCH every wave stacks onto. Never on the default
