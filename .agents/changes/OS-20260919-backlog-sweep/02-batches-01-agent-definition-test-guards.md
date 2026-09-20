@@ -129,6 +129,24 @@ forms still walk through it.
 - [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
 - [x] Commit on `fix/agent-definition-test-guards` — `fix: agent-definition guards that can actually fail (batch 01)`.
+- [x] polish: **[P1]** the nested-definition guard read the whole `err.message`, which carries
+      deepEqual's appended diff, so the path was named by the diff and not by the message —
+      assert on the first line alone, and correct the comment that claimed the diff is replaced.
+- [x] polish: **[A1]** pin the YAML escape hex counts in both directions — `\x41`/`A`/
+      `\U0001F600` accept, `\x4`/`\u12`/`\U0041` reject, each on its own reason regex.
+- [x] polish: **[A2]** reach `frontmatterFields`'s line filter from both sides: an indented line
+      and a colon-less line reject quoting the offending line, a blank line is still skipped.
+- [x] polish: **[A3]** reach the block parse's own three paths — no `---` opener, a key declared
+      twice, and a body asserted to start after the closing `---` rather than repeat the block.
+- [x] polish: **[A4]** stop falsely rejecting `description: "…" # comment`: a space-separated
+      `#` tail is valid YAML, is accepted, and is dropped from the value rather than folded in.
+- [x] polish: **[A5]** a literal TAB is YAML 1.2 rule 57's own escape, so the escape class takes
+      it — and, because that is the key to every tab hole, a TAB outside a quoted scalar (after
+      the colon, after the value, before a `#`) is now rejected, with a case for each place.
+- [x] polish: **[A6]** the nested-definition message is pinned on its reason as well as its path,
+      so the first assertion in `assertKnownDefinitions` is the one proven to fire.
+- [x] polish: **[A7]** pin the size assertion's unit against `fs.statSync().size`, so reverting it
+      to `read(file).length` goes red instead of hiding under a ceiling 3.4x above every file.
 
 ## Acceptance criteria
 
