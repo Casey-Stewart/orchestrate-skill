@@ -132,8 +132,8 @@ forms still walk through it.
 - [x] polish: **[P1]** the nested-definition guard read the whole `err.message`, which carries
       deepEqual's appended diff, so the path was named by the diff and not by the message —
       assert on the first line alone, and correct the comment that claimed the diff is replaced.
-- [x] polish: **[A1]** pin the YAML escape hex counts in both directions — `\x41`/`A`/
-      `\U0001F600` accept, `\x4`/`\u12`/`\U0041` reject, each on its own reason regex.
+- [x] polish: **[A1]** pin the YAML escape hex counts in both directions — the 2-, 4- and
+      8-digit forms accept, `\x4`/`\u12`/`\U0041` reject, each on its own reason regex.
 - [x] polish: **[A2]** reach `frontmatterFields`'s line filter from both sides: an indented line
       and a colon-less line reject quoting the offending line, a blank line is still skipped.
 - [x] polish: **[A3]** reach the block parse's own three paths — no `---` opener, a key declared
@@ -147,6 +147,17 @@ forms still walk through it.
       so the first assertion in `assertKnownDefinitions` is the one proven to fire.
 - [x] polish: **[A7]** pin the size assertion's unit against `fs.statSync().size`, so reverting it
       to `read(file).length` goes red instead of hiding under a ceiling 3.4x above every file.
+- [x] polish: [A1] reject an 8-digit escape naming a code point above U+10FFFF; the largest real one pins the boundary.
+- [x] polish: [A2] one accept row carrying all 18 single-character escapes, plus two rejects: add or drop any member and it is red.
+- [x] polish: [A3] nest the walk fixture two deep and behind a dotted directory, so one level of recursion no longer proves the walk.
+- [x] polish: [A4] a CRLF definition and its LF twin, both written by the test, must parse to the same fields and the same body.
+- [x] polish: [B1] pin the rejection of a quoted value with an unseparated `#`, and the space count; the rule is YAML 1.2 `s-separate-in-line`.
+- [x] polish: [B2] pin the deliberate rejection of a `#` comment line inside the frontmatter block.
+- [x] polish: [B3] accept a single-quoted Windows path — backslashes are literal there, so escape handling stays in the double-quote branch.
+- [x] polish: [C1] say that a TAB inside comment TEXT is legal YAML, unreachable here, and rejected as a deliberate simplification.
+- [x] polish: [C2] reword the cost comment — a false rejection is loud and local, a false acceptance is silent inheritance, so reject on doubt.
+- [x] polish: [C3] put a nested `reviewer.md` in the fixture, so a basename whitelist no longer passes the path-and-reason assertion.
+- [x] polish: drop the unreachable carriage return from the trailing strip; the field regex excludes line terminators and rejects the line first.
 
 ## Acceptance criteria
 
