@@ -25,6 +25,11 @@ const flow = text => text.replace(/\s+/g, ' ');
 // that, `tools:Read, Glob` (no space) still yields a `tools` capture here while YAML
 // sees a bare scalar and Claude Code loads the definition with no tool list at all —
 // the test would pass and the agent would inherit everything.
+// A double-quoted YAML scalar has a closed escape set; any other pair is a ScannerError on
+// the whole document. `description: "Writes to C:\Users\me"` is the trap, because
+// quoting is exactly what this guard tells an author to do to get a colon into a value.
+const YAML_ESCAPE = /^\\([0abtnvfre "/\\N_LP]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/;
+
 // Every frontmatter line goes through this one predicate, and the FRONTMATTER_CASES table
 // below pins its verdicts. A regex guard here used to demand a space after an inner colon
 // and to stop scanning at the first quote character, so three YAML errors walked through:
@@ -43,8 +48,13 @@ function frontmatterField(line) {
     const quote = value[0];
     let i = 1;
     while (i < value.length) {
-      if (quote === '"' && value[i] === '\\') i += 2;
-      else if (value[i] !== quote) i += 1;
+      if (quote === '"' && value[i] === '\\') {
+        // Skip the pair only when YAML defines that escape. `\U` with fewer than eight hex
+        // digits is not one, so a Windows path inside a quoted description is caught here.
+        const escape = YAML_ESCAPE.exec(value.slice(i));
+        if (!escape) return 'escapes ' + value.slice(i, i + 2) + ', which YAML does not define as an escape';
+        i += escape[0].length;
+      } else if (value[i] !== quote) i += 1;
       else if (quote === "'" && value[i + 1] === quote) i += 2;
       else break;
     }
@@ -89,10 +99,16 @@ const FRONTMATTER_CASES = [
     field: { key: 'description', value: '"Runs the steps: quickly"' } },
   { line: "description: 'it''s fine: really'",
     field: { key: 'description', value: "'it''s fine: really'" } },
+  { line: 'description: "She said \\"go: now\\" once"',
+    field: { key: 'description', value: '"She said \\"go: now\\" once"' } },
   { line: 'description: Runs the steps:', reason: /ends its unquoted value with/ },
   { line: 'description: "unterminated', reason: /never closes its opening/ },
   { line: 'description: a "b: c" d', reason: /carries an unquoted/ },
   { line: 'description: "quoted" and more', reason: /has content after its closing/ },
+  { line: 'description: "Writes to C:\\Users\\me\\out"',
+    reason: /escapes \\U, which YAML does not define/ },
+  { line: 'description: "Matches \\d+: the count"',
+    reason: /escapes \\d, which YAML does not define/ },
   { line: 'tools:Read, Glob', reason: /is not a single-line/ },
 ];
 
