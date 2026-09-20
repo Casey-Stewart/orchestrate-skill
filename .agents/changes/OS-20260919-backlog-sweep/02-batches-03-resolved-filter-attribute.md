@@ -239,10 +239,12 @@ the merge.
   the JSON `completeness`, `evidence.worktrees[].cleanliness` and `diagnostics[].code`.
 - Pass: exit **0**, `completeness: complete`, every `cleanliness` is `clean` or `dirty`
   (never `unknown`), and **no** `unsafe-filter` diagnostic anywhere.
-- Aside: **on the base build this exits 2 with `completeness: partial`, two
-  `unknown` worktrees and two `unsafe-filter` diagnostics** — that was captured on
-  2026-09-19 before any work began. If you see the old behaviour, STOP and say so: you
-  are looking at the wrong build and nothing below this line can be trusted.
+- Aside: **on the base build this exits 2 with `completeness: partial`, EVERY worktree
+  `unknown`, and one `unsafe-filter` diagnostic per worktree.** Judge the shape, never a
+  count: the inventory grew from two worktrees at capture time (2026-09-19, before any
+  work began) to five once wave 1 opened, and shrinks again when they are removed. If you
+  see the old behaviour, STOP and say so: you are looking at the wrong build and nothing
+  below this line can be trusted.
 - Tag: Build check.
 - Runner: `agent` — pure CLI, read-only.
 
