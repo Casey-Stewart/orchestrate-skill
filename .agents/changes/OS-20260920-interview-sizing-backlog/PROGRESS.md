@@ -44,7 +44,7 @@ and an intermediate checkpoint would prove nothing an earlier wave could not
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
 | B01 | Wrapped polish items in the fence tool | `fix/bl-011-wrapped-polish` | 1 | — | 🟢 | 2026-09-20 | Merged `--no-ff` → **`6253432`**, tip green **272/272** (base 260 + 12). Implementer and reviewer both default tier (M). 6a fence PASS; 6b failing-on-base proven by the orchestrator at `0d1f8b7` (84 tests, 81 pass, 3 fail). `R1 SHIP @d0d3fcf asks=6` (reviewer 2 + test-hunter 4, all test-only; reviewer ASK 1 = hunter F4) → polish `7e9dad8` closed F1–F4, test-only, so no scoped re-review. Reviewer ASK 2 declined as a production change an ASK cannot license → residual for BACKLOG. **The unfixed tool reported VIOLATION on this batch's own wrapped polish items and the fixed copy PASS** — BL-011 reproduced and closed in one gate. See [LOG.md](LOG.md) §2026-09-20 — wave 1 › B01. `m: rounds=0 asks=4 fence-bounces=0 gate=4/0 tip-red=0` |
-| B02 | Interview sizing rule and the topic-5 move | `fix/interview-sizing` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
+| B02 | Interview sizing rule and the topic-5 move | `fix/interview-sizing` | 2 | — | 🟢 | 2026-09-20 | Merged `--no-ff` → **`9ad30d9`**, tip green **285/285**. Implementer default tier, reviewer strong tier (L). 6a PASS; 6b proven by the orchestrator at `37219cd` (10 tests, 0 pass, 10 fail — every assertion load-bearing). `R1 SHIP @1b5b7f4 asks=16` (reviewer 4 + test-hunter 12 from 67 mutations, all test-only) → polish `accc2dc`, verified test-only (both documents byte-identical to the gated commit), so no scoped re-review. All 25 named mutations now behave; 11 of 13 tests fail on base, the 2 that pass being pure harness controls. See [LOG.md](LOG.md) §2026-09-20 — wave 2 › B02. `m: rounds=0 asks=16 fence-bounces=0 gate=12/0 tip-red=0` |
 | B03 | Leading YAML indicator characters in frontmatter | `fix/bl-008-yaml-indicators` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
 | B04 | Name check-attr in the manual fallback | `fix/bl-014-check-attr` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
 | B05 | A test seam for the unreachable evidence guards | `fix/bl-009-evidence-seam` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
@@ -73,14 +73,14 @@ credential or external access is required, and nothing needs a working-copy rese
 
 | Request item | Source | Batch | Version | Status |
 |--------------|--------|-------|---------|--------|
-| A1 merge arithmetic deleted; back-to-back calls default | request | B02 | — | ⬜ |
-| A2 compound option labels banned | request | B02 | — | ⬜ |
-| A3 confirmations + gaps made load-bearing | request | B02 | — | ⬜ |
-| A4 repeat repo collapses the round | request | B02 | — | ⬜ |
-| A5 repeats capped, not questions | request | B02 | — | ⬜ |
-| A6 topic 5 moved to step 7 | request | B02 | — | ⬜ |
-| A7 topic numbers stable; registry row repointed | request | B02 | — | ⬜ |
-| A8 SKILL.md agrees | request | B02 | — | ⬜ |
+| A1 merge arithmetic deleted; back-to-back calls default | request | B02 | — | 🟢 merged `9ad30d9` |
+| A2 compound option labels banned | request | B02 | — | 🟢 merged `9ad30d9` |
+| A3 confirmations + gaps made load-bearing | request | B02 | — | 🟢 merged `9ad30d9` |
+| A4 repeat repo collapses the round | request | B02 | — | 🟢 merged `9ad30d9` |
+| A5 repeats capped, not questions | request | B02 | — | 🟢 merged `9ad30d9` |
+| A6 topic 5 moved to step 7 | request | B02 | — | 🟢 merged `9ad30d9` |
+| A7 topic numbers stable; registry row repointed | request | B02 | — | 🟢 merged `9ad30d9` |
+| A8 SKILL.md agrees | request | B02 | — | 🟢 merged `9ad30d9` |
 | BL-008 leading YAML indicator characters | backlog BL-008 | B03 | — | ⬜ |
 | BL-009 unreachable fail-closed guards | backlog BL-009 | B05 | — | ⬜ |
 | BL-010 self-check greps code spans | backlog BL-010 | B07 | — | ⬜ |

@@ -420,3 +420,69 @@ records the defect instead of blessing it, and its failure message directs a fut
 member into `INDICATOR_MEMBERS` — where it gains a rejection case of its own — rather than to delete
 an assertion. The round-2 re-review is checking that the move is genuinely all that is needed, since
 a design that required deleting an assertion to progress would have failed its own purpose.
+
+### B02 — polish and integration
+
+Polish `accc2dc`, **verified test-only by the orchestrator rather than taken on report**:
+`git diff --stat 1b5b7f4 accc2dc -- orchestrate/` is empty, so both documents are byte-identical to
+the gated commit and the pass closed mechanically with no scoped re-review. Fence PASS on the
+polished tip. Merged `--no-ff` → **`9ad30d9`**; tip validation **285 pass / 0 fail**, `git diff
+--check` exit 0.
+
+All 25 named mutations now behave, including every one the hunter had found green: the wrapped
+compound label, the `and`-joined label, the numeric-budget reimposition in both documents, the A3
+and A4 contradictions that had no sweep at all, the A5 close-out paraphrases, the revived directives
+in `templates/00-READBEFORE.md`, `protocol.md` and `execution-models.md`, and the `interview #5`
+citations in `.html`, `.ps1` and `.txt`. The innocent `"plan + wave map"` quotation outside the
+interview section is green by design now that the label scan is scoped to that section.
+
+**Failing-on-base is 11 of 13, not 13 of 13, and the two that pass are correct.** They are the
+harness controls — `every contradiction pattern can still fire on the directive it was written to
+catch` and `the compound-label scan catches both banned forms, wrapped or inline` — which assert on
+their own synthetic specimens and contain no document pin. A control that passed on base is doing
+its job; a control that FAILED on base would mean the harness itself was broken. Worth recording
+because "every assertion must fail on base" is the rule of thumb, and this is the principled
+exception to it.
+
+Two things the implementer reported that the ask did not anticipate. Two contradiction patterns
+needed a tempered gap `(?:(?!\bnever\b)[^.])`, because this document states its own rules in the
+negative — "never ask what detection already answered" — and an untempered sweep fired on the
+PROHIBITION ITSELF, which would have forced a document edit the polish was forbidden to make. And
+placeholder names are neutralised before sweeping, since `{{MERGE_POLICY}}` is an identifier, not an
+instruction to merge. Both exclusions are commented where they are made.
+
+**The batch prompt was wrong about a count, and the implementer checked.** It said fifteen registry
+rows cite an interview topic; there are **sixteen** — `{{MUTATION_RUNNER}}` cites "confirmed in
+interview #1" mid-cell rather than at the cell head, so a head-anchored grep misses it. All sixteen
+are now pinned and the count asserted. The planning session wrote that number from its own grep;
+this is the third time this change that a figure baked into the ledger has been corrected by the
+agent asked to act on it.
+
+### B04 — scoped re-review: SHIP, and a correction to this log
+
+The scoped re-review of `6b7897c..HEAD` returned **SHIP**, no P0, no P1. It confirmed the polish is
+documentation-only where the documents are concerned: one changed line in each mirror, identical,
+`Never execute such filters to` → `Never execute such filter drivers to`, 78→86 columns and so
+inside the ~90 wrap with the surrounding lines byte-identical. It recomputed both table hashes
+independently, re-verified the mirror byte-identity, the placeholder set across all three commits,
+`recipes.length === 7`, and full CRLF.
+
+Seventeen mutations. The one that matters: **mutation C — negating the rule in BOTH documents — now
+REDDENS against the clause pin while the mirror and both SHA-256 pins stay GREEN.** That is the
+round-1 escape closed, demonstrated rather than asserted. The added sweep's live control fires, and
+it operates on COLLAPSED text, so it does not carry the wrapped-line defect its sibling B02 shipped
+in the same wave.
+
+**Correction to the entry above, which recorded the implementer's account.** The `[^.;:]*` narrowing
+IS load-bearing — an unnarrowed `.*` matches today — but not for the reason given. The false
+positive is `do not probe their trees` at `protocol.md:193`, which PRECEDES the only `git check-attr`
+occurrence; the `Never execute such filter drivers…` sentence the implementer named sits AFTER it
+and cannot match a left-to-right negation→command pattern at all. Recorded here rather than silently
+amended above, because the earlier entry is the record of what was believed at the time.
+
+Three residual ASKs, all comments rather than behaviour: the sweep is polarity-blind and reddens on
+sentences that STRENGTHEN the rule (`Never skip git check-attr filter.`); it misses contradictions
+phrased without its four verbs or with the negation after the command; and its scope is the fallback
+subsection, not the document. All three are honest-labelling fixes to one comment block, sent as a
+second, comment-only polish. A narrow sweep honestly labelled is worth more than a broad one
+silently trusted.
