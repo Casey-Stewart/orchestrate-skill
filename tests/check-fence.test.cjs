@@ -251,6 +251,14 @@ test('a configured driver no path resolves to leaves the fence mechanically usab
   state(r, 'PASS'); assert.equal(c.status, 0, c.stdout); state(c.json, 'PASS'); assert.equal(c.json.batchSha, sha);
   assert.deepEqual(r.evidence.worktreeDiagnostics, []);
   assert.equal(fs.existsSync(marker), false); assert.deepEqual([f.repo.snapshot(), f.candidate.snapshot()], before);
+  // Live-canary control, last because it is destructive. The absence above is vacuous
+  // unless this fixture CAN execute the driver, and no attributes file named it until now.
+  f.repo.write('.git/info/attributes', 'allowed.txt filter=marker\n');
+  // Equal byte length on purpose: status short-circuits on a size change and never
+  // converts, so only a same-size edit makes the driver reachable at all.
+  f.candidate.write('allowed.txt', 'IMPLEMENTED\n'); fs.utimesSync(path.join(f.candidate.cwd, 'allowed.txt'), new Date(0), new Date(0));
+  f.candidate.git('status', '--porcelain=v1', '--untracked-files=all');
+  assert.equal(fs.existsSync(marker), true, 'the fixture must be able to execute the driver, or absence proves nothing');
 });
 test('staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI', async t => {
   const { checkFence } = await api;

@@ -182,6 +182,21 @@ NO change — it is deliberately outside this fence.
 - [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
 - [x] Commit on `fix/resolved-filter-attribute` — `fix: gate status on resolved per-path filter attributes, not configured drivers (batch 03)`.
+- [x] polish: ASK 1 — exercise the resolved-filter probe error paths: a configured driver
+      plus a corrupted `.git/index` stays `unknown` with a diagnostic, and the
+      record-count invariant is pinned against real Git; note the probe ordering.
+- [x] polish: ASK 2 — pin the `-z` round trip with a refusal fixture whose tracked,
+      stat-dirty path carries a space and non-ASCII.
+- [x] polish: ASK 3 — pin the bare `set` classification with a valueless `filter`
+      attribute fixture.
+- [x] polish: ASK 4 — pin the untracked half of the enumeration with an uncommitted,
+      non-ignored path the attribute matches.
+- [x] polish: ASK 5 — add a live-canary control so the marker-absence assertions in the
+      permissive fixtures are not self-fulfilling.
+- [x] polish: ASK 6 — assert `--help` describes the resolved-attribute rule and still
+      documents its exit codes.
+- [x] polish: ASK 7 — rename the `$GIT_DIR/info/attributes` refusal test so its name
+      matches its fixture.
 
 ## Acceptance criteria
 

@@ -157,6 +157,9 @@ test('CLI errors, invalid encoding, unavailable Git and dirty calls preserve unk
   const absent = cli(repo, 'ancestry', ['--ancestor', MAIN, '--descendant', 'refs/heads/missing']); assert.equal(absent.status, 2); unknown(absent.json);
   const dirty = cli(repo, 'worktrees'); assert.equal(dirty.status, 0); assert.deepEqual(dirty.json.evidence.worktrees[0].status, [{ status: '??', path: 'dirty name Ω.txt', originalPath: null }]);
   const help = repo.cli('git-evidence.mjs', ['--help']); assert.equal(help.status, 0); assert.match(help.stdout, /shipment/);
+  // --help states the rule the helper actually applies, and keeps documenting its exits.
+  assert.match(help.stdout, /A path resolving to a clean\/process filter attribute, or a submodule, makes worktree cleanliness UNKNOWN; unsafe status commands are not run\./);
+  assert.match(help.stdout, /Exit 0: complete facts \(including not-contained\); exit 2: partial\/unknown or invalid invocation\./);
   const noGit = repo.cli('git-evidence.mjs', ['ancestry', '--repo', repo.cwd, '--ancestor', MAIN, '--descendant', MAIN], { PATH: repo.root, Path: repo.root }); assert.equal(noGit.status, 2); unknown(noGit.json); assert.ok(noGit.json.diagnostics[0].error);
   assert.deepEqual(repo.snapshot(), before);
   repo.write(`${LEDGER}/PROGRESS.md`, Buffer.from([0xff, 0xfe])); repo.commit('invalid utf8');
@@ -241,10 +244,21 @@ test('a configured driver no inspected path resolves to leaves cleanliness obser
     assert.deepEqual(e.worktrees[0].status, [{ status: ' M', path: 'plain.txt', originalPath: null }]);
   }
   assert.equal(fs.existsSync(marker), false, 'a dirty inspected path must not start a filter command');
+  // Live-canary control, last because it is destructive. Every absence assertion above is
+  // vacuous unless this fixture CAN execute the driver: attach the attribute to the
+  // tracked, stat-dirty path and let Git itself run status once. The marker must appear.
+  repo.git('config', '--unset', 'filter.marker.process'); // the stub cannot speak the long-running protocol
+  repo.write('.gitattributes', 'pinned.txt -filter\nignored.txt filter=marker\nplain.txt filter=marker\n');
+  // Equal byte length on purpose: status short-circuits on a size change and never
+  // converts, so only a same-size edit makes the driver reachable at all.
+  repo.write('plain.txt', 'plaiN\n'); fs.utimesSync(path.join(repo.cwd, 'plain.txt'), new Date(0), new Date(0));
+  repo.git('status', '--porcelain=v1', '--untracked-files=all');
+  assert.equal(fs.existsSync(marker), true, 'the fixture must be able to execute the driver, or absence proves nothing');
 });
-test('a driver reached only through an attribute in the index is still refused', async t => {
+test('a driver reached only through $GIT_DIR/info/attributes is still refused', async t => {
   // The fast path may skip the attribute enumeration when nothing is configured; it must
-  // never turn a resolving path safe, whichever attributes file names the driver.
+  // never turn a resolving path safe, whichever attributes file names the driver. This
+  // one is untracked and uncommitted: no .gitattributes blob mentions the driver.
   const repo = makeRepo(t), marker = path.join(repo.cwd, 'info-filter-must-not-run'), script = path.join(repo.root, 'info-filter.cjs');
   fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
   repo.write('filtered.txt', 'before\n'); repo.commit('info attributes fixture');
@@ -257,6 +271,84 @@ test('a driver reached only through an attribute in the index is still refused',
     assert.ok(r.diagnostics.some(d => d.code === 'unsafe-filter'), JSON.stringify(r.diagnostics));
   }
   assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before);
+});
+// Each case is the ONLY path in its repository carrying an attribute, so each one alone
+// holds the enumeration and classification rule it names.
+const QUOTED = `sub dir/réd 'q'.bin`;
+for (const [name, attributes, file, tracked, live] of [
+  // -z round trip: without it `ls-files` applies core.quotePath to this path and the
+  // NUL-separated triples become `path: filter: value` text that no tab split survives.
+  ['a space and non-ASCII path', '*.bin filter=marker\n', QUOTED, true, true],
+  // A valueless `filter` attribute resolves to bare `set`. Today's Git selects no driver
+  // for it, so this is a deliberate margin no other test would hold.
+  ['a bare set attribute', 'bare.txt filter\n', 'bare.txt', true, false],
+  // Defence in depth, not a live exploit: status enumerates untracked non-ignored paths
+  // under -uall, so the probe enumerates them too rather than resting on the current
+  // reachability of convert_to_git, which only index entries reach.
+  ['an untracked non-ignored path', '*.bin filter=marker\n', 'new.bin', false, false],
+]) test(`${name} resolving to a driver refuses without executing it`, async t => {
+  const repo = makeRepo(t), marker = path.join(repo.cwd, 'resolving-must-not-run'), script = path.join(repo.root, 'resolving-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  repo.write('.gitattributes', attributes); repo.write('untouched.txt', 'no attribute here\n');
+  if (tracked) repo.write(file, 'before\n');
+  repo.commit('resolving driver fixture'); repo.git('config', 'filter.marker.clean', `node "${script.replaceAll('\\', '/')}"`);
+  // Tracked cases are made stat-dirty, so status would have to convert them to answer.
+  repo.write(file, 'after!\n'); if (tracked) fs.utimesSync(path.join(repo.cwd, file), new Date(0), new Date(0));
+  const before = repo.snapshot(), { worktrees, discovery } = await api;
+  for (const operation of ['worktrees', 'discovery']) {
+    const actual = ({ worktrees, discovery })[operation](options(repo)), command = cli(repo, operation);
+    assert.equal(command.status, 2);
+    for (const r of [actual, command.json]) {
+      assert.equal(r.completeness, 'partial'); assert.equal(r.evidence.worktrees[0].cleanliness, 'unknown');
+      assert.ok(r.diagnostics.some(d => d.code === 'unsafe-filter'), JSON.stringify(r.diagnostics));
+    }
+    assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before);
+  }
+  // Live-canary control: only a tracked, stat-dirty path can reach a driver through
+  // status, so only there does the absence above carry weight. Say so rather than let
+  // the assertion read as proof in the cases where nothing could have run.
+  if (!live) return;
+  repo.git('status', '--porcelain=v1', '--untracked-files=all');
+  assert.equal(fs.existsSync(marker), true, 'the fixture must be able to execute the driver, or absence proves nothing');
+});
+// git() caps output at 16MB and times out at 15s, so a large or slow repository really can
+// fail these probes. Failing closed is the whole contract. Both cases are asserted because
+// a corrupt index fails every ls-files call: the fixture pins the OUTCOME, and cannot from
+// outside tell the enumeration apart from the index inventory. Ordering note for a reader
+// who expects invalid-index here: with a driver configured the enumeration now runs first,
+// so a corrupt index surfaces as git-probe, and invalid-index is left for a readable but
+// malformed inventory.
+for (const configured of [true, false]) test(`a failed probe stays unknown rather than clean, driver ${configured ? 'configured' : 'absent'}`, async t => {
+  const repo = makeRepo(t), marker = path.join(repo.cwd, 'broken-probe-must-not-run'), script = path.join(repo.root, `broken-probe-${configured}.cjs`);
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  repo.write('.gitattributes', 'filtered.txt filter=marker\n'); repo.write('filtered.txt', 'before\n'); repo.commit('broken probe fixture');
+  if (configured) repo.git('config', 'filter.marker.clean', `node "${script.replaceAll('\\', '/')}"`);
+  fs.writeFileSync(path.join(repo.cwd, '.git/index'), 'this is not a Git index');
+  const before = repo.snapshot(), result = (await api).worktrees(options(repo)), command = cli(repo, 'worktrees');
+  assert.equal(command.status, 2);
+  for (const r of [result, command.json]) {
+    assert.notEqual(r.completeness, 'complete'); assert.equal(r.evidence.worktrees[0].cleanliness, 'unknown');
+    assert.deepEqual(r.evidence.worktrees[0].status, []);
+    assert.ok(r.diagnostics.some(d => d.code === 'git-probe' && d.command === 'ls-files' && path.resolve(d.path) === path.resolve(repo.cwd)), JSON.stringify(r.diagnostics));
+    assert.equal(r.diagnostics.some(d => d.code === 'unsafe-filter'), false, JSON.stringify(r.diagnostics));
+  }
+  assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before);
+});
+test('an unmerged index keeps one attribute record per enumerated entry', async t => {
+  // The probe requires exactly three fields per enumerated path, so it must agree with
+  // real Git about how many records come back. An unmerged path is listed once per stage
+  // and check-attr answers once per line; if that ever diverged the probe would report
+  // invalid-attributes and refuse a repository that is merely conflicted.
+  const repo = makeRepo(t);
+  repo.write('conflict.txt', 'base\n'); repo.commit('base');
+  repo.git('checkout', '-b', 'side'); repo.write('conflict.txt', 'side\n'); repo.commit('side');
+  repo.git('checkout', 'main'); repo.write('conflict.txt', 'main\n'); repo.commit('main');
+  assert.equal(repo.probe('merge', 'side').status, 1, 'the fixture must actually conflict');
+  repo.git('config', 'filter.marker.clean', 'node --version');
+  assert.equal(repo.git('ls-files', '--cached', '--', 'conflict.txt').split('\n').length, 3, 'all three stages must be enumerated');
+  const e = complete((await api).worktrees(options(repo)));
+  assert.equal(e.worktrees[0].cleanliness, 'dirty');
+  assert.ok(e.worktrees[0].status.some(s => s.status === 'UU' && s.path === 'conflict.txt'), JSON.stringify(e.worktrees[0].status));
 });
 test('malformed loose refs are retained as unknown while valid sibling evidence remains available', async t => {
   const repo = makeRepo(t); writeLedger(repo); repo.commit('valid sibling ledger'); repo.write('.git/refs/heads/broken', 'not-an-object\n');
