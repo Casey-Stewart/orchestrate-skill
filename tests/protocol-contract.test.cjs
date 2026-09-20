@@ -140,15 +140,23 @@ test('reusable artifacts contain no local Python installation default, while fro
 
 test('the scaffold self-check names the Bnn id rule for both authority tables', () => {
   // scaffolding.md step 9 and the SKILL.md one-liner summarising it are the only place
-  // a scaffolder is TOLD the rule the fence enforces. Without this, a reflow that drops
-  // either clause leaves the suite green and the next ledger repeats bare-01 ids.
+  // a scaffolder is TOLD the rules the fence enforces. Both clauses are matched by one
+  // anchored regex over the whole file, never by a window derived from punctuation:
+  // swapping a semicolon for a full stop must not be able to widen the window until
+  // unrelated prose elsewhere satisfies it. `[^.;]*` keeps each match inside one clause.
+  const idRule = /every `#` cell of the[^.;]*(?:plan[^.;]*PROGRESS|PROGRESS[^.;]*plan)[^.;]*`Bnn`/i;
+  const residualGrep = /grep[^;]*`<title>`/i;
   for (const file of ['orchestrate/references/scaffolding.md', 'orchestrate/SKILL.md']) {
     const text = read(file).replace(/\s+/g, ' ');
-    const at = text.indexOf('`Bnn`');
-    assert.notEqual(at, -1, file + ': the scaffold self-check must name the `Bnn` id rule');
-    assert.equal(text.indexOf('`Bnn`', at + 1), -1, file + ': exactly one `Bnn` clause, so the two files cannot drift apart');
-    const clause = text.slice(text.lastIndexOf(';', at) + 1, at + '`Bnn`'.length);
-    for (const required of [/`#` cell/, /plan/i, /PROGRESS/]) assert.match(clause, required, file + ': clause reads "' + clause.trim() + '"');
+    assert.match(text, idRule, file + ': the self-check must require every `#` cell of the plan AND PROGRESS batch tables to read `Bnn`');
+    assert.match(text, residualGrep, file + ': the self-check must grep for `<title>`, the token a deleted comment marker leaves behind');
+  }
+  // Rule and template cannot drift apart: the example rows must carry the very token
+  // step 9 greps for, or the partial-deletion door reopens without a single test moving.
+  for (const template of ['orchestrate/templates/01-plan.md', 'orchestrate/templates/PROGRESS.md']) {
+    const row = read(template).split('\n').find(l => /^\| B\d{2,} \|/.test(l));
+    assert.ok(row, template + ': no `| Bnn | ... |` example row to check');
+    assert.ok(row.includes('<title>'), template + ': the example row must carry `<title>`, the token step 9 greps for — row reads ' + row);
   }
 });
 

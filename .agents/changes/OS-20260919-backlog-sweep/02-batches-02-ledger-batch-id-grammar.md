@@ -180,6 +180,12 @@ this fence for that reason.**
 - [x] polish: ASK 4 — match the exact "pins no example row" diagnostic and drive the reverse direction from the shipped template blob at base `fad7a64` instead of a self-stripped copy.
 - [x] polish: ASK 5 — assert the archived contract's interpreter-path occurrence count, not mere presence, so deleting two of the three stays red.
 - [x] polish: ASK 6 — report the checklist/evidence discrepancy at lines 163-165 (the extraction assertion fires before any fence diagnostic); ticked box left as-is.
+- [x] polish: P1-1 — restore "the new ledger directory" as the subject of the pre-existing `{{` and `<!--` greps; scope only the new `<title>` token to `*.md`, in both files.
+- [x] polish: P1-2 — match the `Bnn` clause with one anchored regex over the whole file instead of a window derived from a semicolon nothing asserts; prove it against the demonstrated bypass.
+- [x] polish: A1 — assert the step-9 grep list names `<title>` in BOTH files, and that each template's example row still carries that token, so rule and template cannot drift apart.
+- [x] polish: A2 — drop the whole-file `` `Bnn` `` uniqueness lock; the anchored clause regex replaces it and a legitimate later mention no longer goes red.
+- [x] polish: A3 — correct the report's "zero `<title>` hits" claim: this ledger's own batch file carries one, inside a fenced code block, at scaffold time.
+- [x] polish: A4 — report that pinning `BATCH_BASE` to `fad7a64` makes the suite require repository history (loud failure in a shallow clone); the tradeoff ASK 4 asked for, no change.
 
 ## Acceptance criteria
 
