@@ -18,6 +18,7 @@ export function decode(bytes) { return decoder.decode(bytes); }
 export function git(repo, args, options = {}) {
   const result = spawnSync('git', ['--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false', ...args], {
     cwd: repo, env: { ...(options.env ?? process.env), GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_NO_LAZY_FETCH: '1' },
+    ...(options.input === undefined ? {} : { input: options.input }),
     shell: false, windowsHide: true, timeout: 15000, maxBuffer: 16 * 1024 * 1024,
   });
   // Git's stderr can contain a remote URL, including credentials. Do not publish it.
@@ -99,17 +100,49 @@ export function parseStatus(text) {
   }
   return entries;
 }
+function safeResolvedFilters(repo, diagnostics, options) {
+  // Enumerate exactly what status inspects under --untracked-files=all: tracked paths plus
+  // untracked non-ignored ones. Status never inspects an ignored path's content, so a
+  // filter attribute there cannot make a driver run; --exclude-standard applies the very
+  // exclusions status applies, so that precision is free. Listing paths and reading their
+  // attributes executes no driver: check-attr resolves text files, it converts nothing.
+  const listing = git(repo, ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], options);
+  if (!listing.ok) { diagnostics.push({ ...listing.diagnostic, path: repo }); return false; }
+  if (!listing.text) return true;
+  const paths = listing.text.split('\0');
+  if (paths.pop() !== '') { diagnostics.push(diagnostic('invalid-attributes', 'Malformed path inventory', { path: repo })); return false; }
+  // The NUL-separated listing is fed through verbatim, so quotes, spaces and non-ASCII
+  // survive; -z output is NUL-separated path/attribute/value triples, never tab-delimited.
+  const attributes = git(repo, ['check-attr', 'filter', '-z', '--stdin'], { ...options, input: listing.bytes });
+  if (!attributes.ok) { diagnostics.push({ ...attributes.diagnostic, path: repo }); return false; }
+  const fields = attributes.text.split('\0');
+  if (fields.pop() !== '' || fields.length !== paths.length * 3) { diagnostics.push(diagnostic('invalid-attributes', 'Malformed attribute report', { path: repo })); return false; }
+  for (let i = 0; i < fields.length; i += 3) {
+    if (fields[i + 1] !== 'filter') { diagnostics.push(diagnostic('invalid-attributes', 'Unexpected attribute in report', { path: repo })); return false; }
+    // `unspecified` and `unset` (a `-filter` attribute) select no driver and are safe.
+    // Any other value names one, and a bare `set` could resolve to one.
+    if (fields[i + 2] !== 'unspecified' && fields[i + 2] !== 'unset') { diagnostics.push(diagnostic('unsafe-filter', 'An inspected path resolves to a filter attribute; status was not run because it can execute commands', { path: repo })); return false; }
+  }
+  return true;
+}
 function safeStatusPrerequisites(repo, diagnostics, options) {
-  // Status may execute clean/process drivers even without updating the index. A
-  // configured driver makes cleanliness unavailable under this read-only contract;
-  // do not run it, or pretend disabling its conversion would give truthful status.
-  // GIT_CONFIG affects `git config` only, so omit that historical override to inspect
-  // the same configuration scopes that status would actually read (including includes).
+  // Status may execute clean/process drivers even without updating the index, but only for
+  // a path that actually resolves to one: configuration alone converts nothing, and Git for
+  // Windows ships filter.lfs.* system-wide. So the trigger is the resolved per-path filter
+  // attribute. Where one resolves, cleanliness is unavailable under this read-only
+  // contract; do not run the driver, or pretend disabling its conversion would give
+  // truthful status.
+  // GIT_CONFIG affects `git config` only, so omit that historical override: the fast path
+  // below must see the same configuration scopes status reads (including includes), or a
+  // redirected file could skip the enumeration. `git check-attr` ignores GIT_CONFIG, so the
+  // resolved verdict itself cannot be concealed that way.
   const env = { ...(options.env ?? process.env) };
   for (const key of Object.keys(env)) if (key.toUpperCase() === 'GIT_CONFIG') delete env[key];
   const filters = git(repo, ['config', '--includes', '--null', '--name-only', '--get-regexp', '^filter[.].*[.](clean|process)$'], { ...options, env });
   if (!filters.ok && !(filters.exit === 1 && filters.text === '')) { diagnostics.push({ ...filters.diagnostic, path: repo }); return false; }
-  if (filters.text) { diagnostics.push(diagnostic('unsafe-filter', 'Clean/process filters are configured; status was not run because it can execute commands', { path: repo })); return false; }
+  // A fast path in the safe direction only: with no driver configured anywhere, no
+  // attribute can select an executable one. It never makes a resolved attribute safe.
+  if (filters.text && !safeResolvedFilters(repo, diagnostics, options)) return false;
   // Git status normally descends into submodules, whose separate local configuration
   // could execute a driver as well. Do not recurse into uninspected repositories.
   const index = git(repo, ['ls-files', '--stage', '-z'], options);
@@ -309,7 +342,7 @@ export function parseFlags(args, names, required) {
   return result;
 }
 export function evidenceCli(args) {
-  if (args.length === 1 && args[0] === '--help') return { code: 0, text: 'git-evidence.mjs <discovery|worktrees|ancestry|shipment|ledger> --repo <repo>\nancestry: --ancestor <ref-or-sha> --descendant <ref-or-sha>\nshipment: --integration <full-ref> --source <local|remote> [--remote <name>] --ref <full-ref>\nledger: --ref <full-ref> --ledger <id> [--owner <ref-or-sha>] [--target <ref-or-sha>]\nExit 0: complete facts (including not-contained); exit 2: partial/unknown or invalid invocation.\nConfigured clean/process filters or submodules make worktree cleanliness UNKNOWN; unsafe status commands are not run.\n' };
+  if (args.length === 1 && args[0] === '--help') return { code: 0, text: 'git-evidence.mjs <discovery|worktrees|ancestry|shipment|ledger> --repo <repo>\nancestry: --ancestor <ref-or-sha> --descendant <ref-or-sha>\nshipment: --integration <full-ref> --source <local|remote> [--remote <name>] --ref <full-ref>\nledger: --ref <full-ref> --ledger <id> [--owner <ref-or-sha>] [--target <ref-or-sha>]\nExit 0: complete facts (including not-contained); exit 2: partial/unknown or invalid invocation.\nA path resolving to a clean/process filter attribute, or a submodule, makes worktree cleanliness UNKNOWN; unsafe status commands are not run.\n' };
   const operation = args[0] || null;
   try {
     const defs = { discovery: [], worktrees: [], ancestry: ['ancestor', 'descendant'], shipment: ['integration', 'source', 'ref'], ledger: ['ref', 'ledger'] };

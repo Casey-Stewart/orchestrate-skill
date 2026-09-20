@@ -14,12 +14,3 @@ point-in-time review record pinned to commit `af57139` and is left untouched.
 | BL-004 | low | `tests/agent-definitions.test.cjs` — the unquoted-`: ` frontmatter guard still accepts three YAML-invalid forms: a trailing colon at end of value (`description: Runs the steps:`), an unterminated quote, and `description: a "b: c" d`. Each makes YAML error on the whole document, so no definition loads and a "read-only" role inherits the full catalog — the same end state the strictness was added to prevent, reached by parse failure rather than a missing key. Bounded: `tools:` is asserted literally equal to a fixed string, so these can only land on `description:`. | OS-20260919 B01 scoped re-review |
 | BL-005 | low | `tests/agent-definitions.test.cjs` — the directory whitelist uses a non-recursive `readdirSync`, so `.claude/agents/subdir/orchestrator.md` escapes it if a Claude Code build loads nested definitions. | OS-20260919 B01 scoped re-review |
 | BL-006 | trivial | `tests/agent-definitions.test.cjs` — the body-size assertion says "bytes" but measures LF-normalized UTF-16 length; with em-dashes present, `qa-runner` reports ~1195 against 1214 on disk. Use `Buffer.byteLength`, or reword. | OS-20260919 B01 scoped re-review |
-| BL-007 | trivial | Bookkeeping: `02-batches-01-agent-definitions.md` records no `- [ ] polish:` line for the body-length ceiling, so the ledger does not show that optional item as taken. | OS-20260919 B01 scoped re-review |
-
-## Deferred by decision, not defect
-
-- **Ship the agent definitions as a plugin.** A skill directory cannot carry `agents/`;
-  only a folder with `.claude-plugin/plugin.json` can. Considered at OS-20260919 planning
-  time and explicitly deferred as a follow-on change, with the user choosing "repo root
-  only" plus README install instructions. Revisit if the manual copy step proves to be
-  the thing people skip.
