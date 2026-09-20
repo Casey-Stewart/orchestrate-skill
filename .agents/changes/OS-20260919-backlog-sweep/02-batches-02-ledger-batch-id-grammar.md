@@ -152,8 +152,8 @@ this fence for that reason.**
       the file is present with drifted content. Own commit.
 - [x] **[BL-001]** Add the "at least one candidate location exists here" assertion (or
       record in the report why it was rejected).
-- [ ] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/01-plan.md`.
-- [ ] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/PROGRESS.md`.
+- [x] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/01-plan.md`.
+- [x] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/PROGRESS.md`.
 - [ ] **[BL-002]** Extend the step-9 self-check in `orchestrate/references/scaffolding.md`
       and the matching one-liner in `orchestrate/SKILL.md:186-187` with the id-format
       clause, covering BOTH tables. Own commit.
