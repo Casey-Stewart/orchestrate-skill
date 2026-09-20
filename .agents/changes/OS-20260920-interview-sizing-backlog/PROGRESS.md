@@ -43,7 +43,7 @@ and an intermediate checkpoint would prove nothing an earlier wave could not
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Wrapped polish items in the fence tool | `fix/bl-011-wrapped-polish` | 1 | — | 🔄 | 2026-09-20 | Wave 1 open; implementer spawned on the default tier (M weight). |
+| B01 | Wrapped polish items in the fence tool | `fix/bl-011-wrapped-polish` | 1 | — | 🔄 | 2026-09-20 | Implementer default tier (M), reviewer default tier. 6a fence PASS (0 violations, 0 unknowns); 6b failing-on-base proven by the orchestrator at `0d1f8b7` (84 tests, 81 pass, 3 fail). `R1 SHIP @d0d3fcf asks=6` (reviewer 2 + test-hunter 4, all test-only). Polish carries F1–F4; reviewer ASK 2 declined as a production change → residual for BACKLOG. See [LOG.md](LOG.md) §2026-09-20 — wave 1 › B01. |
 | B02 | Interview sizing rule and the topic-5 move | `fix/interview-sizing` | 2 | — | ⬜ | 2026-09-20 | — |
 | B03 | Leading YAML indicator characters in frontmatter | `fix/bl-008-yaml-indicators` | 2 | — | ⬜ | 2026-09-20 | — |
 | B04 | Name check-attr in the manual fallback | `fix/bl-014-check-attr` | 2 | — | ⬜ | 2026-09-20 | — |

@@ -84,3 +84,69 @@ Node v22.22.3; git with `origin` at `https://github.com/Casey-Stewart/orchestrat
 baseline `260 pass, 0 fail` at `efc4eec`; working tree clean after the user-ordered
 `git restore` of the hand-applied BL-014 edit; `.claude/agents/` holds all four definitions,
 so the `test-hunter` gate is available to this ledger, unlike the ledger that created it.
+
+## 2026-09-20 — wave 1
+
+### B01 — gate round 1
+
+**`R1 SHIP @d0d3fcf asks=6`** — reviewer `SHIP` (default tier, M weight) with 2 ASKs, test-hunter
+`4 findings, 0 needing a production change` (all therefore ASKs). No P0, no P1, no round spent.
+
+Mechanical gates first. **6a fence check** returned `PASS` from the integration checkout with
+`violations: []` and `unknowns: []` — exactly the three fenced paths plus ticks-only edits to the
+batch file, every worktree clean. **6b failing-on-base** was run by the orchestrator, not taken on
+the implementer's word: the batch's `tests/check-fence.test.cjs` checked out byte-accurately over
+the unfixed base `0d1f8b7` reports **84 tests / 81 pass / 3 fail** — `wrapped ticked and unticked
+items`, `wrapped item then an unrelated appended line`, and their parent. A first attempt to stage
+that file through a PowerShell pipeline (`Set-Content -NoNewline`) collapsed it to one line and
+produced a `SyntaxError`, a transport defect in the gate rather than a result; `git checkout
+<branch> -- <path>` is the byte-accurate form and is what the recorded run used.
+
+The reviewer went past its brief in the way this repository keeps rewarding: rather than trusting
+the synthetic fixtures, it ran the **base** tool over the two real ledger files that put BL-011 in
+the backlog — `OS-20260919-backlog-sweep/02-batches-01-*.md` gives **49** `batch-content`
+violations on base and **0** on the fix, and `OS-20260919-agent-tool-restrictions/02-batches-01-*.md`
+gives **70** → **0**. The fix resolves the REPORTED instance, not a lookalike. It also confirmed
+`check-fence.mjs:93` is the only mechanical parser of `polish:` lines anywhere in `orchestrate/`
+or `tests/` — the sibling-instance guardrail has no second instance to fix here.
+
+Both gates independently mutated the shipped line and agreed the four new subtests each kill a
+distinct mutant: dropping the `headed` state reddens BOTH negatives, widening `/^ +\S/` to column 0
+reddens the unrelated-line case, and reverting to the base scan reddens the two positives. The two
+negatives that pass on base AND after the fix are therefore a genuine both-sides boundary pin, not
+the vacuous pair they superficially resemble — the question the hunter was spawned to settle.
+
+### B01 — the six ASKs, and the one that is not a polish item
+
+Test-hunter, all TEST-ONLY:
+
+- **F1** — the indent boundary is pinned only against column 0. Every fixture uses exactly six
+  leading spaces, so `/^ {3,}\S/`, `/^ {6}\S/` and `/^\s+\S/` each survive 84/84. Probing the
+  shipped function directly, a tab-indented continuation is REJECTED and a one-space continuation
+  is ACCEPTED — neither verdict is asserted anywhere.
+- **F2** — *a branch no input reaches*, on the exact expression this batch rewrote: no fixture
+  reaches the positional guard `if (i === polishAt)`. Mutating it to `if (i >= 0)` leaves the file
+  84/84, and no other test in the repository contains a `polish:` line. On a wrapped polish item
+  smuggled into the `## Acceptance` section the real function returns three `batch-content`
+  diagnostics and the mutant returns none.
+- **F3** — the header's non-empty-ask requirement is unpinned: `polish: .+$` → `polish: .*$`
+  survives 84/84.
+- **F4** (= reviewer ASK 1, the two gates converging) — the batch's third acceptance criterion is
+  asserted by NOTHING. `protocol-contract.test.cjs:208-209` REPLACES the whole `<!-- - [ ] one box
+  … -->` comment before rendering, so anything added inside it is invisible to the suite by
+  construction. Restoring `02-batch.md` to its base blob — deleting the example outright — left
+  65/65 green. This is precisely the BL-002/BL-011 class the batch exists to close, reproducing
+  inside the batch that closes it.
+
+**Reviewer ASK 2 is NOT sent to polish.** After a polish header the new grammar consumes any
+indented non-blank line, so an appended `  - [ ] Also rewrite the module into three files.` under a
+polish item clears the mechanical gate (a violation on base). The reviewer verified it and
+deliberately did not block: in markdown an indented block under a list item IS part of that item,
+and the tool's own banner says it does not replace semantic hunk mapping — which is the gate that
+actually catches sneaked work. Tightening it is a PRODUCTION behaviour change, and the contract is
+explicit that an ASK never licenses one. It is recorded here as a residual for the close-out
+backlog, with the reviewer's own minimal fix (`&& !/^ +- \[[ x]\] /.test(...)`), which every real
+continuation line in `.agents/changes/**` and `.agents/archive/**` still satisfies.
+
+Polish therefore carries F1–F4 only — all in `tests/check-fence.test.cjs`, no production file
+touched, so the pass closes mechanically without a scoped re-review.
