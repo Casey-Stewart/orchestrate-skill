@@ -1,0 +1,84 @@
+# Progress
+
+**Identifier**: OS-20260919-backlog-sweep
+**Started**: 2026-09-19 · **Base**: f8290405b45a89928b1808f8b1241df1ccea39f2 (the default-branch commit the ledger
+branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
+**State**: ACTIVE
+**Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
+**Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
+(read on demand by heading, never at boot)
+**Smoke page**: — (current delivery: URL, ledger-relative HTML path, or `plain text`; update at each hand-over)
+**Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
+before believing any row (§Recovery in the contract).
+
+**State** is exactly one of: ACTIVE | AT-CHECKPOINT C1 | USER-BLOCKED | COMPLETE. It is
+updated in the same commit as every wave open, checkpoint close-out and change-complete.
+Discovery greps this one line — the form stays exact.
+
+## Execution model
+
+**Waved stack — W1: B01 + B02 + B03, all three concurrent. Checkpoints: C1 after W1, final and only.** — The three batches are mutually file-disjoint and none depends on another, so the whole change is one wave: B01 owns a single test file, B02 owns the two ledger templates that carry a batch table plus the scaffolder docs and `tests/protocol-contract.test.cjs`, and B03 owns the evidence tool, its two mirrored prose copies and its two test files. Nothing here is behaviour a user can click, so an intermediate checkpoint would buy nothing. But the decisive claims of BL-002 and BL-003 — that this repo's own fence checker can read this repo's own scaffolder's output, and that the evidence helper is usable on a stock Windows install — cannot be proved by any test in this suite, because every fixture sets `GIT_CONFIG_NOSYSTEM=1` and an empty global config precisely to isolate the machine's real configuration away. C1 therefore runs the real helper CLIs against this real repository with the real system Git config, and that is the only reason it is hands-on.
+
+## Legend
+
+- `⬜ Not Started` · `🔄 In Progress` · `🟢 Integrated` (reviewed, validations green on
+  the worktree AND the integration tip, merged; awaiting its covering checkpoint) ·
+  `🧪 At Checkpoint` (checkpoint reached, awaiting the USER's combined smoke verdict) ·
+  `❌ Smoke Failed` (the USER failed a reached checkpoint — never an agent-found failure) ·
+  `✅ Passed` (its checkpoint passed; merged toward the default branch per the merge
+  policy — verify with git) · `⛔ Blocked` (`defective`, or `green, residual finding
+  open`; awaiting the user's verdict; `⛔ (dropped)` once the user drops it) ·
+  `❌ (fix-up capped)` (a checkpoint fix-up failed review twice; awaiting the verdict) ·
+  `👤 User Action`
+
+## Batches
+
+| # | Batch | Branch | Wave | Version | Status | Updated | Notes |
+|---|-------|--------|------|---------|--------|---------|-------|
+| B01 | Agent-definition guards that can fail | `fix/agent-definition-test-guards` | 1 | — | ⬜ | 2026-09-19 | S/fix. BL-004 + BL-005 + BL-006, one file. Machine-verifiable; covered by C1. Gate: fence → failing-on-base + reviewer + `test-hunter` (separate, not combined — the user's 2026-09-19 decision applies the gate to every batch, and BL-004 is one of this change's two "assertion that cannot fail" items). |
+| B02 | Batch-id grammar the fence can read | `fix/ledger-batch-id-grammar` | 1 | — | ⬜ | 2026-09-19 | M/fix. BL-001 + BL-002. Both ledger templates, not just the plan — `oneRow` runs on the PROGRESS table too. Hands-on at C1. Holds `tests/protocol-contract.test.cjs`, which asserts B03's two prose mirrors against each other. |
+| B03 | Resolved per-path filter attribute | `fix/resolved-filter-attribute` | 1 | — | ⬜ | 2026-09-19 | L/fix. BL-003. Code is in `git-evidence.mjs` `safeStatusPrerequisites()`, not `check-fence.mjs`. Safety property unchanged; only the trigger moves to `git check-attr filter`. Base canary captured: `worktrees --repo .` exits 2, partial, 2× `unsafe-filter`. Hands-on at C1. |
+
+## Checkpoints
+
+| Checkpoint | After wave | Covers | Why here | Status | Verdict |
+|------------|------------|--------|----------|--------|---------|
+| C1 (final) | 1 | B01, B02, B03 | The only checkpoint. Nothing in this change is clickable behaviour, so an intermediate gate would buy nothing — but every test fixture in this repo sets `GIT_CONFIG_NOSYSTEM=1` and an empty global config on purpose, so no test can prove BL-003's claim ("usable on a stock Windows install") or half of BL-002's ("this repo's fence can read this repo's scaffolder"). C1 runs the real CLIs against the real repository with the real system config. | ⬜ | — |
+
+## Issued checkpoint inputs
+
+none — C1 has no input files, fixtures or stable-id registry. Every step is a command run
+against this repository's own working tree and committed history, judged on a process exit
+code and a JSON field. Prerequisites, named: `node` and `git` on PATH, and PowerShell 7
+for the published validation recipe. No private data, credentials, external network access
+or disposable environment are required — every test builds its own throwaway repository
+under the OS temp directory. Two steps deliberately perturb a file and restore it (B01's
+nested-definition step creates and deletes an untracked file under `.claude/agents/`;
+B02's archive-guard step edits and restores
+`.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md`); both name
+their restore command and both prove the restore with `git status --porcelain`.
+
+## Smoke-test verdict log
+
+| Date | Checkpoint | Verdict | User notes |
+|------|------------|---------|------------|
+| — | — | — | No verdict yet. C1 has not been reached. |
+
+## Item → batch coverage audit
+
+| Request item | Source | Batch | Version | Status |
+|--------------|--------|-------|---------|--------|
+| BL-001 — dead frozen-ledger guard at `tests/protocol-contract.test.cjs:122` | backlog BL-001 | B02 | — | ⬜ |
+| BL-002 — plan and PROGRESS templates pin no batch-id format; no scaffolder self-check; no end-to-end fence test | backlog BL-002 | B02 | — | ⬜ |
+| BL-003 — `unsafe-filter` fires on configured drivers rather than resolved per-path attributes | backlog BL-003 | B03 | — | ⬜ |
+| BL-004 — three YAML-invalid `description:` forms accepted by the frontmatter guard | backlog BL-004 | B01 | — | ⬜ |
+| BL-005 — non-recursive `readdirSync` in the agent-directory whitelist | backlog BL-005 | B01 | — | ⬜ |
+| BL-006 — body-size assertion measures UTF-16 length while claiming bytes | backlog BL-006 | B01 | — | ⬜ |
+| BL-007 — missing `polish:` bookkeeping line in the OS-20260919 ledger | backlog BL-007 | excluded | — | ✅ struck by the user 2026-09-19, verbatim in [00-request.md](00-request.md); row deleted from `BACKLOG.md` in the scaffold commit, no OS-20260919 file touched |
+| Remove the `## Deferred by decision, not defect` section from `BACKLOG.md` | user decision 2026-09-19 | batch 00 | — | ✅ carried onto the ledger branch in the scaffold commit |
+
+## Session log
+
+| Date | Session did | Stopped because |
+|------|-------------|-----------------|
+| 2026-09-19 | Scaffold. Re-verified all seven backlog entries against the files at `f829040` rather than trusting their text (00-request.md §Accuracy check): six confirmed, BL-002 found wider than written (`oneRow` runs on the PROGRESS table too), BL-003 reproduced live on this machine. Interviewed; user struck BL-007. Planned 3 batches / 1 wave / 1 final checkpoint. Baseline validation green: 207 pass, 0 fail. Base canary recorded for C1: `git-evidence.mjs worktrees --repo .` exits 2, `partial`, 2× `unsafe-filter`. | (scaffold in progress — this row is completed at the scaffold commit) |
