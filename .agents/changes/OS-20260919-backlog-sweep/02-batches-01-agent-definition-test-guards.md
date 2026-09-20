@@ -118,7 +118,7 @@ forms still walk through it.
 - [x] **[BL-004]** Add the accept/reject case table that drives the new validator, with at
       minimum: the three reject forms, the quoted-colon accept, `tools:Read, Glob` (no
       space) as a reject, and one plain valid line as an accept. Own commit.
-- [ ] **[BL-005]** Make the directory whitelist recursive; a nested `.md` fails with its
+- [x] **[BL-005]** Make the directory whitelist recursive; a nested `.md` fails with its
       relative path and the reason in the message. Own commit.
 - [ ] **[BL-006]** Fix the size assertion so its units and its message agree; state in a
       comment which one it measures and why. Own commit.
