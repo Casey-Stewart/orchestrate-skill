@@ -122,13 +122,13 @@ forms still walk through it.
       relative path and the reason in the message. Own commit.
 - [x] **[BL-006]** Fix the size assertion so its units and its message agree; state in a
       comment which one it measures and why. Own commit.
-- [ ] Confirm all four shipped definitions still pass every assertion, unchanged.
-- [ ] Prove failing-on-base: name, in the report, the exact assertion that goes red when
+- [x] Confirm all four shipped definitions still pass every assertion, unchanged.
+- [x] Prove failing-on-base: name, in the report, the exact assertion that goes red when
       run against the un-fixed file, for EACH of BL-004, BL-005 and BL-006.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `fix/agent-definition-test-guards` — `fix: agent-definition guards that can actually fail (batch 01)`.
+- [x] Commit on `fix/agent-definition-test-guards` — `fix: agent-definition guards that can actually fail (batch 01)`.
 
 ## Acceptance criteria
 
