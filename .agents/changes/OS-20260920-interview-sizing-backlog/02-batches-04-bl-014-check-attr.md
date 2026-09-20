@@ -63,18 +63,18 @@ un-fixed text. This batch therefore adds the assertion that does — which is wh
 
 ## Checklist
 
-- [ ] Name `git check-attr filter` in the resolved-filter sentence at `orchestrate/references/protocol.md:216`,
+- [x] Name `git check-attr filter` in the resolved-filter sentence at `orchestrate/references/protocol.md:216`,
       without reflowing the surrounding paragraph.
-- [ ] Apply the byte-identical edit to `orchestrate/templates/00-READBEFORE.md:162`.
-- [ ] Add an assertion to `tests/protocol-contract.test.cjs` that the resolved-filter rule names
+- [x] Apply the byte-identical edit to `orchestrate/templates/00-READBEFORE.md:162`.
+- [x] Add an assertion to `tests/protocol-contract.test.cjs` that the resolved-filter rule names
       `git check-attr filter` in BOTH files — a criterion that fails on the un-fixed text, which the
       existing mirror comparison does not.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-014-check-attr` — `fix: name check-attr in the manual fallback (batch 04)`.
+- [x] Commit on `fix/bl-014-check-attr` — `fix: name check-attr in the manual fallback (batch 04)`.
 
 ## Acceptance criteria
 

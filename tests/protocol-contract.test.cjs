@@ -86,6 +86,22 @@ test('template placeholders and registry match in both directions', () => {
   assert.deepEqual([...used].sort(), listed.sort());
 });
 
+// The helper-section mirror below proves only that the two documents AGREE: it is green when
+// both name a command and green when neither does. Pin the command in each document separately,
+// and inside the rule itself, so naming it elsewhere in the document cannot satisfy this.
+test('the manual read-only fallback names git check-attr filter in the resolved-filter rule', () => {
+  for (const [label, text] of [['orchestrate/references/protocol.md', protocol],
+    ['orchestrate/templates/00-READBEFORE.md', contract]]) {
+    const from = text.indexOf('**Manual read-only fallback.**'), to = text.indexOf('## Git model');
+    assert.ok(from !== -1 && to > from, label + ': the manual read-only fallback must precede the Git model heading');
+    const fallback = text.slice(from, to);
+    const start = fallback.indexOf('Before status,'), end = fallback.indexOf('makes safe cleanliness unknown');
+    assert.ok(start !== -1 && end > start, label + ': the manual fallback must still carry the resolved-filter rule');
+    assert.match(fallback.slice(start, end).replace(/\s+/g, ' '), /\bgit check-attr filter\b/,
+      label + ': the resolved-filter rule must name the command a human runs by hand, as its neighbours do');
+  }
+});
+
 test('generated contract bakes helper grammar, outcomes, fallback and full input responsibility', () => {
   const helperSection = text => text.slice(text.indexOf('### Read-only evidence tools'), text.indexOf('## Git model'));
   assert.equal(helperSection(contract).replaceAll('{{EVIDENCE_TOOL}}', 'orchestrate/tools/git-evidence.mjs')

@@ -159,7 +159,7 @@ body of only the selected ledger; never copy it into the default checkout.
 For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contained,
 1 not-contained, any other exit unknown. Shipment source resolution is in Recovery.
 Inspect every worktree's porcelain status including untracked files and both rename
-endpoints. Before status, resolve the filter attribute of the paths status inspects:
+endpoints. Before status, run git check-attr filter on the paths status inspects:
 a path resolving to a set filter, or a submodule, makes safe cleanliness unknown;
 unspecified, unset and mere configuration do not. Never execute such filters to
 obtain a clean result. For the manual fence, use git diff --name-status -z -M
