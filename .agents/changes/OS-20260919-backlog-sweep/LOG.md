@@ -340,3 +340,71 @@ Added since the last entry:
 8. The `<title>` token added to step 9 inherits "Any hit is an unfilled slot; fix before
    committing", which is false for it: this repo's own scaffold produces one legitimate hit
    from a fenced example. Belongs with residual 3 (the greps do not ignore code spans).
+
+## 2026-09-20 — wave 1 closed, C1 reached
+
+### B01 — integrated at `e79d378` after three rounds and three polish passes
+
+The most expensive batch in the change, and worth recording why. Its subject is "an
+assertion that passes input it was written to reject", and **five separate times the fix
+for that defect itself contained that defect**:
+
+1. R1: the double-quote branch skipped any `\X` pair where YAML defines a closed set.
+2. R1: BL-005's recursion never executed — no subdirectory exists, so `return []` stayed green.
+3. R1: the case table asserted only on the predicate's return value; the consumer could stop calling it.
+4. R2: `assert.deepEqual` APPENDS its custom message to the diff rather than replacing it,
+   so the path assertion was satisfied by the diff — one round after being fixed for that
+   exact reason. The comment claiming otherwise was simply false on Node 22.
+5. Scoped re-review: the U+10FFFF boundary was pinned on the strengthening side only, so
+   loosening it to `> 0x110000` accepted `"\U00110000"` with all 248 tests green.
+
+Every one was found by a gate MUTATING the code, never by reading it. The user authorized
+the third round at the cap.
+
+What holds it now, each verified independently rather than accepted on report: dropping
+each of the eighteen escape alternatives one at a time turns the suite red for all
+eighteen; a sweep over all 95 printable ASCII characters pins the whitelist in both
+directions, with the member list written as its own literal so a both-at-once edit is
+caught by a set-size assertion; the walk is proven at depth two including a basename that
+collides with a known definition; CRLF/LF equivalence is decided by the code rather than
+by the checkout; and a PyYAML differential over 2,222,220 alphabet lines plus 1,405
+focused escape values reports zero false acceptances, down from 15,245.
+
+One good piece of reasoning worth keeping: closing the CRLF ask revealed that the `\r` in
+the trailing strip `/[ \r]+$/` was UNREACHABLE — JavaScript's `.` excludes line
+terminators, so the field regex fails on any line containing a CR and the strip never sees
+one. That is why the hunter's mutation was green in both checkouts. The implementer
+removed the dead `\r` rather than making the strip reachable, on the grounds that making
+it reachable would be a new ACCEPTANCE path in a batch about false acceptance. The
+re-reviewer confirmed the analysis empirically: reverting the strip changes zero verdicts
+across 2.2M lines.
+
+### C1 pre-smoke — 8 PASS, 2 FAIL, and both FAILs were mine
+
+The QA runner executed all ten steps. Both failures were defects in the SCRIPT, which it
+correctly attributed to the script rather than the build:
+
+- **Step 5** asked for a live fence run against B02's branch. It returns `UNKNOWN` with
+  `candidate-worktree` now, because the orchestrator removed the batch worktrees when the
+  wave closed — `check-fence.mjs` requires a live candidate worktree. The runner checked
+  whether BL-002 was implicated and established it was not: `allowedPaths` came back with
+  all six fenced paths, which is only reachable after `oneRow()` matched B02 in both
+  tables. Rewritten to assert the template-rendered end-to-end test, which is runnable at
+  any time, with the live PASS cited from the record.
+- **Step 6** claimed all three rows of the previous ledger read
+  `Fence PASS (manual — helper UNKNOWN, see LOG R2/R3)`. Two do; the third reads
+  `Fence PASS (manual, extended fence)`. Substance intact, wording wrong. Corrected.
+
+It also found, unprompted, that **B01's PROGRESS row was still `🔄` with no merge SHA**
+while B01 was merged and was HEAD — an orchestrator bookkeeping error from updating B02
+and B03 and missing B01. Fixed. That is the second time this run that an agent asked to
+check one thing found a real defect in something adjacent.
+
+Both RED steps genuinely went red — 259/1 each, on exactly the named test, then back to
+260/0. The four tracked definitions were hash-identical throughout, `.agents/archive/` was
+never touched in this repository, and the final `git status --porcelain` showed only the
+evidence directory and the smoke script.
+
+One step passed for a *stronger* reason than stated: step 1's main worktree returned
+`dirty`, not `clean`, which is inside the pass condition and better evidence — it proves a
+real `git status` was parsed rather than degraded to a default.
