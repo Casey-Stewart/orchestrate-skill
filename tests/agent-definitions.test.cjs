@@ -69,10 +69,10 @@ function frontmatterField(line) {
   return { key: field[1], value };
 }
 
-function definition(name) {
-  const file = '.claude/agents/' + name + '.md';
-  assert.ok(fs.existsSync(path.join(ROOT, file)), 'missing definition: ' + file);
-  const text = read(file);
+// The frontmatter block parse, taken over document text: the four shipped definitions and
+// the one-line documents in FRONTMATTER_CASES reach the predicate through this one door,
+// so a predicate the consumer has stopped calling cannot stay green.
+function frontmatterFields(text, file) {
   const match = /^---\n([\s\S]*?)\n---\n/.exec(text);
   assert.ok(match, file + ' must open with --- delimited YAML frontmatter');
   const fields = new Map();
@@ -83,14 +83,23 @@ function definition(name) {
     assert.ok(!fields.has(field.key), file + ' declares ' + field.key + ': twice');
     fields.set(field.key, field.value);
   }
+  return { fields, body: text.slice(match[0].length) };
+}
+
+function definition(name) {
+  const file = '.claude/agents/' + name + '.md';
+  assert.ok(fs.existsSync(path.join(ROOT, file)), 'missing definition: ' + file);
+  const text = read(file);
+  const { fields, body } = frontmatterFields(text, file);
   const tools = (fields.get('tools') || '').split(',').map(t => t.trim()).filter(Boolean);
-  return { file, text, body: text.slice(match[0].length), fields, tools };
+  return { file, text, body, fields, tools };
 }
 
 // The three forms the earlier guard accepted, the properly quoted colon it must keep
 // accepting — the rule is YAML validity, not a ban on colons — and the no-space form the
-// strictness was written for. Every case runs through the same predicate `definition()`
-// puts the shipped frontmatter through, so a validator that quietly loosens fails here.
+// strictness was written for. Every case is run twice — through the predicate, and as a
+// one-line document through the same `frontmatterFields()` the four definitions go
+// through — so neither a validator that loosens nor a consumer that stops calling it stays green.
 const FRONTMATTER_CASES = [
   { line: 'name: qa-runner', field: { key: 'name', value: 'qa-runner' } },
   { line: 'tools: Read, Glob, Grep, Bash',
@@ -116,13 +125,20 @@ for (const probe of FRONTMATTER_CASES) {
   const verb = probe.field ? ' accepts ' : ' rejects ';
   test('the frontmatter validator' + verb + '`' + probe.line + '`', () => {
     const verdict = frontmatterField(probe.line);
+    // The same line as a whole document, entering by the door `definition()` uses.
+    const document = '---\n' + probe.line + '\n---\n\nbody\n';
     if (probe.field) {
       assert.deepEqual(verdict, probe.field, '`' + probe.line + '` is valid YAML and has to parse as written');
+      assert.equal(frontmatterFields(document, 'synthetic.md').fields.get(probe.field.key), probe.field.value,
+        '`' + probe.line + '` has to survive the document parse, not just the predicate');
       return;
     }
     assert.equal(typeof verdict, 'string', '`' + probe.line + '` is a YAML error: the document would not parse, '
       + 'no definition would load, and a "read-only" role would inherit the whole catalog');
     assert.match(verdict, probe.reason, '`' + probe.line + '` must be rejected for the reason it is invalid');
+    assert.throws(() => frontmatterFields(document, 'synthetic.md'),
+      err => err instanceof assert.AssertionError && probe.reason.test(err.message) && err.message.includes(probe.line),
+      '`' + probe.line + '` must fail the document parse too — a predicate the consumer never calls guards nothing');
   });
 }
 
