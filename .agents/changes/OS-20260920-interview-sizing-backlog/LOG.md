@@ -209,3 +209,59 @@ B03 `fix/bl-008-yaml-indicators`, B04 `fix/bl-014-check-attr`, B05 `fix/bl-009-e
 Four worktrees under `%TEMP%\wt920\b0*`, per-worktree setup n/a. The fences were planned mutually
 disjoint and no member reads another's output; this is the wave the plan's concurrency was approved
 for. Every member is gated by the tool B01 just repaired.
+
+### B02 — gate round 1 (reviewer)
+
+**`R1 SHIP @1b5b7f4 asks=4`** from the strong tier. No P0, no P1. Validation 282/282 on the worktree.
+
+**The near-miss the orchestrator checked for, and the implementer had already avoided.** The phrase
+A1 must delete WRAPS in the real file — `…only merged down to its 4-question` / `cap — 1+3 …`. A
+naive single-line search for `merged down to its 4-question cap` returns ZERO on the UN-FIXED base,
+so an absence assertion over raw text would have passed before the fix and after it: an assertion
+that cannot fail, in the batch whose entire product is prose assertions. The test collapses
+whitespace first (`collapse = text.replace(/\s+/g,' ')`), and the reviewer confirmed each of the
+six literals fires on the collapsed base. Failing-on-base, run independently by the orchestrator
+with only the two documents reverted: **10 tests, 0 pass, 10 fail**, each for its own reason.
+
+The reviewer swept for surviving contradictions by hand as well as by the test and found none in
+`orchestrate/`, and verified the placeholder set is byte-identical to base — the B04 coupling the
+plan feared cannot fire. It also judged the behaviour question directly: the new sentences are
+imperative, and all three entry points (procedure step 2, the section heading, `SKILL.md:175`)
+now carry the same rule, so a reader who stops at any one of them gets it.
+
+Its honest note on the trade-off, recorded because it is the user's decision to have made: with
+the arithmetic gone and only topic scope bounding the count, four to five calls is now a normal
+run. That is the behaviour change the user asked for, not a defect.
+
+### B04 — gate round 1 (combined reviewer + hunter, S weight)
+
+**`R1 SHIP @6b7897c asks=2`**. No P0, no P1. Validation 273/273. Fence PASS; failing-on-base
+confirmed independently by the orchestrator (8 tests, 7 pass, 1 fail, the named assertion).
+
+Fifteen mutations, each run in a uniquely-named temp path. Thirteen were caught, including the
+three that matter: the command appended as an unrelated trailing sentence still REDDENS (the pin
+is genuinely positional, not "the string appears somewhere"), and single-sided removal from
+EITHER document reddens with that document's own label — the criterion the existing mirror test
+could not hold, since it only compares the two halves to each other.
+
+**Two mutations came back GREEN, and one of them is a real residual.** Mutation 14 rewrote the rule
+in BOTH documents to `Before status, **never** run git check-attr filter on the paths status
+inspects:` — and the new test, the mirror and both SHA pins all stayed green. The assertion pins
+the command's PRESENCE in the rule, not its imperative, so a future batch could inscribe the exact
+opposite of what the production probe does and nothing would notice. That is
+*positive-only assertions on prose* surviving inside the fix for it. It is non-blocking — before
+this batch the sentence had no pin at all — but it is exactly the class this repository keeps
+producing, so it goes to polish rather than to the backlog.
+
+The reviewer also flagged, and the orchestrator accepts, that naming the command `git check-attr
+filter` two sentences before "Never execute such filters to obtain a clean result" lets a human
+skimming the fallback bind "such filters" to the probe and skip it — in the batch whose whole
+purpose is giving that human the command. One word ("such filter drivers") disambiguates inside
+the existing line with no reflow.
+
+**Declined on contract grounds.** The reviewer routed an out-of-fence item: `bugs-2026-09-17.md:95-100`
+carries an `ASK-3 — Interview batching math doesn't add up` entry quoting the merge arithmetic B02
+just deleted, and by repo convention would want a `— FIXED` marker. The ledger contract states that
+file is "a dated point-in-time review record pinned to commit `af57139` and is off limits to every
+batch". A point-in-time record is not made wrong by later work; annotating it would make it no
+longer point-in-time. Recorded as a close-out residual for the user, not actioned.
