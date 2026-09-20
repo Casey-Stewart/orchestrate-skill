@@ -272,3 +272,71 @@ and used `<title>` instead. Independently confirmed by the re-review.
 6. Ledger wording, not a defect: BL-006's acceptance criterion asks for an assertion that is
    red at base, which a units-and-wording fix cannot satisfy while the definitions are
    byte-identical at base. The perturbation reading is the only workable one.
+
+### B02 — integrated at `bbc63bb` after two scoped re-reviews
+
+R1 SHIP with 7 ASKs. The polish closed them but overreached, and the first scoped
+re-review caught both halves: it had narrowed the subject of the two PRE-EXISTING
+self-check greps from "the new ledger directory" to "the new ledger's `*.md`" (no ask
+authorised that, and it removes coverage — ledgers accumulate non-`.md` at their root
+later), and the new clause guard derived its window by slicing to the nearest semicolon,
+which nothing asserted: replace the two semicolons with full stops, shorten the clause,
+and the rule named neither the plan nor PROGRESS while the suite stayed green.
+
+The redo fixed both. The second scoped re-review ran the bypass itself rather than
+trusting the report — green at `4e33956`, red at `a5a1526` — and found four more, of which
+three were closed in a final test-only pass:
+
+- `residualGrep` used `[^;]*` where the comment beside it and `idRule` used `[^.;]*`, so a
+  match could cross a sentence. Demonstrated: delete `<title>` from the grep list, leave a
+  sentence naming `<title>` before the next semicolon, and the suite stays green — the
+  token silently leaves the rule. The same shape as the bypass just fixed, one line above.
+- The clause guard matched token CO-OCCURRENCE, not polarity: "in EITHER the plan OR
+  PROGRESS" and "in BOTH the plan and PROGRESS need NOT read `Bnn`" both stayed green. The
+  implementer chose exact per-file substring pins over a looser regex, with the right
+  reasoning: no regex over those few words separates a requirement from its negation, and
+  the file already pins approved prose exactly via the decision-table hashes.
+- A FALSE POSITIVE, which matters as much: `[^.;]*` cannot cross a period, including one in
+  a filename, so writing "`01-plan.md`" in the clause turned the suite red claiming the rule
+  was missing when it was present.
+
+The fourth ASK — the `<title>` token inheriting step 9's absolute "any hit is an unfilled
+slot", which this repository's own scaffold falsifies — was deliberately NOT closed here.
+Its fix is a doc change that would have triggered a third scoped re-review, and it belongs
+with the broader code-span residual already recorded. → backlog.
+
+Worth recording: told to add `<slug>` to the grep list, the implementer established that
+`<slug>` legitimately survives scaffolding (the contract ships a manual-fallback recipe
+containing it, so it is in every real ledger's contract, always) and chose `<title>`
+instead, then scoped the grep to `*.md` because raw `<title>` false-positives on the
+smoke-page HTML a ledger acquires at a checkpoint. Both claims were independently
+confirmed. The implementer's judgement beat the orchestrator's instruction.
+
+### A new defect, found BY the restored tool on its first real use
+
+With BL-002 and BL-003 both merged, the mechanical fence ran for real on B01 and returned
+**49 `batch-content` violations, zero unknowns**. Cause: `validateBatchEdit` accepts only
+SINGLE-LINE `- [x] polish:` items, via `/^- \[[ x]\] polish: .+$/`, while this repository
+wraps every checklist line at ~90 characters — including in the COMPLETE, merged
+OS-20260919 ledger, whose polish items wrap identically.
+
+This is the same class as BL-002: the mechanical checker cannot read what the repository's
+own authoring convention produces. It is notable that it surfaced within minutes of the
+tool becoming usable, on the first batch it gated — the defect had been latent for as long
+as the tool had been unusable.
+
+B01 was cleared by the manual gate instead, verified explicitly: every removed line in its
+batch file is an unticked checkbox, every added line is a tick or an indented continuation,
+and nothing else changed. The VIOLATION was overridden on that documented basis rather
+than waved away. → backlog.
+
+### Residual list, updated
+
+Added since the last entry:
+
+7. `validateBatchEdit` rejects wrapped `- [x] polish:` items, which is the format every
+   ledger in this repository uses. Either the grammar should accept continuation lines or
+   the convention should change — the former, almost certainly.
+8. The `<title>` token added to step 9 inherits "Any hit is an unfilled slot; fix before
+   committing", which is false for it: this repo's own scaffold produces one legitimate hit
+   from a fenced example. Belongs with residual 3 (the greps do not ignore code spans).
