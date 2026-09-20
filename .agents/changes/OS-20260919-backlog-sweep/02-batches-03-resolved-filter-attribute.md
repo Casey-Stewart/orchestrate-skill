@@ -172,11 +172,11 @@ NO change — it is deliberately outside this fence.
       of the existing marker-file assertions.
 - [x] Update the `--help` text at `git-evidence.mjs` to describe the resolved-attribute
       rule and keep its documented exit codes.
-- [ ] Update the prose in `orchestrate/references/protocol.md` and the mirrored sentence
+- [x] Update the prose in `orchestrate/references/protocol.md` and the mirrored sentence
       in `orchestrate/templates/00-READBEFORE.md` — **identically**. Own commit.
-- [ ] Verify the mirror: `node --test tests/protocol-contract.test.cjs` passes without
+- [x] Verify the mirror: `node --test tests/protocol-contract.test.cjs` passes without
       that file having been edited.
-- [ ] Run the canary again after the fix from the repository root and record the new exit
+- [x] Run the canary again after the fix from the repository root and record the new exit
       code, `completeness`, `cleanliness` values and diagnostics.
 - [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
 - [ ] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
