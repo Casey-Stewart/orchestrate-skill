@@ -119,15 +119,85 @@ test('reusable artifacts contain no local Python installation default, while fro
     ...fs.readdirSync(path.join(ROOT, 'orchestrate/references')).filter(p => p.endsWith('.md')).map(p => 'orchestrate/references/' + p),
     'orchestrate/tools/build-smoke-page.mjs', 'orchestrate/tools/smoke-inputs.mjs'];
   for (const file of paths) assert.doesNotMatch(read(file), /[A-Z]:[\\/](?:Users|Program Files)[\\/].*Python|fatbo|Python310/i, file);
-  const frozen = path.join(ROOT, '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md');
-  // The approved ledger is branch-local; ordinary clones after user archival need
-  // not contain it. When present, reusable edits must never rewrite its local fact.
-  if (fs.existsSync(frozen)) {
-    const text = fs.readFileSync(frozen, 'utf8');
-    assert.match(text, /Python310[\\/]python\.exe/);
-    assert.match(text, /Every generation and independent Excel-validation command in this run uses literal/);
+  const candidates = ['.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md',
+    '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md'];
+  // The approved ledger is branch-local and moves on archival; ordinary clones need
+  // not contain it. When present, reusable edits must never rewrite its local fact —
+  // and one location must exist HERE, so the next move breaks this guard loudly
+  // instead of silently disarming it.
+  const frozen = candidates.filter(p => fs.existsSync(path.join(ROOT, p)));
+  assert.ok(frozen.length, 'frozen ledger contract must be readable at one of: ' + candidates.join(', '));
+  // Counts, not mere presence: the interpreter path occurs three times and the
+  // Excel-validation sentence once, so deleting any of them turns this red. A presence
+  // check survives losing two of the three and calls the environment fact "retained".
+  for (const file of frozen) {
+    const text = read(file);
+    assert.equal((text.match(/Python310[\\/]python\.exe/g) || []).length, 3, file + ': three literal interpreter paths');
+    assert.equal((text.match(/Every generation and independent Excel-validation command in this run uses literal/g) || []).length,
+      1, file + ': one Excel-validation sentence');
   }
 });
+
+test('the scaffold self-check names the Bnn id rule for both authority tables', () => {
+  // scaffolding.md step 9 and the SKILL.md one-liner summarising it are the only place
+  // a scaffolder is TOLD the rules the fence enforces. The id rule is pinned as the
+  // exact approved sentence, like the decision tables above: mere co-occurrence of
+  // "plan", "PROGRESS" and `Bnn` cannot tell "in BOTH ... and" from "in EITHER ... OR",
+  // nor a requirement from its negation, and only those words state the rule the fence
+  // enforces. Rewording it is then a deliberate, visible test edit. Filenames are
+  // normalised away first, so writing "PROGRESS.md" is prose, not a failure.
+  const selfCheckText = file => read(file).replace(/\s+/g, ' ').replace(/\.md\b/g, '');
+  const idClause = {
+    'orchestrate/references/scaffolding.md': 'every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`',
+    'orchestrate/SKILL.md': "every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`"
+  };
+  // The residual grep is bound to its own verdict: naming `<title>` somewhere else in
+  // the paragraph is not the same as grepping for it and requiring zero hits. `[^.;]*`
+  // keeps the match inside one clause — the hole a bare `[^;]*` left open.
+  const residualGrep = /grep the new[^.;]*`<title>`[^.;]*zero hits/i;
+  for (const [file, clause] of Object.entries(idClause)) {
+    const text = selfCheckText(file);
+    assert.ok(text.includes(clause), file + ': the self-check must read exactly "' + clause + '" (whitespace collapsed, .md stripped)');
+    assert.match(text, residualGrep, file + ': the self-check must grep for `<title>` and require zero hits — the token a deleted comment marker leaves behind');
+  }
+  // Rule and template cannot drift apart: the example rows must carry the very token
+  // step 9 greps for, or the partial-deletion door reopens without a single test moving.
+  for (const template of ['orchestrate/templates/01-plan.md', 'orchestrate/templates/PROGRESS.md']) {
+    const row = read(template).split('\n').find(l => /^\| B\d{2,} \|/.test(l));
+    assert.ok(row, template + ': no `| Bnn | ... |` example row to check');
+    assert.ok(row.includes('<title>'), template + ': the example row must carry `<title>`, the token step 9 greps for — row reads ' + row);
+  }
+});
+
+// The commit these templates pinned no example row at — a permanent historical blob,
+// reachable in any full clone, used below as the red half of the proof.
+const BATCH_BASE = 'fad7a64';
+// A scaffolder's job, mechanised: lift the pinned example row out of the template's
+// batch-table instruction comment and substitute real values. No authority row is
+// hand-authored here, so a template that pins no Bnn row cannot quietly ship a ledger
+// the real fence refuses to read.
+function renderAuthorityTable(template, required, values, text = read(template)) {
+  const lines = text.split('\n'), cellsOf = line => line.split('|').slice(1, -1).map(x => x.trim());
+  const head = lines.findIndex(l => l.startsWith('|') && required.every(key => cellsOf(l).includes(key)));
+  assert.notEqual(head, -1, template + ': no batch table carrying ' + required.join(', '));
+  const open = lines.findIndex((l, i) => i > head && l.includes('<!--'));
+  assert.notEqual(open, -1, template + ': the batch table carries no instruction comment');
+  const close = open + lines.slice(open).findIndex(l => l.includes('-->'));
+  // A live example row OUTSIDE the comment carries no {{ and no <!--, so the scaffold
+  // self-check passes it and it reaches a filled ledger beside the real B01 — the
+  // duplicate id that makes the fence throw for every batch of the change.
+  assert.deepEqual(lines.filter((l, i) => (i < open || i > close) && /^\| B\d{2,} \|/.test(l)), [],
+    template + ': a `| Bnn | ... |` row outside the instruction comment would survive scaffolding and collide with the real B01');
+  const example = lines.slice(open, close + 1).find(l => /^\| B\d{2,} \|.*\|$/.test(l));
+  assert.ok(example, template + ': the batch-table instruction comment pins no `| Bnn | ... |` example row for a scaffolder to copy');
+  const header = cellsOf(lines[head]), cells = cellsOf(example);
+  assert.equal(cells.length, header.length, template + ': the Bnn example row needs one cell per header column');
+  // Callers never supply the # cell, so the id the fence reads is the template's own.
+  // Without this, swapping the # and Batch columns leaves the suite green while the
+  // template instructs every scaffolder to put the id in the wrong place.
+  assert.match(cells[header.indexOf('#')], /^B\d{2,}$/, template + ": the example row's Bnn must sit in the # column");
+  return [lines[head], lines[head + 1], '| ' + header.map((key, i) => values[key] ?? cells[i]).join(' | ') + ' |', ''].join('\n');
+}
 
 test('published helper recipes execute actual CLIs and generated batch grammar passes the real fence', t => {
   const repo = makeRepo(t), ledger = '.agents/changes/DOCS', integration = 'refs/heads/codex/docs-ledger';
@@ -139,8 +209,24 @@ test('published helper recipes execute actual CLIs and generated batch grammar p
     .replace(/<!-- - \[ \] one box[\s\S]*?-->/, '- [ ] Implement example.')
     .replace(/<!--[\s\S]*?-->/g, '');
   repo.write(batchFile, rendered);
-  repo.write(ledger + '/01-plan.md', '| # | Branch | Files (fence) |\n|---|---|---|\n| B01 | codex/docs-b01 | `payload.txt` |\n');
-  repo.write(ledger + '/PROGRESS.md', '**State**: ACTIVE\n| # | Branch | Notes |\n|---|---|---|\n| B01 | codex/docs-b01 | — |\n');
+  const planKeys = ['#', 'Branch', 'Files (fence)'], progressKeys = ['#', 'Branch', 'Notes'];
+  // No '#' value: B01 below is the fence's --batch-id, and it must be the id the
+  // templates themselves pin. Change either template's example id and this goes red.
+  repo.write(ledger + '/01-plan.md', renderAuthorityTable('orchestrate/templates/01-plan.md', planKeys,
+    { Branch: '`codex/docs-b01`', 'Files (fence)': '`payload.txt`' }));
+  repo.write(ledger + '/PROGRESS.md', '**State**: ACTIVE\n' + renderAuthorityTable('orchestrate/templates/PROGRESS.md',
+    progressKeys, { Branch: '`codex/docs-b01`', Notes: '—' }));
+  // The other direction, driven by a shipped artifact rather than text this test
+  // mutilated itself: at this batch's base these templates pinned no example row, and
+  // the helper must still say so in those exact words. That silence is what degraded
+  // OS-20260919's fence check to the manual fallback for every one of its batches.
+  for (const [template, keys] of [['orchestrate/templates/01-plan.md', planKeys], ['orchestrate/templates/PROGRESS.md', progressKeys]]) {
+    const blob = spawnSync('git', ['-C', ROOT, 'show', BATCH_BASE + ':' + template], { encoding: 'utf8', windowsHide: true });
+    assert.ifError(blob.error); assert.equal(blob.status, 0, template + ' at ' + BATCH_BASE + ' must be readable: ' + blob.stderr);
+    assert.throws(() => renderAuthorityTable(template, keys, {}, blob.stdout.replace(/\r\n/g, '\n')),
+      e => e.message === template + ': the batch-table instruction comment pins no `| Bnn | ... |` example row for a scaffolder to copy',
+      template + ' at ' + BATCH_BASE + ' must fail on the missing example row, not on some other diagnostic');
+  }
   repo.write(ledger + '/00-READBEFORE.md', contract.replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => ({
     INTEGRATION_BRANCH: 'codex/docs-ledger', EVIDENCE_TOOL: path.join(ROOT, 'orchestrate/tools/git-evidence.mjs'),
     FENCE_TOOL: path.join(ROOT, 'orchestrate/tools/check-fence.mjs') }[key] || 'example')));

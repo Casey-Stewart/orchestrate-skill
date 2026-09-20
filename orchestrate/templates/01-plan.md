@@ -15,7 +15,10 @@ file is the contract; this one only locks scope, waves, and checkpoints.
      within a wave — reshape batches (seam batches, splits, merges) until the safe waves
      are as wide as possible. Smoke = the covering checkpoint (e.g. "C1"), suffixed
      "(hands-on)" for batches that need the user's hands — those are the reason an
-     intermediate checkpoint exists. Version "—" if the repo doesn't version. -->
+     intermediate checkpoint exists. Version "—" if the repo doesn't version.
+     Every # cell is Bnn — two digits minimum; the fence check keys on it. Copy:
+| B01 | <title> | fix | S | `fix/<slug>` | 1 | `path/one.ts`, `path/two.ts` | C1 | — |
+-->
 
 ## Wave map & checkpoints
 

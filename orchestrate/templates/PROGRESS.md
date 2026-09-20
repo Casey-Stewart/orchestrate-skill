@@ -44,7 +44,10 @@ before believing any row (§Recovery in the contract).
      `m: rounds=<FIX FIRST rounds> asks=<ASK items closed by polish> fence-bounces=<times
      the fence check sent the implementer back> gate=<gate-agent findings>/<of which
      needed a production change> tip-red=<1 if tip validation went red after this merge>`.
-     Anything longer goes in LOG.md under a heading this cell names. -->
+     Anything longer goes in LOG.md under a heading this cell names.
+     Every # cell is Bnn — the same id as the plan's row and the batch file title. Copy:
+| B01 | <title> | `fix/<slug>` | 1 | — | ⬜ | <date> | — |
+-->
 
 ## Checkpoints
 

@@ -145,34 +145,50 @@ this fence for that reason.**
 
 ## Checklist
 
-- [ ] Read all five fenced files and confirm each line cited above still says what this
+- [x] Read all five fenced files and confirm each line cited above still says what this
       file claims; report drift rather than working around it.
-- [ ] **[BL-001]** Repoint the frozen-ledger guard at the archive location and make it
+- [x] **[BL-001]** Repoint the frozen-ledger guard at the archive location and make it
       provably live — the two assertions execute in this checkout, and the test fails if
       the file is present with drifted content. Own commit.
-- [ ] **[BL-001]** Add the "at least one candidate location exists here" assertion (or
+- [x] **[BL-001]** Add the "at least one candidate location exists here" assertion (or
       record in the report why it was rejected).
-- [ ] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/01-plan.md`.
-- [ ] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/PROGRESS.md`.
-- [ ] **[BL-002]** Extend the step-9 self-check in `orchestrate/references/scaffolding.md`
+- [x] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/01-plan.md`.
+- [x] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/PROGRESS.md`.
+- [x] **[BL-002]** Extend the step-9 self-check in `orchestrate/references/scaffolding.md`
       and the matching one-liner in `orchestrate/SKILL.md:186-187` with the id-format
       clause, covering BOTH tables. Own commit.
-- [ ] **[BL-002]** Rewrite the authority files in `tests/protocol-contract.test.cjs:132`
+- [x] **[BL-002]** Rewrite the authority files in `tests/protocol-contract.test.cjs:132`
       to render from the shipped `01-plan.md` and `PROGRESS.md` templates, and run the
       real `check-fence.mjs` over the result. Own commit.
-- [ ] Prove failing-on-base for BL-002: check out the batch base, apply ONLY the new test,
+- [x] Prove failing-on-base for BL-002: check out the batch base, apply ONLY the new test,
       and record that it goes red with the fence's own `Duplicate or malformed batch IDs`
       reaching the assertion — quote the actual failure text in the report.
-- [ ] Prove failing-on-base for BL-001 **in a throwaway clone, never in this repository**
+- [x] Prove failing-on-base for BL-001 **in a throwaway clone, never in this repository**
       (the contract forbids modifying `.agents/archive/`): delete the single line
       containing `Every generation and independent Excel-validation command in this run
       uses literal` and record that the guard goes red. Use that sentence, not the
       `Python310` line — five lines contain `Python310` and three match the asserted
       regex, so removing one proves nothing.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `fix/ledger-batch-id-grammar` — `fix: pin Bnn batch ids in the ledger templates and revive the archive guard (batch 02)`.
+- [x] Commit on `fix/ledger-batch-id-grammar` — `fix: pin Bnn batch ids in the ledger templates and revive the archive guard (batch 02)`.
+- [x] polish: ASK 1a — assert inside `renderAuthorityTable` that no `| Bnn | … |` row sits OUTSIDE the instruction comment, where every assertion in the file is blind to it and a real scaffold would keep it.
+- [x] polish: ASK 1b — add one token to `scaffolding.md` step 9's zero-hits grep so a partial deletion that leaves the example body line behind is caught (the suggested `<slug>` is unusable — see report).
+- [x] polish: ASK 2 — stop hard-coding `'#': 'B01'` in the render values so the id the fence checks is the one lifted from the template, and assert the example row's `Bnn` sits in the `#` column.
+- [x] polish: ASK 3 — assert that `scaffolding.md` and `SKILL.md` both carry the `Bnn` clause and that each names the plan AND PROGRESS.
+- [x] polish: ASK 4 — match the exact "pins no example row" diagnostic and drive the reverse direction from the shipped template blob at base `fad7a64` instead of a self-stripped copy.
+- [x] polish: ASK 5 — assert the archived contract's interpreter-path occurrence count, not mere presence, so deleting two of the three stays red.
+- [x] polish: ASK 6 — report the checklist/evidence discrepancy at lines 163-165 (the extraction assertion fires before any fence diagnostic); ticked box left as-is.
+- [x] polish: P1-1 — restore "the new ledger directory" as the subject of the pre-existing `{{` and `<!--` greps; scope only the new `<title>` token to `*.md`, in both files.
+- [x] polish: P1-2 — match the `Bnn` clause with one anchored regex over the whole file instead of a window derived from a semicolon nothing asserts; prove it against the demonstrated bypass.
+- [x] polish: A1 — assert the step-9 grep list names `<title>` in BOTH files, and that each template's example row still carries that token, so rule and template cannot drift apart.
+- [x] polish: A2 — drop the whole-file `` `Bnn` `` uniqueness lock; the anchored clause regex replaces it and a legitimate later mention no longer goes red.
+- [x] polish: A3 — correct the report's "zero `<title>` hits" claim: this ledger's own batch file carries one, inside a fenced code block, at scaffold time.
+- [x] polish: A4 — report that pinning `BATCH_BASE` to `fad7a64` makes the suite require repository history (loud failure in a shallow clone); the tradeoff ASK 4 asked for, no change.
+- [x] polish: R3-1 — anchor `residualGrep` to the grep's own zero-hits verdict with `[^.;]*`, closing the same cross-sentence hole `[^;]*` left open; proven with the demonstrated bypass.
+- [x] polish: R3-2 — pin each self-check id clause as an exact per-file substring, since co-occurrence cannot tell BOTH/and from EITHER/OR nor a rule from its negation.
+- [x] polish: R3-3 — normalise whitespace and strip `.md` before matching, so correct prose naming `PROGRESS.md` no longer turns the suite red claiming the rule is missing.
 
 ## Acceptance criteria
 
