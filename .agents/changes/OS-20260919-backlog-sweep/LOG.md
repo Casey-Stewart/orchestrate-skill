@@ -432,3 +432,42 @@ Worth generalising: a contract clause that names an artifact and a builder is no
 and "the information is equivalent" is not the test. The test is whether the driving
 session can follow the ledger alone — and a session reading `Smoke page: plain text` where
 the contract says HTML has been handed a different protocol than the one it was promised.
+
+### Residual 10 — the build-identity gate has never worked, on any run
+
+Found by the user at hand-over, mid-smoke-run, by noticing that the gate's commit check
+"has been wrong on every run on this version of Orchestrate".
+
+**The mechanism.** The smoke page records `buildSha` = the build it was written against.
+Committing the page necessarily moves HEAD past that build, so `git rev-parse HEAD` and
+`buildSha` can never agree at the moment a tester reads the page. The mismatch is
+structural, not occasional.
+
+**The evidence that it is systemic.** The previous ledger,
+`OS-20260919-agent-tool-restrictions`, carries the identical hand-written escape hatch in
+its sidecar — "A later commit containing only checkpoint artifacts (this page and its
+sidecar) is allowed" — and its HEAD was ahead too (`baf6552` reached C1 after the tested
+`168b9d8`). Two ledgers, two hand-written allowances, same defect.
+
+**Why it is the same class as this change's own subject.** `gate.commands` prints HEAD;
+`gate.checks` is prose asking a human to decide whether the difference is "only checkpoint
+artifacts". The builder validates that `buildSha` is a full hex object ID and nothing else.
+So the one gate whose job is "are you testing the right tree" resolves to eyeballing — a
+check that looks mechanical and is not, which is precisely what BL-001, BL-002 and BL-004
+each turned out to be.
+
+**The fix.** Put the containment check in `gate.commands` where it executes:
+
+    git merge-base --is-ancestor <buildSha> HEAD && \
+      git diff --name-only <buildSha>..HEAD | grep -v '^<ledger-dir>/'
+
+Exit 0 with no output proves both halves — the tested build is an ancestor of HEAD, and
+nothing outside the ledger directory moved since. Then have `build-smoke-page.mjs` reject a
+sidecar whose gate carries no containment check, or the next ledger hand-writes the
+allowance again. Guidance lives in `orchestrate/references/smoke-page.md`; the builder's
+`validate()` is where the rejection belongs.
+
+**Scope decision.** The user chose "file it, keep testing": C1's gate did pass on the real
+criterion — the orchestrator verified containment by hand before the question was asked,
+and the two commits since `e79d378` touch only ledger artifacts — but having to trust that
+manual check IS the defect. Fixing the skill is its own change, not a reopened wave.
