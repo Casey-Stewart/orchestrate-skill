@@ -127,13 +127,34 @@ test('reusable artifacts contain no local Python installation default, while fro
   // instead of silently disarming it.
   const frozen = candidates.filter(p => fs.existsSync(path.join(ROOT, p)));
   assert.ok(frozen.length, 'frozen ledger contract must be readable at one of: ' + candidates.join(', '));
+  // Counts, not mere presence: the interpreter path occurs three times and the
+  // Excel-validation sentence once, so deleting any of them turns this red. A presence
+  // check survives losing two of the three and calls the environment fact "retained".
   for (const file of frozen) {
     const text = read(file);
-    assert.match(text, /Python310[\\/]python\.exe/, file);
-    assert.match(text, /Every generation and independent Excel-validation command in this run uses literal/, file);
+    assert.equal((text.match(/Python310[\\/]python\.exe/g) || []).length, 3, file + ': three literal interpreter paths');
+    assert.equal((text.match(/Every generation and independent Excel-validation command in this run uses literal/g) || []).length,
+      1, file + ': one Excel-validation sentence');
   }
 });
 
+test('the scaffold self-check names the Bnn id rule for both authority tables', () => {
+  // scaffolding.md step 9 and the SKILL.md one-liner summarising it are the only place
+  // a scaffolder is TOLD the rule the fence enforces. Without this, a reflow that drops
+  // either clause leaves the suite green and the next ledger repeats bare-01 ids.
+  for (const file of ['orchestrate/references/scaffolding.md', 'orchestrate/SKILL.md']) {
+    const text = read(file).replace(/\s+/g, ' ');
+    const at = text.indexOf('`Bnn`');
+    assert.notEqual(at, -1, file + ': the scaffold self-check must name the `Bnn` id rule');
+    assert.equal(text.indexOf('`Bnn`', at + 1), -1, file + ': exactly one `Bnn` clause, so the two files cannot drift apart');
+    const clause = text.slice(text.lastIndexOf(';', at) + 1, at + '`Bnn`'.length);
+    for (const required of [/`#` cell/, /plan/i, /PROGRESS/]) assert.match(clause, required, file + ': clause reads "' + clause.trim() + '"');
+  }
+});
+
+// The commit these templates pinned no example row at — a permanent historical blob,
+// reachable in any full clone, used below as the red half of the proof.
+const BATCH_BASE = 'fad7a64';
 // A scaffolder's job, mechanised: lift the pinned example row out of the template's
 // batch-table instruction comment and substitute real values. No authority row is
 // hand-authored here, so a template that pins no Bnn row cannot quietly ship a ledger
@@ -145,10 +166,19 @@ function renderAuthorityTable(template, required, values, text = read(template))
   const open = lines.findIndex((l, i) => i > head && l.includes('<!--'));
   assert.notEqual(open, -1, template + ': the batch table carries no instruction comment');
   const close = open + lines.slice(open).findIndex(l => l.includes('-->'));
+  // A live example row OUTSIDE the comment carries no {{ and no <!--, so the scaffold
+  // self-check passes it and it reaches a filled ledger beside the real B01 — the
+  // duplicate id that makes the fence throw for every batch of the change.
+  assert.deepEqual(lines.filter((l, i) => (i < open || i > close) && /^\| B\d{2,} \|/.test(l)), [],
+    template + ': a `| Bnn | ... |` row outside the instruction comment would survive scaffolding and collide with the real B01');
   const example = lines.slice(open, close + 1).find(l => /^\| B\d{2,} \|.*\|$/.test(l));
   assert.ok(example, template + ': the batch-table instruction comment pins no `| Bnn | ... |` example row for a scaffolder to copy');
   const header = cellsOf(lines[head]), cells = cellsOf(example);
   assert.equal(cells.length, header.length, template + ': the Bnn example row needs one cell per header column');
+  // Callers never supply the # cell, so the id the fence reads is the template's own.
+  // Without this, swapping the # and Batch columns leaves the suite green while the
+  // template instructs every scaffolder to put the id in the wrong place.
+  assert.match(cells[header.indexOf('#')], /^B\d{2,}$/, template + ": the example row's Bnn must sit in the # column");
   return [lines[head], lines[head + 1], '| ' + header.map((key, i) => values[key] ?? cells[i]).join(' | ') + ' |', ''].join('\n');
 }
 
@@ -163,17 +193,22 @@ test('published helper recipes execute actual CLIs and generated batch grammar p
     .replace(/<!--[\s\S]*?-->/g, '');
   repo.write(batchFile, rendered);
   const planKeys = ['#', 'Branch', 'Files (fence)'], progressKeys = ['#', 'Branch', 'Notes'];
+  // No '#' value: B01 below is the fence's --batch-id, and it must be the id the
+  // templates themselves pin. Change either template's example id and this goes red.
   repo.write(ledger + '/01-plan.md', renderAuthorityTable('orchestrate/templates/01-plan.md', planKeys,
-    { '#': 'B01', Branch: '`codex/docs-b01`', 'Files (fence)': '`payload.txt`' }));
+    { Branch: '`codex/docs-b01`', 'Files (fence)': '`payload.txt`' }));
   repo.write(ledger + '/PROGRESS.md', '**State**: ACTIVE\n' + renderAuthorityTable('orchestrate/templates/PROGRESS.md',
-    progressKeys, { '#': 'B01', Branch: '`codex/docs-b01`', Notes: '—' }));
-  // The other direction: strip the pinned row and the render must fail loudly, naming
-  // the template and the Bnn row it wanted. An unpinned # cell is what degraded
+    progressKeys, { Branch: '`codex/docs-b01`', Notes: '—' }));
+  // The other direction, driven by a shipped artifact rather than text this test
+  // mutilated itself: at this batch's base these templates pinned no example row, and
+  // the helper must still say so in those exact words. That silence is what degraded
   // OS-20260919's fence check to the manual fallback for every one of its batches.
   for (const [template, keys] of [['orchestrate/templates/01-plan.md', planKeys], ['orchestrate/templates/PROGRESS.md', progressKeys]]) {
-    const stripped = read(template).split('\n').filter(l => !/^\| B\d{2,} \|/.test(l)).join('\n');
-    assert.throws(() => renderAuthorityTable(template, keys, {}, stripped),
-      e => e.message.includes(template) && e.message.includes('Bnn'), template);
+    const blob = spawnSync('git', ['-C', ROOT, 'show', BATCH_BASE + ':' + template], { encoding: 'utf8', windowsHide: true });
+    assert.ifError(blob.error); assert.equal(blob.status, 0, template + ' at ' + BATCH_BASE + ' must be readable: ' + blob.stderr);
+    assert.throws(() => renderAuthorityTable(template, keys, {}, blob.stdout.replace(/\r\n/g, '\n')),
+      e => e.message === template + ': the batch-table instruction comment pins no `| Bnn | ... |` example row for a scaffolder to copy',
+      template + ' at ' + BATCH_BASE + ' must fail on the missing example row, not on some other diagnostic');
   }
   repo.write(ledger + '/00-READBEFORE.md', contract.replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => ({
     INTEGRATION_BRANCH: 'codex/docs-ledger', EVIDENCE_TOOL: path.join(ROOT, 'orchestrate/tools/git-evidence.mjs'),

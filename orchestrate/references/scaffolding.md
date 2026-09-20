@@ -76,7 +76,8 @@
    content. `evidence/` is created at the first checkpoint, not now.
    Keep the generated delivery contract runtime-neutral: use the committed smoke HTML
    and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
-9. **Self-check** — grep the new ledger directory for `{{` and for `<!--`: **zero hits**.
+9. **Self-check** — grep the new ledger's `*.md` for `{{`, `<!--` and `<title>` (a
+   deleted comment marker can leave an example row behind): **zero hits**.
    `**State**: ACTIVE` present in PROGRESS; the pre-flight verdict line present in the
    plan; every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`.
    Any hit is an unfilled slot; fix before committing.

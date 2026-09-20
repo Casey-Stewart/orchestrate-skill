@@ -173,6 +173,13 @@ this fence for that reason.**
 - [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
 - [x] Commit on `fix/ledger-batch-id-grammar` — `fix: pin Bnn batch ids in the ledger templates and revive the archive guard (batch 02)`.
+- [x] polish: ASK 1a — assert inside `renderAuthorityTable` that no `| Bnn | … |` row sits OUTSIDE the instruction comment, where every assertion in the file is blind to it and a real scaffold would keep it.
+- [x] polish: ASK 1b — add one token to `scaffolding.md` step 9's zero-hits grep so a partial deletion that leaves the example body line behind is caught (the suggested `<slug>` is unusable — see report).
+- [x] polish: ASK 2 — stop hard-coding `'#': 'B01'` in the render values so the id the fence checks is the one lifted from the template, and assert the example row's `Bnn` sits in the `#` column.
+- [x] polish: ASK 3 — assert that `scaffolding.md` and `SKILL.md` both carry the `Bnn` clause and that each names the plan AND PROGRESS.
+- [x] polish: ASK 4 — match the exact "pins no example row" diagnostic and drive the reverse direction from the shipped template blob at base `fad7a64` instead of a self-stripped copy.
+- [x] polish: ASK 5 — assert the archived contract's interpreter-path occurrence count, not mere presence, so deleting two of the three stays red.
+- [x] polish: ASK 6 — report the checklist/evidence discrepancy at lines 163-165 (the extraction assertion fires before any fence diagnostic); ticked box left as-is.
 
 ## Acceptance criteria
 
