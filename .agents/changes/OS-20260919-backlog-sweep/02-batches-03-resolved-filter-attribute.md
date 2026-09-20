@@ -162,13 +162,13 @@ NO change — it is deliberately outside this fence.
       set value or bare `set` as unsafe. Own commit.
 - [x] Keep every existing refusal reason intact: submodules, malformed index, failed
       probe, unparseable output — each still returns `unknown`, never "safe".
-- [ ] Add the failing-on-base test: filter configured, no path resolving to it → real
+- [x] Add the failing-on-base test: filter configured, no path resolving to it → real
       cleanliness, `completeness: complete`, exit 0, no `unsafe-filter`. Own commit.
-- [ ] Confirm the three existing filter tests still pass unchanged
+- [x] Confirm the three existing filter tests still pass unchanged
       (`tests/git-contract.test.cjs:186`, `:200-205`, `:292`;
       `tests/check-fence.test.cjs:235`). If one must change, justify it in the report —
       an existing assertion may be pinning the old trigger.
-- [ ] Add a case proving no filter command is executed under the new rule, in the style
+- [x] Add a case proving no filter command is executed under the new rule, in the style
       of the existing marker-file assertions.
 - [x] Update the `--help` text at `git-evidence.mjs` to describe the resolved-attribute
       rule and keep its documented exit codes.

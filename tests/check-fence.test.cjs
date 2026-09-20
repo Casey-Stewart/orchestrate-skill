@@ -240,6 +240,18 @@ test('configured filters leave the fence UNKNOWN without executing a command or 
   const before = [f.repo.snapshot(), f.candidate.snapshot()]; const r = (await api).checkFence(f.opts), c = f.cli();
   state(r, 'UNKNOWN', 'unsafe-filter'); assert.equal(c.status, 2); state(c.json, 'UNKNOWN', 'unsafe-filter'); assert.equal(fs.existsSync(marker), false); assert.deepEqual([f.repo.snapshot(), f.candidate.snapshot()], before);
 });
+test('a configured driver no path resolves to leaves the fence mechanically usable', async t => {
+  // Both observations of the worktree inventory run the status prerequisite, so a driver
+  // that a stock install configures system-wide used to cost every candidate its verdict.
+  const f = fixture(t), marker = path.join(f.candidate.cwd, 'filter-must-not-run'), script = path.join(f.repo.root, 'unresolved-fence-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  f.repo.git('config', 'filter.marker.clean', `node "${script.replaceAll('\\', '/')}"`);
+  f.candidate.write('allowed.txt', 'implemented\n'); f.candidate.write(BATCHFILE, f.batchText.replace('- [ ]', '- [x]')); const sha = f.candidate.commit('implement');
+  const before = [f.repo.snapshot(), f.candidate.snapshot()]; const r = (await api).checkFence(f.opts), c = f.cli();
+  state(r, 'PASS'); assert.equal(c.status, 0, c.stdout); state(c.json, 'PASS'); assert.equal(c.json.batchSha, sha);
+  assert.deepEqual(r.evidence.worktreeDiagnostics, []);
+  assert.equal(fs.existsSync(marker), false); assert.deepEqual([f.repo.snapshot(), f.candidate.snapshot()], before);
+});
 test('staged and unstaged type dirt produce a deterministic fence VIOLATION in API and CLI', async t => {
   const { checkFence } = await api;
   for (const kind of ['staged', 'unstaged']) await t.test(kind, t => {

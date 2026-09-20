@@ -206,6 +206,58 @@ test('configured clean and process filters never execute through API or actual C
     assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before);
   });
 });
+test('a configured driver no inspected path resolves to leaves cleanliness observable', async t => {
+  // Git for Windows writes filter.lfs.* into the system gitconfig on every stock install.
+  // A configured driver converts nothing until an attribute selects it, so mere
+  // configuration must not cost the mechanical gate its answer.
+  const { worktrees, discovery } = await api;
+  const repo = makeRepo(t), marker = path.join(repo.cwd, 'filter-must-not-run'), script = path.join(repo.root, 'unresolved-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  for (const kind of ['clean', 'process']) repo.git('config', `filter.marker.${kind}`, `node "${script.replaceAll('\\', '/')}"`);
+  // A repository with no path at all is safe, not unknown.
+  assert.equal(complete(worktrees(options(repo))).worktrees[0].cleanliness, 'clean');
+  // `-filter` resolves to `unset` and every other inspected path to `unspecified`: neither
+  // selects the configured driver. The attribute on the ignored path does select it, but
+  // status never inspects that path's content, so nothing can convert it.
+  repo.write('.gitattributes', 'pinned.txt -filter\nignored.txt filter=marker\n'); repo.write('.gitignore', 'ignored.txt\n');
+  repo.write('pinned.txt', 'pinned\n'); repo.write('plain.txt', 'plain\n'); repo.commit('unresolved driver fixture');
+  repo.write('ignored.txt', 'ignored\n');
+  const before = repo.snapshot();
+  for (const operation of ['worktrees', 'discovery']) {
+    const actual = ({ worktrees, discovery })[operation](options(repo)), command = cli(repo, operation);
+    assert.equal(command.status, 0, command.stdout);
+    for (const result of [actual, command.json]) {
+      assert.equal(result.completeness, 'complete', JSON.stringify(result.diagnostics));
+      assert.equal(result.evidence.worktrees[0].cleanliness, 'clean');
+      assert.equal(result.diagnostics.some(d => d.code === 'unsafe-filter'), false, JSON.stringify(result.diagnostics));
+    }
+    assert.equal(fs.existsSync(marker), false, `${operation} must not start a filter command`); assert.deepEqual(repo.snapshot(), before);
+  }
+  // Real dirt is reported as dirt, and still without executing anything.
+  repo.write('plain.txt', 'changed\n'); fs.utimesSync(path.join(repo.cwd, 'plain.txt'), new Date(0), new Date(0));
+  const dirty = complete(worktrees(options(repo))), dirtyCli = cli(repo, 'worktrees'); assert.equal(dirtyCli.status, 0, dirtyCli.stdout);
+  for (const e of [dirty, dirtyCli.json.evidence]) {
+    assert.equal(e.worktrees[0].cleanliness, 'dirty');
+    assert.deepEqual(e.worktrees[0].status, [{ status: ' M', path: 'plain.txt', originalPath: null }]);
+  }
+  assert.equal(fs.existsSync(marker), false, 'a dirty inspected path must not start a filter command');
+});
+test('a driver reached only through an attribute in the index is still refused', async t => {
+  // The fast path may skip the attribute enumeration when nothing is configured; it must
+  // never turn a resolving path safe, whichever attributes file names the driver.
+  const repo = makeRepo(t), marker = path.join(repo.cwd, 'info-filter-must-not-run'), script = path.join(repo.root, 'info-filter.cjs');
+  fs.writeFileSync(script, `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed'); process.stdin.pipe(process.stdout);`);
+  repo.write('filtered.txt', 'before\n'); repo.commit('info attributes fixture');
+  repo.write('.git/info/attributes', 'filtered.txt filter=marker\n'); repo.git('config', 'filter.marker.clean', `node "${script.replaceAll('\\', '/')}"`);
+  repo.write('filtered.txt', 'after!\n'); fs.utimesSync(path.join(repo.cwd, 'filtered.txt'), new Date(0), new Date(0));
+  const before = repo.snapshot(), result = (await api).worktrees(options(repo)), command = cli(repo, 'worktrees');
+  assert.equal(command.status, 2);
+  for (const r of [result, command.json]) {
+    assert.equal(r.completeness, 'partial'); assert.equal(r.evidence.worktrees[0].cleanliness, 'unknown');
+    assert.ok(r.diagnostics.some(d => d.code === 'unsafe-filter'), JSON.stringify(r.diagnostics));
+  }
+  assert.equal(fs.existsSync(marker), false); assert.deepEqual(repo.snapshot(), before);
+});
 test('malformed loose refs are retained as unknown while valid sibling evidence remains available', async t => {
   const repo = makeRepo(t); writeLedger(repo); repo.commit('valid sibling ledger'); repo.write('.git/refs/heads/broken', 'not-an-object\n');
   const before = repo.snapshot(), brokenBytes = fs.readFileSync(path.join(repo.cwd, '.git/refs/heads/broken'));
