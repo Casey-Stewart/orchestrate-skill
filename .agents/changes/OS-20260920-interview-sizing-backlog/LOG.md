@@ -486,3 +486,51 @@ phrased without its four verbs or with the negation after the command; and its s
 subsection, not the document. All three are honest-labelling fixes to one comment block, sent as a
 second, comment-only polish. A narrow sweep honestly labelled is worth more than a broad one
 silently trusted.
+
+### B03 — round 2: SHIP, and the third instance of one class
+
+**`R2 SHIP @5acad5e`**. The P1 and both round-1 ASKs are **FIX VERIFIED**. Validation 278/278.
+
+The re-reviewer re-derived rather than re-read. It ran its own PyYAML 6.0.3 sweep over all 95
+printable-ASCII heads and diffed it against the extracted predicate: the set the predicate accepts
+where YAML disagrees is EXACTLY the declared `KNOWN_GAP`, nothing more and nothing missing, with the
+failure-mode comment matching character for character. `~Runs a batch` loads as `'~Runs a batch'`,
+so "reads exactly as written" is accurate for the string the sweep actually builds. `QUOTE_HEADS`
+hides no acceptance — both quotes raise in PyYAML and the quoted branch rejects them.
+
+**The `KNOWN_GAP` design was tested against its own purpose, not just its assertions.** The reviewer
+simulated closing `#`: the pattern edit plus the two list edits leaves two failures, both size
+literals; updating the four count literals goes fully green. **No assertion is deleted and none has
+its meaning inverted.** That was the whole question — a design that required deleting an assertion
+to make progress would have been *a test that pins the defect* wearing a better name.
+
+The `met` counts assertion also survived attack: a non-printable member drops the count, a
+`KNOWN_GAP` duplicate collapses in the loop and is caught (that list has no `Set`-size assertion of
+its own, so `met.gap` is doing real work), and widening `QUOTE_HEADS` to swallow a character past the
+`continue` raises `met.quote` — so the early `continue` is not an escape hatch.
+
+**Two new ASKs, and the first is this change's third instance of one class.** `INDICATOR_ON_DOUBT` is
+pinned by `deepEqual(list.filter(m => !MEMBERS.includes(m)), [])`, which passes for `[]` — an empty
+filter of an empty list — and for any subset. Setting it to `[]` went GREEN and **restored the exact
+falsehood round-1's ASK-2 was raised about**; setting it to `['?','!']` went GREEN and makes the
+message claim YAML accepts `!Runs a batch`, which raises ConstructorError. An assertion that cannot
+fail, sitting inside the fix for an earlier finding.
+
+That is now three times in this change: B01's F4 (the template example asserted by nothing), B04's
+mutation 14 (the rule's imperative unpinned), and this. The pattern is consistent enough to name:
+**the fix for a vacuity finding is itself a prime site for a vacuity finding**, because the author is
+thinking about the behaviour being pinned and not about whether the new pin can fail. Every gate this
+change ran that mutated the fix — rather than reading it — found one. Candidate for the close-out
+distillation.
+
+The second ASK is a scope-honesty point that rhymes with the round-1 P1. `KNOWN_GAP` claims "seven
+characters are accepted here that YAML does not read as written"; that is true of the swept form,
+`description: <c>Runs a batch`. Sweeping ONE-CHARACTER values finds **nine** divergences — the seven
+plus `=` (ConstructorError) and `~` (loads `None`). The live case is `tools: ~`, accepted here as the
+string `~` while YAML loads null: key present, no list, **full catalog inherited** — BL-008's end
+state reached through a column nobody swept. Pre-existing and outside the fence, so it goes to the
+backlog with the gap family; the sentence gets scoped to what it actually checked.
+
+The round-1 P1 was the end-of-line form of a head character and the fix closed that column for `-`
+alone. This is the same lesson from the other side: **a sweep is complete only for the shape it
+sweeps, and naming the shape is the honest part.**
