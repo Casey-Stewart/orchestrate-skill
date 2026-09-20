@@ -215,7 +215,7 @@ For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contain
 Inspect every worktree's porcelain status including untracked files and both rename
 endpoints. Before status, run git check-attr filter on the paths status inspects:
 a path resolving to a set filter, or a submodule, makes safe cleanliness unknown;
-unspecified, unset and mere configuration do not. Never execute such filters to
+unspecified, unset and mere configuration do not. Never execute such filter drivers to
 obtain a clean result. For the manual fence, use git diff --name-status -z -M
 integration-sha...batch-sha, inspect both rename endpoints against the committed plan
 union recorded extensions union own batch file; inspect that file's blob diff for

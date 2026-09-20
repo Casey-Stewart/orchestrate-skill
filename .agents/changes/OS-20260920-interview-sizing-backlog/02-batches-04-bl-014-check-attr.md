@@ -75,6 +75,10 @@ un-fixed text. This batch therefore adds the assertion that does — which is wh
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/bl-014-check-attr` — `fix: name check-attr in the manual fallback (batch 04)`.
+- [x] polish: Pin the resolved-filter clause, not just the command token, so inserting a
+      negation into the rule in either document reddens the suite; demonstrate it.
+- [x] polish: Change "such filters" to "such filter drivers" in both mirrors, so a reader
+      cannot bind it to the git check-attr filter probe the rule now names.
 
 ## Acceptance criteria
 
