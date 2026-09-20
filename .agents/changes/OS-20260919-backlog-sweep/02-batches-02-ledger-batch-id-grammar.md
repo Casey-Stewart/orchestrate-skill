@@ -186,6 +186,9 @@ this fence for that reason.**
 - [x] polish: A2 — drop the whole-file `` `Bnn` `` uniqueness lock; the anchored clause regex replaces it and a legitimate later mention no longer goes red.
 - [x] polish: A3 — correct the report's "zero `<title>` hits" claim: this ledger's own batch file carries one, inside a fenced code block, at scaffold time.
 - [x] polish: A4 — report that pinning `BATCH_BASE` to `fad7a64` makes the suite require repository history (loud failure in a shallow clone); the tradeoff ASK 4 asked for, no change.
+- [x] polish: R3-1 — anchor `residualGrep` to the grep's own zero-hits verdict with `[^.;]*`, closing the same cross-sentence hole `[^;]*` left open; proven with the demonstrated bypass.
+- [x] polish: R3-2 — pin each self-check id clause as an exact per-file substring, since co-occurrence cannot tell BOTH/and from EITHER/OR nor a rule from its negation.
+- [x] polish: R3-3 — normalise whitespace and strip `.md` before matching, so correct prose naming `PROGRESS.md` no longer turns the suite red claiming the rule is missing.
 
 ## Acceptance criteria
 

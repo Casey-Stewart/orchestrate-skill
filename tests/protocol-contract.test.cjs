@@ -140,16 +140,25 @@ test('reusable artifacts contain no local Python installation default, while fro
 
 test('the scaffold self-check names the Bnn id rule for both authority tables', () => {
   // scaffolding.md step 9 and the SKILL.md one-liner summarising it are the only place
-  // a scaffolder is TOLD the rules the fence enforces. Both clauses are matched by one
-  // anchored regex over the whole file, never by a window derived from punctuation:
-  // swapping a semicolon for a full stop must not be able to widen the window until
-  // unrelated prose elsewhere satisfies it. `[^.;]*` keeps each match inside one clause.
-  const idRule = /every `#` cell of the[^.;]*(?:plan[^.;]*PROGRESS|PROGRESS[^.;]*plan)[^.;]*`Bnn`/i;
-  const residualGrep = /grep[^;]*`<title>`/i;
-  for (const file of ['orchestrate/references/scaffolding.md', 'orchestrate/SKILL.md']) {
-    const text = read(file).replace(/\s+/g, ' ');
-    assert.match(text, idRule, file + ': the self-check must require every `#` cell of the plan AND PROGRESS batch tables to read `Bnn`');
-    assert.match(text, residualGrep, file + ': the self-check must grep for `<title>`, the token a deleted comment marker leaves behind');
+  // a scaffolder is TOLD the rules the fence enforces. The id rule is pinned as the
+  // exact approved sentence, like the decision tables above: mere co-occurrence of
+  // "plan", "PROGRESS" and `Bnn` cannot tell "in BOTH ... and" from "in EITHER ... OR",
+  // nor a requirement from its negation, and only those words state the rule the fence
+  // enforces. Rewording it is then a deliberate, visible test edit. Filenames are
+  // normalised away first, so writing "PROGRESS.md" is prose, not a failure.
+  const selfCheckText = file => read(file).replace(/\s+/g, ' ').replace(/\.md\b/g, '');
+  const idClause = {
+    'orchestrate/references/scaffolding.md': 'every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`',
+    'orchestrate/SKILL.md': "every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`"
+  };
+  // The residual grep is bound to its own verdict: naming `<title>` somewhere else in
+  // the paragraph is not the same as grepping for it and requiring zero hits. `[^.;]*`
+  // keeps the match inside one clause — the hole a bare `[^;]*` left open.
+  const residualGrep = /grep the new[^.;]*`<title>`[^.;]*zero hits/i;
+  for (const [file, clause] of Object.entries(idClause)) {
+    const text = selfCheckText(file);
+    assert.ok(text.includes(clause), file + ': the self-check must read exactly "' + clause + '" (whitespace collapsed, .md stripped)');
+    assert.match(text, residualGrep, file + ': the self-check must grep for `<title>` and require zero hits — the token a deleted comment marker leaves behind');
   }
   // Rule and template cannot drift apart: the example rows must carry the very token
   // step 9 greps for, or the partial-deletion door reopens without a single test moving.
