@@ -44,10 +44,10 @@ and an intermediate checkpoint would prove nothing an earlier wave could not
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
 | B01 | Wrapped polish items in the fence tool | `fix/bl-011-wrapped-polish` | 1 | — | 🟢 | 2026-09-20 | Merged `--no-ff` → **`6253432`**, tip green **272/272** (base 260 + 12). Implementer and reviewer both default tier (M). 6a fence PASS; 6b failing-on-base proven by the orchestrator at `0d1f8b7` (84 tests, 81 pass, 3 fail). `R1 SHIP @d0d3fcf asks=6` (reviewer 2 + test-hunter 4, all test-only; reviewer ASK 1 = hunter F4) → polish `7e9dad8` closed F1–F4, test-only, so no scoped re-review. Reviewer ASK 2 declined as a production change an ASK cannot license → residual for BACKLOG. **The unfixed tool reported VIOLATION on this batch's own wrapped polish items and the fixed copy PASS** — BL-011 reproduced and closed in one gate. See [LOG.md](LOG.md) §2026-09-20 — wave 1 › B01. `m: rounds=0 asks=4 fence-bounces=0 gate=4/0 tip-red=0` |
-| B02 | Interview sizing rule and the topic-5 move | `fix/interview-sizing` | 2 | — | ⬜ | 2026-09-20 | — |
-| B03 | Leading YAML indicator characters in frontmatter | `fix/bl-008-yaml-indicators` | 2 | — | ⬜ | 2026-09-20 | — |
-| B04 | Name check-attr in the manual fallback | `fix/bl-014-check-attr` | 2 | — | ⬜ | 2026-09-20 | — |
-| B05 | A test seam for the unreachable evidence guards | `fix/bl-009-evidence-seam` | 2 | — | ⬜ | 2026-09-20 | — |
+| B02 | Interview sizing rule and the topic-5 move | `fix/interview-sizing` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
+| B03 | Leading YAML indicator characters in frontmatter | `fix/bl-008-yaml-indicators` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
+| B04 | Name check-attr in the manual fallback | `fix/bl-014-check-attr` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
+| B05 | A test seam for the unreachable evidence guards | `fix/bl-009-evidence-seam` | 2 | — | 🔄 | 2026-09-20 | Wave 2 open; implementer spawned on the default tier. |
 | B06 | Smoke-page build identity, sidecar coherence and hand-over proofing | `fix/bl-012-013-017-smoke-page` | 3 | — | ⬜ | 2026-09-20 | — |
 | B07 | Self-check code spans and honest runner classification | `fix/bl-010-016-selfcheck-runners` | 4 | — | ⬜ | 2026-09-20 | — |
 

@@ -150,3 +150,62 @@ continuation line in `.agents/changes/**` and `.agents/archive/**` still satisfi
 
 Polish therefore carries F1–F4 only — all in `tests/check-fence.test.cjs`, no production file
 touched, so the pass closes mechanically without a scoped re-review.
+
+### B01 — polish, integration, and BL-011 closing on itself
+
+Polish `7e9dad8` closed F1–F4 in `tests/check-fence.test.cjs` alone; `check-fence.mjs` and
+`02-batch.md` are byte-identical to `d0d3fcf`, so the pass closed mechanically with no scoped
+re-review. Each finding now kills its mutant: F1 by a one-space continuation ACCEPTED and a
+tab-indented one REJECTED (the two fixtures differ in exactly one character, so the verdict cannot
+be attributed to line-count skew); F2 by a wrapped item appended past `polishAt` into
+`## Acceptance`, which the real function rejects at `[14,15]` and an always-true guard consumes;
+F3 by a header with a trailing space and an empty ask; F4 by reading the template with `fs` and
+feeding its extracted bytes through the real `validateBatchEdit`.
+
+**The implementer corrected the ASK's own premise on F3** — the bare `- [ ] polish:` case the
+orchestrator relayed does NOT kill `.+` → `.*`, because the mutation keeps the literal space in
+`polish: `, so a header without that space is rejected either way; it measured that mutant
+surviving 12/12. The distinguishing input is `- [ ] polish: ` WITH the space and an empty ask.
+Both spellings are now asserted. A gate finding is a pointer, not a specification — the same
+lesson the contract already records for backlog entries, arriving this time from the other side.
+
+It also reported a hazard worth keeping: `String.prototype.replace` performs `$`-substitution on a
+string replacement, and `` $` `` inserts the entire preceding text. Appending the polish items with
+a `.replace()` whose replacement contained a `$`-bearing regex literal duplicated 183 lines of the
+batch file. Reverted with `git checkout`, redone by index slicing; every fixture edit in the test
+file now uses a function replacer plus an `assert.notEqual(text, f.batchText)` guard, so a silently
+no-op fixture edit cannot masquerade as a pass.
+
+**BL-011 closed on itself, which is the part worth remembering.** Run from the integration checkout
+— which still held the UNFIXED tool — 6a on the polished tip returned `VIOLATION`, tripping on
+B01's own four wrapped `polish:` items. The fixed copy in the batch worktree returned `PASS`, 0
+violations, 0 unknowns, and the manual fallback confirmed the batch-file diff is pure appends of
+ticked polish items with no other line touched. That is the defect reproducing one final time on
+the batch that repairs it, and the concrete vindication of the pre-flight finding that put B01
+alone in wave 1: every later batch is now gated by a tool that can read this repository's own
+authoring convention.
+
+Dry run clean → merged `--no-ff` → **`6253432`**; tip validation **272 pass / 0 fail** (base 260 +
+12 new), `git diff --check` exit 0.
+
+### Environment notes, not plan deviations
+
+Worktrees live at `%TEMP%\wt920\<batch>` rather than under the session scratchpad: the scratchpad
+prefix plus this repo's 146-character deepest tracked path exceeds Windows' 260-character limit —
+the same trap both previous ledgers hit. `git worktree remove` leaves a stale `.git/worktrees/<id>`
+admin directory behind with `Permission denied` on this machine; the entries are absent from
+`git worktree list`, so reconcile does not see them and nothing is blocked.
+
+A gate transport defect, recorded because it nearly produced a false result: staging a file through
+a PowerShell pipeline with `Set-Content -NoNewline` collapsed `tests/check-fence.test.cjs` to a
+single line and yielded a `SyntaxError: Unexpected end of input`. Read naively that is "the batch's
+tests do not even load on base" — a fabricated failing-on-base pass. `git checkout <branch> -- <path>`
+is the byte-accurate form. Verified means verified through a transport that does not mangle.
+
+## 2026-09-20 — wave 2
+
+Opened with all four members cut from wave base **`37219cd`**: B02 `fix/interview-sizing`,
+B03 `fix/bl-008-yaml-indicators`, B04 `fix/bl-014-check-attr`, B05 `fix/bl-009-evidence-seam`.
+Four worktrees under `%TEMP%\wt920\b0*`, per-worktree setup n/a. The fences were planned mutually
+disjoint and no member reads another's output; this is the wave the plan's concurrency was approved
+for. Every member is gated by the tool B01 just repaired.
