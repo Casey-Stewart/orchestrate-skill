@@ -151,16 +151,16 @@ NO change — it is deliberately outside this fence.
 
 ## Checklist
 
-- [ ] Capture the base-build canary BEFORE editing: run
+- [x] Capture the base-build canary BEFORE editing: run
       `node orchestrate/tools/git-evidence.mjs worktrees --repo .` from the repository
       root and record the exit code, `completeness`, every `cleanliness` value and every
       diagnostic `code`. Quote it in the report.
-- [ ] Read all five fenced files and confirm each line cited above still says what this
+- [x] Read all five fenced files and confirm each line cited above still says what this
       file claims; report drift rather than working around it.
-- [ ] Replace the config-only trigger in `safeStatusPrerequisites()` with the resolved
+- [x] Replace the config-only trigger in `safeStatusPrerequisites()` with the resolved
       per-path `filter` attribute rule, treating `unspecified` and `unset` as safe and a
       set value or bare `set` as unsafe. Own commit.
-- [ ] Keep every existing refusal reason intact: submodules, malformed index, failed
+- [x] Keep every existing refusal reason intact: submodules, malformed index, failed
       probe, unparseable output — each still returns `unknown`, never "safe".
 - [ ] Add the failing-on-base test: filter configured, no path resolving to it → real
       cleanliness, `completeness: complete`, exit 0, no `unsafe-filter`. Own commit.
@@ -170,7 +170,7 @@ NO change — it is deliberately outside this fence.
       an existing assertion may be pinning the old trigger.
 - [ ] Add a case proving no filter command is executed under the new rule, in the style
       of the existing marker-file assertions.
-- [ ] Update the `--help` text at `git-evidence.mjs` to describe the resolved-attribute
+- [x] Update the `--help` text at `git-evidence.mjs` to describe the resolved-attribute
       rule and keep its documented exit codes.
 - [ ] Update the prose in `orchestrate/references/protocol.md` and the mirrored sentence
       in `orchestrate/templates/00-READBEFORE.md` — **identically**. Own commit.
