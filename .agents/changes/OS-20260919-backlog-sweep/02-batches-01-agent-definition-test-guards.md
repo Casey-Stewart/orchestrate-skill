@@ -110,25 +110,56 @@ forms still walk through it.
 
 ## Checklist
 
-- [ ] Read `tests/agent-definitions.test.cjs` end to end and confirm each line cited above
+- [x] Read `tests/agent-definitions.test.cjs` end to end and confirm each line cited above
       still says what this file claims it says; report any drift instead of working around it.
-- [ ] **[BL-004]** Replace the unquoted-`: ` guard with one that rejects all three named
+- [x] **[BL-004]** Replace the unquoted-`: ` guard with one that rejects all three named
       forms — trailing colon at end of value, unterminated quote, and `a "b: c" d` —
       while still accepting a properly quoted colon.
-- [ ] **[BL-004]** Add the accept/reject case table that drives the new validator, with at
+- [x] **[BL-004]** Add the accept/reject case table that drives the new validator, with at
       minimum: the three reject forms, the quoted-colon accept, `tools:Read, Glob` (no
       space) as a reject, and one plain valid line as an accept. Own commit.
-- [ ] **[BL-005]** Make the directory whitelist recursive; a nested `.md` fails with its
+- [x] **[BL-005]** Make the directory whitelist recursive; a nested `.md` fails with its
       relative path and the reason in the message. Own commit.
-- [ ] **[BL-006]** Fix the size assertion so its units and its message agree; state in a
+- [x] **[BL-006]** Fix the size assertion so its units and its message agree; state in a
       comment which one it measures and why. Own commit.
-- [ ] Confirm all four shipped definitions still pass every assertion, unchanged.
-- [ ] Prove failing-on-base: name, in the report, the exact assertion that goes red when
+- [x] Confirm all four shipped definitions still pass every assertion, unchanged.
+- [x] Prove failing-on-base: name, in the report, the exact assertion that goes red when
       run against the un-fixed file, for EACH of BL-004, BL-005 and BL-006.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `fix/agent-definition-test-guards` — `fix: agent-definition guards that can actually fail (batch 01)`.
+- [x] Commit on `fix/agent-definition-test-guards` — `fix: agent-definition guards that can actually fail (batch 01)`.
+- [x] polish: **[P1]** the nested-definition guard read the whole `err.message`, which carries
+      deepEqual's appended diff, so the path was named by the diff and not by the message —
+      assert on the first line alone, and correct the comment that claimed the diff is replaced.
+- [x] polish: **[A1]** pin the YAML escape hex counts in both directions — the 2-, 4- and
+      8-digit forms accept, `\x4`/`\u12`/`\U0041` reject, each on its own reason regex.
+- [x] polish: **[A2]** reach `frontmatterFields`'s line filter from both sides: an indented line
+      and a colon-less line reject quoting the offending line, a blank line is still skipped.
+- [x] polish: **[A3]** reach the block parse's own three paths — no `---` opener, a key declared
+      twice, and a body asserted to start after the closing `---` rather than repeat the block.
+- [x] polish: **[A4]** stop falsely rejecting `description: "…" # comment`: a space-separated
+      `#` tail is valid YAML, is accepted, and is dropped from the value rather than folded in.
+- [x] polish: **[A5]** a literal TAB is YAML 1.2 rule 57's own escape, so the escape class takes
+      it — and, because that is the key to every tab hole, a TAB outside a quoted scalar (after
+      the colon, after the value, before a `#`) is now rejected, with a case for each place.
+- [x] polish: **[A6]** the nested-definition message is pinned on its reason as well as its path,
+      so the first assertion in `assertKnownDefinitions` is the one proven to fire.
+- [x] polish: **[A7]** pin the size assertion's unit against `fs.statSync().size`, so reverting it
+      to `read(file).length` goes red instead of hiding under a ceiling 3.4x above every file.
+- [x] polish: [A1] reject an 8-digit escape naming a code point above U+10FFFF; the largest real one pins the boundary.
+- [x] polish: [A2] one accept row carrying all 18 single-character escapes, plus two rejects: add or drop any member and it is red.
+- [x] polish: [A3] nest the walk fixture two deep and behind a dotted directory, so one level of recursion no longer proves the walk.
+- [x] polish: [A4] a CRLF definition and its LF twin, both written by the test, must parse to the same fields and the same body.
+- [x] polish: [B1] pin the rejection of a quoted value with an unseparated `#`, and the space count; the rule is YAML 1.2 `s-separate-in-line`.
+- [x] polish: [B2] pin the deliberate rejection of a `#` comment line inside the frontmatter block.
+- [x] polish: [B3] accept a single-quoted Windows path — backslashes are literal there, so escape handling stays in the double-quote branch.
+- [x] polish: [C1] say that a TAB inside comment TEXT is legal YAML, unreachable here, and rejected as a deliberate simplification.
+- [x] polish: [C2] reword the cost comment — a false rejection is loud and local, a false acceptance is silent inheritance, so reject on doubt.
+- [x] polish: [C3] put a nested `reviewer.md` in the fixture, so a basename whitelist no longer passes the path-and-reason assertion.
+- [x] polish: drop the unreachable carriage return from the trailing strip; the field regex excludes line terminators and rejects the line first.
+- [x] polish: [P1] pin the code-point bound from the loose side as well — the first code point that does not exist now has its own reject row.
+- [x] polish: [ASK] sweep every printable ASCII character against an independently written member list, instead of sampling two rejects.
 
 ## Acceptance criteria
 
