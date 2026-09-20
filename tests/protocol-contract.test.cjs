@@ -134,6 +134,24 @@ test('reusable artifacts contain no local Python installation default, while fro
   }
 });
 
+// A scaffolder's job, mechanised: lift the pinned example row out of the template's
+// batch-table instruction comment and substitute real values. No authority row is
+// hand-authored here, so a template that pins no Bnn row cannot quietly ship a ledger
+// the real fence refuses to read.
+function renderAuthorityTable(template, required, values, text = read(template)) {
+  const lines = text.split('\n'), cellsOf = line => line.split('|').slice(1, -1).map(x => x.trim());
+  const head = lines.findIndex(l => l.startsWith('|') && required.every(key => cellsOf(l).includes(key)));
+  assert.notEqual(head, -1, template + ': no batch table carrying ' + required.join(', '));
+  const open = lines.findIndex((l, i) => i > head && l.includes('<!--'));
+  assert.notEqual(open, -1, template + ': the batch table carries no instruction comment');
+  const close = open + lines.slice(open).findIndex(l => l.includes('-->'));
+  const example = lines.slice(open, close + 1).find(l => /^\| B\d{2,} \|.*\|$/.test(l));
+  assert.ok(example, template + ': the batch-table instruction comment pins no `| Bnn | ... |` example row for a scaffolder to copy');
+  const header = cellsOf(lines[head]), cells = cellsOf(example);
+  assert.equal(cells.length, header.length, template + ': the Bnn example row needs one cell per header column');
+  return [lines[head], lines[head + 1], '| ' + header.map((key, i) => values[key] ?? cells[i]).join(' | ') + ' |', ''].join('\n');
+}
+
 test('published helper recipes execute actual CLIs and generated batch grammar passes the real fence', t => {
   const repo = makeRepo(t), ledger = '.agents/changes/DOCS', integration = 'refs/heads/codex/docs-ledger';
   const batch = 'refs/heads/codex/docs-b01', batchFile = ledger + '/02-batches-01-example.md';
@@ -144,8 +162,19 @@ test('published helper recipes execute actual CLIs and generated batch grammar p
     .replace(/<!-- - \[ \] one box[\s\S]*?-->/, '- [ ] Implement example.')
     .replace(/<!--[\s\S]*?-->/g, '');
   repo.write(batchFile, rendered);
-  repo.write(ledger + '/01-plan.md', '| # | Branch | Files (fence) |\n|---|---|---|\n| B01 | codex/docs-b01 | `payload.txt` |\n');
-  repo.write(ledger + '/PROGRESS.md', '**State**: ACTIVE\n| # | Branch | Notes |\n|---|---|---|\n| B01 | codex/docs-b01 | — |\n');
+  const planKeys = ['#', 'Branch', 'Files (fence)'], progressKeys = ['#', 'Branch', 'Notes'];
+  repo.write(ledger + '/01-plan.md', renderAuthorityTable('orchestrate/templates/01-plan.md', planKeys,
+    { '#': 'B01', Branch: '`codex/docs-b01`', 'Files (fence)': '`payload.txt`' }));
+  repo.write(ledger + '/PROGRESS.md', '**State**: ACTIVE\n' + renderAuthorityTable('orchestrate/templates/PROGRESS.md',
+    progressKeys, { '#': 'B01', Branch: '`codex/docs-b01`', Notes: '—' }));
+  // The other direction: strip the pinned row and the render must fail loudly, naming
+  // the template and the Bnn row it wanted. An unpinned # cell is what degraded
+  // OS-20260919's fence check to the manual fallback for every one of its batches.
+  for (const [template, keys] of [['orchestrate/templates/01-plan.md', planKeys], ['orchestrate/templates/PROGRESS.md', progressKeys]]) {
+    const stripped = read(template).split('\n').filter(l => !/^\| B\d{2,} \|/.test(l)).join('\n');
+    assert.throws(() => renderAuthorityTable(template, keys, {}, stripped),
+      e => e.message.includes(template) && e.message.includes('Bnn'), template);
+  }
   repo.write(ledger + '/00-READBEFORE.md', contract.replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => ({
     INTEGRATION_BRANCH: 'codex/docs-ledger', EVIDENCE_TOOL: path.join(ROOT, 'orchestrate/tools/git-evidence.mjs'),
     FENCE_TOOL: path.join(ROOT, 'orchestrate/tools/check-fence.mjs') }[key] || 'example')));

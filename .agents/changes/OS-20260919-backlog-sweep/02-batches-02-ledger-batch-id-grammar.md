@@ -157,7 +157,7 @@ this fence for that reason.**
 - [x] **[BL-002]** Extend the step-9 self-check in `orchestrate/references/scaffolding.md`
       and the matching one-liner in `orchestrate/SKILL.md:186-187` with the id-format
       clause, covering BOTH tables. Own commit.
-- [ ] **[BL-002]** Rewrite the authority files in `tests/protocol-contract.test.cjs:132`
+- [x] **[BL-002]** Rewrite the authority files in `tests/protocol-contract.test.cjs:132`
       to render from the shipped `01-plan.md` and `PROGRESS.md` templates, and run the
       real `check-fence.mjs` over the result. Own commit.
 - [ ] Prove failing-on-base for BL-002: check out the batch base, apply ONLY the new test,
