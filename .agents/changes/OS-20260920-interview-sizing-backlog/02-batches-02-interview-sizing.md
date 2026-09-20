@@ -125,6 +125,21 @@ ONLY citation of topic 5 in the repository.
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/interview-sizing` — `fix: interview sizing rule and the topic-5 move (batch 02)`.
+- [x] polish: Scan option labels over collapsed text, filter on ` + ` or ` and `, and scope the
+      scan to the Interview section, so a wrapped or and-joined compound label reddens and an
+      innocent quoted phrase elsewhere does not.
+- [x] polish: Widen the contradiction sweeps to ordinary English — consolidate / combine /
+      collapse stems, a second call called a failure, and a numeric question budget — and add the
+      sweeps A3 and A4 never had, each with its own live specimen.
+- [x] polish: Replace the two assertions that cannot fail: the citation-count inequality entailed
+      by its own input, and the length / set-size / no-5 checks entailed by the deepEqual above
+      them. The replacements pin the expected list itself and per-topic citation in scaffolding.md.
+- [x] polish: Sweep every file the skill ships, not the two edited documents: contradictions over
+      `orchestrate/**`, and citations over every extension, so a dangling topic in the HTML
+      template, a .ps1 or a .txt is not invisible.
+- [x] polish: Add the missing small pins — a positive assertion on SKILL.md’s interview clause, the
+      per-row registry citation map, a notEqual(-1) guard before slicing procedure step 7, and an
+      existsSync on the 00-READBEFORE template name the repeat-repo rule depends on.
 
 ## Acceptance criteria
 

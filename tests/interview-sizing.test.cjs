@@ -7,9 +7,19 @@ const ROOT = path.resolve(__dirname, '..');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g, '\n');
 const SCAFFOLDING = 'orchestrate/references/scaffolding.md';
 const SKILL = 'orchestrate/SKILL.md';
-const FENCED = [SCAFFOLDING, SKILL];
-// Collapsed whitespace, so a wrapped reintroduction is caught as surely as a one-line one.
+const TEMPLATE_CONTRACT = 'orchestrate/templates/00-READBEFORE.md';
+// The surviving interview topics, written out here and nowhere derived: an edit that
+// changes both the documents and this list still has to get past the size assertions
+// below, which are properties of THIS list, not of what the sweep happened to find.
+const TOPICS = [1, 2, 3, 4, 6, 7];
+// Collapsed whitespace, so a wrapped reintroduction is caught as surely as a one-line
+// one. Every scan in this file runs on collapsed text; ~90-column wrapping is this
+// repository's own convention, so the wrapped form is the likely one.
 const collapse = text => text.replace(/\s+/g, ' ');
+// Placeholder NAMES are identifiers, not directives: `{{MERGE_POLICY}}` is a slot in
+// the generated contract, not an instruction to merge anything. They are neutralised
+// before the contradiction sweep so the sweep can key on ordinary English stems.
+const sweepText = text => collapse(text.replace(/\{\{[A-Z_]+\}\}/g, ' {{PLACEHOLDER}} '));
 const section = (text, heading) => {
   const start = text.indexOf(heading);
   assert.notEqual(start, -1, 'section heading not found: ' + heading);
@@ -17,14 +27,27 @@ const section = (text, heading) => {
   return text.slice(start, next === -1 ? text.length : next);
 };
 
-// The interview is sized by prose, so the production code here IS the wording: a
-// positive-only suite is defeated by appending one sentence. Every rule below is
-// therefore pinned twice — the passage that must be present, and a sweep of BOTH whole
-// documents for a directive that would contradict it.
+// Files the skill SHIPS, and files the repository carries. The sizing rule is set by
+// all of `orchestrate/**` — a revived single-round directive in protocol.md or in the
+// generated contract template governs behaviour exactly as one in scaffolding.md does —
+// so the contradiction sweeps run over the whole skill, not over the two edited files.
+// `.agents/` is excluded everywhere on purpose: those ledgers are historical records
+// that quote the removed text verbatim and are never rewritten.
+const BINARY = /\.(?:xlsx|xls|png|jpe?g|gif|ico|pdf|zip|gz|woff2?|ttf|eot|exe|dll)$/i;
+function walk(dir, out = []) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
+    if (entry.name === '.git' || entry.name === '.agents' || entry.name === 'node_modules') continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walk(full, out);
+    else if (!BINARY.test(entry.name)) out.push(path.relative(ROOT, full).split(path.sep).join('/'));
+  }
+  return out;
+}
+const skillFiles = () => walk(path.join(ROOT, 'orchestrate'));
 
-test('the merge arithmetic and the single-round promise are gone from both documents', () => {
+test('the merge arithmetic and the single-round promise are gone from the whole skill', () => {
   // A1 + A8, negative. These are the exact strings the batch deleted; re-introducing
-  // any of them in either document turns this red.
+  // any of them anywhere in the skill turns this red, wrapped or not.
   const removed = [
     'merged down to its 4-question cap',
     '{1+3, 2+6, 4+7, 5}',
@@ -33,7 +56,10 @@ test('the merge arithmetic and the single-round promise are gone from both docum
     'ONE consolidated interview round',
     'ONE consolidated AskUserQuestion round',
   ];
-  for (const file of FENCED) {
+  const files = skillFiles();
+  assert.ok(files.includes(SCAFFOLDING) && files.includes(SKILL) && files.includes(TEMPLATE_CONTRACT),
+    'the skill sweep must reach the edited documents and the generated contract template');
+  for (const file of files) {
     const text = collapse(read(file));
     for (const literal of removed) {
       assert.ok(!text.includes(literal), file + ': must not contain "' + literal + '"');
@@ -42,32 +68,71 @@ test('the merge arithmetic and the single-round promise are gone from both docum
 });
 
 // Each banned pattern is paired with a specimen it MUST match. The specimens are the
-// sentences this batch removed (and, for the rules that are pure additions, the
-// directive that would undo them), so a typo cannot quietly disarm a sweep: the sweep
-// proves it can fire before it reports that it did not.
+// sentences this batch removed, or the directive that would undo a rule it added, so a
+// pattern that has gone blind reports itself before it reports "nothing found". Plain
+// English counts: a rule keyed on "merge" is no guard at all against "consolidate",
+// "combine", "collapse" — or against re-imposing the arithmetic with no verb at all,
+// as a numeric budget.
 const CONTRADICTIONS = [
+  // A1 — one round, one call, or a question budget by any other name.
   ['a single interview round', /\b(?:one|a single)\s+(?:consolidated\s+)?(?:AskUserQuestion\s+)?(?:interview\s+)?round\b/i,
     'Interview — ONE consolidated AskUserQuestion round covering only the gaps'],
-  ['topics squeezed into one call', /\bfits?\b[^.]{0,60}\b(?:one|a single)\b[^.]{0,20}\bcall\b/i,
+  ['topics squeezed into one call', /\bfits?\b[^.]{0,60}\b(?:one|a single)\b[^.]{0,20}\bcalls?\b/i,
     'Batch it: topics 1-7 fit in one AskUserQuestion call only merged down to its cap'],
-  ['topics merged to save a call', /\bmerg\w*\b[^.]{0,40}\b(?:topics?|questions?)\b/i,
-    'merge the topics until they fit'],
-  ['questions merged to save a call', /\b(?:topics?|questions?)\b[^.]{0,40}\bmerg\w*\b/i,
-    'genuinely unmergeable topics get two calls; otherwise merge'],
-  ['a decision re-asked at approval', /\b(?:re-?ask|ask again|re-?confirm|reconfirm)\b[^.]{0,60}\bapprov/i,
-    're-confirm every interview answer at plan approval'],
-  ['approval that re-opens a decision', /\bapprov\w*[^.]{0,60}\b(?:re-?ask|ask again|re-?confirm|reconfirm)\b/i,
+  ['topics merged, consolidated, combined or collapsed',
+    /\b(?:merg|consolidat|combin|collaps)\w*\b[^.]{0,60}\b(?:topics?|questions?|interview)\b/i,
+    'Consolidate all seven topics into a single AskUserQuestion call'],
+  // Object first. `interview` is deliberately NOT an object here: this repository's
+  // documents legitimately put "interview #4" a few words from a git "merge".
+  ['topics merged, consolidated, combined or collapsed (reversed)',
+    /\b(?:topics?|questions?)\b[^.]{0,60}\b(?:merg|consolidat|combin|collaps)\w*/i,
+    'the topics are consolidated into one AskUserQuestion call'],
+  ['a second call treated as a defect', /\b(?:second|extra|additional|further)\s+calls?\b[^.]{0,60}\b(?:failure|failing|avoided?|discouraged|last resort)\b/i,
+    'issuing a second call is a failure of preparation'],
+  ['a question budget, stated as a limit', /\b(?:at most|no more than|never exceed|never ask more than|a maximum of|cap(?:ped)? at|limit(?:ed)? to|budget of)\s+\S+\s+questions?\b/i,
+    'Never exceed four questions in total across the whole interview'],
+  ['a question budget, stated as a total', /\b\S+\s+questions?\s+(?:in total|in all|overall|across the (?:whole|entire))\b/i,
+    'Never exceed four questions in total across the whole interview'],
+  // A3 — nothing detection settled, and nothing step 7 will ask, may be asked here.
+  // `(?:(?!\bnever\b)[^.])` is a tempered gap: this document states its prohibitions as
+  // "never ask what detection already answered", and a sweep that fires on the
+  // prohibition itself would have to be deleted rather than fixed.
+  ['re-asking what step 7 asks',
+    /\b(?:wave map|checkpoint placement|batch weights?)\b(?:(?!\bnever\b)[^.]){0,80}\bask\w*\b(?:(?!\bnever\b)[^.]){0,60}\binterview\b/i,
+    'When the wave map is unclear, ask about it in the interview as well'],
+  ['re-asking what detection answered',
+    /\bdetect\w*\b(?:(?!\bnever\b)[^.]){0,80}\bask\b(?:(?!\bnever\b)[^.]){0,80}\b(?:again|anyway|regardless|in the interview)\b/i,
+    'Where detection is uncertain, ask the question again in the interview rather than presenting it'],
+  // A4 — a repeat repo reads the previous contract instead of re-interviewing.
+  ['prior ledgers ignored', /\b(?:ignor|disregard|skip)\w*\b[^.]{0,40}\b(?:prior|previous|earlier|existing)\s+ledgers?\b/i,
+    'Ignore prior ledgers; always run the full interview from scratch'],
+  ['the interview re-run from scratch', /\binterview\b[^.]{0,40}\bfrom scratch\b/i,
+    'Ignore prior ledgers; always run the full interview from scratch'],
+  // A5 — the cap is on repeats: no decision is reopened at approval or at close-out.
+  ['a decision reopened at approval or close-out', /\b(?:re-?ask|re-?confirm|reconfirm|revisit|re-?open)\w*\b[^.]{0,80}\b(?:approv|close-?out)/i,
+    'Revisit every interview answer at close-out'],
+  ['approval or close-out that reopens a decision', /\b(?:approv\w*|close-?out)\b[^.]{0,80}\b(?:re-?ask|re-?confirm|reconfirm|revisit|re-?open)\w*/i,
     'at plan approval, re-ask anything the user may have changed their mind about'],
+  ['a decision asked a second time', /\bask\w*\b[^.]{0,60}\b(?:a second time|twice|again)\b[^.]{0,60}\b(?:approv|close-?out)/i,
+    'Ask each interview decision a second time when the plan is approved'],
 ];
 
-test('no surviving directive in either document contradicts the sizing rule', () => {
-  // A1-A5, negative. The live control comes first: a pattern that cannot fire on the
-  // very text it was written to catch is not a guard.
+test('every contradiction pattern can still fire on the directive it was written to catch', () => {
+  // The live control, kept as its own test so a blind pattern is named on its own line
+  // rather than hidden behind the first sweep failure.
   for (const [name, pattern, specimen] of CONTRADICTIONS) {
     assert.match(specimen, pattern, 'the sweep for "' + name + '" must fire on its own specimen');
   }
-  for (const file of FENCED) {
-    const text = collapse(read(file));
+  assert.equal(new Set(CONTRADICTIONS.map(c => c[0])).size, CONTRADICTIONS.length, 'sweep names are unique');
+});
+
+test('no surviving directive anywhere in the skill contradicts the sizing rule', () => {
+  // A1-A5, negative. This is the entire defence against a later appended sentence, so
+  // it runs over every file the skill ships, collapsed.
+  const files = skillFiles();
+  assert.ok(files.length > 10, 'the sweep must walk the skill tree, not a single file');
+  for (const file of files) {
+    const text = sweepText(read(file));
     for (const [name, pattern] of CONTRADICTIONS) {
       assert.doesNotMatch(text, pattern, file + ': surviving directive — ' + name);
     }
@@ -75,17 +140,40 @@ test('no surviving directive in either document contradicts the sizing rule', ()
 });
 
 test('back-to-back calls are the default and four is the schema cap, not a budget', () => {
-  // A1, positive.
+  // A1, positive, at all three entry points a reader can stop at.
   const text = collapse(read(SCAFFOLDING));
   assert.match(text, /Back-to-back AskUserQuestion calls are the DEFAULT/);
   assert.match(text, /one question per decision that can independently change the plan/);
   assert.match(text, /four questions per call is the tool's schema cap on `questions`, not a budget/);
   assert.match(text, /issue as many calls as the open gaps need/);
-  // The procedure step and the section heading must agree with the body, or a reader
-  // who stops at either one still believes in the single round.
   assert.match(text, /2\. \*\*Interview\*\* — back-to-back AskUserQuestion calls, as many as the open gaps need/);
   assert.ok(read(SCAFFOLDING).includes('## Interview (back-to-back AskUserQuestion calls — confirmations + gaps only)'),
     SCAFFOLDING + ': the Interview heading must name back-to-back calls and keep "confirmations + gaps only"');
+  // A8, positive: deleting SKILL.md's clause outright must not be silent — the
+  // scaffolding pipeline would then name no interview step at all.
+  assert.match(collapse(read(SKILL)),
+    /→ interview \(back-to-back AskUserQuestion calls, as many as the gaps need\) → plan the batches/);
+});
+
+// An option label is short and carries no sentence punctuation; a quoted sentence of
+// prose is neither. Collapsing first is what makes a label wrapped across two source
+// lines — the likely form at this repository's ~90 columns — visible to the scan.
+const compoundLabels = sectionText => [...collapse(sectionText).matchAll(/"[^"]{1,120}"/g)]
+  .map(m => m[0])
+  .filter(label => / \+ | and /.test(label))
+  .filter(label => label.length <= 60 && !/[.,;?]/.test(label));
+
+test('the compound-label scan catches both banned forms, wrapped or inline', () => {
+  // Live control for A2: the scan is run against the two mutations it exists to catch,
+  // one of them wrapped over a line break, plus a prose quotation it must ignore.
+  const specimen = [
+    'Options are "Stop at integration +',
+    'test-hunter" and "Full recipe and agent-run smoke", while the prose quotation',
+    '"on for the next ledger once this one\'s metrics token has shown review time, false',
+    'stops and human smoke minutes." is not a label at all.',
+  ].join('\n');
+  assert.deepEqual(compoundLabels(specimen),
+    ['"Stop at integration + test-hunter"', '"Full recipe and agent-run smoke"']);
 });
 
 test('compound option labels are banned and the ban is illustrated, not described', () => {
@@ -94,12 +182,11 @@ test('compound option labels are banned and the ban is illustrated, not describe
   assert.match(text, /Never join two independent axes in one option LABEL/);
   assert.match(text, /a `\+` or an `and` in a label is the smell/);
   assert.match(text, /One axis per question, one axis per label/);
-  // Sweep: the only double-quoted label joining two axes anywhere in either document is
-  // the banned specimen itself. On the base there are none at all, so this is not a
-  // vacuous "nothing found" — it demands the illustration exist.
-  const compound = FENCED.flatMap(file => [...read(file).matchAll(/"[^"\n]*"/g)].map(m => m[0]))
-    .filter(label => label.includes(' + '));
-  assert.deepEqual(compound, ['"Full recipe + agent-run smoke"']);
+  // Scoped to the section that describes the questions: the only label joining two axes
+  // there is the banned specimen itself. Zero matches is a failure too — the rule has to
+  // be SHOWN, and on the base there were none at all.
+  assert.deepEqual(compoundLabels(section(read(SCAFFOLDING), '## Interview (')),
+    ['"Full recipe + agent-run smoke"']);
 });
 
 test('"confirmations + gaps only" is load-bearing: detection and step 7 are off limits', () => {
@@ -119,10 +206,13 @@ test('a repeat repo collapses the round from the previous ledger contract', () =
   assert.match(text, /A REPEAT repo needs almost no interview/);
   assert.match(text, /`00-READBEFORE\.md`[^.]{0,120}baked answers[^.]{0,80}defaults/);
   assert.match(text, /a second ledger in the same repository needs one call, or none/);
-  // Detection of prior ledgers is SKILL.md's Discovery; if that section is renamed the
-  // instruction points at nothing, so pin the anchor it names.
+  // Two anchors the instruction depends on, either of which a later batch could move:
+  // the Discovery section that finds the prior ledger, and the template that gives the
+  // file its name. Without them the sentence is true when written and false later.
   assert.ok(read(SKILL).includes('## Discovery (every mode starts here)'),
     SKILL + ': §Discovery — the prior-ledger detection this rule relies on — must exist');
+  assert.ok(fs.existsSync(path.join(ROOT, TEMPLATE_CONTRACT)),
+    TEMPLATE_CONTRACT + ': the interview defaults are read from this file in the previous ledger, so it must still be its name');
 });
 
 test('the cap is on REPEATS, not on questions', () => {
@@ -141,19 +231,22 @@ test('interview topic 5 has moved into procedure step 7, with no pointer left be
   assert.notEqual(listEnd, -1, SCAFFOLDING + ': the topic list must end at the FIRST-ledger defaults paragraph');
   const topicList = interview.slice(0, listEnd);
   const numbers = [...topicList.matchAll(/^(\d+)\. \*\*/gm)].map(m => Number(m[1]));
-  // Written independently of the pattern, so a both-at-once edit still fails.
-  assert.deepEqual(numbers, [1, 2, 3, 4, 6, 7]);
-  assert.equal(numbers.length, 6);
-  assert.equal(new Set(numbers).size, 6);
-  assert.ok(!numbers.includes(5), SCAFFOLDING + ': the interview list must contain no topic 5');
+  assert.deepEqual(numbers, TOPICS);
+  // Properties of the expected list itself, not of `numbers`: an edit that moves the
+  // documents and this file together still has to survive them.
+  assert.equal(TOPICS.length, 6, 'six interview topics survive the move');
+  assert.ok(!TOPICS.includes(5), 'topic 5 is not an interview topic any more');
   // No pointer row survives in the list either: the moved subject is named nowhere in it.
   assert.doesNotMatch(topicList, /wave map/i, SCAFFOLDING + ': no interview topic may mention the wave map');
   assert.doesNotMatch(topicList, /checkpoint placement/i, SCAFFOLDING + ': no interview topic may mention checkpoint placement');
 
   const procedure = section(scaffolding, '## Procedure');
-  const approve = procedure.slice(procedure.indexOf('7. **Approve**'), procedure.indexOf('8. **Fill**'));
-  assert.ok(approve.length, SCAFFOLDING + ': procedure step 7 must exist and precede step 8');
-  const approveText = collapse(approve);
+  const stepSeven = procedure.indexOf('7. **Approve**');
+  const stepEight = procedure.indexOf('8. **Fill**');
+  assert.notEqual(stepSeven, -1, SCAFFOLDING + ': procedure step 7 must be the Approve step');
+  assert.notEqual(stepEight, -1, SCAFFOLDING + ': procedure step 8 must be the Fill step');
+  assert.ok(stepSeven < stepEight, SCAFFOLDING + ': step 7 must precede step 8');
+  const approveText = collapse(procedure.slice(stepSeven, stepEight));
   for (const subject of ['plan', 'wave map', 'weights', 'checkpoints', 'fold-ins']) {
     assert.ok(approveText.includes(subject), SCAFFOLDING + ': step 7 must name ' + subject + ' — reads: ' + approveText);
   }
@@ -164,6 +257,16 @@ test('interview topic 5 has moved into procedure step 7, with no pointer left be
   // SKILL.md summarises the same approval and must name weights too.
   assert.match(collapse(read(SKILL)), /user approves plan \+ wave map \+ checkpoints \+ weights \+ fold-ins in one pass/);
 });
+
+// Which registry row cites which interview topic, pinned row by row. The set of topics
+// alone cannot see a single row losing its citation while a sibling row still cites the
+// same number, and the registry is the reason the numbering had to be preserved at all.
+const REGISTRY_CITATIONS = {
+  ID_PREFIX: [6], MAIN_BRANCH: [4], SHIPMENT_SOURCE: [4], SHIPMENT_REF: [4], MERGE_POLICY: [4],
+  VALIDATION_COMMANDS: [1], MUTATION_RUNNER: [1], VERSION_FILES: [2], VERSION_BUMP_RULE: [2],
+  CHANGELOG_RULE: [2], SMOKE_PROCEDURE: [3], AGENT_RUNNERS: [3], EXTRA_PROHIBITIONS: [7],
+  GATE_AGENTS: [7], ROLE_TIERS: [7], CONVERGENCE: [7],
+};
 
 test('the EXECUTION_MODEL registry row is repointed in its third column only', () => {
   // A7. The row's shape is what protocol-contract.test.cjs reads; only the source moves.
@@ -176,34 +279,40 @@ test('the EXECUTION_MODEL registry row is repointed in its third column only', (
   assert.doesNotMatch(cells[3], /interview\s*#/i, 'the third column must no longer cite an interview topic');
 });
 
-// Every citation of an interview topic anywhere in the product must resolve to a topic
-// that still exists. `.agents/` is excluded on purpose: those ledgers are historical
-// records that quote the removed text verbatim and are never rewritten.
-function sweepFiles(dir, out = []) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
-    if (entry.name === '.git' || entry.name === '.agents' || entry.name === 'node_modules') continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) sweepFiles(full, out);
-    else if (/\.(md|cjs|mjs|js)$/.test(entry.name)) out.push(path.relative(ROOT, full).split(path.sep).join('/'));
+test('every other registry row still cites the interview topic it always cited', () => {
+  // A7, the siblings. Dropping a citation is invisible to a set comparison.
+  const rows = read(SCAFFOLDING).split('\n').filter(l => /^\| `\{\{[A-Z_]+\}\}`/.test(l));
+  assert.ok(rows.length > 20, SCAFFOLDING + ': the placeholder registry must still be a table of rows');
+  const found = {};
+  for (const row of rows) {
+    const cited = [...row.matchAll(/interview\s*#(\d+)/gi)].map(m => Number(m[1]));
+    if (cited.length) found[row.match(/\{\{([A-Z_]+)\}\}/)[1]] = cited;
   }
-  return out;
-}
+  assert.deepEqual(found, REGISTRY_CITATIONS);
+  assert.equal(Object.keys(REGISTRY_CITATIONS).length, 16, 'sixteen registry rows cite an interview topic');
+});
 
 test('every surviving interview-topic citation resolves to a topic that still exists', () => {
-  const files = sweepFiles(ROOT);
-  // Controls: the sweep really walked the tree and really reached the citing file.
-  assert.ok(files.includes(SCAFFOLDING), 'the sweep must reach ' + SCAFFOLDING);
-  assert.ok(files.includes(SKILL), 'the sweep must reach ' + SKILL);
+  // A7, repository-wide and extension-blind: a citation in the shipped HTML template or
+  // in a script dangles exactly as one in Markdown does.
+  const files = walk(ROOT);
+  assert.ok(files.includes(SCAFFOLDING) && files.includes(SKILL), 'the sweep must reach the edited documents');
+  assert.ok(files.includes('orchestrate/references/smoke-page-template.html'),
+    'the sweep must reach the shipped HTML template, not only Markdown');
+  assert.ok(files.includes('orchestrate/tools/check-fence.mjs'), 'the sweep must reach the shipped tools');
   assert.ok(files.length > 10, 'the sweep must walk the repository, not a single directory');
   const cited = [];
   for (const file of files) {
     for (const match of read(file).matchAll(/interview\s*#(\d+)/gi)) cited.push({ file, topic: Number(match[1]) });
   }
   const topics = [...new Set(cited.map(c => c.topic))].sort((a, b) => a - b);
-  // The member list is written out, not derived from what was found.
-  assert.deepEqual(topics, [1, 2, 3, 4, 6, 7]);
-  assert.equal(topics.length, 6);
-  const dangling = cited.filter(c => ![1, 2, 3, 4, 6, 7].includes(c.topic));
+  assert.deepEqual(topics, TOPICS);
+  const dangling = cited.filter(c => !TOPICS.includes(c.topic));
   assert.deepEqual(dangling, []);
-  assert.ok(cited.length >= topics.length, 'each surviving topic must actually be cited somewhere');
+  // Every surviving topic is cited in the document that defines it — the check the set
+  // comparison above cannot make, since it is built from the citations themselves.
+  for (const topic of TOPICS) {
+    assert.ok(cited.some(c => c.file === SCAFFOLDING && c.topic === topic),
+      SCAFFOLDING + ': interview topic ' + topic + ' must still be cited by the placeholder registry or the preconditions');
+  }
 });
