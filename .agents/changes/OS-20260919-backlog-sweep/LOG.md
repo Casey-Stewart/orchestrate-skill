@@ -506,3 +506,45 @@ and then refused again because editing section 2's `need` changed the instructio
 for steps 3-5 without their revisions moving. Both refusals were correct and both are the
 reissue discipline the spec asks for. The tooling here is sound; it was the authoring and
 the gate prose that were weak.
+
+### Residual 12 — "verified" must mean verified AS PUBLISHED
+
+The correction to step 1 was itself broken. Fixing a step that dumped 1,125 fields at the
+tester, I wrote a command containing a literal U+0000 and a literal newline into the
+sidecar JSON. I tested it in my own shell, where I had authored it as a heredoc, and
+declared it pre-verified. As published it could not run at all: the NUL is invisible and
+unsendable, and the bare newline made an unterminated JS string literal — `SyntaxError`,
+exit 1, no output. Fourth defect in the same step, introduced by the fix to the third.
+
+The QA runner caught it by doing the one thing I had not: taking the command from the
+issued artifact rather than from the source it was authored in.
+
+**The rule.** A command in a hand-over artifact is verified only when it has been executed
+in the form the reader receives it. Not the source, not the heredoc, not the shell it was
+composed in. For this page that means: render it, read the code block's `textContent`,
+execute exactly those bytes. Done now — 541 characters, byte-identical, exit 0,
+`paths inspected: 387` / `paths resolving to a filter: 0`.
+
+**Two mechanical defences worth having**, both cheap:
+- Author embedded commands with no backslashes and no control characters at all. Here
+  `String.fromCharCode(0)` replaces `\0` and `bad.forEach(b => console.log(b))` replaces
+  `join('\n')`. Nothing can then be mangled by a JSON, HTML or shell transport layer.
+- `build-smoke-page.mjs` should reject a sidecar whose prose carries a control character
+  other than tab or newline, and should reject a `Section N` or `Step N` cross-reference
+  that the sidecar does not contain. Two of the five page defects this run were dangling
+  cross-references; one was an invisible control byte. All three are structurally
+  detectable without understanding the content.
+
+**Also fixed in this issue**, all found by the re-run reading the page as a document rather
+than as a list of commands: the standfirst claimed every step had passed while step 10 said
+two failed; step 9 offered an unbounded `git log -- .claude/agents/` that returns the
+PREVIOUS change's commits and cannot answer its own pass line; step 7's pass line cited
+"the three forms BL-004 names" when BL-004 appears nowhere on the page; step 8 repeated an
+unverified claim about `node --test tests/` (now verified — it discovers 1 test and fails
+it); and step 10 pointed at evidence whose numbering does not map onto this page, with two
+generations of evidence sitting side by side and nothing saying so.
+
+**Count pinning, again.** The path count moved 365 → 375 → 387 across three runs, because
+evidence files are themselves tracked. The aside now says explicitly not to expect a fixed
+number. This is the second time in this checkpoint that a pinned count would have misled a
+tester; the canary aside was the first.

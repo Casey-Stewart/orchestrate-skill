@@ -676,7 +676,7 @@
   <div class="masthead-in">
     <p class="eyebrow">Checkpoint C1 · batches B01–B03</p>
     <h1>Backlog sweep — six residuals from OS-20260919 — smoke run</h1>
-    <p class="standfirst">Ten checks, <strong>every one already run by an agent</strong> and passing — the evidence is in <code>evidence/C1/</code>, one file per step. You are spot-checking, not discovering. Run the gate first: this repository has no version file, so the build marker is <em>behavioural</em>, and the gate's third command gives the opposite answer on the base build. When done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the task.</p>
+    <p class="standfirst">Ten checks, <strong>all of them already executed against this page by an agent</strong> — verdicts and evidence in <code>evidence/C1/rerun-summary.md</code>. You are reviewing a result, not discovering one; run any step yourself to spot-check. Run the gate first: this repository has no version file, so the build marker is <em>behavioural</em>, and the gate's third command gives the opposite answer on the base build. When done — or as soon as something looks wrong — press <strong>Copy results as text</strong> and paste it into the task.</p>
 
     <dl class="facts">
 <div class="fact"><dt>Branch</dt><dd><code>chore/backlog-sweep-ledger</code></dd></div>
@@ -800,10 +800,10 @@ node "C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestra
     "steps": [
       {
         "n": 1,
-        "do": "Run \u003ccode>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"\u003c/code>. Then run this, which inspects every tracked and untracked path and reports only the answer:\u003cbr>\u003cbr>\u003ccode>node -e \"const {execSync}=require('child_process');const out=execSync('git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin',{shell:true,maxBuffer:64e6}).toString();const f=out.split('\u0000');if(f[f.length-1]==='')f.pop();let p=0,bad=[];for(let i=0;i+2&lt;=f.length;i+=3){p++;const v=f[i+2];if(v!=='unspecified'&amp;&amp;v!=='unset')bad.push(f[i]+' -&gt; '+v);}console.log('paths inspected:',p);console.log('paths resolving to a filter:',bad.length);if(bad.length)console.log(bad.join('\n'));\"\u003c/code>",
-        "pass": "The first lists \u003ccode>filter.lfs.clean\u003c/code> and \u003ccode>filter.lfs.process\u003c/code> — stock Git for Windows. The second reports a non-zero \u003cstrong>paths inspected\u003c/strong> and \u003cstrong>paths resolving to a filter: 0\u003c/strong>. If any path did resolve, it is named.",
-        "aside": "Runner: agent, pre-verified — 375 paths inspected, 0 resolving. This is the exact situation BL-003 describes: a filter driver configured machine-wide that \u003cem>no file actually uses\u003c/em>. The old code refused on the first fact alone, which is why the helper was unusable on every stock Windows install; the new code asks the second question. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should — say so rather than recording a pass. This is the claim no test in the suite can make, because every fixture sets \u003ccode>GIT_CONFIG_NOSYSTEM=1\u003c/code> and an empty global config precisely to isolate your real configuration away. The raw pipeline prints one record per path — 1,125 NUL-separated fields here — which is why this step summarises instead.",
-        "revision": 2
+        "do": "Run \u003ccode>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"\u003c/code>. Then run this, which inspects every tracked and untracked path and prints only the answer:\u003cbr>\u003cbr>\u003ccode>node -e \"const {execSync}=require('child_process');const NUL=String.fromCharCode(0);const out=execSync('git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin',{shell:true,maxBuffer:64e6}).toString();const f=out.split(NUL);if(f[f.length-1]==='')f.pop();let p=0,bad=[];for(let i=0;i+2&lt;=f.length;i+=3){p++;const v=f[i+2];if(v!=='unspecified'&amp;&amp;v!=='unset')bad.push(f[i]+' resolves to '+v);}console.log('paths inspected:',p);console.log('paths resolving to a filter:',bad.length);bad.forEach(b=&gt;console.log(b));\"\u003c/code>",
+        "pass": "The first lists \u003ccode>filter.lfs.clean\u003c/code> and \u003ccode>filter.lfs.process\u003c/code> — stock Git for Windows. The second prints a non-zero \u003cstrong>paths inspected\u003c/strong> and \u003cstrong>paths resolving to a filter: 0\u003c/strong>, naming any that do.",
+        "aside": "Runner: agent. Verified as published — the command above was extracted from this page and executed, not merely tested in a shell. \u003cstrong>Do not expect a fixed path count\u003c/strong>: it grows as evidence files are added to the ledger (365, then 375, then 387 across three runs). Only the second number matters. This is the exact situation BL-003 describes — a filter driver configured machine-wide that \u003cem>no file actually uses\u003c/em>. The old code refused on the first fact alone, which is why the helper was unusable on every stock Windows install; the new code asks the second question. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should — say so rather than recording a pass. This is the claim no test in the suite can make: every fixture sets \u003ccode>GIT_CONFIG_NOSYSTEM=1\u003c/code> and an empty global config precisely to isolate your real configuration away.",
+        "revision": 3
       },
       {
         "n": 2,
@@ -857,9 +857,9 @@ node "C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestra
       {
         "n": 7,
         "do": "In the recipe's output, find the frontmatter case-table tests and \u003ccode>the escape whitelist admits exactly the characters YAML defines\u003c/code>.",
-        "pass": "The three forms BL-004 names each appear as their own passing case, the quoted-colon accept case appears, and the whitelist sweep passes.",
+        "pass": "Three named reject cases pass — a value ending in a colon (\u003ccode>description: Runs the steps:\u003c/code>), an unterminated quote, and \u003ccode>description: a \"b: c\" d\u003c/code> — alongside the quoted-colon accept case (\u003ccode>description: \"Runs the steps: quickly\"\u003c/code>), and \u003ccode>the escape whitelist admits exactly the characters YAML defines\u003c/code> passes.",
         "aside": "Runner: agent, pre-verified. The sweep checks all 95 printable ASCII characters against the 18 escapes YAML defines, in both directions, with the member list written independently of the regex so that editing both at once is still caught. This batch took three review rounds and three polish passes because five separate times the fix for \"an assertion that cannot fail\" itself contained one; the sweep is what finally holds the boundary rather than sampling it.",
-        "revision": 1
+        "revision": 2
       }
     ]
   },
@@ -872,22 +872,22 @@ node "C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestra
         "n": 8,
         "do": "From the repository root in PowerShell, run the published validation recipe: enumerate \u003ccode>tests/*.test.cjs\u003c/code> recursively, run \u003ccode>node --test --test-reporter=spec\u003c/code> over them, then \u003ccode>git diff --check\u003c/code>.",
         "pass": "\u003cstrong>260 pass, 0 fail\u003c/strong>, exit 0, and \u003ccode>git diff --check\u003c/code> silent.",
-        "aside": "Runner: agent, pre-verified. Base was 207, so this change adds 53 tests. \u003ccode>node --test\u003c/code> bare from the root is the portable equivalent; \u003ccode>node --test tests/\u003c/code> is \u003cem>not\u003c/em> — Node's directory-argument discovery differs and the suite fails. That distinction is itself documented in the README and pinned by a test.",
-        "revision": 1
+        "aside": "Runner: agent, pre-verified. Base was 207, so this change adds 53 tests. \u003ccode>node --test\u003c/code> bare from the root is the portable equivalent; \u003ccode>node --test tests/\u003c/code> is \u003cem>not\u003c/em> — verified on this build: it discovers 1 test and fails it, because Node's directory-argument discovery differs from the recipe's recursive enumeration. That distinction is itself documented in the README and pinned by a test.",
+        "revision": 2
       },
       {
         "n": 9,
-        "do": "Confirm the four shipped agent definitions are unchanged: \u003ccode>git diff --stat e79d378 -- .claude/agents/\u003c/code> against the ledger base, or simply \u003ccode>git log --oneline -- .claude/agents/\u003c/code>.",
-        "pass": "No commit in this change touches \u003ccode>.claude/agents/\u003c/code>. The four definitions are byte-identical to the base.",
-        "aside": "Runner: agent, pre-verified. B01 changed the test that guards those files, never the files themselves — they were outside its fence by design, and every gate confirmed it independently by loading the base and the new parser side by side against the same four files.",
-        "revision": 1
+        "do": "Run \u003ccode>git log --oneline e79d3781b9290d54b6c4996989d7b19b6b358422..HEAD -- .claude/agents/\u003c/code>.",
+        "pass": "No output — no commit since the ledger base touches \u003ccode>.claude/agents/\u003c/code>.",
+        "aside": "Runner: agent, pre-verified. B01 changed the test that guards those files, never the files themselves — they were outside its fence by design, and every gate confirmed it independently by loading the base and the new parser side by side against the same four files. The range is required: an unbounded \u003ccode>git log -- .claude/agents/\u003c/code> returns commits from the PREVIOUS change and cannot answer this question.",
+        "revision": 2
       },
       {
         "n": 10,
-        "do": "Read \u003ccode>evidence/C1/summary.md\u003c/code> in this ledger directory, and spot-check any step file that interests you.",
-        "pass": "Ten verdicts recorded. Two are marked FAIL — both are defects in the smoke script, not the build, and both have since been corrected. Everything else passed.",
-        "aside": "Runner: agent. Worth reading rather than skipping: the QA runner was asked to verify ten steps and also caught, unprompted, that B01's PROGRESS row was stale — still marked in-progress with no merge SHA, while B01 was merged and was HEAD. That was my bookkeeping error, now fixed. The same pattern recurred throughout this change: gates asked about one thing kept finding real defects in something adjacent.",
-        "revision": 1
+        "do": "Read \u003ccode>evidence/C1/rerun-summary.md\u003c/code>, and spot-check any \u003ccode>rerun-step-NN.md\u003c/code> that interests you.",
+        "pass": "Eleven verdicts recorded (gate + ten steps) against \u003cem>this\u003c/em> page. Any FAIL is explained and, if it was a page defect, corrected in the issue you are reading.",
+        "aside": "Runner: agent. The \u003ccode>rerun-*\u003c/code> files are authoritative. The older \u003ccode>step-NN.md\u003c/code> and \u003ccode>summary.md\u003c/code> beside them ran a superseded markdown draft with different numbering — they are kept for history and their step numbers do \u003cstrong>not\u003c/strong> map onto this page. Worth reading rather than skipping: a QA runner asked to verify ten steps also caught, unprompted, that B01's PROGRESS row was stale, and a later one caught that this very step's command was unrunnable as published. Gates asked about one thing kept finding real defects in something adjacent.",
+        "revision": 2
       }
     ]
   }
@@ -1547,4 +1547,4 @@ node "C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestra
 })();
 </script>
 
-<!-- smoke-sidecar-sha256:3e5d5034eb3f267730b4939895c96c477a5a11fa1dd1d6ac8f8a3c5e9b0cec7c -->
+<!-- smoke-sidecar-sha256:188c18a6fc7d300d952cbfcf3f2b70b3215e764f35a4155129845464a3b2a217 -->
