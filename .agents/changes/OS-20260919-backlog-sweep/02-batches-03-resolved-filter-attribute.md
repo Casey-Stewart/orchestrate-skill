@@ -178,10 +178,10 @@ NO change — it is deliberately outside this fence.
       that file having been edited.
 - [x] Run the canary again after the fix from the repository root and record the new exit
       code, `completeness`, `cleanliness` values and diagnostics.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/backlog-sweep-ledger...HEAD` plus
       `git status --porcelain`; revert anything outside the fence.
-- [ ] Commit on `fix/resolved-filter-attribute` — `fix: gate status on resolved per-path filter attributes, not configured drivers (batch 03)`.
+- [x] Commit on `fix/resolved-filter-attribute` — `fix: gate status on resolved per-path filter attributes, not configured drivers (batch 03)`.
 
 ## Acceptance criteria
 
