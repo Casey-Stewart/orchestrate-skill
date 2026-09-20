@@ -85,6 +85,17 @@ two are held byte-identical over the §Read-only evidence tools span.
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/bl-011-wrapped-polish` — `fix: wrapped polish items in the fence tool (batch 01)`.
+- [x] polish: [F1] Pin the continuation indent from below as well as from column 0 — assert that a
+      single-space continuation is ACCEPTED and a tab-indented one REJECTED, so a later widening
+      or narrowing of the indent rule goes red.
+- [x] polish: [F2] Reach the positional guard `i === polishAt` — append a WRAPPED polish item
+      outside the `## Checklist` section and assert VIOLATION with its exact line numbers, so
+      mutating the guard to an always-true test goes red.
+- [x] polish: [F3] Pin the header requirement of a non-empty ask: a bare header with no ask text,
+      and its exact violation line set, so the trailing quantifier cannot loosen to accept none.
+- [x] polish: [F4] Fence the template example against drift — read `orchestrate/templates/02-batch.md`
+      with `fs`, assert it SHOWS a wrapped `polish:` item, and feed those exact bytes through the
+      real `validateBatchEdit`, asserting zero violations.
 
 ## Acceptance criteria
 
