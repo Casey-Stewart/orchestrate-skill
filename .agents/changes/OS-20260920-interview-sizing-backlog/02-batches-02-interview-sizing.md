@@ -106,25 +106,25 @@ ONLY citation of topic 5 in the repository.
 
 ## Checklist
 
-- [ ] Replace the merge arithmetic at `scaffolding.md:263-266` with the back-to-back default (A1).
-- [ ] Add the compound-label ban with one of the two real examples from the prior ledgers (A2).
-- [ ] Make "confirmations + gaps only" load-bearing: never ask what detection answered, never ask
+- [x] Replace the merge arithmetic at `scaffolding.md:263-266` with the back-to-back default (A1).
+- [x] Add the compound-label ban with one of the two real examples from the prior ledgers (A2).
+- [x] Make "confirmations + gaps only" load-bearing: never ask what detection answered, never ask
       what step 7 will ask again (A3).
-- [ ] Add the repeat-repo collapse: the previous ledger’s `00-READBEFORE.md` supplies defaults (A4).
-- [ ] Add the cap on REPEATS — asked once, recorded verbatim, never re-litigated at approval (A5).
-- [ ] Delete interview topic 5 from the list with no pointer row, and add **weights** to procedure
+- [x] Add the repeat-repo collapse: the previous ledger’s `00-READBEFORE.md` supplies defaults (A4).
+- [x] Add the cap on REPEATS — asked once, recorded verbatim, never re-litigated at approval (A5).
+- [x] Delete interview topic 5 from the list with no pointer row, and add **weights** to procedure
       step 7 at `scaffolding.md:70-71` (A6).
-- [ ] Repoint the `{{EXECUTION_MODEL}}` registry row at `scaffolding.md:141` to step 7, third column
+- [x] Repoint the `{{EXECUTION_MODEL}}` registry row at `scaffolding.md:141` to step 7, third column
       only, leaving topic numbers 1, 2, 3, 4, 6, 7 untouched (A7).
-- [ ] Update `orchestrate/SKILL.md:175` so it no longer promises ONE consolidated round (A8).
-- [ ] Create `tests/interview-sizing.test.cjs` with the negative pins for A1, A6, A7, A8 and the
+- [x] Update `orchestrate/SKILL.md:175` so it no longer promises ONE consolidated round (A8).
+- [x] Create `tests/interview-sizing.test.cjs` with the negative pins for A1, A6, A7, A8 and the
       positive-pin-plus-contradiction-sweep for A2–A5.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/interview-sizing` — `fix: interview sizing rule and the topic-5 move (batch 02)`.
+- [x] Commit on `fix/interview-sizing` — `fix: interview sizing rule and the topic-5 move (batch 02)`.
 
 ## Acceptance criteria
 

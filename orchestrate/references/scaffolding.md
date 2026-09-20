@@ -14,8 +14,8 @@
 ## Procedure
 
 1. **Detect** repo facts (heuristics below) — read-only.
-2. **Interview** — ONE consolidated AskUserQuestion round covering only the gaps and the
-   confirmations listed below.
+2. **Interview** — back-to-back AskUserQuestion calls, as many as the open gaps need,
+   covering only the gaps and the confirmations listed below.
 3. **Plan** — explore the codebase (sub-agents as needed), draft the batch table with
    file fences and a weight per batch (S / M / L), and map every request item to a
    batch. Then structure for throughput per `execution-models.md`: reshape fences for
@@ -67,8 +67,11 @@
      stall's position along with the plan. A gated batch never shares a wave with
      work that would run past its unanswered question.
    - Never bury a known user gate in the middle of an otherwise-autonomous sequence.
-7. **Approve** — the user approves plan, wave map, checkpoints and fold-ins in ONE pass;
-   that approval is the standing authorization for the concurrency.
+7. **Approve** — present the computed wave map (which batches run concurrently, and
+   why that is safe), the checkpoint placement (after which waves, with the hands-on
+   batches named) per `execution-models.md`, and each batch's weight; the user approves
+   plan, wave map, weights, checkpoints and fold-ins in ONE pass, confirming or
+   adjusting; that approval is the standing authorization for the concurrency.
 8. **Fill** — instantiate every file in `templates/` into
    `.agents/changes/{{CHANGE_ID}}/` (`LOG.md` included), renaming `02-batch.md` to one
    `02-batches-{{BATCH_NUM}}-{{BATCH_SLUG}}.md` per batch. Replace every `{{...}}`
@@ -138,7 +141,7 @@ appear in the templates — check both directions when editing either.
 | `{{INTEGRATION_BRANCH}}` | template (READBEFORE) | `chore/{{CHANGE_SLUG}}-ledger` unless the user overrides |
 | `{{BRANCH_PREFIXES}}` | template (READBEFORE) | detected from `git branch -a` history; default `fix/ feat/ chore/` |
 | `{{MERGE_POLICY}}` | template (READBEFORE) | interview #4 (incl. whether batch commits survive — squash collapses per-fold-in reverts; say so) |
-| `{{EXECUTION_MODEL}}` | template (READBEFORE, PROGRESS) | interview #5 — the confirmed wave map summary (waves + members + checkpoint positions, e.g. "Waved stack — W1: B01+B02+B03; W2: B04+B05. Checkpoints: C1 after W1 (B02 hands-on), C2 final") |
+| `{{EXECUTION_MODEL}}` | template (READBEFORE, PROGRESS) | procedure step 7 — the approved wave map summary (waves + members + checkpoint positions, e.g. "Waved stack — W1: B01+B02+B03; W2: B04+B05. Checkpoints: C1 after W1 (B02 hands-on), C2 final") |
 | `{{EXECUTION_MODEL_RATIONALE}}` | template (READBEFORE, PROGRESS) | written at scaffold time: WHY these waves are safe together and why the checkpoints sit where they do, in 2–4 sentences |
 | `{{VALIDATION_COMMANDS}}` | template (READBEFORE) | interview #1 — fenced block, one command + comment per line, each in its QUIET form (totals line + failing test names; a repo-local quiet reporter if one exists), or literal `none` |
 | `{{MUTATION_RUNNER}}` | template (READBEFORE) | detected (Stryker / mutmut / cargo-mutants / PIT config) and confirmed in interview #1, with the command scoped to changed files; else `none` |
@@ -196,7 +199,7 @@ remotes or a local-only repo → ask in #4, never guess. `git remote set-head or
 is an optional repair hint for a missing/stale remote HEAD, not part of read-only
 detection. Do not run it or fetch automatically.
 
-## Interview (one AskUserQuestion round — confirmations + gaps only)
+## Interview (back-to-back AskUserQuestion calls — confirmations + gaps only)
 
 1. **Validation commands** — present the detected list in its quiet form to
    confirm/edit; nothing detected → ask, offering "none (the checkpoint smoke tests carry
@@ -240,11 +243,6 @@ detection. Do not run it or fetch automatically.
    smoke-tests at checkpoints and merges; the orchestrator never pushes. Confirm or
    adjust (PR flow, orchestrator ff-merge on recorded verdict, squash — note that squash
    collapses per-fold-in commits, so surgical reverts stop being available).
-5. **Wave map + checkpoints + weights** — present the computed wave map (which batches
-   run concurrently, and why that is safe), the checkpoint placement (after which
-   waves, with the hands-on batches named) per `execution-models.md`, and each batch's
-   weight; the user confirms or adjusts. Fewest checkpoints wins: intermediate ones
-   exist only for hands-on risk, and the final one is mandatory.
 6. **ID prefix** — default: initials of the repo directory name
    (`inventory-sync-tool` → `IST`); confirm. Confirm the backlog id scheme.
 7. **Gates, tiers, distillation targets, prohibitions** — offer the detected gate agents,
@@ -260,10 +258,31 @@ next ledger once this one's metrics token has shown review time, false stops and
 smoke minutes." The contract records which gates this ledger runs, so a driving session
 never guesses.
 
-Batch it: topics 1–7 fit in one AskUserQuestion call only merged down to its 4-question
-cap — 1+3 (automated + by-hand verification), 2+6 (repo conventions) and 4+7 (git + gate
-policy) leave exactly four: {1+3, 2+6, 4+7, 5}; genuinely unmergeable → two calls
-back-to-back.
+Back-to-back AskUserQuestion calls are the DEFAULT. Ask one question per decision that
+can independently change the plan; four questions per call is the tool's schema cap on
+`questions`, not a budget; issue as many calls as the open gaps need. Two decisions
+never share one question.
+
+Never join two independent axes in one option LABEL — a `+` or an `and` in a label is
+the smell. "Full recipe + agent-run smoke" reads as one choice and is two: the user who
+wants the full recipe with human-run smoke has nothing to click, so the answer comes
+back as free text or as the wrong pick. One axis per question, one axis per label.
+
+`confirmations + gaps only` is what bounds the count now that the number of calls does
+not: never ask what detection already answered — present it for confirmation, or not at
+all — and never ask what procedure step 7 will ask again (plan, wave map, weights,
+checkpoints, fold-ins).
+
+A REPEAT repo needs almost no interview: Discovery (SKILL.md) already finds prior
+ledgers. Read the most recent one's `00-READBEFORE.md` and offer its baked answers as
+the defaults for everything it settles; a second ledger in the same repository needs one
+call, or none.
+
+Cap REPEATS, not questions. Each decision is asked ONCE, its answer recorded verbatim in
+`00-request.md`, and never re-litigated at plan approval or at close-out. Asking more is
+cheap; asking twice is what produces "Use these conventions." and a system built on a
+guess.
+
 Fold-in picks are NOT interview questions — they ride plan approval (procedure step 7).
 
 ## Baking rule
