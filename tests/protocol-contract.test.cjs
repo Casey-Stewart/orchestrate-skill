@@ -119,13 +119,18 @@ test('reusable artifacts contain no local Python installation default, while fro
     ...fs.readdirSync(path.join(ROOT, 'orchestrate/references')).filter(p => p.endsWith('.md')).map(p => 'orchestrate/references/' + p),
     'orchestrate/tools/build-smoke-page.mjs', 'orchestrate/tools/smoke-inputs.mjs'];
   for (const file of paths) assert.doesNotMatch(read(file), /[A-Z]:[\\/](?:Users|Program Files)[\\/].*Python|fatbo|Python310/i, file);
-  const frozen = path.join(ROOT, '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md');
-  // The approved ledger is branch-local; ordinary clones after user archival need
-  // not contain it. When present, reusable edits must never rewrite its local fact.
-  if (fs.existsSync(frozen)) {
-    const text = fs.readFileSync(frozen, 'utf8');
-    assert.match(text, /Python310[\\/]python\.exe/);
-    assert.match(text, /Every generation and independent Excel-validation command in this run uses literal/);
+  const candidates = ['.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md',
+    '.agents/changes/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md'];
+  // The approved ledger is branch-local and moves on archival; ordinary clones need
+  // not contain it. When present, reusable edits must never rewrite its local fact —
+  // and one location must exist HERE, so the next move breaks this guard loudly
+  // instead of silently disarming it.
+  const frozen = candidates.filter(p => fs.existsSync(path.join(ROOT, p)));
+  assert.ok(frozen.length, 'frozen ledger contract must be readable at one of: ' + candidates.join(', '));
+  for (const file of frozen) {
+    const text = read(file);
+    assert.match(text, /Python310[\\/]python\.exe/, file);
+    assert.match(text, /Every generation and independent Excel-validation command in this run uses literal/, file);
   }
 });
 

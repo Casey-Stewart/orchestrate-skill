@@ -145,12 +145,12 @@ this fence for that reason.**
 
 ## Checklist
 
-- [ ] Read all five fenced files and confirm each line cited above still says what this
+- [x] Read all five fenced files and confirm each line cited above still says what this
       file claims; report drift rather than working around it.
-- [ ] **[BL-001]** Repoint the frozen-ledger guard at the archive location and make it
+- [x] **[BL-001]** Repoint the frozen-ledger guard at the archive location and make it
       provably live — the two assertions execute in this checkout, and the test fails if
       the file is present with drifted content. Own commit.
-- [ ] **[BL-001]** Add the "at least one candidate location exists here" assertion (or
+- [x] **[BL-001]** Add the "at least one candidate location exists here" assertion (or
       record in the report why it was rejected).
 - [ ] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/01-plan.md`.
 - [ ] **[BL-002]** Add the pinned `Bnn` example row to `orchestrate/templates/PROGRESS.md`.
