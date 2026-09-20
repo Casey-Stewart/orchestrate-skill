@@ -43,7 +43,7 @@ and an intermediate checkpoint would prove nothing an earlier wave could not
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Wrapped polish items in the fence tool | `fix/bl-011-wrapped-polish` | 1 | — | 🔄 | 2026-09-20 | Implementer default tier (M), reviewer default tier. 6a fence PASS (0 violations, 0 unknowns); 6b failing-on-base proven by the orchestrator at `0d1f8b7` (84 tests, 81 pass, 3 fail). `R1 SHIP @d0d3fcf asks=6` (reviewer 2 + test-hunter 4, all test-only). Polish carries F1–F4; reviewer ASK 2 declined as a production change → residual for BACKLOG. See [LOG.md](LOG.md) §2026-09-20 — wave 1 › B01. |
+| B01 | Wrapped polish items in the fence tool | `fix/bl-011-wrapped-polish` | 1 | — | 🟢 | 2026-09-20 | Merged `--no-ff` → **`6253432`**, tip green **272/272** (base 260 + 12). Implementer and reviewer both default tier (M). 6a fence PASS; 6b failing-on-base proven by the orchestrator at `0d1f8b7` (84 tests, 81 pass, 3 fail). `R1 SHIP @d0d3fcf asks=6` (reviewer 2 + test-hunter 4, all test-only; reviewer ASK 1 = hunter F4) → polish `7e9dad8` closed F1–F4, test-only, so no scoped re-review. Reviewer ASK 2 declined as a production change an ASK cannot license → residual for BACKLOG. **The unfixed tool reported VIOLATION on this batch's own wrapped polish items and the fixed copy PASS** — BL-011 reproduced and closed in one gate. See [LOG.md](LOG.md) §2026-09-20 — wave 1 › B01. `m: rounds=0 asks=4 fence-bounces=0 gate=4/0 tip-red=0` |
 | B02 | Interview sizing rule and the topic-5 move | `fix/interview-sizing` | 2 | — | ⬜ | 2026-09-20 | — |
 | B03 | Leading YAML indicator characters in frontmatter | `fix/bl-008-yaml-indicators` | 2 | — | ⬜ | 2026-09-20 | — |
 | B04 | Name check-attr in the manual fallback | `fix/bl-014-check-attr` | 2 | — | ⬜ | 2026-09-20 | — |
@@ -84,7 +84,7 @@ credential or external access is required, and nothing needs a working-copy rese
 | BL-008 leading YAML indicator characters | backlog BL-008 | B03 | — | ⬜ |
 | BL-009 unreachable fail-closed guards | backlog BL-009 | B05 | — | ⬜ |
 | BL-010 self-check greps code spans | backlog BL-010 | B07 | — | ⬜ |
-| BL-011 wrapped polish items rejected | backlog BL-011 | B01 | — | ⬜ |
+| BL-011 wrapped polish items rejected | backlog BL-011 | B01 | — | 🟢 merged `6253432` |
 | BL-012 build-identity gate has never worked | backlog BL-012 | B06 | — | ⬜ |
 | BL-013 sidecar coherence unchecked | backlog BL-013 | B06 | — | ⬜ |
 | BL-014 resolved-filter rule names no command | backlog BL-014 | B04 | — | ⬜ |
