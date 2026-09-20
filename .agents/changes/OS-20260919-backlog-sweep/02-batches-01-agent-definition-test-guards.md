@@ -110,12 +110,12 @@ forms still walk through it.
 
 ## Checklist
 
-- [ ] Read `tests/agent-definitions.test.cjs` end to end and confirm each line cited above
+- [x] Read `tests/agent-definitions.test.cjs` end to end and confirm each line cited above
       still says what this file claims it says; report any drift instead of working around it.
-- [ ] **[BL-004]** Replace the unquoted-`: ` guard with one that rejects all three named
+- [x] **[BL-004]** Replace the unquoted-`: ` guard with one that rejects all three named
       forms — trailing colon at end of value, unterminated quote, and `a "b: c" d` —
       while still accepting a properly quoted colon.
-- [ ] **[BL-004]** Add the accept/reject case table that drives the new validator, with at
+- [x] **[BL-004]** Add the accept/reject case table that drives the new validator, with at
       minimum: the three reject forms, the quoted-colon accept, `tools:Read, Glob` (no
       space) as a reject, and one plain valid line as an accept. Own commit.
 - [ ] **[BL-005]** Make the directory whitelist recursive; a nested `.md` fails with its

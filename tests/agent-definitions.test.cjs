@@ -25,6 +25,40 @@ const flow = text => text.replace(/\s+/g, ' ');
 // that, `tools:Read, Glob` (no space) still yields a `tools` capture here while YAML
 // sees a bare scalar and Claude Code loads the definition with no tool list at all —
 // the test would pass and the agent would inherit everything.
+// Every frontmatter line goes through this one predicate, and the FRONTMATTER_CASES table
+// below pins its verdicts. A regex guard here used to demand a space after an inner colon
+// and to stop scanning at the first quote character, so three YAML errors walked through:
+// `description: Runs the steps:`, `description: "unterminated` and `description: a "b: c" d`.
+// A YAML error is not a soft failure — the document does not parse, no definition loads,
+// and a "read-only" role inherits the whole catalog again, this time by parse failure
+// rather than by a missing key. Returns the parsed field, or a string saying what YAML
+// would choke on.
+function frontmatterField(line) {
+  const field = /^([A-Za-z_][A-Za-z0-9_-]*):[ \t]+(\S.*)$/.exec(line);
+  if (!field) return 'is not a single-line `key: value` mapping';
+  const value = field[2].replace(/[ \t\r]+$/, '');
+  if (value[0] === '"' || value[0] === "'") {
+    // Quotes only quote when the value starts with one, so this is the one branch where a
+    // `: ` is legal — and a quote that never closes runs off the end of the document.
+    const quote = value[0];
+    let i = 1;
+    while (i < value.length) {
+      if (quote === '"' && value[i] === '\\') i += 2;
+      else if (value[i] !== quote) i += 1;
+      else if (quote === "'" && value[i + 1] === quote) i += 2;
+      else break;
+    }
+    if (i >= value.length) return 'never closes its opening ' + quote + ' quote — a YAML error';
+    if (value.slice(i + 1).trim() !== '') return 'has content after its closing ' + quote + ' quote';
+    return { key: field[1], value };
+  }
+  // In a plain scalar a `: ` ends the scalar, and a `:` at end of line reads the same way:
+  // either makes YAML look for a second mapping key on the line and error on the document.
+  if (/:$/.test(value)) return 'ends its unquoted value with `:` — YAML reads a second key there';
+  if (/:[ \t]/.test(value)) return 'carries an unquoted `: ` — YAML reads a second key there';
+  return { key: field[1], value };
+}
+
 function definition(name) {
   const file = '.claude/agents/' + name + '.md';
   assert.ok(fs.existsSync(path.join(ROOT, file)), 'missing definition: ' + file);
@@ -34,15 +68,46 @@ function definition(name) {
   const fields = new Map();
   for (const line of match[1].split('\n')) {
     if (line.trim() === '') continue;
-    const field = /^([A-Za-z_][A-Za-z0-9_-]*):[ \t]+(\S.*)$/.exec(line);
-    assert.ok(field, file + ' frontmatter line is not a single-line `key: value` mapping: ' + line);
-    assert.ok(!/^[A-Za-z_][A-Za-z0-9_-]*:[ \t]+[^"'\n]*:[ \t]/.test(line),
-      file + ' frontmatter value needs quoting — an unquoted ": " is a YAML error: ' + line);
-    assert.ok(!fields.has(field[1]), file + ' declares ' + field[1] + ': twice');
-    fields.set(field[1], field[2].trim());
+    const field = frontmatterField(line);
+    assert.ok(typeof field === 'object', file + ' frontmatter line ' + field + ': ' + line);
+    assert.ok(!fields.has(field.key), file + ' declares ' + field.key + ': twice');
+    fields.set(field.key, field.value);
   }
   const tools = (fields.get('tools') || '').split(',').map(t => t.trim()).filter(Boolean);
   return { file, text, body: text.slice(match[0].length), fields, tools };
+}
+
+// The three forms the earlier guard accepted, the properly quoted colon it must keep
+// accepting — the rule is YAML validity, not a ban on colons — and the no-space form the
+// strictness was written for. Every case runs through the same predicate `definition()`
+// puts the shipped frontmatter through, so a validator that quietly loosens fails here.
+const FRONTMATTER_CASES = [
+  { line: 'name: qa-runner', field: { key: 'name', value: 'qa-runner' } },
+  { line: 'tools: Read, Glob, Grep, Bash',
+    field: { key: 'tools', value: 'Read, Glob, Grep, Bash' } },
+  { line: 'description: "Runs the steps: quickly"',
+    field: { key: 'description', value: '"Runs the steps: quickly"' } },
+  { line: "description: 'it''s fine: really'",
+    field: { key: 'description', value: "'it''s fine: really'" } },
+  { line: 'description: Runs the steps:', reason: /ends its unquoted value with/ },
+  { line: 'description: "unterminated', reason: /never closes its opening/ },
+  { line: 'description: a "b: c" d', reason: /carries an unquoted/ },
+  { line: 'description: "quoted" and more', reason: /has content after its closing/ },
+  { line: 'tools:Read, Glob', reason: /is not a single-line/ },
+];
+
+for (const probe of FRONTMATTER_CASES) {
+  const verb = probe.field ? ' accepts ' : ' rejects ';
+  test('the frontmatter validator' + verb + '`' + probe.line + '`', () => {
+    const verdict = frontmatterField(probe.line);
+    if (probe.field) {
+      assert.deepEqual(verdict, probe.field, '`' + probe.line + '` is valid YAML and has to parse as written');
+      return;
+    }
+    assert.equal(typeof verdict, 'string', '`' + probe.line + '` is a YAML error: the document would not parse, '
+      + 'no definition would load, and a "read-only" role would inherit the whole catalog');
+    assert.match(verdict, probe.reason, '`' + probe.line + '` must be rejected for the reason it is invalid');
+  });
 }
 
 // Every other test iterates the known roles, so an unlisted file would never be read.
