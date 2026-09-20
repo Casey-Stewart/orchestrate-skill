@@ -35,9 +35,9 @@ Discovery greps this one line — the form stays exact.
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Agent-definition guards that can fail | `fix/agent-definition-test-guards` | 1 | — | ⬜ | 2026-09-19 | S/fix. BL-004 + BL-005 + BL-006, one file. Machine-verifiable; covered by C1. Gate: fence → failing-on-base + reviewer + `test-hunter` (separate, not combined — the user's 2026-09-19 decision applies the gate to every batch, and BL-004 is one of this change's two "assertion that cannot fail" items). |
-| B02 | Batch-id grammar the fence can read | `fix/ledger-batch-id-grammar` | 1 | — | ⬜ | 2026-09-19 | M/fix. BL-001 + BL-002. Both ledger templates, not just the plan — `oneRow` runs on the PROGRESS table too. Hands-on at C1. Holds `tests/protocol-contract.test.cjs`, which asserts B03's two prose mirrors against each other. |
-| B03 | Resolved per-path filter attribute | `fix/resolved-filter-attribute` | 1 | — | ⬜ | 2026-09-19 | L/fix. BL-003. Code is in `git-evidence.mjs` `safeStatusPrerequisites()`, not `check-fence.mjs`. Safety property unchanged; only the trigger moves to `git check-attr filter`. Base canary captured: `worktrees --repo .` exits 2, partial, 2× `unsafe-filter`. Hands-on at C1. |
+| B01 | Agent-definition guards that can fail | `fix/agent-definition-test-guards` | 1 | — | 🔄 | 2026-09-19 | S/fix. W1 open @fad7a64; worktree <temp>/wtbls/b01. BL-004 + BL-005 + BL-006, one file. Machine-verifiable; covered by C1. Gate: fence → failing-on-base + reviewer + `test-hunter` (separate, not combined — the user's 2026-09-19 decision applies the gate to every batch, and BL-004 is one of this change's two "assertion that cannot fail" items). |
+| B02 | Batch-id grammar the fence can read | `fix/ledger-batch-id-grammar` | 1 | — | 🔄 | 2026-09-19 | M/fix. W1 open @fad7a64; worktree <temp>/wtbls/b02. BL-001 + BL-002. Both ledger templates, not just the plan — `oneRow` runs on the PROGRESS table too. Hands-on at C1. Holds `tests/protocol-contract.test.cjs`, which asserts B03's two prose mirrors against each other. |
+| B03 | Resolved per-path filter attribute | `fix/resolved-filter-attribute` | 1 | — | 🔄 | 2026-09-19 | L/fix. W1 open @fad7a64; worktree <temp>/wtbls/b03. BL-003. Code is in `git-evidence.mjs` `safeStatusPrerequisites()`, not `check-fence.mjs`. Safety property unchanged; only the trigger moves to `git check-attr filter`. Base canary captured: `worktrees --repo .` exits 2, partial, 2× `unsafe-filter`. Hands-on at C1. |
 
 ## Checkpoints
 
@@ -52,11 +52,13 @@ against this repository's own working tree and committed history, judged on a pr
 code and a JSON field. Prerequisites, named: `node` and `git` on PATH, and PowerShell 7
 for the published validation recipe. No private data, credentials, external network access
 or disposable environment are required — every test builds its own throwaway repository
-under the OS temp directory. Two steps deliberately perturb a file and restore it (B01's
-nested-definition step creates and deletes an untracked file under `.claude/agents/`;
-B02's archive-guard step edits and restores
-`.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md`); both name
-their restore command and both prove the restore with `git status --porcelain`.
+under the OS temp directory. Two steps deliberately perturb something and restore it:
+B01's nested-definition step creates and deletes an untracked file under
+`.claude/agents/` in this working tree; B02's archive-guard step runs entirely inside a
+throwaway clone at `$env:TEMP\os919bl\c1`, because the contract forbids an agent to modify
+`.agents/archive/` — the clone root is kept short so the 146-character deepest tracked
+path stays under Windows' 260-character limit. Both name their restore command and both
+prove this repository untouched with `git status --porcelain`.
 
 ## Smoke-test verdict log
 
@@ -81,4 +83,6 @@ their restore command and both prove the restore with `git status --porcelain`.
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
-| 2026-09-19 | Scaffold. Re-verified all seven backlog entries against the files at `f829040` rather than trusting their text (00-request.md §Accuracy check): six confirmed, BL-002 found wider than written (`oneRow` runs on the PROGRESS table too), BL-003 reproduced live on this machine. Interviewed; user struck BL-007. Planned 3 batches / 1 wave / 1 final checkpoint. Baseline validation green: 207 pass, 0 fail. Base canary recorded for C1: `git-evidence.mjs worktrees --repo .` exits 2, `partial`, 2× `unsafe-filter`. | (scaffold in progress — this row is completed at the scaffold commit) |
+| 2026-09-19 | Scaffold. Re-verified all seven backlog entries against the files at `f829040` rather than trusting their text (00-request.md §Accuracy check): six confirmed, BL-002 found wider than written (`oneRow` runs on the PROGRESS table too), BL-003 reproduced live on this machine. Interviewed; user struck BL-007. Planned 3 batches / 1 wave / 1 final checkpoint. Baseline validation green: 207 pass, 0 fail. Base canary recorded for C1: `git-evidence.mjs worktrees --repo .` exits 2, `partial`, 2× `unsafe-filter`. | Plan approved in one pass; the user chose "Approved — start wave 1 now", which is the standing authorization for the three-wide wave. Scaffold committed: `97f7e0f` (backlog cleanup + BL-007 struck), `fad7a64` (ledger). |
+| 2026-09-19 | **Opened wave 1.** Cut all three batch branches from wave base **`fad7a64`**, created three worktrees, spawned B01, B02 and B03 implementers concurrently. | (wave 1 in progress) |
+| 2026-09-19 | **Environment note, not a plan deviation.** Worktrees live at `<temp>/wtbls/b0*` rather than under the session scratchpad: the scratchpad prefix (~150 chars) plus this repo's deepest tracked path (146 chars, under `.agents/archive/.../evidence/C1/inputs/`) exceeds Windows' 260-char limit — the same trap the previous ledger hit. Still outside the repo, still disposable, per-worktree setup still `n/a`. Wave map, fences, gates and checkpoints unchanged. | — |
