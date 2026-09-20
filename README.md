@@ -122,6 +122,37 @@ Windows (PowerShell):
 git clone https://github.com/Casey-Stewart/orchestrate-skill.git; New-Item -ItemType Junction -Path "$HOME\.claude\skills\orchestrate" -Target "$PWD\orchestrate-skill\orchestrate"
 ```
 
+### Installing the skill does not install the agents
+
+The link above puts `orchestrate/` in your skills folder, and a skill directory cannot
+carry agent definitions — Claude Code reads those only from `~/.claude/agents/` (every
+project) or `<project>/.claude/agents/` (one project). So the four tool-restricted
+definitions this repo ships in `.claude/agents/` — `implementer`, `reviewer`,
+`test-hunter`, `qa-runner` — do **not** arrive with the skill install. Copy them
+yourself, or every spawn silently inherits the full tool catalog they exist to trim.
+
+macOS / Linux:
+
+```bash
+mkdir -p ~/.claude/agents && cp orchestrate-skill/.claude/agents/*.md ~/.claude/agents/
+```
+
+Windows (PowerShell):
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$HOME\.claude\agents" | Out-Null; Copy-Item "orchestrate-skill\.claude\agents\*.md" -Destination "$HOME\.claude\agents"
+```
+
+For one project only, copy them into that project's `.claude/agents/` instead. Either
+way, restart Claude Code — definitions are read at startup. The skill still works
+without them, but nothing falls back on its own: a spawn naming one of these
+types fails outright (`Agent type 'implementer' not found`), so the orchestrator
+substitutes the general-purpose agent itself on every spawn and the read-only
+rules stay prose-enforced — see `orchestrate/references/protocol.md`
+§Degraded environments. And with them, the guarantee is stronger but not
+absolute — Bash can still write, so "read-only" stays partly conventional; removing
+Write/Edit closes the easy path, not every path.
+
 Whatever branch the clone has checked out is what runs — stay on `main`. If you prefer
 a plain copy, `cp -r orchestrate-skill/orchestrate ~/.claude/skills/` works, and
 `diff -r ~/.claude/skills/orchestrate orchestrate-skill/orchestrate` tells you when it

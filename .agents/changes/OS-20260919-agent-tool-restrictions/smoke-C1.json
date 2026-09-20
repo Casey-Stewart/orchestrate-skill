@@ -1,0 +1,114 @@
+{
+  "change": "Tool-restricted agent definitions and per-skeleton agent types",
+  "checkpoint": 1,
+  "batches": "B01–B03",
+  "branch": "chore/agent-tool-restrictions-ledger",
+  "buildSha": "168b9d867ff4464092a584e92113c0a03d82de63",
+  "ckptKey": "OS-20260919-agent-tool-restrictions-C1",
+  "pageTitle": "C1 smoke run",
+  "standfirst": "Nine checks, <strong>all of them yours</strong> — none could be pre-verified, because every one needs a Claude Code restart that no agent in the run can perform. Run Step 0 first. When done—or as soon as something fails—press <strong>Copy results as text</strong> and paste it into the task.",
+  "gate": {
+    "intro": "Run this gate before recording any verdict. Paste the whole block as-is: it runs the same way in <code>cmd.exe</code> and PowerShell.",
+    "commands": [
+      "git -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" branch --show-current\ngit -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" rev-parse HEAD\ngit -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" ls-files .claude/agents/"
+    ],
+    "checks": [
+      "Branch must be <code>chore/agent-tool-restrictions-ledger</code>. Tested source commit: <code>168b9d867ff4464092a584e92113c0a03d82de63</code>. A later commit containing only checkpoint artifacts (this page and its sidecar) is allowed.",
+      "<strong>Canary.</strong> The third command must list exactly four files — <code>implementer.md</code>, <code>qa-runner.md</code>, <code>reviewer.md</code>, <code>test-hunter.md</code>. On the base build <code>.claude/agents/</code> does not exist at all, so it prints <strong>nothing</strong>. If it prints nothing here you are on the wrong tree — stop and say so rather than recording verdicts. This change bumps no version because nothing in this repo is versioned; the presence of those four files IS the build marker."
+    ]
+  },
+  "sections": [
+    {
+      "n": 1,
+      "title": "Restart — do this first",
+      "need": "The ability to fully quit and reopen Claude Code with this repository as the working directory. No test data, no credentials, no network access.",
+      "steps": [
+        {
+          "n": 1,
+          "do": "Fully quit and reopen Claude Code, with this repository as the working directory. A new tab or a new session inside the running app is <em>not</em> enough — the process must restart.",
+          "pass": "The session starts with no error mentioning <code>.claude/agents/</code>.",
+          "aside": "Runner: human. Every later step depends on this one. Agent definitions are read once at startup, which is the whole reason this checkpoint exists: the session that wrote these files booted before they existed and can never test them.",
+          "revision": 1
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "The four roles report their own tools",
+      "need": "The restarted session from Step 1, and the ability to spawn a sub-agent by <code>subagent_type</code>.",
+      "steps": [
+        {
+          "n": 2,
+          "do": "Spawn a sub-agent with <code>subagent_type: reviewer</code> and ask it to list every tool it has available.",
+          "pass": "It reports <code>Read</code>, <code>Glob</code>, <code>Grep</code> and <code>Bash</code> and nothing else — specifically no <code>Write</code>, no <code>Edit</code>, and no <code>mcp__</code> tool of any kind.",
+          "aside": "Runner: human. A self-report is a claim, not proof. If it lists a tool you did not expect, that is a fail. And if it <em>declines</em> to use <code>Write</code> rather than reporting <code>Write</code> as unavailable, treat that as a fail too — declining is the honour system this change was built to replace.",
+          "revision": 1
+        },
+        {
+          "n": 3,
+          "do": "Spawn a sub-agent with <code>subagent_type: test-hunter</code> and ask the same question.",
+          "pass": "The same four tools. No <code>Write</code>, no <code>Edit</code>, no <code>mcp__</code> tool.",
+          "aside": "Runner: human. Same standard as Step 2 — unavailable, not merely unused.",
+          "revision": 1
+        },
+        {
+          "n": 4,
+          "do": "Spawn a sub-agent with <code>subagent_type: implementer</code> and ask the same question.",
+          "pass": "<code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Glob</code>, <code>Grep</code>, <code>Bash</code> — and no <code>mcp__</code> tool, no Artifact, no visualize, no Drive, no Gmail.",
+          "aside": "Runner: human. This role keeps Write and Edit by design. What is being checked is the absence of everything else — the connector and Artifact schemas are the 12–15k per spawn this change removes.",
+          "revision": 1
+        },
+        {
+          "n": 5,
+          "do": "Spawn a sub-agent with <code>subagent_type: qa-runner</code> and ask the same question.",
+          "pass": "The implementer's six tools plus the <code>mcp__Claude_Browser__</code> browser tools, and no other <code>mcp__</code> server.",
+          "aside": "Runner: human. <strong>qa-runner keeping Write and Edit is deliberate, not a slip.</strong> The request described it as \"adds browser tools\" right after the read-only pair, but the QA-runner skeleton tells it to write evidence files at each checkpoint — a qa-runner without Write could not produce the evidence a close-out consumes. The reasoning is written into the definition's own body so a later reader does not \"correct\" it back.",
+          "revision": 1
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "End to end — skeleton names a type, the type exists, the type is restricted",
+      "need": "The restarted session. This is the check the whole change exists for.",
+      "steps": [
+        {
+          "n": 6,
+          "do": "Open <code>orchestrate/references/subagent-prompts.md</code> and read the line immediately above the Reviewer skeleton's opening fenced block. Then skim the file for the same line above each of the other six skeletons.",
+          "pass": "Above the Reviewer skeleton: <code>**Spawn with** <span>`</span>subagent_type: reviewer<span>`</span>.</code> The identical form appears above all seven skeletons — Implementer and Fix-up name <code>implementer</code>; Reviewer, Plan pre-flight and Convergence name <code>reviewer</code>; Test hunter names <code>test-hunter</code>; QA runner names <code>qa-runner</code>.",
+          "aside": "Runner: human. Seven skeletons, four definitions — Plan pre-flight and Convergence share the reviewer's shape (read, judge, write nothing), and Fix-up edits code like an implementer.",
+          "revision": 1
+        },
+        {
+          "n": 7,
+          "do": "In the restarted session, spawn the reviewer exactly as that skeleton now instructs — passing the <code>subagent_type</code> the line names — and ask it whether it can edit files.",
+          "pass": "The spawn succeeds (the type resolves), and the agent reports that <code>Write</code> and <code>Edit</code> are <strong>not available to it</strong> — not merely that it will not use them.",
+          "aside": "Runner: human. This is the end-to-end check: the skeleton names a type, the type exists, and the type is restricted. A spawn failure here means the definition's filename and the skeleton's line disagree.",
+          "revision": 1
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "What a user without the definitions will read",
+      "need": "No restart required for these two; they are documentation checks. Step 9 would write into your own home directory if you chose to run its command — you do not have to.",
+      "steps": [
+        {
+          "n": 8,
+          "do": "Read the new undefined-agent-types bullet in <code>orchestrate/references/protocol.md</code> §Degraded environments.",
+          "pass": "It says a spawn naming one of these types <strong>fails outright</strong> and that the <em>orchestrator</em> must substitute the general-purpose agent itself; that the prose read-only rules are then the only enforcement; that the per-spawn saving is forfeited; and it ends in an install action you could actually perform from any repo — copy <code>.claude/agents/*.md</code> into <code>~/.claude/agents/</code>, then restart. It must <em>not</em> claim anything falls back automatically.",
+          "aside": "Runner: human. This wording was a blocking review finding. An unknown <code>subagent_type</code> genuinely errors — <code>Agent type 'implementer' not found</code> — so an earlier draft that promised an automatic fallback was wrong, and the draft after that pointed at a <code>README.md</code> which is not shipped with the skill and so resolved to nothing from any other repo. Judge whether the text now helps someone who is <em>not</em> sitting in this clone.",
+          "revision": 1
+        },
+        {
+          "n": 9,
+          "do": "Read the new agent-install subsection in <code>README.md</code>. Confirm the command for your platform names a real source path in your clone and your real <code>~/.claude/agents/</code> destination. Run it only if you want the agents available in every project.",
+          "pass": "The subsection states plainly that installing the skill does <strong>not</strong> install the agents; the command text is correct for your platform and the source path exists; the per-project alternative and the restart requirement are both named; and the fallback sentence says a spawn <em>fails</em> rather than promising an automatic fallback. If you ran the command, the four files are now in <code>~/.claude/agents/</code>.",
+          "aside": "Runner: human. This writes into your home directory, not a disposable environment — <strong>verifying the text without running it is a valid pass.</strong> The trap this subsection exists to close: the skill installs by symlinking <code>orchestrate/</code> alone, and a skill directory cannot carry agent definitions, so a user who assumes the symlink brought them gets none of the saving.",
+          "revision": 1
+        }
+      ]
+    }
+  ],
+  "inputs": []
+}
