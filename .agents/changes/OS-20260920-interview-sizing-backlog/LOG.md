@@ -373,3 +373,50 @@ re-ran the full suite, committed, and re-ran every mutation against the committe
 quietly eats the work it was meant to be testing, and every subsequent verdict describes a tree
 nobody intended. This is the same family as the `Set-Content` transport defect recorded above: the
 apparatus that verifies the work can corrupt the work, and its output looks identical either way.
+
+### B03 — fix round, and the orchestrator's own corroboration
+
+Fix round `5acad5e`, 278/278. The P1 is fixed as specified — the pattern is now
+``/^(- |-$|[@`*%[{!?])/`` — and all four dash forms are pinned as rows: `-x` accepted, `- x`, `-`
+and `- ` rejected, so a one-sided edit to either dash form reddens.
+
+**The implementer did not take the gates' gap list on trust either.** Asked to determine `KNOWN_GAP`
+empirically, it swept every printable-ASCII head against PyYAML 6.0.3 comparing the loaded value with
+the input, and reports the gap set is EXACTLY the seven the two gates had named between them —
+`#`, `&`, `,`, `>`, `]`, `|`, `}` — and nothing more. Three agents and the orchestrator have now
+converged on the same seven characters by four independent routes.
+
+**Orchestrator verification, run directly rather than read from a report.** PyYAML 6.0.3 on this
+machine:
+
+```
+'description: -'              -> RAISES ScannerError      (the round-1 P1, confirmed)
+'description: ?Runs a batch'  -> {'description': '?Runs a batch'}   (the backlog's claim is wrong)
+'description: &a x'           -> {'description': 'x'}     (silent anchor drop)
+'description: #c'             -> {'description': None}    (silent null)
+'description: ~Runs a batch'  -> {'description': '~Runs a batch'}   (valid; must stay accepted)
+```
+
+Every claim holds. `~` in particular is the one that could have gone the other way — `~` alone is
+YAML's null, so "leading `~` is an indicator" is a plausible-sounding error — and the implementer was
+right to exclude it from both lists and to give the sweep a third message branch saying so.
+
+Two structural findings it volunteered are better than the ask. A leading `"` or `'` is rejected by
+the QUOTED branch as an unterminated scalar, and YAML rejects it too, so it belongs in neither list:
+folding it into `INDICATOR_MEMBERS` would have been a true verdict reached by a false route, and into
+`KNOWN_GAP` an outright false claim. It gets a third named bucket, `QUOTE_HEADS`. And a leading space
+never reaches `value` at all, because `: +` in the field regex consumes it exactly as YAML treats it
+as separation — so that column tests the tail alone, which is correct in both readers, and is
+commented rather than silently exempted.
+
+The assertion worth copying elsewhere is `assert.deepEqual(met, { member: 8, gap: 7, quote: 2 })`:
+it proves every declared list member is actually REACHED by the sweep. Without it, a list the loop
+never meets is a branch no input reaches — a whole list could be silently unswept while every
+individual assertion passed. `singles` is eight because `- ` is two characters and is pinned by its
+own rows; the 8-vs-9 discrepancy is stated in the assertion rather than left to be rediscovered.
+
+`KNOWN_GAP` asserts that seven characters YAML rejects are ACCEPTED here. That is deliberate: it
+records the defect instead of blessing it, and its failure message directs a future fixer to MOVE the
+member into `INDICATOR_MEMBERS` — where it gains a rejection case of its own — rather than to delete
+an assertion. The round-2 re-review is checking that the move is genuinely all that is needed, since
+a design that required deleting an assertion to progress would have failed its own purpose.
