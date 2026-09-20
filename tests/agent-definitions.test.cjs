@@ -178,10 +178,15 @@ test('no definition pins a model or reaches past the browser MCP server', () => 
 // A drift alarm, not a style rule. These files are re-read on every spawn, so length is
 // the cost this batch exists to remove; the largest is ~1.2 KiB today and the ceiling is
 // roughly 3x that. Tripping it means rewrite the body, not raise the number.
+// Bytes as they sit on disk, which is what a spawn re-reads — so this one assertion reads
+// the file raw rather than through `read()`, whose CRLF normalization and UTF-16 `.length`
+// under-count a file carrying em-dashes: qa-runner.md is 1214 bytes in a CRLF checkout and
+// 1191 units after normalizing, and the smaller number is not the cost being bounded.
 test('no definition has grown into a document', () => {
   for (const name of Object.keys(TOOLS)) {
-    const { file, text } = definition(name);
-    assert.ok(text.length <= 4096, file + ' is ' + text.length + ' bytes; keep definitions under 4 KiB');
+    const { file } = definition(name);
+    const bytes = fs.readFileSync(path.join(ROOT, file)).length;
+    assert.ok(bytes <= 4096, file + ' is ' + bytes + ' bytes on disk; keep definitions under 4 KiB');
   }
 });
 
