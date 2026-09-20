@@ -408,3 +408,27 @@ evidence directory and the smoke script.
 One step passed for a *stronger* reason than stated: step 1's main worktree returned
 `dirty`, not `clean`, which is inside the pass condition and better evidence — it proves a
 real `git status` was parsed rather than degraded to a default.
+
+### Contract deviation at hand-over — caught by the user, not by me
+
+I delivered the C1 script as markdown. The contract is explicit at `00-READBEFORE.md:448`:
+use the `smoke-*.html` in this ledger as the page's format and delivery base, update it for
+this checkpoint, and commit it as `smoke-<Cn>.html`. The repository ships
+`build-smoke-page.mjs`, a template, and two test suites for exactly this, and the previous
+ledger delivered `smoke-C1.html` + `smoke-C1.json`.
+
+I reasoned that the page was optional polish and that a markdown script carried the same
+information. That was wrong on the contract and wrong on the merits — the page has a
+verdict-capture UI and a "Copy results as text" paste format the markdown does not, which
+is the mechanism the verdict log is written from. No waiver was recorded, because I did not
+recognise it as a deviation at the time. The user asked why, which is how it surfaced.
+
+Rebuilt with the repository's own builder from `smoke-C1.json`: 63,412 bytes, 0 unfilled
+slots. The markdown draft is deleted so there is one source of truth. The evidence files
+under `evidence/C1/` were numbered against that draft; the mapping is recorded in the
+PROGRESS `Smoke page` field rather than renumbering files a QA runner already wrote.
+
+Worth generalising: a contract clause that names an artifact and a builder is not advisory,
+and "the information is equivalent" is not the test. The test is whether the driving
+session can follow the ledger alone — and a session reading `Smoke page: plain text` where
+the contract says HTML has been handed a different protocol than the one it was promised.

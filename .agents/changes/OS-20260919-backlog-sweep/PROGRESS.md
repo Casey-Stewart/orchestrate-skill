@@ -7,7 +7,7 @@ branch was cut from — the "since" point for the first checkpoint's diff and fo
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
-**Smoke page**: [smoke-C1.md](smoke-C1.md) — ledger-relative markdown; pre-smoke evidence in [evidence/C1/](evidence/C1/)
+**Smoke page**: [smoke-C1.html](smoke-C1.html) — built from [smoke-C1.json](smoke-C1.json) by `orchestrate/tools/build-smoke-page.mjs`, 0 unfilled slots. Pre-smoke evidence in [evidence/C1/](evidence/C1/); those files are numbered against the superseded markdown draft, so their step 1-2 are now the page's GATE, and md 3-10 are page steps 1-8.
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
 before believing any row (§Recovery in the contract).
 

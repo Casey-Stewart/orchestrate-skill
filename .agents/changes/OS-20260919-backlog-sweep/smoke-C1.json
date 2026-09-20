@@ -1,0 +1,122 @@
+{
+  "change": "Backlog sweep — six residuals from OS-20260919",
+  "checkpoint": 1,
+  "batches": "B01–B03",
+  "branch": "chore/backlog-sweep-ledger",
+  "buildSha": "e79d3781b9290d54b6c4996989d7b19b6b358422",
+  "ckptKey": "OS-20260919-backlog-sweep-C1",
+  "pageTitle": "C1 smoke run",
+  "standfirst": "Ten checks, <strong>every one already run by an agent</strong> and passing — the evidence is in <code>evidence/C1/</code>, one file per step. You are spot-checking, not discovering. Run the gate first: this repository has no version file, so the build marker is <em>behavioural</em>, and the gate's third command gives the opposite answer on the base build. When done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the task.",
+  "gate": {
+    "intro": "Run this gate before recording any verdict. Paste the whole block as-is: it runs the same way in <code>cmd.exe</code> and PowerShell.",
+    "commands": [
+      "git -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" branch --show-current\ngit -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" rev-parse --short HEAD\nnode \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill/orchestrate/tools/git-evidence.mjs\" worktrees --repo \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\""
+    ],
+    "checks": [
+      "Branch must be <code>chore/backlog-sweep-ledger</code>. Tested source commit: <code>e79d378</code>. A later commit containing only checkpoint artifacts — this page and its sidecar — is allowed.",
+      "<strong>Canary.</strong> The third command must exit <code>0</code> and its JSON must read <code>\"completeness\":\"complete\"</code> with <strong>no</strong> <code>unsafe-filter</code> diagnostic anywhere. On the base build it exits <code>2</code> with <code>\"completeness\":\"partial\"</code>, every worktree <code>unknown</code>, and one <code>unsafe-filter</code> per worktree. Judge the shape, never a count — the worktree inventory grows and shrinks as work proceeds.",
+      "If you see the old behaviour, <strong>stop and say so</strong>. You are looking at the wrong build and nothing below this line can be trusted."
+    ]
+  },
+  "sections": [
+    {
+      "n": 1,
+      "title": "BL-003 — the helper works on a stock Windows install",
+      "need": "Nothing beyond <code>git</code> and <code>node</code> on PATH. No test data, no credentials, no network access. These two steps read configuration; they change none.",
+      "steps": [
+        {
+          "n": 1,
+          "do": "Run <code>git config --system --name-only --get-regexp \"^filter\\..*\\.(clean|process)$\"</code>, then <code>git ls-files -z --cached --others --exclude-standard | git check-attr filter -z --stdin</code> from the repository root.",
+          "pass": "The first lists <code>filter.lfs.clean</code> and <code>filter.lfs.process</code> — stock Git for Windows. The second returns only <code>unspecified</code> or <code>unset</code>: no path resolves to a filter.",
+          "aside": "Runner: agent, pre-verified. This is the exact situation BL-003 describes — a driver configured system-wide that no file actually uses — and the gate's canary passed anyway. If the first command returns nothing, this machine has no LFS filter configured and the canary proves less than it should; say so rather than recording a pass. This is the claim no test in the suite can make, because every fixture sets <code>GIT_CONFIG_NOSYSTEM=1</code> and an empty global config precisely to isolate your real configuration away.",
+          "revision": 1
+        },
+        {
+          "n": 2,
+          "do": "Run the full validation recipe from Section 5, then find these three tests in its output: <code>configured clean and process filters never execute through API or actual CLI status probes</code>, <code>global clean filters remain unknown and never execute through API or actual CLI</code>, and <code>configured filters leave the fence UNKNOWN without executing a command or changing bytes</code>.",
+          "pass": "All three pass. One unit = one named test; expect three.",
+          "aside": "Runner: agent, pre-verified. This is the refusal half of the fix. A helper that stopped refusing when a path <em>does</em> resolve to a filter would have stopped protecting anything — the point was to narrow the trigger, not remove it. An independent gate confirmed these still bind by mutating the new code to always return safe: all three went red.",
+          "revision": 1
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "BL-001 and BL-002 — guards that can now fail",
+      "need": "A writable temp directory for Step 3, which clones this repository and deletes the clone afterwards. Nothing in this repository is modified.",
+      "steps": [
+        {
+          "n": 3,
+          "do": "Run <code>node --test tests/protocol-contract.test.cjs</code> and find <code>published helper recipes execute actual CLIs and generated batch grammar passes the real fence</code>.",
+          "pass": "It passes, and the file reports <code>pass 7 / fail 0</code>.",
+          "aside": "Runner: agent, pre-verified. That test builds a disposable ledger by lifting the <code>Bnn</code> example row out of each shipped template's instruction comment — exactly as a scaffolder does — then runs the real <code>check-fence.mjs</code> over the result. It is <em>red</em> on the base templates, because there is no row to lift. That is BL-002 closed end to end. A live fence run against this change's own batch branches returned <code>\"status\":\"PASS\"</code> with zero violations and zero unknowns on 2026-09-20 — the first mechanical PASS in this repository's history, recorded in PROGRESS and LOG. Do not try to reproduce that one now: <code>check-fence.mjs</code> needs a live candidate worktree and the batch worktrees were removed when the wave closed.",
+          "revision": 1
+        },
+        {
+          "n": 4,
+          "do": "Read the <code>Notes</code> cell of each batch row in this ledger's <code>PROGRESS.md</code>, then the same in <code>.agents/changes/OS-20260919-agent-tool-restrictions/PROGRESS.md</code>.",
+          "pass": "<strong>None</strong> of the previous ledger's three rows records a mechanical fence result — two read <code>Fence PASS (manual — helper UNKNOWN, see LOG R2/R3)</code> and the third <code>Fence PASS (manual, extended fence)</code>. In this ledger, B02's row records a mechanical <code>PASS</code>.",
+          "aside": "Runner: agent, pre-verified. The previous ledger is the before picture, preserved: its mechanical gate was unusable for an entire change and every batch silently fell back to the manual one. B01 and B03 also read <code>manual</code> here, for reasons their own Notes give — B03 ran before its own fix landed, and B01's mechanical run tripped the wrapped-<code>polish:</code>-line tool defect described in the LOG. Only B02's row is expected to show a mechanical result.",
+          "revision": 1
+        },
+        {
+          "n": 5,
+          "do": "In a throwaway clone — never in this repository — run <code>git clone . \"$env:TEMP\\os919c1\"</code>. In the clone, delete the one line containing <code>Every generation and independent Excel-validation command in this run uses literal</code> from <code>.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/00-READBEFORE.md</code>, run the validation recipe there, then <code>git -C \"$env:TEMP\\os919c1\" checkout -- .</code> and re-run. Finally <code>Remove-Item -Recurse -Force \"$env:TEMP\\os919c1\"</code>.",
+          "pass": "RED in the clone while the line is missing, naming <code>reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact</code>; green after the restore. In <em>this</em> repository <code>git status --porcelain</code> stays empty throughout.",
+          "aside": "Runner: agent, pre-verified — it went red, then green, and this repository was untouched. The contract forbids an agent to modify <code>.agents/archive/</code>, which is why this runs in a clone. Use the Excel sentence, which occurs exactly once — <strong>not</strong> the <code>Python310</code> line: five lines contain it and three match the asserted regex, so deleting one proves nothing. That trap was caught at plan pre-flight, before any code was written.",
+          "revision": 1
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "BL-004, BL-005, BL-006 — the agent-definition guards",
+      "need": "Nothing beyond the repository. Step 6 creates and then deletes one untracked file; it never touches the four tracked definitions and never writes into your <code>~/.claude/agents/</code>.",
+      "steps": [
+        {
+          "n": 6,
+          "do": "Create <code>.claude/agents/subdir/orchestrator.md</code> containing the single line <code>hello</code>. Run the validation recipe. Then delete the file and the <code>subdir</code> directory and re-run.",
+          "pass": "RED with the failure naming <code>the directory holds exactly the four known definitions</code> and the path <code>subdir/orchestrator.md</code>; green after the delete, with <code>git status --porcelain</code> empty.",
+          "aside": "Runner: agent, pre-verified — it went red on exactly that test (259/1), then back to 260/0, and the four tracked definitions were hash-identical throughout. This is BL-005: the old whitelist listed one directory level, so a nested definition escaped it entirely and would ship with no <code>tools:</code> line, inheriting every tool.",
+          "revision": 1
+        },
+        {
+          "n": 7,
+          "do": "In the recipe's output, find the frontmatter case-table tests and <code>the escape whitelist admits exactly the characters YAML defines</code>.",
+          "pass": "The three forms BL-004 names each appear as their own passing case, the quoted-colon accept case appears, and the whitelist sweep passes.",
+          "aside": "Runner: agent, pre-verified. The sweep checks all 95 printable ASCII characters against the 18 escapes YAML defines, in both directions, with the member list written independently of the regex so that editing both at once is still caught. This batch took three review rounds and three polish passes because five separate times the fix for \"an assertion that cannot fail\" itself contained one; the sweep is what finally holds the boundary rather than sampling it.",
+          "revision": 1
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "The whole build",
+      "need": "PowerShell 7 for the published recipe. Takes about four minutes.",
+      "steps": [
+        {
+          "n": 8,
+          "do": "From the repository root in PowerShell, run the published validation recipe: enumerate <code>tests/*.test.cjs</code> recursively, run <code>node --test --test-reporter=spec</code> over them, then <code>git diff --check</code>.",
+          "pass": "<strong>260 pass, 0 fail</strong>, exit 0, and <code>git diff --check</code> silent.",
+          "aside": "Runner: agent, pre-verified. Base was 207, so this change adds 53 tests. <code>node --test</code> bare from the root is the portable equivalent; <code>node --test tests/</code> is <em>not</em> — Node's directory-argument discovery differs and the suite fails. That distinction is itself documented in the README and pinned by a test.",
+          "revision": 1
+        },
+        {
+          "n": 9,
+          "do": "Confirm the four shipped agent definitions are unchanged: <code>git diff --stat e79d378 -- .claude/agents/</code> against the ledger base, or simply <code>git log --oneline -- .claude/agents/</code>.",
+          "pass": "No commit in this change touches <code>.claude/agents/</code>. The four definitions are byte-identical to the base.",
+          "aside": "Runner: agent, pre-verified. B01 changed the test that guards those files, never the files themselves — they were outside its fence by design, and every gate confirmed it independently by loading the base and the new parser side by side against the same four files.",
+          "revision": 1
+        },
+        {
+          "n": 10,
+          "do": "Read <code>evidence/C1/summary.md</code> in this ledger directory, and spot-check any step file that interests you.",
+          "pass": "Ten verdicts recorded. Two are marked FAIL — both are defects in the smoke script, not the build, and both have since been corrected. Everything else passed.",
+          "aside": "Runner: agent. Worth reading rather than skipping: the QA runner was asked to verify ten steps and also caught, unprompted, that B01's PROGRESS row was stale — still marked in-progress with no merge SHA, while B01 was merged and was HEAD. That was my bookkeeping error, now fixed. The same pattern recurred throughout this change: gates asked about one thing kept finding real defects in something adjacent.",
+          "revision": 1
+        }
+      ]
+    }
+  ],
+  "inputs": []
+}
