@@ -265,3 +265,79 @@ just deleted, and by repo convention would want a `— FIXED` marker. The ledger
 file is "a dated point-in-time review record pinned to commit `af57139` and is off limits to every
 batch". A point-in-time record is not made wrong by later work; annotating it would make it no
 longer point-in-time. Recorded as a close-out residual for the user, not actioned.
+
+### B02 — gate round 1 (test-hunter), and the class that survived its own fix
+
+**12 findings, 0 needing a production change** — all ASKs — from **67 mutations**. Combined with the
+reviewer's 4, the gate verdict is `R1 SHIP @1b5b7f4 asks=16`.
+
+The hunter first confirmed what the orchestrator asked it to check hardest: the whitespace collapse
+is real, every removed literal reinserted IN WRAPPED FORM reddens, the verdicts are identical on a
+CRLF and an LF checkout, the live controls fire on their own specimens, and no `deepEqual`-message
+trap exists. The near-miss was genuinely avoided.
+
+**Then it found the same class alive in one sweep of the same file.** The A2 compound-label sweep at
+`:100-102` is the ONE place that reads `read(file)` un-collapsed, and its `/"[^"\n]*"/` cannot cross
+a newline. A second compound label on one line reddens; the same label wrapped as
+`"Stop at integration +` / `test-hunter"` is GREEN — and ~90-column wrapping is this repository's own
+convention, so the wrapped form is the LIKELY one. A batch can fix a class in nine places and
+reintroduce it in the tenth, in the same file, in the same commit.
+
+Three other findings are worth the record:
+
+- **The contradiction sweeps miss ordinary English.** A1 keys on `round`, `fits…one…call`, `merg*`.
+  "Consolidate all seven topics into a single AskUserQuestion call" is green; so is "Collapse the
+  topics into as few calls as possible". Worst, the arithmetic can be REIMPOSED without any banned
+  word: "Never exceed four questions in total across the whole interview" is green in both
+  documents. A positive-only pin defeated by a paraphrase is the documented class; this is that
+  class one level up — the SWEEP defeated by a paraphrase.
+- **A3 and A4 have no sweep at all**, while the test's own header comment asserts "Every rule below
+  is therefore pinned twice". The documentation of the test overclaims what the test does, which in
+  a repository whose product is documents is itself the defect.
+- **An assertion that cannot fail**, at `:208`: `assert.ok(cited.length >= topics.length, 'each
+  surviving topic must actually be cited somewhere')` where `topics` is `[...new Set(cited.map(…))]`.
+  The inequality holds for every possible input, including the empty one.
+
+All sixteen went to polish; none needed a document change, so the pass stays test-only.
+
+### B03 — gate round 1: FIX FIRST, and two gates that agreed by disagreeing
+
+**`R1 FIX FIRST @d8541c2`** — strong-tier reviewer, one P1. Test-hunter: 4 findings, 1 marked
+NEEDS-PRODUCTION-CHANGE.
+
+**Both gates independently ran PyYAML 6.0.3 and both confirmed the implementer against the ledger.**
+`description: ?Runs a batch` loads fine; `description: ? x` is a ScannerError. The backlog's "all
+nine confirmed against PyYAML 6.0.3" is wrong about `?`. Shipping `?` anyway was adjudicated
+CORRECT — `?` is a YAML 1.2 `c-indicator` and PyYAML's acceptance of `?x` is a leniency, not a spec
+guarantee, the same shape as the `"Closed"#c` row this file already rejects deliberately — and the
+code comment was explicitly checked and found NOT to overstate. Three independent agents converged
+on a correction to the ledger's own source material.
+
+**The P1 is the sharper finding.** YAML's sequence-entry indicator is `-` followed by a space **or a
+line break**. The pattern carries only the space form, and `value` has trailing spaces stripped, so
+`description: -` is ACCEPTED by the predicate and is a `ScannerError` in PyYAML — the exact harm
+BL-004/BL-008 exist to catch, reached through the one member this batch owns. The reviewer's framing
+is what makes it unarguable: the batch rejects `?x`, which YAML ACCEPTS, on reject-on-doubt grounds,
+while accepting `-<EOL>`, which YAML REJECTS. Completing the ninth member is not widening the list,
+so it is a P1 and not scope creep.
+
+**Where the gates diverged, and how it resolved.** The hunter marked the wider gap family
+(`&`, `#`, `|`, `>`, and the reviewer added `,`, `]`, `}`) NEEDS-PRODUCTION-CHANGE, warning that
+"leaving it in a subagent report only is how BL-008 itself was nearly lost". The reviewer said the
+opposite on disposition: the nine-member fence comes verbatim from BL-008, and widening it mid-round
+is precisely what two reviewers adjudicated against when BL-008 was split out of BL-004 — file it,
+do not pull it in. Both are right about different things, and the resolution satisfies both: the
+family goes to `BACKLOG.md` as its own entry, and the batch gains a declared `KNOWN_GAP` list swept
+alongside `INDICATOR_MEMBERS` and asserted ACCEPTED. That records the gap instead of blessing it —
+when a later batch fixes a member, the assertion goes red and forces it to move between the two
+lists. **Both gates proposed that same `KNOWN_GAP` shape independently**, which is the strongest
+signal available that it is the right one.
+
+The hunter's complement demonstration is why it matters: adding six characters to the class —
+`&#|>~=` — with `INDICATOR_MEMBERS` untouched leaves the file at 53/53 green. The size assertion's
+own message names exactly the edit that survives it.
+
+Its mutation table is the cleanest evidence produced this change: all nine members redden on
+one-at-a-time removal; the both-at-once edit is caught by the length assertion; the duplicate trick
+is caught by `new Set(...).size`; and moving the reason to line 2 of the message reddens 4 tests,
+proving `split('\n')[0]` load-bearing — the BL-004 round-2 trap, tested rather than assumed.
