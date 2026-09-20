@@ -66,25 +66,25 @@ two are held byte-identical over the §Read-only evidence tools span.
 
 ## Checklist
 
-- [ ] Accept indented continuation lines in `validateBatchEdit`’s polish scan
+- [x] Accept indented continuation lines in `validateBatchEdit`’s polish scan
       (`check-fence.mjs:92`), consuming a continuation only after a `- [ ] polish:` or
       `- [x] polish:` header has matched at that position — a leading indented line with no header
       before it stays a `batch-content` violation.
-- [ ] Add a WRAPPED `polish:` example to the `## Checklist` instruction comment in
+- [x] Add a WRAPPED `polish:` example to the `## Checklist` instruction comment in
       `orchestrate/templates/02-batch.md`, inside the existing comment and preserving its literal
       opening `<!-- - [ ] one box`.
-- [ ] Add a `tests/check-fence.test.cjs` case that runs the real `validateBatchEdit` over a batch
+- [x] Add a `tests/check-fence.test.cjs` case that runs the real `validateBatchEdit` over a batch
       file whose appended polish item WRAPS across two or more lines, and asserts zero violations.
-- [ ] Add the negative case: an indented line appended with no polish header above it still produces
+- [x] Add the negative case: an indented line appended with no polish header above it still produces
       a `batch-content` violation.
-- [ ] Add the boundary case on the other side — a wrapped polish item followed by an unrelated
+- [x] Add the boundary case on the other side — a wrapped polish item followed by an unrelated
       appended line still violates — so the loosening is pinned from both directions.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-011-wrapped-polish` — `fix: wrapped polish items in the fence tool (batch 01)`.
+- [x] Commit on `fix/bl-011-wrapped-polish` — `fix: wrapped polish items in the fence tool (batch 01)`.
 
 ## Acceptance criteria
 
