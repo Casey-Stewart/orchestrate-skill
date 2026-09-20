@@ -82,6 +82,15 @@ leading and when the value is quoted.
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/bl-008-yaml-indicators` — `fix: leading YAML indicator characters in frontmatter (batch 03)`.
+- [x] polish: finish the ninth member — YAML's sequence-entry indicator is `-` before a space OR a
+      line break, and the trailing-space strip makes `description: -` and `description: - ` the same
+      value, so both reach the predicate as `-` and both must be rejected (R1 P1).
+- [x] polish: sweep printable ASCII at the head of an unquoted value, asserting rejection exactly on
+      the member list, and name the seven characters YAML also refuses that this parse still accepts
+      in a separate `KNOWN_GAP` list asserted ACCEPTED — recording the gap instead of blessing it, so
+      closing one goes red and forces the member into `INDICATOR_MEMBERS` (R1 ASK-1).
+- [x] polish: `?` is rejected on doubt, not because YAML errors on it, so the sweep's loop message
+      must stop claiming the document would fail to parse for that member (R1 ASK-2).
 
 ## Acceptance criteria
 
