@@ -86,6 +86,34 @@ test('template placeholders and registry match in both directions', () => {
   assert.deepEqual([...used].sort(), listed.sort());
 });
 
+// The helper-section mirror below proves only that the two documents AGREE: it is green when
+// both name a command and green when neither does. Pin the command in each document separately,
+// and inside the rule itself, so naming it elsewhere in the document cannot satisfy this.
+// Pin the whole clause, like the decision tables and the self-check clause below: matching
+// only /git check-attr filter/ is equally satisfied by "never run git check-attr filter",
+// the exact opposite of what the probe does. The imperative IS this sentence's content, so
+// freezing its wording is deliberate; the pin stops at the clause, leaving the rest free.
+test('the manual read-only fallback names git check-attr filter in the resolved-filter rule', () => {
+  const rule = 'Before status, run git check-attr filter on the paths status inspects:';
+  for (const [label, text] of [['orchestrate/references/protocol.md', protocol],
+    ['orchestrate/templates/00-READBEFORE.md', contract]]) {
+    const from = text.indexOf('**Manual read-only fallback.**'), to = text.indexOf('## Git model');
+    assert.ok(from !== -1 && to > from, label + ': the manual read-only fallback must precede the Git model heading');
+    const fallback = text.slice(from, to);
+    const start = fallback.indexOf('Before status,'), end = fallback.indexOf('makes safe cleanliness unknown');
+    assert.ok(start !== -1 && end > start, label + ': the manual fallback must still carry the resolved-filter rule');
+    assert.ok(fallback.slice(start, end).replace(/\s+/g, ' ').startsWith(rule),
+      label + ': the resolved-filter step must read exactly "' + rule + '" (whitespace collapsed)');
+    // A contradiction beside the pinned clause defeats it. Scope is this subsection, not
+    // the document; the clause bound is load-bearing (`do not probe their trees` above
+    // matches an unnarrowed `.*`). Polarity-blind: reinforcements ("Never skip git
+    // check-attr filter") redden too — word one with no negation verb in its clause.
+    // Uncaught by design: negation after the command, a probe synonym, an unlisted verb.
+    assert.doesNotMatch(fallback.replace(/\s+/g, ' '), /(?:never|not|avoid|skip)\b[^.;:]*\bgit check-attr\b/i,
+      label + ': nothing in the manual fallback may tell a human NOT to run git check-attr');
+  }
+});
+
 test('generated contract bakes helper grammar, outcomes, fallback and full input responsibility', () => {
   const helperSection = text => text.slice(text.indexOf('### Read-only evidence tools'), text.indexOf('## Git model'));
   assert.equal(helperSection(contract).replaceAll('{{EVIDENCE_TOOL}}', 'orchestrate/tools/git-evidence.mjs')
