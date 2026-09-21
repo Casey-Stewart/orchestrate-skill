@@ -195,6 +195,72 @@ test('an invisible control character anywhere in the sidecar is refused', () => 
   }
 });
 
+// The rule above protects sidecars. Nothing protected this repository's OWN source, and
+// the accident has landed twice: once in this batch's first draft, where the rule's own
+// character class was written as escapes, decoded into literal control bytes on the way
+// into the file, and left the suite green at 301/301; and once earlier, where a literal
+// U+2028 sat inside a fixture name for the whole life of that fixture. A human running a
+// byte scan catches it for one batch. This catches it for every batch.
+//
+// Domain enforced, stated rather than implied: Unicode Cc entire (C0, DEL, C1) minus
+// tab, LF and CR — CR because this repository's working tree is CRLF — plus the Unicode
+// line and paragraph separators U+2028/U+2029, which is the pair that actually got in.
+const SOURCE_TAB = 9, SOURCE_LF = 10, SOURCE_CR = 13;
+const forbiddenInSource = code =>
+  (code < 32 && code !== SOURCE_TAB && code !== SOURCE_LF && code !== SOURCE_CR)
+  || code === 127 || (code >= 128 && code <= 159) || code === 0x2028 || code === 0x2029;
+// Skipped by content type, never by an allow-list of extensions: a new kind of text file
+// is swept by default rather than silently passing every assertion.
+const NOT_TEXT = /\.(?:xlsx|xls|png|jpe?g|gif|ico|pdf|zip|gz|woff2?|ttf|eot|exe|dll)$/i;
+function invisibleCharactersUnder(root) {
+  const found = [];
+  const walk = dir => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
+      if (entry.name === '.git' || entry.name === 'node_modules') continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) { walk(full); continue; }
+      if (NOT_TEXT.test(entry.name)) continue;
+      let line = 1;
+      for (const character of fs.readFileSync(full, 'utf8')) {
+        const code = character.codePointAt(0);
+        if (code === SOURCE_LF) line++;
+        else if (forbiddenInSource(code)) {
+          found.push(path.relative(root, full).split(path.sep).join('/') + ':' + line
+            + ': U+' + code.toString(16).toUpperCase().padStart(4, '0'));
+        }
+      }
+    }
+  };
+  walk(root);
+  return found;
+}
+
+test('no shipped skill file or test carries an invisible character', t => {
+  // The live control comes FIRST, so the silence over the repository means something.
+  // It plants one byte from each half of the domain, in a SUBDIRECTORY (the walk must
+  // recurse), beside a clean file with tabs and CRLF (which must be spared) and a binary
+  // file full of NULs (which must be skipped).
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'invisible-source-'));
+  t.after(() => fs.rmSync(scratch, { recursive: true, maxRetries: 8, retryDelay: 100 }));
+  fs.mkdirSync(path.join(scratch, 'nested'));
+  fs.writeFileSync(path.join(scratch, 'clean.cjs'), 'const ok = 1;\r\nconst tabbed = 2;\t// fine\r\n');
+  fs.writeFileSync(path.join(scratch, 'nested', 'planted.cjs'),
+    'const nul = "' + String.fromCharCode(0x00) + '";\n'
+    + 'const nel = "' + String.fromCharCode(0x85) + '";\n'
+    + 'const sep = "' + String.fromCharCode(0x2028) + '";\n');
+  fs.writeFileSync(path.join(scratch, 'binary.xlsx'), Buffer.from([0, 1, 2, 3]));
+  assert.deepEqual(invisibleCharactersUnder(scratch),
+    ['nested/planted.cjs:1: U+0000', 'nested/planted.cjs:2: U+0085', 'nested/planted.cjs:3: U+2028'],
+    'the sweep must recurse, report each planted byte with its line, spare tab/CR/LF, and skip binary files');
+  // `.agents/` is out of scope on purpose: those ledgers are historical records that
+  // quote published bytes verbatim and are never rewritten.
+  for (const tree of ['orchestrate', 'tests']) {
+    assert.deepEqual(invisibleCharactersUnder(path.join(__dirname, '..', tree)), [],
+      tree + ': an invisible character in source is an escape something decoded on the way in — '
+      + 'rebuild that literal with String.fromCharCode instead of exempting the file');
+  }
+});
+
 // Two of the five documentation defects in a published page were a `Section 5` and a
 // `Step 3` that no longer existed after a restructure — both mechanically detectable.
 test('a Section or Step cross-reference the sidecar does not contain is refused', () => {
@@ -229,8 +295,12 @@ const script = html => html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const compiles = html => new vm.Script(script(html));
 
 test('ordinary punctuation in a plain name never breaks the generated script', () => {
+  // The separator case is BUILT from its code point. Written as an escape, it was
+  // decoded on the way into this file by an earlier batch's editor, and the literal
+  // U+2028 then sat here, green, for the whole life of the fixture.
+  const separatorName = 'Separator' + String.fromCharCode(0x2028) + 'pack';
   for (const change of ['Fix "Save as"', 'Back\\slash pack', 'Two\nlines', 'A </script> name',
-    'Ampersand & <b>markup</b>', 'Separator pack']) {
+    'Ampersand & <b>markup</b>', separatorName]) {
     compiles(build({ change }));
     const emitted = script(build({ change })).match(/var lines = \["([^\n]*?)", "Current build/)[1];
     assert.equal(JSON.parse('"' + emitted + '"'), `C1 smoke run — ${change} (0.14.0)`,
