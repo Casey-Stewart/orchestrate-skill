@@ -417,7 +417,8 @@ git diff --name-only <buildSha>..HEAD
 
 The first must exit 0; the second must print nothing outside this ledger's directory.
 `build-smoke-page.mjs` refuses a sidecar whose `gate.commands` omits either command or
-the SHA the sidecar records, a sidecar carrying any control character other than tab or
+the SHA the sidecar records, a sidecar carrying any Unicode control character (C0, `DEL`
+or C1, the last for the NEL line terminator `U+0085`) other than tab or
 newline, and a `Section N` or `Step N` reference to a section or step it does not
 contain. Author embedded commands with no backslashes and no control characters.
 

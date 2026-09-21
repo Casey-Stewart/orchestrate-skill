@@ -143,33 +143,56 @@ test('a gate that cannot prove containment mechanically is refused', () => {
 // An invisible U+0000 inside a copyable command reached a published hand-over and made
 // that command a SyntaxError for anyone who pasted it.
 test('an invisible control character anywhere in the sidecar is refused', () => {
-  // Sweep the whole domain rather than sampling: every C0 code point plus DEL. The
-  // member list is written independently of the rule's character class, and its size is
-  // asserted, so widening both at once still reddens.
-  // Built from code points, never written as escapes: an editor or transport that
-  // decodes an escape would put the invisible byte into this file instead of testing it.
-  const controls = [...Array(0x20).keys(), 0x7f].map(i => String.fromCharCode(i));
-  assert.equal(controls.length, 33, 'the sweep must cover C0 and DEL, not a sample');
-  const allowed = new Set(['\t', '\n']);
-  assert.deepEqual(controls.filter(c => allowed.has(c)), ['\t', '\n']);
+  // The domain smoke-page.md publishes, written out independently of the predicate in
+  // build-smoke-page.mjs: Unicode Cc entire — C0, DEL and C1 — minus tab and newline.
+  // Its size and its edges are asserted, so widening the list and the rule in one edit
+  // still reddens. Built from code points, never written as escapes: an editor or
+  // transport that decodes an escape puts the invisible byte into this file instead of
+  // testing it — the accident the source sweep below exists to catch.
+  const c0 = [...Array(0x20).keys()], c1 = [...Array(0x20).keys()].map(i => 0x80 + i);
+  const points = [...c0, 0x7f, ...c1];
+  assert.equal(points.length, 65, 'the sweep must cover C0, DEL and C1 entire, not a sample');
+  assert.deepEqual([Math.min(...points), Math.max(...points)], [0x00, 0x9f]);
+  const controls = points.map(i => String.fromCharCode(i));
+  const allowed = new Set([String.fromCharCode(9), String.fromCharCode(10)]);
+  assert.deepEqual(controls.filter(c => allowed.has(c)).map(c => c.codePointAt(0)), [9, 10]);
+  // Each placement reaches a different arm of the recursion AND names its own path in
+  // the diagnostic, so deleting a placement and its arm in one edit changes the size.
   const placements = [
-    (ch) => ({ gate: { ...gateFor(SHA), commands: [`git switch main${ch}`, ...gateFor(SHA).commands] } }),
-    (ch) => { const sections = sidecar().sections; sections[0].steps[0].do = `Mark it${ch}Fail.`; return { sections }; },
-    (ch) => ({ [`stray${ch}key`]: 'a value' }),
-    (ch) => ({ facts: [{ dt: 'Note', dd: `plain${ch}text` }] })
+    { where: /^sidecar\.gate\.commands\[0\] carries/,
+      make: ch => ({ gate: { ...gateFor(SHA), commands: [`git switch main${ch}`, ...gateFor(SHA).commands] } }) },
+    { where: /^sidecar\.sections\[0\]\.steps\[0\]\.do carries/,
+      make: ch => { const sections = sidecar().sections; sections[0].steps[0].do = `Mark it${ch}Fail.`; return { sections }; } },
+    { where: /^sidecar: key "stray/, make: ch => ({ [`stray${ch}key`]: 'a value' }) },
+    { where: /^sidecar\.facts\[0\]\.dd carries/, make: ch => ({ facts: [{ dt: 'Note', dd: `plain${ch}text` }] }) }
   ];
+  assert.equal(placements.length, 4,
+    'an array element, nested step prose, an object KEY and a nested object must all be swept');
+  assert.equal(new Set(placements.map(p => String(p.where))).size, 4,
+    'each placement must reach a distinct recursion path');
+  const reached = new Set();
   for (const ch of controls) {
-    const point = 'U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+    const point = ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
     for (const place of placements) {
       // Both directions on the same placement: tab and newline are the paired positive
       // controls, so a rule that rejected everything would redden here.
-      if (allowed.has(ch)) assert.doesNotThrow(() => build(place(ch)), point);
-      else fails(place(ch), new RegExp(`carries control character U\\+${point.slice(2)};`));
+      if (allowed.has(ch)) { assert.doesNotThrow(() => build(place.make(ch)), 'U+' + point); continue; }
+      let message = '';
+      try { build(place.make(ch)); } catch (error) { message = error.message; }
+      assert.match(message, place.where, 'U+' + point + ': the diagnostic must name the path it found it at');
+      assert.ok(message.includes(`carries control character U+${point};`),
+        `U+${point} must be refused and named in the message — got: ${message}`);
+      reached.add(String(place.where));
     }
   }
-  // Non-C0 characters the page already handles stay legal.
-  const separators = String.fromCharCode(0x2028) + String.fromCharCode(0x2029);
-  assert.doesNotThrow(() => build({ change: 'Separators ' + separators + ' and accents' }));
+  assert.equal(reached.size, placements.length, 'every placement must actually have produced a rejection');
+  // Both edges of the forbidden range. 0x1F, 0x7F, 0x80 and 0x9F are rejected in the
+  // sweep above; their neighbours just outside it must build, so a narrowing is as
+  // visible as a widening. U+2028/U+2029 are separators, not Cc, and stay legal.
+  for (const outside of [0x20, 0x7e, 0xa0, 0xa1, 0x2028, 0x2029]) {
+    assert.doesNotThrow(() => build({ change: 'Edge ' + String.fromCharCode(outside) + ' case' }),
+      'U+' + outside.toString(16).toUpperCase().padStart(4, '0') + ' is outside Cc and must still build');
+  }
 });
 
 // Two of the five documentation defects in a published page were a `Section 5` and a
@@ -177,12 +200,15 @@ test('an invisible control character anywhere in the sidecar is refused', () => 
 test('a Section or Step cross-reference the sidecar does not contain is refused', () => {
   const place = text => { const sections = sidecar().sections;
     sections[0].steps[0].aside = text; return { sections }; };
-  // Positive controls: every target the sidecar actually contains resolves, and Step 0
-  // is the gate, which every page has.
-  for (const text of ['See Section 1 and Section 2.', 'Repeat Step 1, Step 2 and Step 3.',
-    'Redo Step 0 first.', 'Mark step 1 and section 9 in your own notes.']) {
-    assert.doesNotThrow(() => build(place(text)), text);
-  }
+  // Positive controls, one per thing that must resolve: existing sections, existing
+  // steps, the Step 0 gate every page has, and a lower-case phrase that is prose rather
+  // than a cross-reference. The domain's size is asserted, so deleting the Step 0
+  // control and the Step 0 exemption in one edit cannot stay green.
+  const resolving = ['See Section 1 and Section 2.', 'Repeat Step 1, Step 2 and Step 3.',
+    'Redo Step 0 first.', 'Mark step 1 and section 9 in your own notes.'];
+  assert.equal(resolving.length, 4,
+    'sections, steps, the Step 0 gate and the lower-case non-reference each need a control');
+  for (const text of resolving) assert.doesNotThrow(() => build(place(text)), text);
   fails(place('Continue from Section 5.'), /"Section 5" refers to a section this sidecar does not contain/);
   fails(place('Repeat Step 4.'), /"Step 4" refers to a step this sidecar does not contain/);
   fails(place('See Section  6.'), /"Section 6" refers to a section/);

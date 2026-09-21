@@ -119,7 +119,8 @@ is not a nonempty string containing only `[A-Za-z0-9._-]`, section or step numbe
 that are not positive integers or that repeat
 (`1` and `"1"` are one DOM id and one verdict), agent evidence with no `stepRevision` or
 with a `sha` under 7 hex characters, a `gate.commands` missing either containment
-command or the SHA the sidecar records, any control character other than tab or newline
+command or the SHA the sidecar records, any Unicode control character — C0, `DEL` and
+C1, the last for the NEL line terminator `U+0085` — other than tab or newline
 anywhere in the sidecar (the invisible `U+0000` that made a published command a
 `SyntaxError`), and a capitalised `Section N` or `Step N` reference to a section or step
 the sidecar does not contain (`Step 0` is the gate). Embedded JavaScript data escapes every `<`, so both
@@ -151,7 +152,7 @@ happened: a pre-verified markdown draft was re-authored into the required HTML a
 issued without anyone running it in that form, and it could not run as published.
 Author every embedded command with **no backslashes and no control characters**, so no
 transport between sidecar, HTML and clipboard can mangle it; the builder refuses a
-sidecar carrying a control character other than tab or newline. Where the output is too
+sidecar carrying any Unicode control character other than tab or newline. Where the output is too
 long for a person to check, have the command report the answer instead of the data.
 
 ## The gate (Step 0)

@@ -143,14 +143,19 @@ function gateContainment(gate, buildSha) {
   }
 }
 
-// Everything below C0 except tab and newline is invisible in every editor and in the
-// rendered page. A U+0000 inside a copyable command shipped once and turned that command
-// into a SyntaxError for the reader who pasted it, with nothing on the page to show why.
+// A control character is invisible in every editor and in the rendered page. A U+0000
+// inside a copyable command shipped once and turned that command into a SyntaxError for
+// the reader who pasted it, with nothing on the page to show why.
+// The domain is Unicode Cc entire — C0, DEL and C1 — minus tab and newline, which is
+// what smoke-page.md publishes. C1 is in because NEL (U+0085) is a real line
+// terminator: it splits a pasted command in two while looking like nothing at all.
 // Compared by code point, never by an escape in a character class: the rule must not
 // itself be a line of source whose meaning depends on invisible bytes surviving an edit.
 const TAB = 9, NEWLINE = 10, FIRST_PRINTABLE = 32, DELETE = 127;
+const C1_FIRST = 128, C1_LAST = 159;
 const isControlCharacter = code =>
-  (code < FIRST_PRINTABLE && code !== TAB && code !== NEWLINE) || code === DELETE;
+  (code < FIRST_PRINTABLE && code !== TAB && code !== NEWLINE)
+  || code === DELETE || (code >= C1_FIRST && code <= C1_LAST);
 
 function rejectControlCharacters(value, where) {
   if (typeof value === "string") {
