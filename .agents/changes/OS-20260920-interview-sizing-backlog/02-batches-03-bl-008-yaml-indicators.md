@@ -64,24 +64,39 @@ leading and when the value is quoted.
 
 ## Checklist
 
-- [ ] Add the indicator-character rejection to `frontmatterField`’s unquoted branch, keeping the
+- [x] Add the indicator-character rejection to `frontmatterField`’s unquoted branch, keeping the
       quoted branch untouched and keeping every line routed through `frontmatterFields()`.
-- [ ] Write the nine-member list as data, independently of the matching pattern, and assert its size
+- [x] Write the nine-member list as data, independently of the matching pattern, and assert its size
       so a both-at-once edit is caught.
-- [ ] Sweep the whole domain: every member rejected at the head of an unquoted value, driven from the
+- [x] Sweep the whole domain: every member rejected at the head of an unquoted value, driven from the
       list rather than from hand-written examples.
-- [ ] Pin the other side of the boundary: the same characters accepted when not leading, and accepted
+- [x] Pin the other side of the boundary: the same characters accepted when not leading, and accepted
       when the value is quoted — including `-x` versus `- x` as distinct cases.
-- [ ] Assert the rejection reason from the FIRST LINE of the error message, never from a `deepEqual`
+- [x] Assert the rejection reason from the FIRST LINE of the error message, never from a `deepEqual`
       diff that would satisfy the check by accident.
-- [ ] Confirm the four shipped definitions under `.claude/agents/` still load, so the fix rejects
+- [x] Confirm the four shipped definitions under `.claude/agents/` still load, so the fix rejects
       nothing that currently ships.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-008-yaml-indicators` — `fix: leading YAML indicator characters in frontmatter (batch 03)`.
+- [x] Commit on `fix/bl-008-yaml-indicators` — `fix: leading YAML indicator characters in frontmatter (batch 03)`.
+- [x] polish: finish the ninth member — YAML's sequence-entry indicator is `-` before a space OR a
+      line break, and the trailing-space strip makes `description: -` and `description: - ` the same
+      value, so both reach the predicate as `-` and both must be rejected (R1 P1).
+- [x] polish: sweep printable ASCII at the head of an unquoted value, asserting rejection exactly on
+      the member list, and name the seven characters YAML also refuses that this parse still accepts
+      in a separate `KNOWN_GAP` list asserted ACCEPTED — recording the gap instead of blessing it, so
+      closing one goes red and forces the member into `INDICATOR_MEMBERS` (R1 ASK-1).
+- [x] polish: `?` is rejected on doubt, not because YAML errors on it, so the sweep's loop message
+      must stop claiming the document would fail to parse for that member (R1 ASK-2).
+- [x] polish: pin `INDICATOR_ON_DOUBT` by equality, not by subset — a `filter(...)` against the
+      member list passes for `[]`, which restores the very falsehood R1 ASK-2 removed, and for
+      `['?', '!']`, which claims YAML takes a character it raises on (R2 ASK-1).
+- [x] polish: scope `KNOWN_GAP`'s count to the form actually swept — a head character in front of a
+      longer value — and name `=` and `~` as the one-character-value column's own members, since
+      `tools: ~` loads null where this parse reads the string `~` (R2 ASK-2).
 
 ## Acceptance criteria
 
