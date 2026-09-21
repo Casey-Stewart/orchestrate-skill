@@ -848,3 +848,69 @@ recorded here so it is not lost: C1's own close-out runs the post-render proofin
 render the page, read each code block's `textContent`, execute exactly those bytes — and the
 residual is filed for a later batch to wire into the contract.** BL-017 is dogfooded or it is not
 closed.
+
+### B06 — gate round 1: FIX FIRST on seven P1s, and the fix round that answered them
+
+**`R1 FIX FIRST @fa24309`** — strong-tier reviewer 4 P1s + 3 ASKs; test-hunter 6 findings, 1 needing
+a production change. All in-fence; no `NEEDS_FENCE` was warranted and none was reported.
+
+**What passed first, because it bounded everything else.** The reviewer authored a sidecar following
+ONLY the contract text in `templates/00-READBEFORE.md` — as a future scaffolder would — and the new
+builder **ACCEPTED** it. The spec, the bake and the enforcement describe one gate; no drift, no P0.
+That was the risk the pre-flight widened the fence to prevent, and it did not materialise.
+
+**The headline P1: the rule could not protect its own source, and the class had already recurred.**
+Both gates independently rewrote `isControlCharacter` as a semantically identical class of LITERAL
+control bytes — the exact shape of the implementer's own incident — and the suite stayed green at
+301/301. Worse, `tests/build-smoke-page.test.cjs:207` ALREADY carried a literal U+2028 from some
+earlier batch, byte-identical at base and tip, suite green throughout. The orchestrator confirmed
+both at byte level: exactly one literal U+2028 at line 207, and zero C0/DEL bytes — the earlier scan
+missed it because U+2028 is a Unicode separator, not a C0 byte. Two true findings of different
+classes, not a contradiction.
+
+Three other P1s are worth the record. `renderGate` sliced to one command dropped both containment
+proofs from the published HTML while the suite stayed green — the builder validated that the sidecar
+CARRIED them and nothing proved they REACHED the page, which is BL-012's "where it executes" going
+unenforced. Accepting containment found in `gate.checks` PROSE was green, leaving *executed versus
+eyeballed* — the entire distinction BL-012 exists to draw — unpinned. And the diff contradicted
+itself: containment added as gate item 4 while the text-fallback sentence in the same file still read
+"branch command, expected version, canary", so a page that failed to load would hand the reader a
+fallback missing the one check the batch adds.
+
+**The fix round closed all nine, each with a reddening mutation**, and widened the rule to Unicode Cc
+entire (C0, DEL, C1 — NEL U+0085 really does split a pasted command) with both edges pinned: 65
+members asserted by size and `[min,max]`, and `0x20`, `0x7E`, `0xA0`, `0xA1`, U+2028, U+2029 asserted
+to still build, so a narrowing reddens as loudly as a widening. The new source sweep walks
+`orchestrate/**` and `tests/**`, skips binaries by CONTENT TYPE rather than an extension allow-list
+so a new kind of text file is swept by default, and runs its live control FIRST — planting U+0000,
+U+0085 and U+2028 in a subdirectory beside a clean CRLF-and-tab file and a NUL-filled `.xlsx` — so
+recursion, line numbers, tab/CR sparing and the binary skip are all proven before the repository's
+silence is read. The surviving literal was rebuilt from `String.fromCharCode`, not exempted.
+
+### The moment BL-017 paid for itself, on its own implementation
+
+**The implementer refused the fix its own gate proposed, and was right.** Round 1 relayed the
+reviewer's backslash-free pathspec `':(exclude).agents/'`. Extracted from the rendered block and run
+as those bytes — which is BL-017's own rule — it **fails under cmd.exe**: the single quotes reach git
+unstripped and it dies with ``fatal: Invalid path '':/(exclude).agents'``. It published the
+DOUBLE-quoted form instead, verified it in PowerShell, cmd.exe and Git Bash, and recorded in
+`execution-models.md` why the quoting is double so a future editor does not simplify it back.
+
+The orchestrator reproduced all four cases directly rather than accepting the report:
+
+```
+cmd.exe   ':(exclude).agents/'   -> fatal: Invalid path '':/(exclude).agents'
+cmd.exe   ":(exclude).agents/"   -> empty, clean
+PowerShell ":(exclude).agents/"  -> empty, exit 0
+Git Bash   ":(exclude).agents/"  -> empty, exit 0
+```
+
+The rule the batch was implementing caught a defect in the fix the gate reviewing it had proposed,
+and the command the checkpoint hands a human would otherwise have been broken on one of the three
+shells this repository is driven from. *Verified means verified as published* is no longer a
+guardrail this repository asserts; it is one it has now executed against itself.
+
+A third sighting of the escape-decoding class arrived in the same round: the implementer's own
+scratch mutation script collapsed `\n` to `\n` in a heredoc. Harmless — it asserted rather than
+silently no-opping — but it is the argument for the source sweep being permanent rather than a
+one-off scan.
