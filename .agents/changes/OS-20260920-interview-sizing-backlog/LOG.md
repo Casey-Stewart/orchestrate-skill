@@ -977,3 +977,52 @@ coverage this repository wants, not a hazard.
 Wave 3 closed: B06 `🟢`, tip **303/303**. Wave 4 opens with **B07 alone** —
 `fix/bl-010-016-selfcheck-runners`, cut from wave base **`620378c`**, carrying BL-010 (the scaffold
 self-check greps code spans) and BL-016 (runner classification). It is the last batch before C1.
+
+### B07 — implemented; the wrapped-text class caught PROACTIVELY for the first time
+
+One commit `a019d1f`, 305/305. 6a fence PASS — exactly the seven fenced files plus ticks-only batch
+edits. 6b confirmed by the orchestrator: the batch's test over base documents gives **10 tests, 8
+pass, 2 fail**, precisely the code-span assertion and the five-location sweep. It reports one commit
+rather than two because `scaffolding.md` and `tests/protocol-contract.test.cjs` each carry hunks for
+BOTH backlog items and splitting them needs interactive staging, which is unavailable — a fair
+account rather than a silent merge of two items.
+
+**The wrapped-text class, caught before it bit rather than after.** Its contradiction sweep collapses
+whitespace FIRST, and it says why: `templates/00-READBEFORE.md` wraps `Default is` / `human.` across
+a line break, and a line-based grep missed it. Every previous encounter with this class in this
+change was archaeological — B02's absence assertions nearly shipped vacuous, B02's label sweep DID
+ship with the defect, B06's dogfood masker still cannot handle a wrapped code span. This is the
+first time an agent anticipated it and designed around it unprompted. The repository's ~90-character
+wrap convention is now understood as a property of the data rather than a formatting detail.
+
+**The five-location sweep is bound three ways, and the third is the one that matters.**
+`RUNNER_RULE_CARRIERS.length === 5` and a `new Set(...).size` duplicate guard pin the literal; then
+`carrying` is derived from `fs.readdirSync` over `references/` and `templates/` and `deepEqual`-ed
+against it, so **a sixth document acquiring the rule reddens rather than passing unnoticed**. That is
+signature 1 answered properly — the domain is derived from the checkout, not hand-written — and it
+is the same shape B06's final polish arrived at independently for its source sweep. Two batches, two
+authors, same conclusion: bind the domain to the filesystem and the list cannot rot.
+
+It also noted, unprompted, that the count assertion is written SEPARATELY from the `deepEqual`
+because `deepEqual` appends its message to the diff — the BL-004 trap, applied without being told.
+
+**The contradiction sweep has a live control**, which is what the repository's own guardrail demands:
+four literal strings the batch actually deleted (`environment. Default human. At close-out`, `fixture
+environment. Default is human. Before`, `prohibitions (default human; "touches data" is human`,
+`touch live data)? Default when unsure: every step human.`) are replayed through the 16 patterns and
+each must match, so silence over the real documents means something. Sixteen patterns, twelve files,
+zero contradictions; the single hit is its own reinforcing sentence in `execution-models.md`, which
+is polarity-blindness rather than a miss.
+
+**The BL-010 dogfood, honestly reported.** Raw over this ledger: `{{`=33, `<!--`=14, `<title>`=15 —
+the OLD rule calls all 62 unfilled slots. Span-masked: `{{`=0, `<title>`=0, `<!--`=1, and the
+implementer says plainly that the surviving one is a backtick-quoted comment wrapped across a line
+break which its throwaway masker does not handle, while the rule as written ("fenced and inline code
+spans") does cover it. Reporting the limitation of one's own instrument rather than the number it
+produced is the standard this change has been trying to reach all the way through.
+
+Two out-of-fence observations recorded for the backlog: `smoke-page.md`'s own self-check greps a
+filled page for `{{` expecting zero hits — the same code-span class as BL-010 but a different
+consumer, where a `{{` in generated HTML may genuinely always be a slot, so it may be correct as-is;
+and `subagent-prompts.md:213` ("you never perform a `Runner: human` step") is consistent with the new
+rule and is excluded from the carrier set by design, since it does not state how to CHOOSE the tag.
