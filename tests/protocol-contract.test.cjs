@@ -749,6 +749,23 @@ test('every document carrying the Runner: default states the same rule, and no d
     assert.ok(collapsed('orchestrate/references/execution-models.md').includes(real),
       'this reinforcement is no longer execution-models.md\'s own prose — "' + real + '"');
   }
+  // The other side of the same filter, and what holds the phrase bound in place: each of
+  // these is a GENUINE reversal carrying a negation in the phrase BEFORE the match, and
+  // every one was excused while the look-back ran past the comma. Unbind it and they go
+  // silent again — which makes the bound a tested property rather than a comment.
+  const RECOVERED = ['When the runner is not obvious, default human.',
+    'Never guess the runner, default human.',
+    'This is not optional: default human.',
+    'Rather than guess, default human.',
+    'Nothing else applies, so default human.'];
+  assert.equal(RECOVERED.length, 5, 'all five recovered reversals must stay');
+  assert.equal(new Set(RECOVERED).size, 5, 'the recovered reversals must be distinct');
+  for (const recovered of RECOVERED) {
+    assert.ok(/\b(?:not|never|nothing|rather than)\b/i.test(recovered),
+      'a recovered reversal carrying no negation tests nothing — "' + recovered + '"');
+    assert.ok(flagClauses(recovered).length > 0,
+      'the reinforcement filter is excusing a genuine reversal again — "' + recovered + '"');
+  }
   for (const reinforced of REINFORCEMENTS) {
     assert.ok(DEFAULT_HUMAN.some(({ pattern }) => pattern.test(reinforced)),
       'no pattern matches this reinforcement at all, so exempting it proves nothing — "' + reinforced + '"');
