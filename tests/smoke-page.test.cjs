@@ -14,7 +14,7 @@ const A = 'a'.repeat(40), B = 'b'.repeat(40), C = 'c'.repeat(40);
 // The step-0 gate the builder now requires: a containment proof that executes against
 // the SHA its own sidecar records, not a SHA comparison left to the tester's eye.
 const gateFor = sha => ({ commands: [`git merge-base --is-ancestor ${sha} HEAD`,
-  `git diff --name-only ${sha}..HEAD`], checks: ['Verify the build.'] });
+  `git diff --name-only ${sha}..HEAD -- . ":(exclude).agents/"`], checks: ['Verify the build.'] });
 const steps = () => [
   { n: 1, do: 'Open checkout', pass: 'Checkout opens', revision: 1 },
   { n: 2, do: 'Open help', pass: 'Help opens', revision: 1 }

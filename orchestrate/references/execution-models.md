@@ -152,15 +152,18 @@ the tested SHA literally:
 
 ```text
 git merge-base --is-ancestor <buildSha> HEAD
-git diff --name-only <buildSha>..HEAD
+git diff --name-only <buildSha>..HEAD -- . ":(exclude).agents/"
 ```
 
 The first must exit 0 — the tested build is in her history. The second must print
-nothing outside the ledger directory — only checkpoint artifacts landed since; have it
-report that answer rather than asking her to read a long list (filter with her shell's
-own tool when it is long). Both are plain commands with no backslashes, so no transport
-between sidecar and clipboard can mangle them. `build-smoke-page.mjs` refuses a sidecar
-whose `gate.commands` omits either command or the SHA the sidecar itself records.
+NOTHING — the pathspec excludes the ledger directory, so empty output IS the verdict
+and she never reads a list to reach one. Anything it prints is a real code change made
+after the build she is testing. Both are plain commands with no backslashes, so no
+transport between sidecar and clipboard can mangle them; keep them that way rather than
+adding a shell filter. The pathspec is DOUBLE-quoted on purpose — verified as published
+in PowerShell, `cmd.exe` and Git Bash; single quotes reach git unstripped under
+`cmd.exe` and the command dies with `Invalid path`. `build-smoke-page.mjs` refuses a
+sidecar whose `gate.commands` omits either command or the SHA the sidecar itself records.
 
 **Bump the PATCH component for checkpoint markers; save the MINOR for the release.**
 The marker's only job is to differ from the base branch, so it costs a patch

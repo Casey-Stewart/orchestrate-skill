@@ -174,9 +174,10 @@ whether the run means anything. It must contain, in order:
    asking the user to compare two SHAs by eye, because committing this page moves
    `HEAD` past the build it describes and the two can never agree:
    `git merge-base --is-ancestor <buildSha> HEAD` (must exit 0) and
-   `git diff --name-only <buildSha>..HEAD` (must name nothing outside the ledger
-   directory). Write the tested SHA out in both; the builder rejects a gate that omits
-   either command or that SHA.
+   `git diff --name-only <buildSha>..HEAD -- . ":(exclude).agents/"` (must print
+   NOTHING — the pathspec excludes the ledger, so empty output is the verdict rather
+   than a list to read). Write the tested SHA out in both; the builder rejects a gate
+   that omits either command or that SHA.
 5. The version the user should see and where (`Help → About reads 0.13.1; if it reads
    0.13.0, stop — the checkout did not take`).
 6. **The canary**: one cheap check whose result is OPPOSITE on the base build, with
@@ -330,7 +331,8 @@ from "not run".
 
 The STOP message carries: the current page link/path (or full plain-text script),
 the gate essentials **in text** (branch
-command, expected version, canary — so a page that fails to load can't cause a
+command, both containment commands with the SHA written out, expected version, canary
+— so a page that fails to load can't cause a
 wrong-build run), the step/section counts split into human steps and pre-verified
 steps (with the evidence SHA), and "run it from the page; paste the copied results (or
 just tell me) when done — pre-verified steps are yours to skip or re-run."

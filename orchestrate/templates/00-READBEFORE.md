@@ -412,10 +412,11 @@ Put these in the sidecar's `gate.commands`, with the tested SHA written out:
 
 ```text
 git merge-base --is-ancestor <buildSha> HEAD
-git diff --name-only <buildSha>..HEAD
+git diff --name-only <buildSha>..HEAD -- . ":(exclude).agents/"
 ```
 
-The first must exit 0; the second must print nothing outside this ledger's directory.
+The first must exit 0; the second must print NOTHING — the pathspec excludes the ledger
+directory, so empty output is the verdict and no one reads a list to reach one.
 `build-smoke-page.mjs` refuses a sidecar whose `gate.commands` omits either command or
 the SHA the sidecar records, a sidecar carrying any Unicode control character (C0, `DEL`
 or C1, the last for the NEL line terminator `U+0085`) other than tab or

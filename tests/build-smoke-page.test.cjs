@@ -22,7 +22,7 @@ test.before(async () => { builder = await import('file://' + BUILDER.replace(/\\
 const gateFor = sha => ({ intro: 'Prove the build first.',
   commands: ['git switch chore/smoke-hardening-ledger',
     `git merge-base --is-ancestor ${sha} HEAD`,
-    `git diff --name-only ${sha}..HEAD`],
+    `git diff --name-only ${sha}..HEAD -- . ":(exclude).agents/"`],
   checks: ['<code>git status --porcelain</code> prints nothing.',
     'The containment commands exit 0 and name nothing outside this ledger.'] });
 // A build change carries its gate with it, the way a real re-issue does.
