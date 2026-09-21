@@ -4,7 +4,7 @@
 **Wave**: 2
 **Depends on**: B01, B02, B03
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files**: `BACKLOG.md`
+**Files**: `BACKLOG.md`, `tests/agent-definitions.test.cjs`
 **Spec**: [01-plan.md](01-plan.md) §B04 · **Reviewer pass required**
 
 ## Implementation notes
@@ -49,6 +49,10 @@ file under `.agents/**`, or any entry in the Closed table that predates this cha
 - [x] BL-015 carries an explicit close condition
 - [x] The open-items table is empty, or gone with a line saying so
 - [x] No duplicate-meaning section left behind
+- [ ] polish: fence extension to `tests/agent-definitions.test.cjs` — closing BL-019 as
+      accepted makes its "that column belongs to a later batch" comment false, so correct
+      the comment and carry the digit case into it. Comment accuracy only; no assertion
+      and no `KNOWN_GAP` member changes.
 
 ## Acceptance criteria
 
