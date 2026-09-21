@@ -534,3 +534,51 @@ backlog with the gap family; the sentence gets scoped to what it actually checke
 The round-1 P1 was the end-of-line form of a head character and the fix closed that column for `-`
 alone. This is the same lesson from the other side: **a sweep is complete only for the shape it
 sweeps, and naming the shape is the honest part.**
+
+### B04 — comment-only polish, and an implementer that checked its own correction
+
+Polish `00679d9`: two paths, neither document, **0 non-comment code lines changed**. The regex, the
+clause pin and both documents are byte-for-byte as the scoped re-review saw them.
+
+It did not simply accept the correction — it verified it before writing it down, against the live
+fallback slice: the narrowed pattern does not match today, the unnarrowed one does, the single
+`git check-attr` occurrence sits at index 2052 and `Never execute such filter drivers` at 2236, so
+the negation is AFTER the command and unreachable by a left-to-right pattern. Its own summary is the
+right lesson: *"I had reasoned from proximity rather than from order; the empirical check above is
+what I should have run when I first wrote the claim."*
+
+It also bounded the correction correctly: the substantive finding stands — the narrowing is
+necessary, an unnarrowed `.*` goes red today, and the live control is genuine. Only the explanation
+of WHICH sentence forced it was wrong, and that explanation lived in a comment and a report, never
+in an assertion. No test behaviour depended on it.
+
+Merged `--no-ff` → **`a03ed2f`**, tip **286/286**.
+
+### B03 — polish and integration, and a judgement call worth keeping
+
+Polish `95410a7`, test-only. ASK-1 closed with the reviewer's own minimal fix,
+`assert.deepEqual(INDICATOR_ON_DOUBT, ['?'])`; both previously-green mutations now redden, and the
+message names them so the next reader does not re-loosen it into a subset test. The implementer's
+own note on it: *"my guard against a false message was itself a guard that could not fail."*
+
+ASK-2 closed by SCOPING rather than widening — both places now say seven "at the head of a longer
+value", the form the loop actually builds, with `=` and `~` named in a comment and `tools: ~` spelled
+out as key-present / null / whole-catalog-inherited.
+
+**The judgement call is the part worth keeping.** Told the one-character column had nine divergences,
+it verified rather than transcribing, and found MORE than nine — the digits `0`-`9` load as integers
+and a leading space is separation. It deliberately did NOT fold those into the note: they are type
+coercion and structure, not the parse-failure family, and it declined to state a complete count for
+a column it had only spot-checked. Its reasoning: *"claiming a complete count for a column I only
+spot-checked would have repeated the mistake one line below its own warning."* That is the round-2
+lesson — a sweep is complete only for the shape it sweeps — applied by the agent that received it,
+one step further than the instruction went. `tools: 0` reaching a consumer as an int rather than a
+string is now a third candidate for that backlog entry.
+
+It also declined the `QUOTE_HEADS` duplicate note deliberately and said so, rather than silently
+skipping it: green today, harmless, `met.quote` already catches the widening direction, and the
+belt-and-braces assertion plus its explanatory comment would cost more text than the risk justifies
+in a file this dense. A declined suggestion that names itself as declined is worth more than a
+silently dropped one.
+
+Merged `--no-ff` → **`f7fe0fc`**, tip **292/292** (wave base 272 + 20).
