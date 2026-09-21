@@ -914,3 +914,66 @@ A third sighting of the escape-decoding class arrived in the same round: the imp
 scratch mutation script collapsed `\n` to `\n` in a heredoc. Harmless — it asserted rather than
 silently no-opping — but it is the argument for the source sweep being permanent rather than a
 one-off scan.
+
+### B06 — round 2 SHIP, final polish, integration; wave 3 closed
+
+**`R2 SHIP @7b67102`.** All seven P1s and both ASKs **FIX VERIFIED**, every one re-derived by the
+reviewer's own mutation rather than read from the report. It also ran the dogfood end to end:
+authored a sidecar purely from the current `00-READBEFORE.md` fenced block, built it with this
+builder (accepted, 0 unfilled slots), confirmed both containment commands reach the rendered
+`<pre><code>` verbatim, and then EXECUTED them.
+
+**The hand-over command, verified as published and shown not to be a self-fulfilling canary.** The
+reviewer extracted the commands from the rendered block, wrote those exact bytes to one file per
+shell, and ran them from the repository:
+
+```
+published ":(exclude).agents/"   cmd.exe / powershell / git bash  -> exit 0, empty
+single-quoted (round 1's form)   cmd.exe                          -> exit 128, fatal: Invalid path
+positive control (a base with real code after it)                 -> prints two real changed files
+no pathspec at all                                                -> prints the .agents/ ledger files
+```
+
+The third line is what makes the first meaningful: the silence is a verdict the check is capable of
+withholding. BL-012 is closed properly — the gate that had never worked on any run is now two
+commands whose output IS the answer, not a list a human adjudicates.
+
+**Three residual ASKs, two of them signature 1 inside the sweep written to close a signature-1
+finding.** Dropping `'tests'` from the swept trees left the suite green while silently retiring the
+sweep over the very tree where the historical U+2028 lived; widening the C1 boundary while deleting
+its neighbour from the outside-edge list was likewise green. **The reviewer found both mechanically,
+in minutes, using the signature this change distilled two batches earlier.** That is the clearest
+evidence available that the distillation is a tool and not a moral.
+
+The third was subtler and is the better catch: the sweep spared EVERY CR, not CR-as-line-terminator,
+so a lone CR planted inside a published command stayed green — invisible, and it splits a pasted
+command exactly as the NEL the batch had just widened to C1 for.
+
+**The final polish answered the domain problem better than the ask specified.** Rather than asserting
+a length, `invisibleCharacterScan` now returns `{found, covered}` and `covered` is compared against
+`fs.readdirSync(ROOT)` minus a stated exclusion list — **the domain is the checkout**, so it grows
+with the repository and cannot be shrunk by editing an array. That pulled `README.md`, `CLAUDE.md`,
+`BACKLOG.md`, `LICENSE`, `.gitattributes` and `.claude/` into scope, all clean. The live control
+gained one directory per exclusion, each with a planted NUL that must NOT be reported, so the
+exclusion list is itself live rather than assumed. CR is now spared only before LF, with a lone CR
+in the live control. And the third statement of the contract — `smoke-page.md`'s inline command span
+— is now extracted and fed to the builder alongside the two fenced blocks, with a `hits.length === 1`
+assertion so a future second `git ...` span fails loudly rather than being picked arbitrarily.
+
+It also accepted a correction to its own comment: `NOT_TEXT` is an extension DENY-list, not a content
+sniff. The comment now says what it is and why both failure directions are safe — an unlisted text
+type is swept by default, an unlisted binary type fails loudly.
+
+Merged `--no-ff` → **`620378c`**, tip **303 pass / 0 fail**.
+
+**Orchestrator decision on the sweep's new reach.** The implementer flagged that the sweep now READS
+`BACKLOG.md` and `bugs-2026-09-17.md`, both orchestrator-owned, and offered to exclude them. Keeping
+them in scope: reading is not writing, the contract's prohibition on `bugs-2026-09-17.md` is against
+EDITS, and a stray invisible character in either would surface as a named test failure — which is
+coverage this repository wants, not a hazard.
+
+## 2026-09-20 — wave 4
+
+Wave 3 closed: B06 `🟢`, tip **303/303**. Wave 4 opens with **B07 alone** —
+`fix/bl-010-016-selfcheck-runners`, cut from wave base **`620378c`**, carrying BL-010 (the scaffold
+self-check greps code spans) and BL-016 (runner classification). It is the last batch before C1.
