@@ -129,6 +129,24 @@ exists to close.
       disclaimer honest about the paraphrases still not caught. Test-only.
 - [x] polish: run the full published validation and `git diff --check`; commit on
       `fix/bl-010-016-selfcheck-runners`.
+- [x] polish: the coverage authority protected 15 of 16 patterns. The name-set equality BALANCES when a
+      pattern is deleted, so it bites only on an unflagged entry — and `default when unsure` owned no
+      entry that it alone catches. Add `Default if in doubt.` and assert EXCLUSIVITY as a domain
+      property: every pattern owns a corpus entry no other pattern flags. Test-only.
+- [x] polish: the reinforcement filter excused genuine reversals. Bound the look-back at the nearest
+      `,` `:` or dash so a negation in the PRECEDING phrase no longer reinforces this one (five of the
+      named reversals recovered), and name in the comment what it still excuses — the same-phrase
+      negation and `exec`’s first-match-only scan. The prescribed two-word narrowing was measured and
+      rejected: it reddens the file sweep on shipped prose. Test-only.
+- [x] polish: `PLACEHOLDER_TOKENS` was the one loop domain with no domain subject — the loop asserts
+      each pinned token is present, never that no unpinned token exists. Derive the domain from the
+      grep clause with `matchAll` and `deepEqual` it against the pinned list plus the `*` glob. Test-only.
+- [x] polish: restore the `mark|tag|treat` family in a narrowed form — determiner plus `steps?` directly
+      after the verb — catching `Mark unplaced steps human.`; give it its own regression entry and pin
+      the false positives every narrowing was bought with, including the `hand` three-word gap. Test-only.
+- [x] polish: `Never hand a step to the user.` is invented, not this checkout’s prose, and the comment
+      claiming otherwise was held by nothing. Assert the two real reinforcements against
+      `execution-models.md` and correct the comment. Test-only.
 
 ## Acceptance criteria
 

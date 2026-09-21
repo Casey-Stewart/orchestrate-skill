@@ -417,11 +417,18 @@ test('the scaffold self-check exempts code spans from the placeholder grep', () 
   assert.deepEqual(Object.keys(bounds).sort(), selfCheckFiles.slice().sort());
   // Signature 1 again: dropping `<!--` from this array AND from SKILL.md's grep clause
   // together was GREEN — every assertion took a member as its subject and none took the
-  // domain. Size and distinctness pin the domain; each token must also still be a marker
-  // the shipped skill really writes, so the list cannot be padded to satisfy the size.
+  // domain. Size, distinctness and a real-marker check were still not a domain subject:
+  // the loop below asserts each PINNED token is present and never that the clause names
+  // no OTHER token, so dropping a member here and from both size pins stayed green. The
+  // domain is now DERIVED from the clause — every backticked span it contains, in order,
+  // compared against the pinned list plus the `*` file glob the clause also names.
   const PLACEHOLDER_TOKENS = ['`{{`', '`<!--`', '`<title>`'];
+  const FILE_GLOB = '`*`';
+  const CLAUSE_SPANS = ['`{{`', '`<!--`', FILE_GLOB, '`<title>`'];
   assert.equal(PLACEHOLDER_TOKENS.length, 3, 'the scaffold self-check greps three placeholder tokens');
   assert.equal(new Set(PLACEHOLDER_TOKENS).size, 3, 'the three placeholder tokens must be distinct');
+  assert.deepEqual(CLAUSE_SPANS.filter(span => span !== FILE_GLOB), PLACEHOLDER_TOKENS,
+    'the spans expected in the clause and the pinned token list must not drift apart');
   const shippedForTokens = shippedSkillFiles();
   for (const token of PLACEHOLDER_TOKENS) {
     assert.ok(shippedForTokens.some(f => read(f).includes(token.replace(/`/g, ''))),
@@ -442,6 +449,11 @@ test('the scaffold self-check exempts code spans from the placeholder grep', () 
       assert.ok(grepClause.includes(token),
         file + ': the grep must still name ' + token + ' before its zero-hit verdict — clause reads "' + grepClause + '"');
     }
+    // Subject is the DOMAIN, taken from the document: a fourth token, a substituted one,
+    // or a token dropped from the pinned list and both size pins together all redden here.
+    assert.deepEqual([...grepClause.matchAll(/`[^`]+`/g)].map(span => span[0]), CLAUSE_SPANS,
+      file + ': the grep clause must name exactly the pinned tokens and the file glob, in order'
+        + ' — clause reads "' + grepClause + '"');
     assert.doesNotMatch(grepClause,
       /\b(?:ignor\w*|skip\w*|exclud\w*|omit\w*|except|without|drop\w*|disregard\w*|no longer|never|not)\b/i,
       file + ': no exclusion verb may stand between the grep and its zero-hit verdict — clause reads "' + grepClause + '"');
@@ -566,13 +578,16 @@ test('every document carrying the Runner: default states the same rule, and no d
   // human.") stays intact. When this is green the documents are free of THESE spellings,
   // and nothing stronger may be read into it. The REGRESSION corpus below, not this
   // pattern list, is the authority on which spellings those are: it is asserted to
-  // exercise EVERY pattern, so a rewrite that drops or weakens one reddens there rather
-  // than only on the control that left with it. The 10->14 rewrite silently lost the
-  // `assume` spelling round 1 held, while every visible signal — more patterns, more
-  // controls, a size pin — said the guard had grown.
+  // exercise EVERY pattern and each pattern to own an entry no other pattern catches, so
+  // a rewrite that drops or weakens one reddens there rather than only on the control
+  // that left with it. The 10->14 rewrite silently lost the `assume` spelling round 1
+  // held, while every visible signal — more patterns, more controls, a size pin — said
+  // the guard had grown. READ THE REINFORCEMENT FILTER'S OWN NOTE TOO: it names the
+  // reversals it still excuses, which are a second and separate reason this sweep's
+  // silence means less than it looks like.
   const TARGET = '(?:human|the user|a person|the tester|by hand)';
   // Every entry carries at least one NEGATION-BEARING control ("…, not agent"). Under the
-  // clause-wide pre-filter this sweep used to run, all fifteen of those were skipped
+  // clause-wide pre-filter this sweep used to run, all sixteen of those were skipped
   // unexamined: that is the filter being exercised rather than assumed.
   const DEFAULT_HUMAN = [
     // The em-dash and en-dash alternatives are branches no control reached before.
@@ -625,9 +640,12 @@ test('every document carrying the Runner: default states the same rule, and no d
     { name: 'human unless proven agent', controls: ['human unless proven agent-runnable', 'the user unless confirmed agent-runnable',
       'human unless proven agent-runnable, not the other way round'],
       pattern: /\bunless\b[^.;]*\b(?:proven|demonstrated|confirmed|verified|established)\b[^.;]*\bagent\b/i },
+    // The gap is three words, not `[^.;]*`: an open gap matched build-smoke-page.mjs's
+    // "the page hands // the dangling reference to the tester", which hands a REFERENCE
+    // to a person, not a step. That line is a false-positive control below.
     { name: 'hand the work to the user', controls: ['hand the step to the user when unsure', 'defer it to the user',
       'hand the step to the user, not the agent'],
-      pattern: new RegExp('\\b(?:hand|hands|handing|give|gives|assign|assigns|push|pushes|defer|defers)\\b[^.;]*\\bto ' + TARGET + '\\b', 'i') },
+      pattern: new RegExp('\\b(?:hand|hands|handing|give|gives|assign|assigns|push|pushes|defer|defers)\\b(?:\\s+\\S+){0,3}\\s+to ' + TARGET + '\\b', 'i') },
     { name: 'the user does the running', controls: ['the user executes the steps', 'the user performs every smoke step',
       'the user executes the steps, not the agent'],
       pattern: new RegExp('\\b' + TARGET + '\\b[^.;]*\\b(?:executes|performs|runs|carries out)\\b[^.;]*\\bsteps?\\b', 'i') },
@@ -636,7 +654,17 @@ test('every document carrying the Runner: default states the same rule, and no d
     // both swept clean through the fourteen that replaced it.
     { name: 'assume a person', controls: ['Assume human until a runner is named.', 'Steps are assumed the user.',
       'Unplaced steps are assumed human.', 'Assume human, not agent.'],
-      pattern: new RegExp('\\bassum\\w*\\b[^.;]*\\b' + TARGET + '\\b', 'i') }
+      pattern: new RegExp('\\bassum\\w*\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    // "Mark unplaced steps human." is a natural way to write the reversal and nothing
+    // caught it. The broad form of this pattern (`[^.;]*` between verb and target) fires
+    // on EIGHT places in this checkout, including execution-models.md's own "Tag every
+    // smoke step `Runner: agent`…" and subagent-prompts.md's correct "leave native-app
+    // steps human if no runner"; requiring a determiner and `steps?` directly after the
+    // verb keeps all eight clean. Both are false-positive controls below.
+    { name: 'mark the steps a person', controls: ['Mark unplaced steps human.', 'Mark the step human.',
+      'Treat every step as human.', 'Leave the remaining steps human.', 'Mark the step human, not agent.'],
+      pattern: new RegExp('\\b(?:mark|marks|leave|leaves|tag|tags|treat|treats)\\s+(?:the|every|each|all|any)?\\s*'
+        + '(?:unplaced|remaining|unassigned|untagged|other)?\\s*steps?\\b\\s*(?:as\\s+)?' + TARGET + '\\b', 'i') }
   ];
   // The pre-filter used to skip any clause containing `not`/`never`/`nothing` — 570 of
   // this checkout's 3,887 clauses, 14.7%, in front of every pattern — so "Default when
@@ -648,10 +676,27 @@ test('every document carrying the Runner: default states the same rule, and no d
   // reason to hand a step to the user", where the negation is adjacent to the verb and
   // not to the target; REINFORCEMENTS below pins that clause and two more.) `not` is not
   // a negation when it is the patterns' own vocabulary — "not certain", "do not know" —
-  // or those alternatives go dead again.
+  // or those alternatives go dead again. The look-back stops at the nearest `,` `:` or
+  // dash, because a negation in the PRECEDING phrase does not reinforce this one: that
+  // alone recovers "When the runner is not obvious, default human.", "Never guess the
+  // runner, default human.", "This is not optional: default human.", "Rather than guess,
+  // default human." and "Nothing else applies, so default human.", every one of which
+  // this sweep excused a round ago.
+  // WHAT IT STILL EXCUSES, so its silence is not over-read: a reversal whose negation
+  // sits in the SAME phrase within six words of the match — "The runner is not known and
+  // so the default is human." passes — and, structurally, `exec` returns only the FIRST
+  // match of a pattern in a clause, so an exempted first match hides a later
+  // contradiction by the same pattern in that clause. No clause in this checkout does
+  // that today. Narrowing the window to two words was measured and REJECTED: it unexempts
+  // execution-models.md's own "…is never a reason to hand a step to the user" (the
+  // negation is five words off) and reddens the file sweep on correct prose.
   const NEGATION = /\b(?:never|nor|neither|nothing|no longer|rather than|instead of)\b|\bnot\b(?!\s+(?:certain|know)\b)/i;
-  const reinforcement = (clause, match) => NEGATION.test(match[0])
-    || NEGATION.test(clause.slice(0, match.index).trim().split(/\s+/).slice(-6).join(' '));
+  const PHRASE = /[,:—–]/;
+  const reinforcement = (clause, match) => {
+    if (NEGATION.test(match[0])) return true;
+    const phrases = clause.slice(0, match.index).split(PHRASE);
+    return NEGATION.test(phrases[phrases.length - 1].trim().split(/\s+/).slice(-6).join(' '));
+  };
   const flagClauses = text => text.split(/(?<=[.;])\s+/).flatMap(clause =>
     DEFAULT_HUMAN.filter(({ pattern }) => {
       const match = pattern.exec(clause);
@@ -663,11 +708,11 @@ test('every document carrying the Runner: default states the same rule, and no d
   // pinned so a silently dropped member is caught. The control total counts DISTINCT
   // strings: replacing one pattern's four controls with four copies of a fifth satisfied
   // a plain sum of lengths and silently retired the colon and em-dash forms.
-  assert.equal(DEFAULT_HUMAN.length, 15, 'the default-human family must keep all fifteen patterns');
-  assert.equal(new Set(DEFAULT_HUMAN.map(entry => entry.name)).size, 15, 'pattern names must be distinct');
+  assert.equal(DEFAULT_HUMAN.length, 16, 'the default-human family must keep all sixteen patterns');
+  assert.equal(new Set(DEFAULT_HUMAN.map(entry => entry.name)).size, 16, 'pattern names must be distinct');
   const CONTROLS = DEFAULT_HUMAN.flatMap(entry => entry.controls);
   assert.equal(new Set(CONTROLS).size, CONTROLS.length, 'no control string may be repeated to pad the total');
-  assert.equal(new Set(CONTROLS).size, 60, 'the control corpus must keep all sixty distinct strings');
+  assert.equal(new Set(CONTROLS).size, 65, 'the control corpus must keep all sixty-five distinct strings');
   for (const { name, pattern, controls } of DEFAULT_HUMAN) {
     assert.ok(controls.length >= 3, name + ': every pattern needs at least three control strings');
     assert.ok(controls.some(control => /\b(?:not|never)\b/i.test(control)),
@@ -678,18 +723,32 @@ test('every document carrying the Runner: default states the same rule, and no d
         name + ': the sweep as actually run does not flag its own control — "' + control + '"');
     }
   }
-  // The false positive round 2 bought the connector whitelist with: an open gap matched
-  // this line of build-smoke-page.mjs, and a sweep that cries wolf gets deleted. Adding
-  // the modal connectors above must not reopen it, whatever the checkout later says.
-  assert.deepEqual(flagClauses('what every step in that section asks the user to test'), [],
-    'the connector whitelist has been reopened: a step-counting sentence is not a runner default');
+  // The false positives each narrowing was bought with. A sweep that cries wolf gets
+  // deleted by the next author, so these are pinned as strings rather than left to the
+  // file sweep, which would go quiet if the prose were reworded: the connector whitelist
+  // (round 2), the three-word gap on `hand` and the determiner on `mark|tag|treat`.
+  const NEVER_FLAGGED = ['what every step in that section asks the user to test',
+    'the page hands // the dangling reference to the tester as an instruction.',
+    'Tag every smoke step `Runner: agent` or `Runner: human`.',
+    'leave native-app steps human if no runner.'];
+  assert.equal(NEVER_FLAGGED.length, 4, 'every narrowing keeps the false positive that bought it');
+  for (const clean of NEVER_FLAGGED) {
+    assert.deepEqual(flagClauses(clean), [],
+      'a narrowing has been reopened: this is correct prose, not a runner default — "' + clean + '"');
+  }
   // A live control for the filter itself: each of these MATCHES a pattern and must be
   // silenced by the reinforcement rule, so "nothing was flagged" means the filter ran
-  // rather than that nothing could reach it. The last two are this checkout's own prose.
+  // rather than that nothing could reach it.
   const REINFORCEMENTS = ['Never hand a step to the user.',
     'so "no test could prove it" is never a reason to hand a step to the user.',
     'the user tests at checkpoints, never per batch or per wave by default.'];
   assert.equal(REINFORCEMENTS.length, 3, 'all three reinforcement controls must stay');
+  // "this checkout's own prose" was a comment, held by nothing, and would have gone
+  // quietly false on any rewording. The first string is invented; these two are not.
+  for (const real of REINFORCEMENTS.slice(1)) {
+    assert.ok(collapsed('orchestrate/references/execution-models.md').includes(real),
+      'this reinforcement is no longer execution-models.md\'s own prose — "' + real + '"');
+  }
   for (const reinforced of REINFORCEMENTS) {
     assert.ok(DEFAULT_HUMAN.some(({ pattern }) => pattern.test(reinforced)),
       'no pattern matches this reinforcement at all, so exempting it proves nothing — "' + reinforced + '"');
@@ -710,6 +769,10 @@ test('every document carrying the Runner: default states the same rule, and no d
     'touch live data)? Default when unsure: every step human.',
     'Default: human.',
     'Default: the tester.',
+    // `default when unsure` owned no EXCLUSIVE entry: its one entry was also caught by
+    // two other patterns, so deleting that pattern, its entry and its pins balanced the
+    // set-equality below and went green while "Default if in doubt." went silent.
+    'Default if in doubt.',
     'Steps whose runner is unclear go to the user.',
     'When you cannot be certain an agent can do it, mark the step human.',
     'If in doubt, the tester runs it.',
@@ -727,9 +790,10 @@ test('every document carrying the Runner: default states the same rule, and no d
     'Hand the step to the user.',
     'The user executes the steps at the checkpoint.',
     'Assume human until a runner is named.',
-    'Unplaced steps are assumed human.'];
-  assert.equal(REGRESSION.length, 24, 'the regression corpus must keep all twenty-four spellings');
-  assert.equal(new Set(REGRESSION).size, 24, 'the regression corpus must not repeat a spelling to pad its size');
+    'Unplaced steps are assumed human.',
+    'Mark unplaced steps human.'];
+  assert.equal(REGRESSION.length, 26, 'the regression corpus must keep all twenty-six spellings');
+  assert.equal(new Set(REGRESSION).size, 26, 'the regression corpus must not repeat a spelling to pad its size');
   for (const regression of REGRESSION) {
     assert.ok(flagClauses(regression).length > 0, 'the sweep no longer catches: "' + regression + '"');
   }
@@ -739,6 +803,20 @@ test('every document carrying the Runner: default states the same rule, and no d
     flagClauses(regression).map(hit => hit.split(' :: ')[0])))].sort(),
   DEFAULT_HUMAN.map(entry => entry.name).slice().sort(),
   'every pattern must be exercised by the regression corpus, and the corpus may name no pattern the family has dropped');
+  // …and set equality alone protected only fifteen of sixteen, because deleting a pattern
+  // removes its name from BOTH sides at once and only bites when an entry goes unflagged.
+  // EXCLUSIVITY is the property that makes the authority whole: every pattern must own a
+  // corpus entry that NO other pattern flags, so deleting the pattern, its entry and its
+  // pins together always leaves some other entry uncaught.
+  for (const { name } of DEFAULT_HUMAN) {
+    const exclusive = REGRESSION.filter(regression => {
+      const hits = flagClauses(regression).map(hit => hit.split(' :: ')[0]);
+      return hits.length === 1 && hits[0] === name;
+    });
+    assert.ok(exclusive.length > 0,
+      name + ': no regression entry is caught by this pattern ALONE, so deleting it balances the set'
+        + ' equality above and its real coverage goes silent — add a spelling only it catches');
+  }
   for (const file of shipped) {
     const flagged = flagClauses(collapsed(file));
     assert.equal(flagged.length, 0, file + ': a blanket human default contradicts the runner rule — ' + flagged.join(' || '));
