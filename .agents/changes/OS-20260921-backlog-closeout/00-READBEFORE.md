@@ -404,12 +404,17 @@ can violate — every class below was found here, not imagined:
   current session. (Merging reviewed batch branches into `chore/backlog-closeout-ledger` is
   the orchestrator's normal job.)
 - **Never rewrite a completed ledger.** `.agents/archive/**`,
-  `.agents/changes/OS-20260919-agent-tool-restrictions/**` and
-  `.agents/changes/OS-20260919-backlog-sweep/**` are historical records whose own contracts make
+  `.agents/changes/OS-20260919-agent-tool-restrictions/**`,
+  `.agents/changes/OS-20260919-backlog-sweep/**` and
+  `.agents/changes/OS-20260920-interview-sizing-backlog/**` are historical records whose own
+  contracts make
   this binding; read them freely, write to none. `bugs-2026-09-17.md` is a dated point-in-time
-  review record pinned to commit `af57139` and is off limits to every batch. `BACKLOG.md` is
-  ORCHESTRATOR-OWNED and appears in NO batch fence — entries close at the change-complete
-  distillation, never by the implementer who fixed them. Never repoint, replace or delete
+  review record pinned to commit `af57139` and is off limits to every batch.
+  **`BACKLOG.md` IS IN A FENCE THIS TIME — this reverses the previous ledger's rule, deliberately.**
+  Closing the backlog open table is this change's fourth deliverable, not a distillation
+  side-effect, so `BACKLOG.md` is fenced to **B04 and to no one else**. B01, B02 and B03 must not
+  touch it: an implementer who fixes an entry does NOT close it, and the close is written in
+  wave 2 from the merged commits. Never repoint, replace or delete
   `~/.claude/skills/orchestrate`: it is a stale copy of this skill, ruled out of scope by the user
   on 2026-09-20, and it lies outside this repository entirely.
 
