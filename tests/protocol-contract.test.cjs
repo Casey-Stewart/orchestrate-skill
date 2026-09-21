@@ -676,6 +676,11 @@ test('every document carrying the Runner: default states the same rule, and no d
         name + ': the sweep as actually run does not flag its own control — "' + control + '"');
     }
   }
+  // The false positive round 2 bought the connector whitelist with: an open gap matched
+  // this line of build-smoke-page.mjs, and a sweep that cries wolf gets deleted. Adding
+  // the modal connectors above must not reopen it, whatever the checkout later says.
+  assert.deepEqual(flagClauses('what every step in that section asks the user to test'), [],
+    'the connector whitelist has been reopened: a step-counting sentence is not a runner default');
   // A live control for the filter itself: each of these MATCHES a pattern and must be
   // silenced by the reinforcement rule, so "nothing was flagged" means the filter ran
   // rather than that nothing could reach it. The last two are this checkout's own prose.
