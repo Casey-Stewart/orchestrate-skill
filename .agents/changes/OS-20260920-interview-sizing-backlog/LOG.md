@@ -638,3 +638,44 @@ and both times the resolution came from the guardrails rather than from splittin
 BL-009 named two guards; the hunter established the entry undercounted. *A backlog entry is a
 pointer, not a specification* is this repository's own rule, and it cuts toward fixing the P1 here
 exactly as it cut toward completing the dash member in B03.
+
+### B05 — round 2: SHIP, and a guard verified by its harm rather than its assertion
+
+**`R2 SHIP @572c5d3`**. P1 and ASK both **FIX VERIFIED**. Validation 278/278.
+
+The re-reviewer did the thing that distinguishes a real verification from a green tick: it checked the
+HARM, not the assertion. With `!attributes.ok` mutated to `return true`, `worktrees()` on the
+driver-configured fixture returns `cleanliness: 'dirty'`, `status: [{' M','tracked.txt'}]`,
+`completeness: 'complete'` — it genuinely ran `status` with a driver configured, which is BL-009's
+sentence made executable — while the tip returns `unknown` / `[]` / `partial`. An assertion reddening
+tells you a test noticed; reproducing the harm tells you what the test is FOR.
+
+It also re-ran round 1's `!listing.ok` mutation against the NEW structure. That was the specific risk
+of a restructure — that coverage which previously worked is silently weakened — and the opposite
+happened: it now reddens at three assertions rather than one.
+
+**The injection survived every attack on it as production surface.** Monotone: no value sets `ok`
+true, and `text`/`bytes`/diagnostic survive the spread for both `git()` return shapes. Unreachable:
+`parseFlags` admits only `names.includes(key.slice(2))` against a fixed per-operation literal, which
+also rejects `--__proto__` by the same whitelist. Scoped: exactly two call sites, confirmed
+behaviourally rather than by grep alone — `failProbe: 'ls-files'` leaves the index inventory intact.
+And still the smallest seam, because injecting `git` itself would admit non-monotone results. The
+orchestrator independently confirmed the two call sites and that all three flag spellings return
+`usage` with `--help` silent.
+
+**Two new ASKs, and the first is a regression this batch introduced.** `degradedProbe` dereferences
+`options.failProbe` with no default, so `safeResolvedFilters(repo, diagnostics)` — the two-argument
+call — now THROWS where `11b5d81` returned `true`. Every other exported helper in the module defaults
+that parameter, so it is the one arity trap in the file, and it sits in the seam whose whole purpose
+is to let future tests call this function directly. Correctly judged not-P1: nothing reports safe,
+because the throw is caught at `:209` into `worktree-unavailable`, which is the refusing direction.
+The fix is one token. **It touches production, so a scoped re-review follows** — the second time this
+wave that a polish has crossed that line, and the rule earned its keep both times.
+
+The second ASK is the fourth instance of the pattern this change keeps producing: **the 12-value
+sweep written to prove the injection cannot make anything safe is itself pinned by sampling**, with
+no size assertion, so a both-at-once edit to the domain and its expectation passes. The author of a
+vacuity fix is thinking about the behaviour being pinned, not about whether the new pin can fail.
+B01's F4, B04's mutation 14, B03's `INDICATOR_ON_DOUBT`, and now this — four for four, every one
+found by a gate that MUTATED the fix rather than reading it. That is no longer an observation; it is
+a rule for the close-out distillation.
