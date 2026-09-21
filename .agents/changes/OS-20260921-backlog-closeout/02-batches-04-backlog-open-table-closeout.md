@@ -42,13 +42,13 @@ file under `.agents/**`, or any entry in the Closed table that predates this cha
 
 ## Checklist
 
-- [ ] BL-021, BL-022, BL-023 moved to Closed with their real merge SHAs
-- [ ] BL-022's resolution names the shipped fix shape, not the one its entry proposed
-- [ ] BL-018, BL-019, BL-020, BL-026 closed as accepted, one line of rationale each
-- [ ] BL-015, BL-024, BL-025, BL-027 in a "Noted, no action" section with reasons
-- [ ] BL-015 carries an explicit close condition
-- [ ] The open-items table is empty, or gone with a line saying so
-- [ ] No duplicate-meaning section left behind
+- [x] BL-021, BL-022, BL-023 moved to Closed with their real merge SHAs
+- [x] BL-022's resolution names the shipped fix shape, not the one its entry proposed
+- [x] BL-018, BL-019, BL-020, BL-026 closed as accepted, one line of rationale each
+- [x] BL-015, BL-024, BL-025, BL-027 in a "Noted, no action" section with reasons
+- [x] BL-015 carries an explicit close condition
+- [x] The open-items table is empty, or gone with a line saying so
+- [x] No duplicate-meaning section left behind
 
 ## Acceptance criteria
 
