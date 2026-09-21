@@ -4,7 +4,7 @@
 **Wave**: 1
 **Depends on**: none
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files** (the fence — modify NOTHING else): `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `orchestrate/templates/00-READBEFORE.md`, `tests/protocol-contract.test.cjs`, `tests/subagent-type-mapping.test.cjs`
+**Files**: `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `orchestrate/templates/00-READBEFORE.md`, `tests/protocol-contract.test.cjs`, `tests/subagent-type-mapping.test.cjs`
 **Spec**: [01-plan.md](01-plan.md) §B02 · **Reviewer pass required**
 
 ## Implementation notes

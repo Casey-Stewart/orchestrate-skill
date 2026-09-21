@@ -4,7 +4,7 @@
 **Wave**: 1
 **Depends on**: none
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files** (the fence — modify NOTHING else): `orchestrate/tools/build-smoke-page.mjs`, `orchestrate/references/smoke-page.md`, `tests/build-smoke-page.test.cjs`, `tests/smoke-page.test.cjs`
+**Files**: `orchestrate/tools/build-smoke-page.mjs`, `orchestrate/references/smoke-page.md`, `tests/build-smoke-page.test.cjs`, `tests/smoke-page.test.cjs`
 **Spec**: [01-plan.md](01-plan.md) §B01 · **Reviewer pass required**
 
 ## Implementation notes

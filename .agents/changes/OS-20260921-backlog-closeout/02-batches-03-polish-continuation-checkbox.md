@@ -4,7 +4,7 @@
 **Wave**: 1
 **Depends on**: none
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files** (the fence — modify NOTHING else): `orchestrate/tools/check-fence.mjs`, `tests/check-fence.test.cjs`, `orchestrate/templates/02-batch.md`
+**Files**: `orchestrate/tools/check-fence.mjs`, `tests/check-fence.test.cjs`, `orchestrate/templates/02-batch.md`
 **Spec**: [01-plan.md](01-plan.md) §B03 · **Reviewer pass required**
 
 ## Implementation notes

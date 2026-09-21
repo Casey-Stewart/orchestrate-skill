@@ -4,7 +4,7 @@
 **Wave**: 2
 **Depends on**: B01, B02, B03
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files** (the fence — modify NOTHING else): `BACKLOG.md`
+**Files**: `BACKLOG.md`
 **Spec**: [01-plan.md](01-plan.md) §B04 · **Reviewer pass required**
 
 ## Implementation notes

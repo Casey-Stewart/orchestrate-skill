@@ -21,6 +21,68 @@ heading per session (date), one `###` per batch or event. Never edit an earlier 
   output — a live instance of the repository's own "a test that pins the defect" class,
   which the planner had looked for by grepping `unfilled|self-check` and missed because the
   assertion names neither.
+- **Reading a stale copy of a document ONCE can contaminate work that afterwards correctly
+  uses the fresh one.** This ledger's four batch files were scaffolded with a `**Files**`
+  header carried over from the stale `~/.claude/skills/orchestrate` install, read early in
+  the session before the repository was adopted as the source of truth. The form is
+  plausible, so nothing looked wrong, but it silently killed `validateBatchEdit`'s
+  Files-line branch for the whole ledger. When a source is discovered to be stale, re-derive
+  what was already taken from it — do not merely stop reading it. See §files-line.
+- **A gate agent's evidence needs a control as much as an implementer's does.** A hunter
+  proved a real finding with a mutation that never applied, because it anchored on a tag the
+  template does not contain. The conclusion survived a correct re-run; the proof did not.
+  Treat a gate's "I mutated it and the suite stayed green" as a claim to verify, not a
+  result to act on.
+
+## 2026-09-21 — wave 1
+
+### gates — three batches, three instances of the same class
+
+Every one of B01, B02 and B03 shipped an assertion written to close a vacuity that
+contained another, and in all three cases the gate that caught it MUTATED the fix rather
+than reading it. B01: `assert.equal(steps.length, EXPRESSIONS.length)` where `steps` is
+`EXPRESSIONS.map(...)`. B02: a guard whose subject was the whole document, so an ancestry
+mention elsewhere in the file satisfied a test named for the close-out region. B03: a
+`new Set([...a, ...b]).size` uniqueness check presented in the implementer's own report as
+a size pin, green under three separate member deletions. This is the existing guardrail
+reproducing three times in one wave; what is new is that all three closed as polish passes
+on their own branches and none became a backlog entry.
+
+### the hunter's own mutation was a no-op
+
+B01's hunter proved its coverage-regression finding with mutant M-G, which injected
+`{{ leaked ` by `out.replace("<body", ...)`. The shipped template contains no `<body`, so
+the mutation never applied and its "67 pass / 0 fail" measured nothing — by the same token
+its claim that base line 54 caught the injection was also unfounded. The B01 implementer
+found this, re-ran the mutation anchored on `<main` (which the template does have), and
+the finding HELD: exactly one test reddens, the new assertion. Right conclusion, unsound
+evidence, evidence repaired. The repository's own rule — run a live control through your
+harness before trusting any green or any zero — earned its place again, this time applied
+to a gate agent rather than to an implementer.
+
+### files-line: an orchestrator error diagnosed as a tool defect
+
+B03's polish returned DONE_WITH_CONCERNS reporting that `validateBatchEdit`'s
+`**Files**: ` branch is dead for this entire ledger, so a recorded fence extension cannot
+be distinguished from smuggled scope. The report was accurate about the symptom and wrong
+about the cause, and the cause was mine.
+
+`orchestrate/templates/02-batch.md` ships `**Files**: {{BATCH_FILES}}`, which is exactly
+what the tool matches and what all seven batch files of the previous ledger carry. This
+ledger's four batch files carried `**Files** (the fence — modify NOTHING else): …`, which
+never matches. That parenthetical is the form used by the STALE
+`~/.claude/skills/orchestrate` install, which was read at the very start of this session
+before the divergence was noticed and the repository was adopted as the source of truth.
+The wrong bytes survived the switch.
+
+Fixed by canonicalising all four Files lines in the ledger; no production change, no
+backlog entry. Verified with both controls — the malformed form matches the tool's
+predicate 0 times, the canonical form 1 time, all four ledger files now 1, and the
+previous ledger's 7 files still 1 each, confirming only this ledger was affected.
+
+The lesson generalises past this ledger: reading a stale copy of a document ONCE can
+contaminate work that afterwards correctly uses the fresh one, and the contamination is
+invisible because the stale form is plausible. It is recorded in §Learnings.
 
 ## 2026-09-21 — scaffold
 
