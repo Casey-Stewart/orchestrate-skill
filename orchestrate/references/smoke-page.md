@@ -129,11 +129,16 @@ markup are restored at runtime. Plain names like `Fix "Save as"` also have their
 escaped inside JavaScript strings. Slots the
 table above documents as HTML (`headline`, `standfirst`, the facts, the gate) keep their
 markup. Without Node, or with the sidecar lost, copy the newest committed
-`smoke-*.html`, patch the slots by hand, and run the self-check below; the page never
+`smoke-*.html`, patch the slots by hand, and grep the result for a slot marker — a `{{`,
+an upper-case name, a `}}` — zero hits; the page never
 depends on the tool that filled it.
 
-**Self-check before publishing**: grep the filled file for `{{` — zero hits (the builder
-enforces this and refuses to write a page that fails it). Totals
+**Self-check before publishing**: the builder greps its TEMPLATE for a `{{` that is not
+a well-formed slot marker — a lower-case, spaced or hyphenated name it would leave
+unfilled — and refuses to write a page from that template, as it refuses a slot the
+sidecar cannot fill. It does not grep the filled page: step content may carry `{{` of its
+own (a GitHub Actions expression, a Handlebars or Vue binding), which is content and not
+a slot. Totals
 and the meter compute themselves from the sections array. `BUILD_SHA` must be a full
 40- or 64-character hexadecimal Git object ID. The page rejects an invalid or unfilled
 identity with a visible correction message: verdict entry and copying stay disabled,

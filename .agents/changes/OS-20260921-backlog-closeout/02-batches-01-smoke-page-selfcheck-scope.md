@@ -66,18 +66,18 @@ it, STOP with `NEEDS_FENCE` — do not edit B02's test file.
 
 ## Checklist
 
-- [ ] Scope the residual open-brace scan in `buildSmokePage` to the template, not the filled output
-- [ ] Correct the thrown message so it names a template defect rather than a fill failure
-- [ ] Correct the `0 unfilled slots` success message so it claims only what is now checked
-- [ ] Update the self-check paragraph in `smoke-page.md` to describe what is enforced
-- [ ] Update the hand-patch instruction near `smoke-page.md:132`, which tells a human to run
+- [x] Scope the residual open-brace scan in `buildSmokePage` to the template, not the filled output
+- [x] Correct the thrown message so it names a template defect rather than a fill failure
+- [x] Correct the `0 unfilled slots` success message so it claims only what is now checked
+- [x] Update the self-check paragraph in `smoke-page.md` to describe what is enforced
+- [x] Update the hand-patch instruction near `smoke-page.md:132`, which tells a human to run
       the self-check over the FILLED file — the human-facing half of the same defect
-- [ ] Re-aim the stale pin at `tests/build-smoke-page.test.cjs:54` at the template
-- [ ] Add a test: a sidecar whose step content contains a doubled-brace expression builds successfully
-- [ ] Add a test: the built HTML delivers that text to the reader (DOM harness in `tests/smoke-page.test.cjs`)
-- [ ] Add a test: a template carrying a malformed slot still throws
-- [ ] Add a test: a template slot the sidecar cannot fill still throws (currently unpinned)
-- [ ] Confirm every new test fails against the unmodified base, and record the output
+- [x] Re-aim the stale pin at `tests/build-smoke-page.test.cjs:54` at the template
+- [x] Add a test: a sidecar whose step content contains a doubled-brace expression builds successfully
+- [x] Add a test: the built HTML delivers that text to the reader (DOM harness in `tests/smoke-page.test.cjs`)
+- [x] Add a test: a template carrying a malformed slot still throws
+- [x] Add a test: a template slot the sidecar cannot fill still throws (currently unpinned)
+- [x] Confirm every new test fails against the unmodified base, and record the output
 
 ## Acceptance criteria
 

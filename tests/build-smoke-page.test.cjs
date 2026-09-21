@@ -51,7 +51,54 @@ test('every template slot is filled, and the builder fills no slot the template 
   const declared = new Set(template.match(/\{\{([A-Z_]+)\}\}/g).map(s => s.slice(2, -2)));
   const rendered = new Set(Object.keys(builder.renderSlots(sidecar())));
   assert.deepEqual([...rendered].sort(), [...declared].sort());
-  assert.equal(build().includes('{{'), false);
+  // Re-aimed at the TEMPLATE, where slots live. This line used to read
+  // `build().includes('{{')`, which pinned the defect: step content carrying `{{` is
+  // content, not an unfilled slot. What is worth holding is that the shipped template
+  // carries no `{{` the fill pattern cannot match, and that no well-formed slot
+  // survives the fill.
+  assert.equal(template.replace(/\{\{[A-Z_]+\}\}/g, '').includes('{{'), false,
+    'the shipped template must carry no `{{` outside a well-formed slot marker');
+  assert.equal(build().match(/\{\{[A-Z_]+\}\}/g), null, 'no slot may survive the fill');
+});
+
+// BL-022: the residual scan ran over the FILLED page, so a Do command quoting a
+// GitHub Actions expression, a Handlebars block or a Vue binding could not be published
+// at all — the builder blamed an "unfilled" slot for the reader's own content.
+test('step content carrying a doubled-brace expression publishes unchanged', () => {
+  const EXPRESSIONS = ['${{ github.event.inputs.tag }}', '{{ site.title }}', '{{#if ok}}yes{{/if}}'];
+  assert.equal(new Set(EXPRESSIONS).size, 3, 'the three published templating dialects must be distinct');
+  for (const expression of EXPRESSIONS) {
+    assert.doesNotMatch(expression, /\{\{[A-Z_]+\}\}/,
+      expression + ': a fixture that IS a slot marker would prove nothing about content');
+  }
+  const steps = EXPRESSIONS.map((expression, i) => ({ n: i + 1, revision: 1,
+    do: `Run <code>echo ${expression}</code>.`, pass: `It prints ${expression}.` }));
+  const html = build({ sections: [{ n: 1, title: 'Templating', steps }] });
+  // Subject is the DOMAIN: dropping an expression from the list drops a step too, and
+  // the count comparison reddens rather than both sides shrinking together.
+  assert.deepEqual(EXPRESSIONS.filter(expression => html.split(expression).length - 1 === 2), EXPRESSIONS,
+    'every expression must reach the page verbatim, in both the do and the pass text');
+  assert.equal(steps.length, EXPRESSIONS.length);
+});
+
+test('a template slot name the fill cannot match aborts the build', () => {
+  // Written independently of the `[A-Z_]+` pattern, and asserted below to be outside it.
+  const MALFORMED = ['{{page_title}}', '{{PAGE TITLE}}', '{{PAGE-TITLE}}', '{{ PAGE_TITLE }}', '{{Page_Title}}'];
+  assert.equal(new Set(MALFORMED).size, 5, 'five distinct malformed spellings, not a sample of one');
+  const caught = MALFORMED.filter(slot => {
+    assert.doesNotMatch(slot, /^\{\{[A-Z_]+\}\}$/, slot + ' must be a name the fill pattern cannot match');
+    try { builder.buildSmokePage(sidecar(), template + '\n' + slot); return false; }
+    catch (e) { return /^self-check failed: the template carries a `\{\{` that is not a slot/.test(e.message); }
+  });
+  assert.deepEqual(caught, MALFORMED, 'every malformed slot name must abort the build, naming the template');
+  // The other side of the boundary: the same template, plus a WELL-FORMED marker, builds.
+  assert.doesNotThrow(() => builder.buildSmokePage(sidecar(), template + '\n{{HEADLINE}}'));
+});
+
+test('a template slot the sidecar cannot fill aborts the build', () => {
+  assert.throws(() => builder.buildSmokePage(sidecar(), template + '\n{{NO_SUCH_SLOT}}'),
+    /^Error: template wants a slot the sidecar cannot fill: \{\{NO_SUCH_SLOT\}\}$/m);
+  assert.doesNotThrow(() => builder.buildSmokePage(sidecar(), template + '\n{{BUILD_SHA}}'));
 });
 
 test('the same sidecar always produces the same bytes', () => {
