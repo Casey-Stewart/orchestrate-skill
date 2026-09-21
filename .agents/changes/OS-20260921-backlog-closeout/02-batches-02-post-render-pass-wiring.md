@@ -79,14 +79,14 @@ The user chose BOTH homes, not either:
 
 ## Checklist
 
-- [ ] Add a separate post-page proofing block to `subagent-prompts.md`, distinct from §QA runner
-- [ ] Give the new block its `**Spawn with**` line and extend `SKELETONS` to match
-- [ ] Add the pass to the STOP hand-off in `protocol.md` §checkpoint close-out
-- [ ] Add it to the corresponding close-out sequence in `templates/00-READBEFORE.md`
-- [ ] Add a guard asserting the property over a swept domain, not a hand-written list
-- [ ] Record `execution-models.md:133` as a known un-wired sibling, in the batch's own words
-- [ ] Verify `RUNNER_RULE_COUNTS` and both mirror assertions still pass unchanged
-- [ ] Confirm the new guard fails against the unmodified base, and record the output
+- [x] Add a separate post-page proofing block to `subagent-prompts.md`, distinct from §QA runner
+- [x] Give the new block its `**Spawn with**` line and extend `SKELETONS` to match
+- [x] Add the pass to the STOP hand-off in `protocol.md` §checkpoint close-out
+- [x] Add it to the corresponding close-out sequence in `templates/00-READBEFORE.md`
+- [x] Add a guard asserting the property over a swept domain, not a hand-written list
+- [x] Record `execution-models.md:133` as a known un-wired sibling, in the batch's own words
+- [x] Verify `RUNNER_RULE_COUNTS` and both mirror assertions still pass unchanged
+- [x] Confirm the new guard fails against the unmodified base, and record the output
 
 ## Acceptance criteria
 

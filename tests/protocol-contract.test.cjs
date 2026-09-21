@@ -845,3 +845,118 @@ test('every document carrying the Runner: default states the same rule, and no d
   assert.match(models, /checkpoint asks the user for a VERDICT, not for labour/,
     'execution-models.md must say a checkpoint asks for a verdict, not for labour');
 });
+
+// ===== BL-023: the post-render proofing pass, wired ==========================
+// `smoke-page.md` DEFINED a pass that proofs the built page — every embedded command run
+// out of the page's own bytes, after the page exists and before the STOP — and nothing
+// outside that file invoked it, so no checkpoint ever ran it except by hand. The property
+// pinned below is deliberately not "these documents mention it": it is that EVERY shipped
+// document stating the checkpoint close-out sequence also names the pass, swept out of the
+// checkout rather than compared against a hand-written file list.
+//
+// The reason that distinction is load-bearing, recorded here as the known gap it is. The
+// close-out sequence is stated FIVE times, not three, and two of those five were fenced
+// away from the batch that wired the other three: `execution-models.md` step 5 of its wave
+// loop ("STOP with the combined smoke script, delivered as the smoke page") and `SKILL.md`
+// mode `continue` step 3, which wraps the same phrase across a line break and so does not
+// show up in a naive grep for it at all. Both still hand over without naming the pass. A
+// deepEqual over the wired files would have frozen those two omissions into the suite and
+// made wiring them later look like a regression. KNOWN_UNWIRED therefore says a carrier MAY
+// lack the pass, never that it must: the day either file names it, this test stays green
+// with nothing here to edit, and the day a further document states the close-out without
+// naming the pass, it reddens.
+test('every document stating the checkpoint close-out also invokes the post-render proofing pass', () => {
+  // The phrase every statement of the close-out sequence in this skill ends on.
+  const CLOSE_OUT = /combined smoke script/i;
+  // The pass's own imperative in `smoke-page.md`, which is what a reader greps for and
+  // what the wired documents repeat. If the defining document ever renames the pass, every
+  // pointer written into the other carriers dangles — and this is what says so.
+  const NAMES_PASS = /proofs? the published artifact/i;
+  const KNOWN_UNWIRED = ['orchestrate/SKILL.md', 'orchestrate/references/execution-models.md'];
+  const shipped = shippedSkillFiles();
+  const carriers = shipped.filter(file => CLOSE_OUT.test(collapsed(file)));
+  // Written independently of the pattern, so that weakening the marker and dropping a
+  // member in one edit still reddens. Membership, not set equality: a SIXTH carrier is
+  // allowed and simply has to satisfy the property below.
+  const STATED_IN = ['orchestrate/SKILL.md', 'orchestrate/references/execution-models.md',
+    'orchestrate/references/protocol.md', 'orchestrate/references/smoke-page.md',
+    'orchestrate/templates/00-READBEFORE.md'];
+  assert.equal(STATED_IN.length, 5,
+    'five shipped documents state the close-out sequence; this list may not shrink to a sample');
+  for (const file of STATED_IN) {
+    assert.ok(carriers.includes(file),
+      file + ': no longer matches the close-out marker this sweep selects on, so the sweep has stopped seeing it');
+  }
+  assert.ok(carriers.length >= STATED_IN.length, 'the swept carrier set lost a member');
+  assert.ok(carriers.length < shipped.length,
+    'the close-out marker now selects every shipped file, so selecting on it proves nothing');
+  assert.equal(KNOWN_UNWIRED.length, 2,
+    'exactly two carriers are recorded as knowingly un-wired; a third is a decision, not a quiet addition');
+  for (const file of KNOWN_UNWIRED) {
+    assert.ok(carriers.includes(file),
+      file + ': recorded as a known un-wired carrier but it no longer states the close-out — retire the exemption');
+  }
+  const wired = carriers.filter(file => !KNOWN_UNWIRED.includes(file));
+  assert.equal(wired.length, carriers.length - KNOWN_UNWIRED.length,
+    'an exemption names a file that is not a carrier, so it excuses nothing and hides nothing');
+  assert.ok(wired.length >= 3, 'the wired carrier set collapsed to ' + wired.length + ' document(s)');
+  // The predicate, armed: on the pre-fix text of these documents — a close-out that names
+  // the script and stops — it must say NO, or the property below is satisfied by anything.
+  assert.ok(!NAMES_PASS.test('commit on the integration branch, STOP with the combined smoke script.'),
+    'the predicate accepts a close-out that never names the pass; it would have passed unchanged on the unwired text');
+  for (const file of wired) {
+    assert.match(collapsed(file), NAMES_PASS,
+      file + ': states the checkpoint close-out but never invokes the post-render proofing pass — a rule nothing'
+        + ' invokes never fires; name the pass here, or record the file in KNOWN_UNWIRED with its reason');
+  }
+
+  // Positive matches on prose are defeated by an APPENDED sentence: "the pass is optional
+  // when the pre-smoke passed" leaves every assertion above green and undoes the wiring.
+  // Every clause in a wired carrier that is ABOUT the pass is swept for a directive that
+  // makes it skippable, folds it back into the pre-smoke, or moves it before the page —
+  // the last being the one re-timing the pass's own definition forbids.
+  const ABOUT = /proofs? the published artifact|proofing pass|re-proofed/i;
+  const CONTRADICTIONS = [
+    { name: 'optional or skippable',
+      pattern: /\b(?:optional|skippable|may be (?:skipped|omitted)|can be skipped|if time (?:allows|permits))\b/i },
+    { name: 'folded back into the pre-smoke',
+      pattern: /\b(?:replaces|instead of|in place of)\b[^.;]*\b(?:pre-smoke|QA runner)\b/i },
+    { name: 'moved before the page exists',
+      pattern: /\bbefore the page (?:is built|exists|is generated)\b/i },
+  ];
+  // The boundary swallows the markdown emphasis that closes a sentence. Splitting on
+  // `(?<=[.;])\s+` alone left `smoke-page.md`'s own definition — which ends `…after the
+  // page is built.**` — glued to the NEXT sentence, the one saying the QA runner's
+  // pre-verification "happens before the page exists". That is correct prose about the
+  // runner, and the third pattern flagged the pass for it. A sweep that cries wolf gets
+  // deleted by the next author, so the narrowing and the false positive it was bought
+  // with are both pinned below.
+  const clauses = text => text.split(/(?<=[.;])[\s*]+/).filter(clause => ABOUT.test(clause));
+  const contradictions = text => clauses(text).flatMap(clause =>
+    CONTRADICTIONS.filter(({ pattern }) => pattern.test(clause)).map(({ name }) => name + ' :: ' + clause.trim()));
+  // A live control, because "nothing was flagged" across a handful of clauses is exactly
+  // the shape of a canary that could never sing. Each pattern is armed through the same
+  // code path the file sweep runs, including the clause selection in front of it.
+  const ARMED = ['Proof the published artifact, which is optional.',
+    'Proof the published artifact instead of the pre-smoke.',
+    'Proof the published artifact before the page is built.'];
+  assert.equal(ARMED.length, CONTRADICTIONS.length, 'every contradiction pattern needs its own live control');
+  assert.deepEqual([...new Set(ARMED.flatMap(control => contradictions(control).map(hit => hit.split(' :: ')[0])))].sort(),
+    CONTRADICTIONS.map(entry => entry.name).slice().sort(),
+    'the controls must arm every contradiction pattern and may name none the family has dropped');
+  const EMPHASIS_BOUNDARY = '**Proof the published artifact — an ADDED pass, after the page is built.**'
+    + " The QA runner's pre-verification happens before the page exists and proves the steps, not the bytes"
+    + ' the reader receives;';
+  assert.equal(clauses(EMPHASIS_BOUNDARY).length, 1,
+    'a sentence boundary closed by markdown emphasis must still split, or the next sentence is swept as if it were about the pass');
+  assert.deepEqual(contradictions(EMPHASIS_BOUNDARY), [],
+    'the narrowing has been reopened: this is correct prose about the PRE-smoke, not a re-timing of the pass');
+  assert.ok(collapsed('orchestrate/references/smoke-page.md').includes(EMPHASIS_BOUNDARY),
+    'this false positive is no longer smoke-page.md\'s own prose — re-derive it before trusting the narrowing');
+  for (const file of wired) {
+    assert.ok(clauses(collapsed(file)).length > 0,
+      file + ': the contradiction sweep selected no clause here, so its silence is about nothing');
+    assert.deepEqual(contradictions(collapsed(file)), [],
+      file + ': a directive in this document undoes the pass it invokes');
+  }
+});

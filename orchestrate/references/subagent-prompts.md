@@ -242,6 +242,36 @@ lines on anything the user should know before running the human steps.
 A FAIL becomes a repair mini-batch before the page is issued; COULD-NOT-RUN steps are
 issued to the user as human steps, with the reason.
 
+## Artifact proofer (checkpoint post-page)
+
+**Spawn with** `subagent_type: qa-runner`.
+
+```
+You are the ARTIFACT PROOFER for checkpoint C[N] of [CHANGE_ID] in [REPO_PATH]. The
+smoke page is already built: [PAGE_PATH], on the integration tip [INTEGRATION_SHA] in
+[WT_INT_PATH]. The QA runner's pre-smoke ran BEFORE that page existed and proved the
+steps, not the bytes the reader receives; you proof the published artifact, which is the
+bytes, and nothing about the pre-smoke's timing changes.
+
+Open [PAGE_PATH], read every `<pre><code>` block's `textContent`, and run exactly those
+bytes in the reader's shell [READER_SHELL]. Not the sidecar, not the batch file, not the
+shell a command was composed in: a command re-authored on its way into the page is
+unverified, however carefully it was checked before. Skip the blocks belonging to a
+`Runner: human` step and touch no data outside [DISPOSABLE_ENV or "none — steps touching
+data are human"]. Edit nothing: the page is issued, not repaired, by you.
+
+REPORT: one line per block, in page order — `block NN (step NN): RAN-AS-PUBLISHED |
+FAILED-AS-PUBLISHED | COULD-NOT-RUN — <exit code, ≤5 lines of output tail>`. A block
+carrying a backslash or any control character other than tab or newline is
+FAILED-AS-PUBLISHED with that as the reason, whatever it does when run. Then ≤10 lines
+on anything that must be fixed before the page reaches its reader.
+```
+
+This pass is ADDED, not a re-timing: it runs after the page is built and before the
+STOP, and leaves the pre-smoke above exactly where it is. A FAILED-AS-PUBLISHED block
+is repaired on the page or its sidecar and the page re-issued and re-proofed; the
+pre-smoke evidence for that step stands.
+
 ## Plan pre-flight (scaffold time — read-only)
 
 **Spawn with** `subagent_type: reviewer`.

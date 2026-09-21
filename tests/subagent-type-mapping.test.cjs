@@ -31,6 +31,8 @@ const SKELETONS = [
     opens: 'You hunt tests that cannot fail, for batch B[NN]' },
   { heading: '## QA runner (checkpoint pre-smoke)', type: 'qa-runner',
     opens: 'You are the QA RUNNER for checkpoint C[N]' },
+  { heading: '## Artifact proofer (checkpoint post-page)', type: 'qa-runner',
+    opens: 'You are the ARTIFACT PROOFER for checkpoint C[N]' },
   { heading: '## Plan pre-flight (scaffold time — read-only)', type: 'reviewer',
     opens: 'You are the independent PRE-FLIGHT reviewer of a change plan' },
   { heading: '## Convergence (change-complete — read-only)', type: 'reviewer',
@@ -192,4 +194,65 @@ test('the prose read-only rules survive in every read-only skeleton', () => {
     assert.ok(flow(doc.section(heading)).includes(rule),
       heading + ' lost its prose read-only rule: ' + rule);
   }
+});
+
+// BL-023: `smoke-page.md` defined a pass that proofs the BUILT page and no skeleton
+// invoked it, so it only ever ran when someone remembered. Wiring it in had one hard
+// constraint: the QA runner is pre-page by construction ("a FAIL becomes a repair
+// mini-batch before the page is issued") and the pass's own definition changes nothing
+// about when the runner runs — so it had to become a SECOND skeleton rather than extra
+// duties bolted onto the first. These two tests are what stops a later edit from
+// collapsing them back together or flipping either one's timing.
+const PRE_SMOKE = '## QA runner (checkpoint pre-smoke)';
+const POST_PAGE = '## Artifact proofer (checkpoint post-page)';
+// Directives that would undo the split, in whichever section they landed. Held as one
+// list and armed below, so neither sweep's silence is a canary that could never sing.
+const REVERSALS = [
+  { name: 'the proofing pass made optional', pattern: /\b(?:optional|skippable|may be (?:skipped|omitted)|can be skipped)\b/i },
+  { name: 'the pre-smoke moved after the page', pattern: /\bpre-smoke\b[^.;]*\bafter the page\b/i },
+  { name: 'one pass standing in for the other', pattern: /\b(?:replaces|instead of|in place of)\b[^.;]*\b(?:pre-smoke|proofing pass|QA runner)\b/i },
+];
+const reversals = text => text.split(/(?<=[.;])\s+/).flatMap(clause =>
+  REVERSALS.filter(({ pattern }) => pattern.test(clause)).map(({ name }) => name + ' :: ' + clause.trim()));
+
+test('the reversal sweep over the two checkpoint skeletons is armed', () => {
+  const ARMED = ['The proofing pass is optional once the runner is green.',
+    'The pre-smoke now runs after the page is built.',
+    'The proofer runs instead of the QA runner.'];
+  assert.equal(ARMED.length, REVERSALS.length, 'every reversal pattern needs its own live control');
+  assert.deepEqual([...new Set(ARMED.flatMap(control => reversals(control).map(hit => hit.split(' :: ')[0])))].sort(),
+    REVERSALS.map(entry => entry.name).slice().sort(),
+    'the controls must arm every reversal pattern and may name none the family has dropped');
+});
+
+test('the pre-smoke skeleton keeps its pre-page timing and takes on no post-page duty', () => {
+  const section = flow(doc.section(PRE_SMOKE));
+  assert.ok(section.includes('A FAIL becomes a repair mini-batch before the page is issued'),
+    PRE_SMOKE + ' must still place its repair loop BEFORE the page is issued');
+  // Appending the post-page duty HERE is the edit the timing constraint forbids: the
+  // runner proves the steps, the proofer proves the bytes the reader receives, and one
+  // block doing both contradicts both smoke-page.md and the line pinned above.
+  for (const duty of [/published artifact/i, /textContent/, /after the page is (?:built|generated)/i]) {
+    assert.doesNotMatch(section, duty,
+      PRE_SMOKE + ' has acquired a post-page duty — that belongs in "' + POST_PAGE + '"');
+  }
+  assert.deepEqual(reversals(section), [], PRE_SMOKE + ' carries a directive that undoes the split');
+});
+
+test('the post-page skeleton actually invokes the proofing pass', () => {
+  const section = flow(doc.section(POST_PAGE));
+  // Instructs the pass rather than mentioning it: the page as the source of the bytes,
+  // and the bytes run as they are.
+  for (const clause of ['proof the published artifact',
+    "read every `<pre><code>` block's `textContent`", 'run exactly those bytes',
+    'after the page is built and before the STOP']) {
+    assert.ok(section.includes(clause), POST_PAGE + ' must instruct the pass, not merely name it: ' + clause);
+  }
+  // Both halves say it re-times nothing, so deleting either the prompt's sentence or the
+  // prose one leaves the other to redden.
+  assert.ok(section.includes("nothing about the pre-smoke's timing changes"),
+    POST_PAGE + "'s prompt must tell the agent it re-times nothing");
+  assert.ok(section.includes('leaves the pre-smoke above exactly where it is'),
+    POST_PAGE + "'s prose must say the same to the orchestrator reading it");
+  assert.deepEqual(reversals(section), [], POST_PAGE + ' carries a directive that undoes the pass it invokes');
 });
