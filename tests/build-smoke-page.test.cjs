@@ -90,6 +90,15 @@ test('the gate renders the documented structure', () => {
   assert.match(gate, /Step 0 — prove you are on the right build/);
   assert.match(gate, /<pre><code>git switch chore\/smoke-hardening-ledger<\/code><\/pre>/);
   assert.match(gate, /<ol class="gate-checks">/);
+  // Validation proves the SIDECAR carries the containment commands. This proves they
+  // REACH the page the tester actually runs: rendering only the first command leaves
+  // the eyeballed gate in place while every other assertion here stays green.
+  const commands = gateFor(SHA).commands;
+  assert.equal(commands.length, 3, 'the fixture gate is the branch command plus both containment commands');
+  for (const command of commands) {
+    assert.ok(gate.includes('<pre><code>' + command + '</code></pre>'),
+      'the gate must publish this command verbatim: ' + command);
+  }
 });
 
 test('derived headings can be overridden without touching the template', () => {
@@ -130,6 +139,28 @@ test('a gate that cannot prove containment mechanically is refused', () => {
   // asking a human to adjudicate the difference, with nothing that executes.
   fails({ gate: { checks: ['Tested source commit: <code>af57139</code>. A later commit '
     + 'containing only checkpoint artifacts is allowed.'] } }, /no containment check/);
+  // EXECUTED versus EYEBALLED is the whole of BL-012, so pin the pair that separates
+  // them: the very same two commands, complete and naming this build, written as prose
+  // in `checks` for a human to run by hand. Accepting containment found in `checks`
+  // would leave every other case here green.
+  fails({ gate: { commands: [], checks: [`Run git merge-base --is-ancestor ${SHA} HEAD and then `
+    + `git diff --name-only ${SHA}..HEAD -- . ":(exclude).agents/" yourself, and compare.`] } },
+    /no containment check:.*merge-base --is-ancestor.*and.*diff --name-only.*and.*af57139/);
+  // Near misses: each runs, and each differs from a required command by exactly the
+  // flag that makes it a containment proof. `git merge-base main HEAD` plus a plain
+  // `git diff` is two real commands and no proof of anything.
+  const near = commands => ({ ...gateFor(SHA), commands });
+  fails({ gate: near([`git merge-base ${SHA} HEAD`, `git diff --name-only ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git merge-base --is-ancestor/);
+  fails({ gate: near([`git merge-base --is-ancestor ${SHA} HEAD`, `git diff ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git diff --name-only/);
+  fails({ gate: near(['git merge-base main HEAD', `git diff ${SHA}..HEAD`]) },
+    /no containment check:.*merge-base --is-ancestor.*and.*diff --name-only/);
+  // Case matters, because git's flags are case-sensitive: `--IS-ANCESTOR` is not a flag.
+  fails({ gate: near([`git merge-base --IS-ANCESTOR ${SHA} HEAD`, `git diff --name-only ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git merge-base --is-ancestor/);
+  fails({ gate: near([`git merge-base --is-ancestor ${SHA} HEAD`, `git DIFF --NAME-ONLY ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git diff --name-only/);
   // Containment of SOME build is not containment of THIS one — and naming this one
   // turns the very same gate into an accepted gate.
   fails({ gate: gateFor('b'.repeat(40)) }, /no containment check:.*the tested build `af57139` itself/);
@@ -137,6 +168,45 @@ test('a gate that cannot prove containment mechanically is refused', () => {
   assert.doesNotThrow(() => build({ gate: gateFor(SHA.slice(0, 7)) }), 'the documented 7-hex short form counts');
   for (const commands of ['git status', 42, true, [null], [42], [['git']], [{}]]) {
     fails({ gate: { ...gateFor(SHA), commands } }, /gate\.commands must be an array of command strings/);
+  }
+});
+
+// The spec, the baked contract and the enforcement have to fail TOGETHER, or the
+// three-way agreement holds only until someone edits a document. Both files are in this
+// batch's fence for exactly this reason. This is also the dogfood: what a future
+// scaffolder copies out of the contract is what the builder is fed here.
+const CONTAINMENT_DOCS = ['orchestrate/references/execution-models.md',
+  'orchestrate/templates/00-READBEFORE.md'];
+
+function publishedContainmentBlock(file) {
+  const text = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+  const fenced = [...text.matchAll(/```text\r?\n([\s\S]*?)```/g)].map(m => m[1]);
+  const blocks = fenced.filter(block => block.includes('merge-base --is-ancestor'));
+  assert.equal(blocks.length, 1, file + ': exactly one fenced block must publish the containment commands');
+  const lines = blocks[0].split(/\r?\n/).filter(Boolean);
+  assert.equal(lines.length, 2, file + ': the published block is the two containment commands');
+  return lines;
+}
+
+test('the published containment block is the one the builder accepts', () => {
+  assert.equal(CONTAINMENT_DOCS.length, 2, 'the spec and the baked contract must both be read');
+  const [spec, contract] = CONTAINMENT_DOCS.map(publishedContainmentBlock);
+  assert.deepEqual(contract, spec, 'the scaffolded contract must bake the block execution-models.md specifies');
+  for (const [file, lines] of CONTAINMENT_DOCS.map((file, i) => [file, [spec, contract][i]])) {
+    // Negative control first: the block AS PUBLISHED, placeholder unsubstituted, is
+    // refused — so the acceptance below is about the commands, not about any string.
+    fails({ gate: { ...gateFor(SHA), commands: lines } },
+      /no containment check:.*the tested build `af57139` itself/);
+    const filled = lines.map(line => line.replaceAll('<buildSha>', SHA));
+    assert.notDeepEqual(filled, lines, file + ': the published block must carry the <buildSha> placeholder');
+    assert.doesNotThrow(() => build({ gate: { ...gateFor(SHA), commands: filled } }),
+      file + ': a gate authored from the published block must build');
+    // And it must reach the page, not merely validate.
+    const html = build({ gate: { ...gateFor(SHA), commands: filled } });
+    for (const command of filled) {
+      assert.ok(html.includes('<pre><code>' + command + '</code></pre>'),
+        file + ': the published command must reach the rendered gate: ' + command);
+    }
   }
 });
 
