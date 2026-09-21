@@ -537,6 +537,8 @@ test('every document carrying the Runner: default states the same rule, and no d
   assert.deepEqual(Object.keys(GROUNDS).sort(), carriers.slice().sort());
   assert.equal(Object.values(BACK_REFERENCE).reduce((sum, list) => sum + list.length, 0), 6,
     'one pinned back-reference per occurrence of the rule, not per file');
+  assert.equal(Object.values(GROUNDS).reduce((sum, list) => sum + list.length, 0), 9,
+    'nine pinned grounds across the five carriers: dropping one here and from its document must redden');
   for (const file of carriers) {
     const text = collapsed(file), tails = text.split(RULE).slice(1);
     assert.equal(BACK_REFERENCE[file].length, RUNNER_RULE_COUNTS[file],
@@ -684,9 +686,11 @@ test('every document carrying the Runner: default states the same rule, and no d
   // A live control for the filter itself: each of these MATCHES a pattern and must be
   // silenced by the reinforcement rule, so "nothing was flagged" means the filter ran
   // rather than that nothing could reach it. The last two are this checkout's own prose.
-  for (const reinforced of ['Never hand a step to the user.',
+  const REINFORCEMENTS = ['Never hand a step to the user.',
     'so "no test could prove it" is never a reason to hand a step to the user.',
-    'the user tests at checkpoints, never per batch or per wave by default.']) {
+    'the user tests at checkpoints, never per batch or per wave by default.'];
+  assert.equal(REINFORCEMENTS.length, 3, 'all three reinforcement controls must stay');
+  for (const reinforced of REINFORCEMENTS) {
     assert.ok(DEFAULT_HUMAN.some(({ pattern }) => pattern.test(reinforced)),
       'no pattern matches this reinforcement at all, so exempting it proves nothing — "' + reinforced + '"');
     assert.deepEqual(flagClauses(reinforced), [],
