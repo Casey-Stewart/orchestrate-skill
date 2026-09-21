@@ -130,8 +130,9 @@ capped tip repair is awaiting the user's verdict, in which case the session asks
 
 **Before handing over ANY checkpoint script, make the build identifiable.** Bump the
 version on the integration branch so it differs from the base branch's, and open the
-script with (a) the terminal command that prints the current branch, (b) the version
-she should see, and (c) a **canary** — one cheap step whose result is OPPOSITE on the
+script with (a) the terminal command that prints the current branch, (b) an executable
+**containment check**, (c) the version
+she should see, and (d) a **canary** — one cheap step whose result is OPPOSITE on the
 base build, run FIRST, with "if it behaves the old way, stop and say so". On the smoke page this
 is Step 0 — the gate, a non-verdict section rendered before every verdict step.
 A script whose every step passes on the base build cannot detect that it ran against
@@ -142,6 +143,27 @@ steps against the base, and reported the un-fixed defects as failures. Note whic
 batch appeared to "pass" — the one whose steps deliberately exercise behaviour the fix
 must NOT disturb. Those steps pass on old code by design, so they are the ones most
 likely to disguise a wrong-tree run.
+
+**The containment check is a command, not an eyeball.** Committing the checkpoint page
+moves `HEAD` past the build the page describes, so a gate that asks the tester to
+compare `git rev-parse HEAD` against the recorded build SHA can never agree, and every
+run so far waived the difference by hand. The gate RUNS the comparison instead, naming
+the tested SHA literally:
+
+```text
+git merge-base --is-ancestor <buildSha> HEAD
+git diff --name-only <buildSha>..HEAD -- . ":(exclude).agents/"
+```
+
+The first must exit 0 — the tested build is in her history. The second must print
+NOTHING — the pathspec excludes the ledger directory, so empty output IS the verdict
+and she never reads a list to reach one. Anything it prints is a real code change made
+after the build she is testing. Both are plain commands with no backslashes, so no
+transport between sidecar and clipboard can mangle them; keep them that way rather than
+adding a shell filter. The pathspec is DOUBLE-quoted on purpose — verified as published
+in PowerShell, `cmd.exe` and Git Bash; single quotes reach git unstripped under
+`cmd.exe` and the command dies with `Invalid path`. `build-smoke-page.mjs` refuses a
+sidecar whose `gate.commands` omits either command or the SHA the sidecar itself records.
 
 **Bump the PATCH component for checkpoint markers; save the MINOR for the release.**
 The marker's only job is to differ from the base branch, so it costs a patch

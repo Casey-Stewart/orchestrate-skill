@@ -123,10 +123,88 @@ function number(value, what) {
   if (!Number.isInteger(value) || value < 1) throw new Error(`${what} must be a positive integer`);
 }
 
+// Committing the page necessarily moves HEAD past the build the page describes, so a
+// gate that asks the tester to compare `git rev-parse HEAD` against `buildSha` by eye
+// can never agree; every run so far waived the difference by hand. Require the gate to
+// RUN the containment proof against the SHA this very sidecar records.
+function gateContainment(gate, buildSha) {
+  const commands = gate.commands === undefined ? [] : gate.commands;
+  if (!Array.isArray(commands) || commands.some(command => typeof command !== "string")) {
+    throw new Error("gate.commands must be an array of command strings");
+  }
+  const text = commands.join("\n").replace(/[ \t]+/g, " ");
+  const missing = [];
+  if (!text.includes("merge-base --is-ancestor")) missing.push("`git merge-base --is-ancestor <buildSha> HEAD`");
+  if (!text.includes("diff --name-only")) missing.push("`git diff --name-only <buildSha>..HEAD`");
+  // A containment command naming some other build proves containment of that build.
+  if (!new RegExp(buildSha.slice(0, 7), "i").test(text)) missing.push(`the tested build \`${buildSha.slice(0, 7)}\` itself`);
+  if (missing.length) {
+    throw new Error(`the step-0 gate has no containment check: gate.commands must run ${missing.join(" and ")}`);
+  }
+}
+
+// A control character is invisible in every editor and in the rendered page. A U+0000
+// inside a copyable command shipped once and turned that command into a SyntaxError for
+// the reader who pasted it, with nothing on the page to show why.
+// The domain is Unicode Cc entire — C0, DEL and C1 — minus tab and newline, which is
+// what smoke-page.md publishes. C1 is in because NEL (U+0085) is a real line
+// terminator: it splits a pasted command in two while looking like nothing at all.
+// Compared by code point, never by an escape in a character class: the rule must not
+// itself be a line of source whose meaning depends on invisible bytes surviving an edit.
+const TAB = 9, NEWLINE = 10, FIRST_PRINTABLE = 32, DELETE = 127;
+const C1_FIRST = 128, C1_LAST = 159;
+const isControlCharacter = code =>
+  (code < FIRST_PRINTABLE && code !== TAB && code !== NEWLINE)
+  || code === DELETE || (code >= C1_FIRST && code <= C1_LAST);
+
+function rejectControlCharacters(value, where) {
+  if (typeof value === "string") {
+    const characters = [...value];
+    const at = characters.findIndex(character => isControlCharacter(character.codePointAt(0)));
+    if (at === -1) return;
+    const point = characters[at].codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
+    throw new Error(`${where} carries control character U+${point}; only tab and newline are allowed, `
+      + "because an invisible character makes a published command a SyntaxError");
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, i) => rejectControlCharacters(item, `${where}[${i}]`));
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      rejectControlCharacters(key, `${where}: key ${JSON.stringify(key)}`);
+      rejectControlCharacters(item, `${where}.${key}`);
+    }
+  }
+}
+
+// A restructure leaves `Section 5` and `Step 3` pointing at nothing, and the page hands
+// the dangling reference to the tester as an instruction. Capitalised forms are the
+// cross-references; `step 1` in "Mark step 1 Fail" is the step's own prose. Step 0 is
+// the gate, which every page has.
+function rejectDanglingReferences(d, sections, steps) {
+  const known = { Section: sections, Step: steps };
+  const scan = value => {
+    if (typeof value === "string") {
+      for (const [, word, digits] of value.matchAll(/\b(Section|Step)\s+(\d+)\b/g)) {
+        const n = Number(digits);
+        if (word === "Step" && n === 0) continue;
+        if (known[word].has(n)) continue;
+        throw new Error(`"${word} ${digits}" refers to a ${word.toLowerCase()} this sidecar does not contain`);
+      }
+      return;
+    }
+    if (Array.isArray(value)) { value.forEach(scan); return; }
+    if (value && typeof value === "object") for (const item of Object.values(value)) scan(item);
+  };
+  scan(d);
+}
+
 function validate(d) {
   const missing = ["change", "checkpoint", "batches", "branch", "buildSha", "ckptKey", "gate", "sections"]
     .filter(key => d[key] === undefined || d[key] === "");
   if (missing.length) throw new Error(`sidecar is missing: ${missing.join(", ")}`);
+  rejectControlCharacters(d, "sidecar");
   // The page refuses to run on an unfilled or malformed identity; fail here instead,
   // where the message can name the file, rather than shipping a page that stops the user.
   if (!/^[0-9a-fA-F]{40}$|^[0-9a-fA-F]{64}$/.test(d.buildSha)) {
@@ -142,6 +220,7 @@ function validate(d) {
   }
   if (!Array.isArray(d.sections) || !d.sections.length) throw new Error("sidecar has no sections");
   if (!Array.isArray(d.gate.checks) || !d.gate.checks.length) throw new Error("the step-0 gate has no checks");
+  gateContainment(d.gate, d.buildSha);
 
   const seenSections = new Set(), seenSteps = new Map();
   for (const section of d.sections) {
@@ -170,6 +249,7 @@ function validate(d) {
       }
     }
   }
+  rejectDanglingReferences(d, seenSections, new Set(seenSteps.keys()));
   declareInputs(d);
   return d;
 }

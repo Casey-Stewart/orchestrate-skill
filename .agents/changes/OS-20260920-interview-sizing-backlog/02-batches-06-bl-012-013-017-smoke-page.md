@@ -91,32 +91,35 @@ the test.
 
 ## Checklist
 
-- [ ] Move the build-identity gate spec in `orchestrate/references/execution-models.md` from
+- [x] Move the build-identity gate spec in `orchestrate/references/execution-models.md` from
       branch/version/canary to an executable containment check.
-- [ ] Update the baked gate text in `orchestrate/templates/00-READBEFORE.md` to match, so a ledger
+- [x] Update the baked gate text in `orchestrate/templates/00-READBEFORE.md` to match, so a ledger
       scaffolded after this change authors a sidecar the new builder accepts.
-- [ ] Have `validate()` in `build-smoke-page.mjs` REJECT a sidecar whose gate carries no containment
+- [x] Have `validate()` in `build-smoke-page.mjs` REJECT a sidecar whose gate carries no containment
       check, with a message naming what is missing.
-- [ ] Reject a sidecar carrying any control character other than tab or newline — the U+0000 case that
+- [x] Reject a sidecar carrying any control character other than tab or newline — the U+0000 case that
       made a published command a `SyntaxError`.
-- [ ] Reject a `Section N` or `Step N` reference the sidecar does not contain (BL-013’s two dangling
+- [x] Reject a `Section N` or `Step N` reference the sidecar does not contain (BL-013’s two dangling
       cross-references).
-- [ ] Update `tests/smoke-page.test.cjs`’s sidecar fixtures at `:112` and `:155` so they carry a
+- [x] Update `tests/smoke-page.test.cjs`’s sidecar fixtures at `:112` and `:155` so they carry a
       containment check, keeping every existing assertion’s meaning intact.
-- [ ] Add `tests/build-smoke-page.test.cjs` cases for all three new rejections, each with a positive
+- [x] Add `tests/build-smoke-page.test.cjs` cases for all three new rejections, each with a positive
       control that is ACCEPTED, so no rejection assertion is satisfied by an input that could never
       have passed.
-- [ ] Add the hand-over proofing rule to `orchestrate/references/smoke-page.md` (BL-017), scoped as an
+- [x] Add the hand-over proofing rule to `orchestrate/references/smoke-page.md` (BL-017), scoped as an
       added post-render pass: a command is verified only when executed in the form the reader receives
       it, and embedded commands carry no backslashes and no control characters.
-- [ ] Update `orchestrate/references/smoke-page.md:139` so its pointer at `execution-models.md` still
+- [x] Update `orchestrate/references/smoke-page.md:139` so its pointer at `execution-models.md` still
       describes the gate that file now specifies.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-012-013-017-smoke-page` — `fix: smoke-page build identity, sidecar coherence and hand-over proofing (batch 06)`.
+- [x] Commit on `fix/bl-012-013-017-smoke-page` — `fix: smoke-page build identity, sidecar coherence and hand-over proofing (batch 06)`.
+- [x] polish: R2 ASK-1 - bind the source sweep's domain to the checkout. The swept trees were an array literal with no assertion about the domain, so narrowing it to ['orchestrate'] retired the sweep over the tree the historical U+2028 lived in, 63/63 green. Coverage is now compared against the repository root's top-level entries minus .git, .agents and node_modules, which also brings README.md - the one other document publishing a copyable command - into scope.
+- [x] polish: R2 ASK-2 - bind the outside-the-domain edge list. Setting C1_LAST = 160 and dropping 0xA0 from the list was 63/63 green while the builder began rejecting a no-break space. The list is a named const with its length asserted, and the member one past the top of the swept domain is asserted against that domain rather than sampled.
+- [x] polish: R2 ASK-3 - forbid a lone CR in source, and read the fourth statement of the contract. The sweep spared every CR while the comment claimed it spared CRLF, so a lone CR planted inside a published command stayed green; CR is now spared only before LF, with a lone CR in the live control. smoke-page.md's inline `git ...` spans extract cleanly and joined CONTAINMENT_SOURCES, so dropping --is-ancestor there no longer passes.
 
 ## Acceptance criteria
 

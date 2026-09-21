@@ -17,12 +17,22 @@ const SHA = 'af57139e302f85a209a9a7695f671345fc7ed6ed';
 let builder;
 test.before(async () => { builder = await import('file://' + BUILDER.replace(/\\/g, '/')); });
 
+// The gate the contract now specifies: the containment proof executes, and names the
+// SHA of the build this sidecar describes. A sidecar for another build needs its own.
+const gateFor = sha => ({ intro: 'Prove the build first.',
+  commands: ['git switch chore/smoke-hardening-ledger',
+    `git merge-base --is-ancestor ${sha} HEAD`,
+    `git diff --name-only ${sha}..HEAD -- . ":(exclude).agents/"`],
+  checks: ['<code>git status --porcelain</code> prints nothing.',
+    'The containment commands exit 0 and name nothing outside this ledger.'] });
+// A build change carries its gate with it, the way a real re-issue does.
+const onBuild = sha => ({ buildSha: sha, gate: gateFor(sha) });
+
 const sidecar = (over = {}) => ({
   change: 'Smoke-page hardening', checkpoint: 1, batches: 'B01–B05',
   branch: 'chore/smoke-hardening-ledger', buildSha: SHA, ckptKey: 'orch-smoke-c1',
   version: { now: '0.14.0', was: '0.13.2' }, suite: '27 / 27 pass', knownFailures: 'none',
-  gate: { intro: 'Prove the build first.', commands: ['git switch chore/smoke-hardening-ledger'],
-    checks: ['<code>git status --porcelain</code> prints nothing.'] },
+  gate: gateFor(SHA),
   sections: [
     { n: 1, title: 'Verdict persistence', steps: [
       { n: 1, do: 'Mark step 1 <strong>Fail</strong>.', pass: 'It turns red.', revision: 1 },
@@ -46,7 +56,7 @@ test('every template slot is filled, and the builder fills no slot the template 
 
 test('the same sidecar always produces the same bytes', () => {
   assert.equal(build(), build());
-  assert.notEqual(build(), build({ buildSha: 'b'.repeat(40) }));
+  assert.notEqual(build(), build(onBuild('b'.repeat(40))));
 });
 
 for (const [label, newline] of [['LF', '\n'], ['CRLF', '\r\n']]) {
@@ -80,6 +90,15 @@ test('the gate renders the documented structure', () => {
   assert.match(gate, /Step 0 — prove you are on the right build/);
   assert.match(gate, /<pre><code>git switch chore\/smoke-hardening-ledger<\/code><\/pre>/);
   assert.match(gate, /<ol class="gate-checks">/);
+  // Validation proves the SIDECAR carries the containment commands. This proves they
+  // REACH the page the tester actually runs: rendering only the first command leaves
+  // the eyeballed gate in place while every other assertion here stays green.
+  const commands = gateFor(SHA).commands;
+  assert.equal(commands.length, 3, 'the fixture gate is the branch command plus both containment commands');
+  for (const command of commands) {
+    assert.ok(gate.includes('<pre><code>' + command + '</code></pre>'),
+      'the gate must publish this command verbatim: ' + command);
+  }
 });
 
 test('derived headings can be overridden without touching the template', () => {
@@ -102,14 +121,313 @@ test('a sidecar that would produce a broken run sheet is refused', () => {
   fails({ sections: noRevision }, /evidence with no stepRevision/);
 });
 
+// The one gate whose job is "are you testing the right tree" resolved to eyeballing on
+// every run this skill has produced: committing the page moves HEAD past `buildSha`, so
+// a `git rev-parse HEAD` comparison can never agree and was waived by hand each time.
+test('a gate that cannot prove containment mechanically is refused', () => {
+  // The control the whole test rests on: the contract's own gate builds. Every case
+  // below removes exactly one thing from it, so no rejection is satisfied by an input
+  // that could never have been accepted.
+  assert.doesNotThrow(() => build(), 'the gate execution-models.md specifies must build');
+  const without = drop => ({ ...gateFor(SHA), commands: gateFor(SHA).commands.filter(c => !c.includes(drop)) });
+  fails({ gate: without('merge-base') }, /no containment check: gate\.commands must run `git merge-base --is-ancestor/);
+  fails({ gate: without('--name-only') }, /no containment check: gate\.commands must run `git diff --name-only/);
+  fails({ gate: { ...gateFor(SHA), commands: [] } },
+    /no containment check:.*merge-base --is-ancestor.*and.*diff --name-only.*and.*af57139/);
+  fails({ gate: { ...gateFor(SHA), commands: undefined } }, /no containment check/);
+  // The hand-written escape hatch both ledgers on this version carried: a prose check
+  // asking a human to adjudicate the difference, with nothing that executes.
+  fails({ gate: { checks: ['Tested source commit: <code>af57139</code>. A later commit '
+    + 'containing only checkpoint artifacts is allowed.'] } }, /no containment check/);
+  // EXECUTED versus EYEBALLED is the whole of BL-012, so pin the pair that separates
+  // them: the very same two commands, complete and naming this build, written as prose
+  // in `checks` for a human to run by hand. Accepting containment found in `checks`
+  // would leave every other case here green.
+  fails({ gate: { commands: [], checks: [`Run git merge-base --is-ancestor ${SHA} HEAD and then `
+    + `git diff --name-only ${SHA}..HEAD -- . ":(exclude).agents/" yourself, and compare.`] } },
+    /no containment check:.*merge-base --is-ancestor.*and.*diff --name-only.*and.*af57139/);
+  // Near misses: each runs, and each differs from a required command by exactly the
+  // flag that makes it a containment proof. `git merge-base main HEAD` plus a plain
+  // `git diff` is two real commands and no proof of anything.
+  const near = commands => ({ ...gateFor(SHA), commands });
+  fails({ gate: near([`git merge-base ${SHA} HEAD`, `git diff --name-only ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git merge-base --is-ancestor/);
+  fails({ gate: near([`git merge-base --is-ancestor ${SHA} HEAD`, `git diff ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git diff --name-only/);
+  fails({ gate: near(['git merge-base main HEAD', `git diff ${SHA}..HEAD`]) },
+    /no containment check:.*merge-base --is-ancestor.*and.*diff --name-only/);
+  // Case matters, because git's flags are case-sensitive: `--IS-ANCESTOR` is not a flag.
+  fails({ gate: near([`git merge-base --IS-ANCESTOR ${SHA} HEAD`, `git diff --name-only ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git merge-base --is-ancestor/);
+  fails({ gate: near([`git merge-base --is-ancestor ${SHA} HEAD`, `git DIFF --NAME-ONLY ${SHA}..HEAD`]) },
+    /no containment check: gate\.commands must run `git diff --name-only/);
+  // Containment of SOME build is not containment of THIS one — and naming this one
+  // turns the very same gate into an accepted gate.
+  fails({ gate: gateFor('b'.repeat(40)) }, /no containment check:.*the tested build `af57139` itself/);
+  assert.doesNotThrow(() => build(onBuild('b'.repeat(40))), 'a gate naming its own build is accepted');
+  assert.doesNotThrow(() => build({ gate: gateFor(SHA.slice(0, 7)) }), 'the documented 7-hex short form counts');
+  for (const commands of ['git status', 42, true, [null], [42], [['git']], [{}]]) {
+    fails({ gate: { ...gateFor(SHA), commands } }, /gate\.commands must be an array of command strings/);
+  }
+});
+
+// The spec, the baked contract and the enforcement have to fail TOGETHER, or the
+// three-way agreement holds only until someone edits a document. Both files are in this
+// batch's fence for exactly this reason. This is also the dogfood: what a future
+// scaffolder copies out of the contract is what the builder is fed here.
+function publishedContainmentBlock(file) {
+  const text = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+  const fenced = [...text.matchAll(/```text\r?\n([\s\S]*?)```/g)].map(m => m[1]);
+  const blocks = fenced.filter(block => block.includes('merge-base --is-ancestor'));
+  assert.equal(blocks.length, 1, file + ': exactly one fenced block must publish the containment commands');
+  const lines = blocks[0].split(/\r?\n/).filter(Boolean);
+  assert.equal(lines.length, 2, file + ': the published block is the two containment commands');
+  return lines;
+}
+
+// smoke-page.md states the same contract a fourth time, as two inline spans rather than
+// a fenced block. Drift there is loud rather than silent — an author following it writes
+// a sidecar the builder rejects — but it is still a statement of the contract no test
+// read, so it is read here too.
+function publishedInlineCommands(file) {
+  const text = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+  const spans = [...text.matchAll(/`([^`\r\n]+)`/g)].map(m => m[1]).filter(span => span.startsWith('git '));
+  return ['merge-base --is-ancestor', 'diff --name-only'].map(needle => {
+    const hits = [...new Set(spans.filter(span => span.includes(needle)))];
+    assert.equal(hits.length, 1,
+      file + ': exactly one inline `git ...` span must publish ' + needle + ' — found ' + JSON.stringify(hits));
+    return hits[0];
+  });
+}
+
+const CONTAINMENT_SOURCES = [
+  { file: 'orchestrate/references/execution-models.md', read: publishedContainmentBlock },
+  { file: 'orchestrate/templates/00-READBEFORE.md', read: publishedContainmentBlock },
+  { file: 'orchestrate/references/smoke-page.md', read: publishedInlineCommands }
+];
+
+test('the published containment block is the one the builder accepts', () => {
+  assert.equal(CONTAINMENT_SOURCES.length, 3,
+    'the spec, the baked contract and the reference prose each state this contract and must each be read');
+  const published = CONTAINMENT_SOURCES.map(({ file, read }) => [file, read(file)]);
+  for (const [file, lines] of published) {
+    assert.deepEqual(lines, published[0][1], file + ': every statement of the contract must publish the same two commands');
+  }
+  for (const [file, lines] of published) {
+    // Negative control first: the block AS PUBLISHED, placeholder unsubstituted, is
+    // refused — so the acceptance below is about the commands, not about any string.
+    fails({ gate: { ...gateFor(SHA), commands: lines } },
+      /no containment check:.*the tested build `af57139` itself/);
+    const filled = lines.map(line => line.replaceAll('<buildSha>', SHA));
+    assert.notDeepEqual(filled, lines, file + ': the published block must carry the <buildSha> placeholder');
+    assert.doesNotThrow(() => build({ gate: { ...gateFor(SHA), commands: filled } }),
+      file + ': a gate authored from the published block must build');
+    // And it must reach the page, not merely validate.
+    const html = build({ gate: { ...gateFor(SHA), commands: filled } });
+    for (const command of filled) {
+      assert.ok(html.includes('<pre><code>' + command + '</code></pre>'),
+        file + ': the published command must reach the rendered gate: ' + command);
+    }
+  }
+});
+
+// An invisible U+0000 inside a copyable command reached a published hand-over and made
+// that command a SyntaxError for anyone who pasted it.
+test('an invisible control character anywhere in the sidecar is refused', () => {
+  // The domain smoke-page.md publishes, written out independently of the predicate in
+  // build-smoke-page.mjs: Unicode Cc entire — C0, DEL and C1 — minus tab and newline.
+  // Its size and its edges are asserted, so widening the list and the rule in one edit
+  // still reddens. Built from code points, never written as escapes: an editor or
+  // transport that decodes an escape puts the invisible byte into this file instead of
+  // testing it — the accident the source sweep below exists to catch.
+  const c0 = [...Array(0x20).keys()], c1 = [...Array(0x20).keys()].map(i => 0x80 + i);
+  const points = [...c0, 0x7f, ...c1];
+  assert.equal(points.length, 65, 'the sweep must cover C0, DEL and C1 entire, not a sample');
+  assert.deepEqual([Math.min(...points), Math.max(...points)], [0x00, 0x9f]);
+  const controls = points.map(i => String.fromCharCode(i));
+  const allowed = new Set([String.fromCharCode(9), String.fromCharCode(10)]);
+  assert.deepEqual(controls.filter(c => allowed.has(c)).map(c => c.codePointAt(0)), [9, 10]);
+  // Each placement reaches a different arm of the recursion AND names its own path in
+  // the diagnostic, so deleting a placement and its arm in one edit changes the size.
+  const placements = [
+    { where: /^sidecar\.gate\.commands\[0\] carries/,
+      make: ch => ({ gate: { ...gateFor(SHA), commands: [`git switch main${ch}`, ...gateFor(SHA).commands] } }) },
+    { where: /^sidecar\.sections\[0\]\.steps\[0\]\.do carries/,
+      make: ch => { const sections = sidecar().sections; sections[0].steps[0].do = `Mark it${ch}Fail.`; return { sections }; } },
+    { where: /^sidecar: key "stray/, make: ch => ({ [`stray${ch}key`]: 'a value' }) },
+    { where: /^sidecar\.facts\[0\]\.dd carries/, make: ch => ({ facts: [{ dt: 'Note', dd: `plain${ch}text` }] }) }
+  ];
+  assert.equal(placements.length, 4,
+    'an array element, nested step prose, an object KEY and a nested object must all be swept');
+  assert.equal(new Set(placements.map(p => String(p.where))).size, 4,
+    'each placement must reach a distinct recursion path');
+  const reached = new Set();
+  for (const ch of controls) {
+    const point = ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+    for (const place of placements) {
+      // Both directions on the same placement: tab and newline are the paired positive
+      // controls, so a rule that rejected everything would redden here.
+      if (allowed.has(ch)) { assert.doesNotThrow(() => build(place.make(ch)), 'U+' + point); continue; }
+      let message = '';
+      try { build(place.make(ch)); } catch (error) { message = error.message; }
+      assert.match(message, place.where, 'U+' + point + ': the diagnostic must name the path it found it at');
+      assert.ok(message.includes(`carries control character U+${point};`),
+        `U+${point} must be refused and named in the message — got: ${message}`);
+      reached.add(String(place.where));
+    }
+  }
+  assert.equal(reached.size, placements.length, 'every placement must actually have produced a rejection');
+  // Both edges of the forbidden range. 0x1F, 0x7F, 0x80 and 0x9F are rejected in the
+  // sweep above; their neighbours just outside it must build, so a narrowing is as
+  // visible as a widening. U+2028/U+2029 are separators, not Cc, and stay legal.
+  const OUTSIDE_Cc = [0x20, 0x7e, 0xa0, 0xa1, 0x2028, 0x2029];
+  assert.equal(OUTSIDE_Cc.length, 6, 'one neighbour beyond each Cc edge (0x20 above C0, 0x7E below '
+    + 'DEL, 0xA0 above C1), plus an ordinary printable and both Unicode separators');
+  // Bound to the swept domain itself, not sampled: the code point one past the top of
+  // the forbidden range must be in this list. Without it, widening C1_LAST to 0xA0 —
+  // which rejects a no-break space, legitimate in prose — passes in silence.
+  assert.deepEqual(OUTSIDE_Cc.filter(code => code === Math.max(...points) + 1), [0xa0],
+    'the neighbour one past the top of the swept domain must be an accepted control');
+  for (const outside of OUTSIDE_Cc) {
+    assert.doesNotThrow(() => build({ change: 'Edge ' + String.fromCharCode(outside) + ' case' }),
+      'U+' + outside.toString(16).toUpperCase().padStart(4, '0') + ' is outside Cc and must still build');
+  }
+});
+
+// The rule above protects sidecars. Nothing protected this repository's OWN source, and
+// the accident has landed twice: once in this batch's first draft, where the rule's own
+// character class was written as escapes, decoded into literal control bytes on the way
+// into the file, and left the suite green at 301/301; and once earlier, where a literal
+// U+2028 sat inside a fixture name for the whole life of that fixture. A human running a
+// byte scan catches it for one batch. This catches it for every batch.
+//
+// Domain enforced, stated rather than implied: Unicode Cc entire (C0, DEL, C1) minus
+// tab and LF, plus the Unicode line and paragraph separators U+2028/U+2029, which is the
+// pair that actually got in. CR is spared ONLY as the first half of a CRLF pair — this
+// working tree is CRLF. A LONE CR is invisible and splits a pasted command exactly as
+// the NEL this rule was widened to C1 for.
+const SOURCE_TAB = 9, SOURCE_LF = 10, SOURCE_CR = 13;
+const forbiddenInSource = code =>
+  (code < 32 && code !== SOURCE_TAB && code !== SOURCE_LF && code !== SOURCE_CR)
+  || code === 127 || (code >= 128 && code <= 159) || code === 0x2028 || code === 0x2029;
+// An extension DENY-list, not a content sniff: a new kind of TEXT file is swept by
+// default, and a binary kind nobody listed fails loudly rather than passing silently.
+// Both errors land on the safe side; neither is silent.
+const NOT_TEXT = /\.(?:xlsx|xls|png|jpe?g|gif|ico|pdf|zip|gz|woff2?|ttf|eot|exe|dll)$/i;
+const SWEEP_EXCLUDED = ['.git', '.agents', 'node_modules'];
+
+// Returns what it FOUND and what it COVERED. The second half is the point: a sweep whose
+// domain is a hand-written array quietly shrinks when someone edits the array.
+function invisibleCharacterScan(root) {
+  const found = [], covered = new Set();
+  const walk = (dir, top) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
+      if (SWEEP_EXCLUDED.includes(entry.name)) continue;
+      const full = path.join(dir, entry.name), name = top ?? entry.name;
+      covered.add(name);
+      if (entry.isDirectory()) { walk(full, name); continue; }
+      if (NOT_TEXT.test(entry.name)) continue;
+      const characters = [...fs.readFileSync(full, 'utf8')];
+      let line = 1;
+      for (let i = 0; i < characters.length; i++) {
+        const code = characters[i].codePointAt(0);
+        if (code === SOURCE_LF) { line++; continue; }
+        if (code === SOURCE_CR) {
+          if (characters[i + 1]?.codePointAt(0) === SOURCE_LF) continue;
+        } else if (!forbiddenInSource(code)) continue;
+        found.push(path.relative(root, full).split(path.sep).join('/') + ':' + line
+          + ': U+' + code.toString(16).toUpperCase().padStart(4, '0'));
+      }
+    }
+  };
+  walk(root, undefined);
+  return { found, covered: [...covered].sort() };
+}
+
+test('no file this repository publishes carries an invisible character', t => {
+  // The live control comes FIRST, so the silence over the repository means something. It
+  // plants one byte from each part of the domain — a C0 NUL, a C1 NEL, a separator and a
+  // LONE CR — in a SUBDIRECTORY (the walk must recurse), beside a clean file whose tabs
+  // and CRLF pairs must be spared, a binary full of NULs that must be skipped, and
+  // excluded directories whose planted bytes must NOT be reported.
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'invisible-source-'));
+  t.after(() => fs.rmSync(scratch, { recursive: true, maxRetries: 8, retryDelay: 100 }));
+  fs.mkdirSync(path.join(scratch, 'nested'));
+  fs.writeFileSync(path.join(scratch, 'clean.cjs'), 'const ok = 1;\r\nconst tabbed = 2;\t// fine\r\n');
+  fs.writeFileSync(path.join(scratch, 'nested', 'planted.cjs'),
+    'const nul = "' + String.fromCharCode(0x00) + '";\n'
+    + 'const nel = "' + String.fromCharCode(0x85) + '";\n'
+    + 'const sep = "' + String.fromCharCode(0x2028) + '";\n'
+    + 'const lone = "git status' + String.fromCharCode(0x0d) + ' --short";\n');
+  fs.writeFileSync(path.join(scratch, 'binary.xlsx'), Buffer.from([0, 1, 2, 3]));
+  for (const excluded of SWEEP_EXCLUDED) {
+    fs.mkdirSync(path.join(scratch, excluded));
+    fs.writeFileSync(path.join(scratch, excluded, 'record.md'), 'quoted ' + String.fromCharCode(0x00) + ' verbatim\n');
+  }
+  const control = invisibleCharacterScan(scratch);
+  assert.deepEqual(control.found,
+    ['nested/planted.cjs:1: U+0000', 'nested/planted.cjs:2: U+0085',
+      'nested/planted.cjs:3: U+2028', 'nested/planted.cjs:4: U+000D'],
+    'the sweep must recurse, report each planted byte with its line including a lone CR, '
+    + 'spare tab and CRLF, skip binary files, and never descend into an excluded directory');
+  assert.deepEqual(control.covered, ['binary.xlsx', 'clean.cjs', 'nested'],
+    'coverage must be the top-level entries minus the exclusions, binaries included as visited');
+
+  // The swept domain is the CHECKOUT, not a list in this file: every top-level entry
+  // except the stated exclusions. It then grows with the repository instead of needing
+  // maintenance, and narrowing it to one tree cannot pass. `.agents/` stays out on
+  // purpose — those ledgers are historical records that quote published bytes verbatim.
+  const ROOT = path.join(__dirname, '..');
+  const expected = fs.readdirSync(ROOT).filter(name => !SWEEP_EXCLUDED.includes(name)).sort();
+  assert.ok(expected.length > 2, 'the repository root must offer more than the two source trees to sweep');
+  const repository = invisibleCharacterScan(ROOT);
+  assert.deepEqual(repository.covered, expected,
+    'the sweep must cover every top-level entry of the checkout except ' + SWEEP_EXCLUDED.join(', '));
+  assert.deepEqual(repository.found, [],
+    'an invisible character in a published file is an escape something decoded on the way in — '
+    + 'rebuild that literal with String.fromCharCode instead of exempting the file');
+});
+
+// Two of the five documentation defects in a published page were a `Section 5` and a
+// `Step 3` that no longer existed after a restructure — both mechanically detectable.
+test('a Section or Step cross-reference the sidecar does not contain is refused', () => {
+  const place = text => { const sections = sidecar().sections;
+    sections[0].steps[0].aside = text; return { sections }; };
+  // Positive controls, one per thing that must resolve: existing sections, existing
+  // steps, the Step 0 gate every page has, and a lower-case phrase that is prose rather
+  // than a cross-reference. The domain's size is asserted, so deleting the Step 0
+  // control and the Step 0 exemption in one edit cannot stay green.
+  const resolving = ['See Section 1 and Section 2.', 'Repeat Step 1, Step 2 and Step 3.',
+    'Redo Step 0 first.', 'Mark step 1 and section 9 in your own notes.'];
+  assert.equal(resolving.length, 4,
+    'sections, steps, the Step 0 gate and the lower-case non-reference each need a control');
+  for (const text of resolving) assert.doesNotThrow(() => build(place(text)), text);
+  fails(place('Continue from Section 5.'), /"Section 5" refers to a section this sidecar does not contain/);
+  fails(place('Repeat Step 4.'), /"Step 4" refers to a step this sidecar does not contain/);
+  fails(place('See Section  6.'), /"Section 6" refers to a section/);
+  fails(place('There is no Section 0.'), /"Section 0" refers to a section/);
+  // Any string in the sidecar, not only step prose.
+  fails({ standfirst: 'Start at Step 9.' }, /"Step 9" refers to a step/);
+  fails({ gate: { ...gateFor(SHA), checks: ['Then do Section 7.'] } }, /"Section 7" refers to a section/);
+  // The paired control for the rejection: the reference is accepted the moment its
+  // target exists, so the refusal was about the missing target, not about the wording.
+  const withFourth = place('Repeat Step 4.');
+  withFourth.sections[1].steps.push({ n: 4, do: 'Perform new check 4.', pass: 'It succeeds.', revision: 1 });
+  assert.doesNotThrow(() => build(withFourth));
+});
+
 // A page whose script does not parse has no verdict buttons and no copy button, so
 // every fill must be checked by compiling the script the user would actually get.
 const script = html => html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const compiles = html => new vm.Script(script(html));
 
 test('ordinary punctuation in a plain name never breaks the generated script', () => {
+  // The separator case is BUILT from its code point. Written as an escape, it was
+  // decoded on the way into this file by an earlier batch's editor, and the literal
+  // U+2028 then sat here, green, for the whole life of the fixture.
+  const separatorName = 'Separator' + String.fromCharCode(0x2028) + 'pack';
   for (const change of ['Fix "Save as"', 'Back\\slash pack', 'Two\nlines', 'A </script> name',
-    'Ampersand & <b>markup</b>', 'Separator pack']) {
+    'Ampersand & <b>markup</b>', separatorName]) {
     compiles(build({ change }));
     const emitted = script(build({ change })).match(/var lines = \["([^\n]*?)", "Current build/)[1];
     assert.equal(JSON.parse('"' + emitted + '"'), `C1 smoke run — ${change} (0.14.0)`,
@@ -185,7 +503,7 @@ const newStep = n => ({ n, do: `Perform new check ${n}.`, pass: 'It succeeds.', 
 test('reissues append after existing steps, in the final section or new sections', () => {
   const previous = sidecar();
   const original = JSON.stringify(previous);
-  const current = sidecar({ buildSha: 'b'.repeat(40) });
+  const current = sidecar(onBuild('b'.repeat(40)));
   current.sections[1].steps.push(newStep(4));
   current.sections.push({ n: 3, title: 'New coverage', steps: [newStep(5), newStep(6)] });
   const html = reissue(current, previous);
@@ -263,9 +581,9 @@ test('later reissues cannot lose previous revision increases, including by omiss
 
 test('page facts, evidence, and JSON key order do not invalidate unchanged instructions', () => {
   const previous = sidecar();
-  const current = sidecar({ buildSha: 'b'.repeat(40), suite: '30 / 30 pass',
+  const current = sidecar({ ...onBuild('b'.repeat(40)), suite: '30 / 30 pass',
     standfirst: 'Reissued after a repair.', copyHeader: 'C1 reissue',
-    gate: { checks: ['Confirm the new build.'] } });
+    gate: { ...gateFor('b'.repeat(40)), checks: ['Confirm the new build.'] } });
   current.sections[1].steps[0].pre = { sha: 'b'.repeat(40), stepRevision: 1,
     env: 'New test environment', evidence: 'evidence/C1/new-run.md' };
   current.sections[0].steps[0] = Object.fromEntries(Object.entries(current.sections[0].steps[0]).reverse());
