@@ -582,3 +582,59 @@ in a file this dense. A declined suggestion that names itself as declined is wor
 silently dropped one.
 
 Merged `--no-ff` → **`f7fe0fc`**, tip **292/292** (wave base 272 + 20).
+
+### B05 — gate round 1: the reviewer shipped it and the hunter did not
+
+**`R1 FIX FIRST @11b5d81`** — reviewer `SHIP`, no P0/P1, 3 ASKs; test-hunter **3 findings, 2 marked
+NEEDS-PRODUCTION-CHANGE**, and a gate finding needing a production change is a P1. This is the
+clearest demonstration this change has produced of why the two gates are separate agents with
+separate briefs: the reviewer audited the diff against the batch's acceptance criteria and found it
+met every one of them — which it does — while the hunter mutated the code the diff did not touch and
+found the batch's own class still live three lines away.
+
+The reviewer's work was not weak. It ran base and tip CLIs against a purpose-built resolving-filter
+fixture and confirmed the `worktrees` JSON byte-identical by `cmp`; checked key ORDER survives the
+extraction, which matters because the CLI emits `JSON.stringify`; established that ESM live bindings
+are read-only for importers so the internal call site cannot be monkey-patched; and judged two
+exports the smallest seam that works, by showing each alone leaves one guard unreachable. It also
+found the positive control STRONGER than claimed: the fixture writes equal-size content plus
+`utimesSync(…, epoch)`, so `status` must compare content rather than short-circuiting in
+`ce_match_stat_basic` — the exact trap recorded in `OS-20260919-backlog-sweep/LOG.md:199`, caught by
+a reviewer reading a previous ledger's narrative.
+
+**The hunter's 31 mutations are the record of this change.** Every call-site mutation reddens —
+verdict ignored, verdict pushed but `true` returned, `path: repo` dropped, wrong `pathCount`, probe
+removed from the walk — which settles the risk the extraction created, that the tests now cover the
+pure function thoroughly and the call site not at all. They do not. The `deepEqual` self-comparison
+at `:537`, which looked like the textbook *assertion satisfied by a neighbouring assertion's output*,
+survives scrutiny: the hand-written literals at `:475`/`:482`/`:493` redden FIRST under any code or
+message mutation, and `:537` is the ONLY assertion that catches the call site dropping `path: repo`.
+An assertion that computes its expectation from the code under test can still earn its place, if
+something else anchors the value and it is the unique witness of a real wire.
+
+**Three holes, and the scope line between them.**
+
+1. `tests/git-contract.test.cjs:479` — the case labelled "records without the terminating NUL must be
+   refused" passes on the COUNT half of the guard, never the terminator half. Disabling only the
+   first disjunct leaves the file green. The assertion is real; its LABEL is wrong, which is worse
+   than a missing test — a future reader deletes the duplicate-looking case and silently loses the
+   count coverage. → ASK.
+2. `git-evidence.mjs:137`, `if (!attributes.ok)` → **P1**. Flipped to `return true` the probe reports
+   safe on an UNREAD attribute report and runs `status` with a driver configured; suite green. That
+   is BL-009's own sentence, describing a guard BL-009 did not name.
+3. `git-evidence.mjs:133`, `if (paths.pop() !== '')` → **backlog**, with the sibling at `:165`.
+
+**The adjudication, recorded because the two gates disagreed and the line is not obvious.** Findings
+2 and 3 are the same class in the same function; treating them differently needs a reason better
+than taste. The reason is the mechanism: covering the P1 needs only a way to make the existing
+attribute probe fail — an injectable probe, which the batch's OWN checklist item 1 already
+contemplates ("an export, or an injectable probe") and which `safeResolvedFilters(repo, diagnostics,
+options)` is already shaped for. Covering finding 3 means driving a DIFFERENT parse through a SECOND
+exported classifier: new production surface. **The line between completing a batch and widening it is
+whether the mechanism already exists.** It does for one and not the other.
+
+This is the second time this change that the two gates have split on disposition — B03 was the first —
+and both times the resolution came from the guardrails rather than from splitting the difference.
+BL-009 named two guards; the hunter established the entry undercounted. *A backlog entry is a
+pointer, not a specification* is this repository's own rule, and it cuts toward fixing the P1 here
+exactly as it cut toward completing the dash member in B03.
