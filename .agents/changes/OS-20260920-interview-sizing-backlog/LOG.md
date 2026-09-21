@@ -756,3 +756,47 @@ exported boundary — the two-argument call works only because its body never de
 Covered (a future edit adding `options.env` there reddens line 585), so an observation rather than a
 defect, and adding a default would be an unrequested production change on a pass meant to touch none.
 Recorded so the next reader knows it was seen and judged, not missed.
+
+### B05 — final polish and integration; wave 2 closed
+
+Final polish `5d50455`, test-only: `git-evidence.mjs` byte-identical to the reviewed `96b4c8f`, so
+the mechanical close applied and no further review ran. It verified ASK-1's claim before inserting
+the word — of the six helpers taking `options`, the four EXPORTED ones default it and the two
+module-private ones (`provenanceOptions:50`, `safeStatusPrerequisites:153`) do not — and folded the
+attribute-precedence finding into the same comment, on the grounds that it was "the one thing I had
+asserted without evidence". Merged `--no-ff` → **`6b0ef39`**; tip **298 pass / 0 fail**.
+
+**A second greppable signature, from the author of the instance.** Asked to reflect, the implementer
+sharpened its own earlier note and then went past it:
+
+> the tell here was not a second literal but a *discarded output*. `safeResolvedFilters(repo.cwd, [])`
+> throws the diagnostics array away at the call site — the function's second return channel, written
+> into the argument list and never read. … an out-parameter passed as a fresh literal and never bound
+> to a name is an assertion that has declined half of what the function told it.
+
+It also observed that this file's prevailing idiom is `const diagnostics = []; … assert(diagnostics…)`
+precisely because the codebase already knows that, and its line was the single place that broke the
+idiom — while pinning a fix.
+
+So the distillation now has two mechanical shapes, both checkable without understanding the code
+under test, which is exactly what makes them huntable by a gate:
+
+1. **Two literals that partition the same collection with no assertion relating them.** Operational
+   form: for every array literal used as a loop domain, is there an assertion whose subject is the
+   DOMAIN (size, set-equality, or a count over the results) rather than its members?
+2. **An out-parameter passed inline as a fresh literal and never bound.** The call has declined half
+   the function's return channel, so any assertion on the result alone cannot see why it refused.
+
+Every earlier instance of this class was found by a gate MUTATING the fix — expensive, and it needs
+insight into the behaviour. These two can be grepped. That is the difference between a lesson and a
+tool, and it is the most transferable output of this change.
+
+## 2026-09-20 — wave 3
+
+Wave 2 closed: all five members `🟢`, tip **298/298** (wave base 272 + 26; ledger base 260 + 38).
+Four worktrees deregistered; the stale `.git/worktrees/*` admin directories resist deletion on this
+machine as recorded, are absent from `git worktree list`, and block nothing.
+
+Wave 3 opens with **B06 alone** — `fix/bl-012-013-017-smoke-page`, the batch that carries BL-012,
+BL-013 and BL-017. It runs alone because its documents are contested: `templates/00-READBEFORE.md`
+was B04's this wave and is B07's next, and `references/execution-models.md` is shared with B07.
