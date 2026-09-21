@@ -140,6 +140,62 @@ test('a gate that cannot prove containment mechanically is refused', () => {
   }
 });
 
+// An invisible U+0000 inside a copyable command reached a published hand-over and made
+// that command a SyntaxError for anyone who pasted it.
+test('an invisible control character anywhere in the sidecar is refused', () => {
+  // Sweep the whole domain rather than sampling: every C0 code point plus DEL. The
+  // member list is written independently of the rule's character class, and its size is
+  // asserted, so widening both at once still reddens.
+  // Built from code points, never written as escapes: an editor or transport that
+  // decodes an escape would put the invisible byte into this file instead of testing it.
+  const controls = [...Array(0x20).keys(), 0x7f].map(i => String.fromCharCode(i));
+  assert.equal(controls.length, 33, 'the sweep must cover C0 and DEL, not a sample');
+  const allowed = new Set(['\t', '\n']);
+  assert.deepEqual(controls.filter(c => allowed.has(c)), ['\t', '\n']);
+  const placements = [
+    (ch) => ({ gate: { ...gateFor(SHA), commands: [`git switch main${ch}`, ...gateFor(SHA).commands] } }),
+    (ch) => { const sections = sidecar().sections; sections[0].steps[0].do = `Mark it${ch}Fail.`; return { sections }; },
+    (ch) => ({ [`stray${ch}key`]: 'a value' }),
+    (ch) => ({ facts: [{ dt: 'Note', dd: `plain${ch}text` }] })
+  ];
+  for (const ch of controls) {
+    const point = 'U+' + ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+    for (const place of placements) {
+      // Both directions on the same placement: tab and newline are the paired positive
+      // controls, so a rule that rejected everything would redden here.
+      if (allowed.has(ch)) assert.doesNotThrow(() => build(place(ch)), point);
+      else fails(place(ch), new RegExp(`carries control character U\\+${point.slice(2)};`));
+    }
+  }
+  // Non-C0 characters the page already handles stay legal.
+  const separators = String.fromCharCode(0x2028) + String.fromCharCode(0x2029);
+  assert.doesNotThrow(() => build({ change: 'Separators ' + separators + ' and accents' }));
+});
+
+// Two of the five documentation defects in a published page were a `Section 5` and a
+// `Step 3` that no longer existed after a restructure — both mechanically detectable.
+test('a Section or Step cross-reference the sidecar does not contain is refused', () => {
+  const place = text => { const sections = sidecar().sections;
+    sections[0].steps[0].aside = text; return { sections }; };
+  // Positive controls: every target the sidecar actually contains resolves, and Step 0
+  // is the gate, which every page has.
+  for (const text of ['See Section 1 and Section 2.', 'Repeat Step 1, Step 2 and Step 3.',
+    'Redo Step 0 first.', 'Mark step 1 and section 9 in your own notes.']) {
+    assert.doesNotThrow(() => build(place(text)), text);
+  }
+  fails(place('Continue from Section 5.'), /"Section 5" refers to a section this sidecar does not contain/);
+  fails(place('Repeat Step 4.'), /"Step 4" refers to a step this sidecar does not contain/);
+  fails(place('See Section  6.'), /"Section 6" refers to a section/);
+  fails(place('There is no Section 0.'), /"Section 0" refers to a section/);
+  // Any string in the sidecar, not only step prose.
+  fails({ standfirst: 'Start at Step 9.' }, /"Step 9" refers to a step/);
+  fails({ gate: { ...gateFor(SHA), checks: ['Then do Section 7.'] } }, /"Section 7" refers to a section/);
+  // The paired control for the rejection: the reference is accepted the moment its
+  // target exists, so the refusal was about the missing target, not about the wording.
+  const withFourth = place('Repeat Step 4.');
+  withFourth.sections[1].steps.push({ n: 4, do: 'Perform new check 4.', pass: 'It succeeds.', revision: 1 });
+  assert.doesNotThrow(() => build(withFourth));
+});
 
 // A page whose script does not parse has no verdict buttons and no copy button, so
 // every fill must be checked by compiling the script the user would actually get.

@@ -118,8 +118,11 @@ The builder also rejects known invalid inputs: a short `buildSha`, a storage key
 is not a nonempty string containing only `[A-Za-z0-9._-]`, section or step numbers
 that are not positive integers or that repeat
 (`1` and `"1"` are one DOM id and one verdict), agent evidence with no `stepRevision` or
-with a `sha` under 7 hex characters, and a `gate.commands` missing either containment
-command or the SHA the sidecar records. Embedded JavaScript data escapes every `<`, so both
+with a `sha` under 7 hex characters, a `gate.commands` missing either containment
+command or the SHA the sidecar records, any control character other than tab or newline
+anywhere in the sidecar (the invisible `U+0000` that made a published command a
+`SyntaxError`), and a capitalised `Section N` or `Step N` reference to a section or step
+the sidecar does not contain (`Step 0` is the gate). Embedded JavaScript data escapes every `<`, so both
 `</script>` and `<!-- <script>` remain data during HTML parsing; the original text and
 markup are restored at runtime. Plain names like `Fix "Save as"` also have their quotes
 escaped inside JavaScript strings. Slots the

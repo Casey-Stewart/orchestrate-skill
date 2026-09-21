@@ -417,7 +417,9 @@ git diff --name-only <buildSha>..HEAD
 
 The first must exit 0; the second must print nothing outside this ledger's directory.
 `build-smoke-page.mjs` refuses a sidecar whose `gate.commands` omits either command or
-the SHA the sidecar records.
+the SHA the sidecar records, a sidecar carrying any control character other than tab or
+newline, and a `Section N` or `Step N` reference to a section or step it does not
+contain. Author embedded commands with no backslashes and no control characters.
 
 **Verdicts are four**: **pass** · **fail** (did something else — triage to the
 offending batch(es) → ❌) · **blocked** (the step could not be performed as written —

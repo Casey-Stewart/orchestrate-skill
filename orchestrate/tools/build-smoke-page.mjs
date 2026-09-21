@@ -143,10 +143,63 @@ function gateContainment(gate, buildSha) {
   }
 }
 
+// Everything below C0 except tab and newline is invisible in every editor and in the
+// rendered page. A U+0000 inside a copyable command shipped once and turned that command
+// into a SyntaxError for the reader who pasted it, with nothing on the page to show why.
+// Compared by code point, never by an escape in a character class: the rule must not
+// itself be a line of source whose meaning depends on invisible bytes surviving an edit.
+const TAB = 9, NEWLINE = 10, FIRST_PRINTABLE = 32, DELETE = 127;
+const isControlCharacter = code =>
+  (code < FIRST_PRINTABLE && code !== TAB && code !== NEWLINE) || code === DELETE;
+
+function rejectControlCharacters(value, where) {
+  if (typeof value === "string") {
+    const characters = [...value];
+    const at = characters.findIndex(character => isControlCharacter(character.codePointAt(0)));
+    if (at === -1) return;
+    const point = characters[at].codePointAt(0).toString(16).toUpperCase().padStart(4, "0");
+    throw new Error(`${where} carries control character U+${point}; only tab and newline are allowed, `
+      + "because an invisible character makes a published command a SyntaxError");
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, i) => rejectControlCharacters(item, `${where}[${i}]`));
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      rejectControlCharacters(key, `${where}: key ${JSON.stringify(key)}`);
+      rejectControlCharacters(item, `${where}.${key}`);
+    }
+  }
+}
+
+// A restructure leaves `Section 5` and `Step 3` pointing at nothing, and the page hands
+// the dangling reference to the tester as an instruction. Capitalised forms are the
+// cross-references; `step 1` in "Mark step 1 Fail" is the step's own prose. Step 0 is
+// the gate, which every page has.
+function rejectDanglingReferences(d, sections, steps) {
+  const known = { Section: sections, Step: steps };
+  const scan = value => {
+    if (typeof value === "string") {
+      for (const [, word, digits] of value.matchAll(/\b(Section|Step)\s+(\d+)\b/g)) {
+        const n = Number(digits);
+        if (word === "Step" && n === 0) continue;
+        if (known[word].has(n)) continue;
+        throw new Error(`"${word} ${digits}" refers to a ${word.toLowerCase()} this sidecar does not contain`);
+      }
+      return;
+    }
+    if (Array.isArray(value)) { value.forEach(scan); return; }
+    if (value && typeof value === "object") for (const item of Object.values(value)) scan(item);
+  };
+  scan(d);
+}
+
 function validate(d) {
   const missing = ["change", "checkpoint", "batches", "branch", "buildSha", "ckptKey", "gate", "sections"]
     .filter(key => d[key] === undefined || d[key] === "");
   if (missing.length) throw new Error(`sidecar is missing: ${missing.join(", ")}`);
+  rejectControlCharacters(d, "sidecar");
   // The page refuses to run on an unfilled or malformed identity; fail here instead,
   // where the message can name the file, rather than shipping a page that stops the user.
   if (!/^[0-9a-fA-F]{40}$|^[0-9a-fA-F]{64}$/.test(d.buildSha)) {
@@ -191,6 +244,7 @@ function validate(d) {
       }
     }
   }
+  rejectDanglingReferences(d, seenSections, new Set(seenSteps.keys()));
   declareInputs(d);
   return d;
 }
