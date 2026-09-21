@@ -800,3 +800,51 @@ machine as recorded, are absent from `git worktree list`, and block nothing.
 Wave 3 opens with **B06 alone** — `fix/bl-012-013-017-smoke-page`, the batch that carries BL-012,
 BL-013 and BL-017. It runs alone because its documents are contested: `templates/00-READBEFORE.md`
 was B04's this wave and is B07's next, and `references/execution-models.md` is shared with B07.
+
+### B06 — implemented, and the bug class reproduced inside the rule that stops it
+
+Four commits, one per fold-in item plus ticks: `5395b75` (BL-012), `d19218f` (BL-013), `e353fbf`
+(BL-017), `fa24309`. 301/301 on the worktree. 6a fence PASS — exactly the six fenced files plus
+ticks-only batch-file edits. 6b confirmed by the orchestrator: the batch's tests over the base
+builder give **32 tests, 29 pass, 3 fail**, all three `AssertionError: Missing expected exception`,
+i.e. the base builder ACCEPTS all three bad sidecars. `subagent-prompts.md` unmodified, so BL-017
+was written as an added post-render pass rather than an ordering change, as the trap required.
+
+**The incident, which is the best single illustration this change has produced.** While writing the
+CONTROL-CHARACTER rule, the implementer's editing tool decoded `\uXXXX` escapes, so
+`/[\u0000-\u0008…]/` landed in the builder as five LITERAL control bytes — git reported the file as
+`Bin` — and `'\u007f'` / `'\u2028'` landed literally in the test. In its own words:
+
+> The suite stayed green because a character class with literal controls behaves identically — a
+> perfect instance of the bug this batch exists to stop, in the rule that stops it.
+
+It found this itself, fixed it by comparing code points with no escape anywhere, and rebuilt the
+test's sweep from `String.fromCharCode`. The orchestrator verified the claim and went one step
+further than the report: **0** non-tab/newline control bytes in every blob B06 touched, checked at
+the tip AND in all four commits, because a defect introduced and fixed mid-batch can leave a stray
+byte in an intermediate blob that a tip-only scan never sees.
+
+What makes it worth recording is not the slip but the mechanism: **the transport decoded the
+escape, and the resulting file behaved identically, so nothing could notice.** That is the same
+family as the `Set-Content` pipeline defect and the `git checkout` that ate an uncommitted edit,
+both recorded earlier in this change — the apparatus that writes or verifies the work can corrupt
+it, and the output looks right either way. Three instances now, three different tools.
+
+The open question handed to the gates: the orchestrator's control-byte scan is EXTERNAL to the
+suite. If a future edit reintroduced literal control bytes into the builder or its test, would
+anything in `tests/**` go red? A rule whose own source can be silently corrupted by the very defect
+it detects is this batch's subject turned on itself.
+
+**Two out-of-fence notes the implementer raised, both needing an orchestrator decision rather than
+an edit.** First, `.agents/changes/OS-20260919-backlog-sweep/smoke-C1.json` and the archived
+ledger's carry gates the NEW builder rejects, so a re-issue of either closed page would now fail
+validation; both are frozen records and were correctly left alone. Second, and more serious:
+`smoke-page.md:271` still has the QA runner verify BEFORE the page is built, so both passes now
+exist, and **nothing outside `smoke-page.md` tells a conductor to run the post-render one**. A rule
+that nothing invokes is *vacuous-until-later documentation* being written on purpose. B07 owns
+`execution-models.md` and `templates/00-READBEFORE.md` next wave but its scope is BL-010 and BL-016,
+so naming the pass there would be scope creep against a locked plan. **The orchestrator's commitment,
+recorded here so it is not lost: C1's own close-out runs the post-render proofing pass by hand —
+render the page, read each code block's `textContent`, execute exactly those bytes — and the
+residual is filed for a later batch to wire into the contract.** BL-017 is dogfooded or it is not
+closed.
