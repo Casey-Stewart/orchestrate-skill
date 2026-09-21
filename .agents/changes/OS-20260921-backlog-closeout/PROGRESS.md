@@ -45,9 +45,9 @@ intermediate checkpoint would prove nothing the final one cannot.
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Scope the smoke-page self-check to the template (BL-022) | `fix/smoke-page-selfcheck-scope` | 1 | — | ⬜ | 2026-09-21 | M. Must re-aim the defect-pinning assertion at `tests/build-smoke-page.test.cjs:54`, not delete it. |
-| B02 | Wire the post-render proofing pass into the hand-over (BL-023) | `fix/post-render-pass-wiring` | 1 | — | ⬜ | 2026-09-21 | L — strong-tier reviewer. Separate post-page block; guard must sweep a domain, not a carrier list. |
-| B03 | Narrow the polish continuation scan (BL-021) | `fix/polish-continuation-checkbox` | 1 | — | ⬜ | 2026-09-21 | S — combined reviewer+gate pass. Edits the fence tool; run helpers from the integration tree only. |
+| B01 | Scope the smoke-page self-check to the template (BL-022) | `fix/smoke-page-selfcheck-scope` | 1 | — | 🔄 | 2026-09-21 | M. Must re-aim the defect-pinning assertion at `tests/build-smoke-page.test.cjs:54`, not delete it. W1 opened at base `6054be8`. |
+| B02 | Wire the post-render proofing pass into the hand-over (BL-023) | `fix/post-render-pass-wiring` | 1 | — | 🔄 | 2026-09-21 | L — strong-tier reviewer. Separate post-page block; guard must sweep a domain, not a carrier list. W1 opened at base `6054be8`. |
+| B03 | Narrow the polish continuation scan (BL-021) | `fix/polish-continuation-checkbox` | 1 | — | 🔄 | 2026-09-21 | S — combined reviewer+gate pass. Edits the fence tool; run helpers from the integration tree only. W1 opened at base `6054be8`. |
 | B04 | Close the backlog open table | `chore/backlog-open-table-closeout` | 2 | — | ⬜ | 2026-09-21 | S — combined pass. Reads the merged commits of B01–B03, not this ledger's intentions. |
 
 ## Checkpoints
@@ -81,4 +81,5 @@ hash/size manifest and the delivery location, plus working-copy and reset instru
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
+| 2026-09-21 | **Wave 1 opened** at integration base `6054be8` — B01, B02, B03 cut concurrently, each in its own worktree under the session scratchpad. User authorization: "go ahead and run to checkout", read as *checkpoint* and stated as such before acting. Run continues to C1. | — (run in progress) |
 | 2026-09-21 | Scaffolded `OS-20260921-backlog-closeout` at base `5efd484` (clean tree, cut from `main` after the BACKLOG table-rendering fix merged as `5efd484`). Repeat-repo interview: three decisions taken in one call, every other answer inherited from the previous ledger's contract. Pre-flight returned **4 BLOCKING, 10 ADVISORY**; all resolved into the plan and batch files before the user saw them — B02's wiring target contradicted the QA runner's pre-page timing, two fences were missing a test file each, and a B03 smoke step would have mutated a real ledger. Plan approved "Approve as shown". | Plan approved as scaffold-only. Wave 1 does not open until the user says so. |
