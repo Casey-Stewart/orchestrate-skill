@@ -1026,3 +1026,62 @@ filled page for `{{` expecting zero hits — the same code-span class as BL-010 
 consumer, where a `{{` in generated HTML may genuinely always be a slot, so it may be correct as-is;
 and `subagent-prompts.md:213` ("you never perform a `Runner: human` step") is consistent with the new
 rule and is excluded from the carrier set by design, since it does not state how to CHOOSE the tag.
+
+### B07 — gate round 1: FIX FIRST, and two corrections to the entry above
+
+**`R1 FIX FIRST @a019d1f`** — strong-tier reviewer 3 P1s; test-hunter 8 findings, 1 needing a
+production change. The two gates overlapped on two findings and each found three the other missed.
+
+**Corrections to the preceding entry, which was written from the implementer's report.** The
+contradiction sweep is **10 patterns, not 16**. And **there is no BL-010 dogfood TEST** — the
+span-masked counts were a manual check by the implementer, so nothing in the suite exercises the
+code-span exemption as behaviour, only as wording. The preceding entry praised that dogfood as
+though it were verification. It was an honest manual check, honestly reported, but the ledger
+should not have promoted it to coverage, and this is the second time this change that an
+orchestrator entry has needed correcting from a later gate. Recorded rather than edited above.
+
+**The finding that matters most is a safety narrowing, and the contradiction sweep was structurally
+blind to it.** The new sentence is a CLOSED enumeration — "human ONLY when it needs … a device, a
+GUI, held credentials, or a judgement about whether something looks right" — and in all five files it
+sits one clause from the pre-existing human list naming **another OS**, **live data** and "anything
+*touches your data* unless a disposable environment exists". Three of the old grounds map onto the
+new enumeration; those do not. A conductor reading ONLY as controlling tags a touches-your-data step
+`agent`, and the QA runner executes agent steps on the integration tip. **The failure runs in the
+dangerous direction.** The orchestrator verified the text directly in `execution-models.md` and
+`02-batch.md` rather than from the report.
+
+BL-016's enumeration was illustrative; implementing it as a closed set narrowed a safety rule. That
+is the fifth time in this change a backlog entry has been treated as a specification and turned out
+to be a pointer — and the first time the consequence was a permission rather than a defect. The
+sweep could not see it because it keys on `default…human` and this is a NARROWING, not a
+restatement: **a sweep built to catch reversals of a rule is blind to an edit that shrinks the
+rule's scope.** That is a new bug class and it goes to the distillation.
+
+**The prose pins were weaker than they looked, in five separate ways**, every one demonstrated:
+
+- Nine of the ten sweep patterns are **unreachable branches** — disarming each individually left the
+  suite green nine times, because the live control is `.some(...)` over four strings and so arms the
+  FAMILY, not its members. Emptying the control array is green. Reducing it to one string is green.
+  Signature 1, twice, inside the sweep built to protect a prose rule.
+- The rule occurs **six** times in five files (`scaffolding.md` twice), and `includes` needs only
+  one — deleting either `scaffolding.md` occurrence alone stays green, including the one that
+  replaced `Default when unsure: every step human`.
+- The exemption assertion **passes on the exact inverse wording**: rewritten to "counting tokens both
+  inside and outside fenced and inline code spans — a quoted token is still a slot", the test is
+  green. It pins a noun phrase both polarities contain rather than the predicate.
+- The polarity guard catches only the original word order, so appending "A hit inside a code span is
+  still an unfilled slot." leaves the document carrying the exemption AND its negation, green.
+- **The batch widened a clause the pre-existing `residualGrep` anchor depends on, without
+  re-verifying the anchor.** Rewriting SKILL.md to "ignoring `<title>` entirely, and require zero
+  hits outside…" satisfies the `[^.;]*` class across `entirely, and require` — both the anchor test
+  and the new test stay green while the `<title>` grep is REMOVED. A batch that widens a regex's
+  surrounding text owes that regex a re-verification.
+
+And **20 of 20 paraphrases were missed**, four of them inserted in the same paragraph as the pinned
+rule: `Steps whose runner is unclear go to the user.` · `Start from human and downgrade to agent
+once a runner is confirmed.` · plain `Default: human.` Two structural causes, not twenty accidents —
+every pattern requires the literal token `human` while these documents say **the user** just as
+often, and pattern 0 requires whitespace after `default`, so a colon defeats it.
+
+What survived scrutiny: the carrier sweep, the batch's central deliverable, is sound in both gates'
+hands — six mutations redden, including a sixth document acquiring the rule under either directory.
