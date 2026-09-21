@@ -138,6 +138,22 @@ and the meter compute themselves from the sections array. `BUILD_SHA` must be a 
 identity with a visible correction message: verdict entry and copying stay disabled,
 and neither saved records nor the artifact store are accessed.
 
+**Proof the published artifact — an ADDED pass, after the page is built.** The QA
+runner's pre-verification happens before the page exists and proves the steps, not the
+bytes the reader receives; this pass is additional and changes nothing about when the
+runner runs. After the page is generated and before the STOP, open the filled
+`smoke-<Cn>.html`, read each `<pre><code>` block's `textContent`, and run exactly those
+bytes in the reader's shell. **A command is verified only when it has been executed in
+the form the reader receives it** — not from the sidecar, not from the batch file, not
+from the shell it was composed in. A command that was re-authored on its way into the
+artifact is an unverified command, however carefully it was checked before. It has
+happened: a pre-verified markdown draft was re-authored into the required HTML and
+issued without anyone running it in that form, and it could not run as published.
+Author every embedded command with **no backslashes and no control characters**, so no
+transport between sidecar, HTML and clipboard can mangle it; the builder refuses a
+sidecar carrying a control character other than tab or newline. Where the output is too
+long for a person to check, have the command report the answer instead of the data.
+
 ## The gate (Step 0)
 
 `{{GATE_BODY}}` is the build-identity gate from `execution-models.md`, rendered as
