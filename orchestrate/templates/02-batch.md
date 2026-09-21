@@ -54,8 +54,10 @@ the merge.
      - Runner: `agent` (executable in THIS repo's environment by a runner the contract
        lists — say which) or `human` (hardware, credentials, feel, another OS, live
        data). A step is human ONLY when it needs something an agent on this machine
-       cannot do: a device, a GUI, held credentials, or a judgement about whether
-       something looks right — a checkpoint asks the user for a verdict, not for
+       cannot do: a device, a GUI, held credentials, a judgement about whether
+       something looks right, or something the environment contract forbids an agent
+       here to do — the live-data and another-OS grounds above are that last kind, not
+       exceptions to this rule. A checkpoint asks the user for a verdict, not for
        labour. Agent steps are pre-verified before the hand-over.
      - Inputs: stable IDs and exact issued file links, requirements, independently
        validated expected results, read-only or working-copy/reset commands. Conductor

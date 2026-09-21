@@ -26,9 +26,10 @@
    unless a disposable environment exists), and place the smoke
    checkpoints (one after each hands-on wave + the mandatory final one — never per
    batch). A step is human ONLY when it needs something an agent on this machine
-   cannot do: a device, a GUI, held credentials, or a judgement about whether
-   something looks right. Pick the applicable guardrails per batch (the subset of
-   the project's guardrail bullets its fence can violate).
+   cannot do: a device, a GUI, held credentials, a judgement about whether something
+   looks right, or something the environment contract forbids an agent here to do.
+   Pick the applicable guardrails per batch (the subset of the project's guardrail
+   bullets its fence can violate).
    Inventory the exact required inputs for each step while planning: workbook
    sheets/columns/types/formulas/edge cases, independent validation, reproducible
    synthetic generation, immutable issue paths and working-copy/reset directions.
@@ -83,8 +84,8 @@
    and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
 9. **Self-check** — grep the new ledger directory for `{{` and `<!--`, and its `*.md`
    for `<title>` (a deleted marker can leave an example row behind): **zero hits**
-   outside fenced and inline code spans — a ledger that documents templating work
-   quotes those tokens legitimately, and a quoted token is not a slot.
+   outside fenced and inline code spans. A hit inside a code span is not an unfilled
+   slot — a ledger that documents templating work quotes those tokens legitimately.
    `**State**: ACTIVE` present in PROGRESS; the pre-flight verdict line present in the
    plan; every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`.
    Any hit outside a code span is an unfilled slot; fix before committing. Discount
@@ -236,8 +237,9 @@ detection. Do not run it or fetch automatically.
    screenshot), is there a disposable data environment, and what must an agent never
    do (launch the headed app, touch live data)? The answers decide the tags, not a
    blanket fallback. A step is human ONLY when it needs something an agent on this
-   machine cannot do: a device, a GUI, held credentials, or a judgement about whether
-   something looks right.
+   machine cannot do: a device, a GUI, held credentials, a judgement about whether
+   something looks right, or something the environment contract forbids an agent here
+   to do.
 4. **Default branch + merge policy** — confirm the actual default branch as a full
    local ref (`{{MAIN_BRANCH}}`, protected even if no local copy currently exists).
    Confirm whether shipment means a merge into that LOCAL branch or into its branch

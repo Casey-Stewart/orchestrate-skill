@@ -367,8 +367,10 @@ THIS repo's environment by the runners listed under Roles) or `Runner: human` (h
 credentials, feel, another OS, or anything not listed). A step flagged "Touches your data"
 is human unless the runner line names a disposable fixture environment. A step is human
 ONLY when it needs something an agent on this machine cannot do: a device, a GUI, held
-credentials, or a judgement about whether something looks right; a fixture's isolation is
-not such a thing, and a checkpoint asks the user for a verdict, not for labour.
+credentials, a judgement about whether something looks right, or something the environment
+contract forbids an agent here to do — the data and another-OS grounds above are that last
+kind, not exceptions to this rule. A fixture's isolation is not such a thing, and a
+checkpoint asks the user for a verdict, not for labour.
 Before the page is issued, the QA runner executes every agent step on the
 integration tip and writes `evidence/C<n>/step-NN.md` (command, exit code, output tail or
 screenshot path, the integration SHA and the environment). The page renders those steps

@@ -369,8 +369,10 @@ environment by a runner the contract lists — CLI, HTTP, browser, screenshot) o
 `Runner: human` (hardware, credentials, feel, another OS, anything unlisted). Steps
 flagged "Touches your data" are human unless the contract names a disposable fixture
 environment. A step is human ONLY when it needs something an agent on this machine
-cannot do: a device, a GUI, held credentials, or a judgement about whether something
-looks right; a fixture's isolation is not such a thing, and a checkpoint asks the user
+cannot do: a device, a GUI, held credentials, a judgement about whether something
+looks right, or something the environment contract forbids an agent here to do — the
+data and another-OS grounds above are that last kind, not exceptions to this rule. A
+fixture's isolation is not such a thing, and a checkpoint asks the user
 for a verdict, not for labour. At close-out the QA runner executes the agent steps on the
 integration tip and writes `evidence/C<n>/` (command, exit, tail or screenshot, SHA,
 environment); the page shows them as pre-verified, collapsed, re-runnable. A failing

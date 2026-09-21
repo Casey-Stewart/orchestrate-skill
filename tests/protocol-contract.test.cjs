@@ -345,100 +345,233 @@ test('actual README recursive command and portable form discover nested failure 
   const empty = run(); assert.notEqual(empty.status, 0); assert.match(empty.stderr, /No Node test suites discovered/);
 });
 
+// ===== BL-010 and BL-016 sweeps ============================================
+// Both sweeps below take their domain from the checkout rather than a hand-written
+// list, and walk it RECURSIVELY with no file-type filter: a carrier of either rule
+// could land in `references/runners/rules.md`, in `smoke-page-template.html` (which
+// already carries runner prose) or in a tool. `orchestrate/` happens to be flat and
+// mostly Markdown today, so "it recurses" and "it reads every type" would be vacuous
+// claims about this checkout; the fixture test below reaches the recursive branch at
+// depth three and pins the non-Markdown members that exist here.
+function walkFiles(dir, prefix = '') {
+  const found = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    const rel = prefix ? prefix + '/' + entry.name : entry.name;
+    if (entry.isDirectory()) found.push(...walkFiles(path.join(dir, entry.name), rel));
+    else if (entry.isFile()) found.push(rel);
+  }
+  return found;
+}
+const shippedSkillFiles = () => walkFiles(path.join(ROOT, 'orchestrate')).map(rel => 'orchestrate/' + rel);
+const collapsed = file => read(file).replace(/\s+/g, ' ');
+
+test('the shipped-skill domain both rule sweeps use recurses and filters no file type', t => {
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'skill-domain-walk-'));
+  t.after(() => fs.rmSync(root, { recursive: true, maxRetries: 8, retryDelay: 100 }));
+  fs.mkdirSync(path.join(root, 'references', 'runners'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'empty-dir'));
+  fs.writeFileSync(path.join(root, 'SKILL.md'), 'top\n');
+  fs.writeFileSync(path.join(root, 'references', 'smoke-page-template.html'), 'html\n');
+  fs.writeFileSync(path.join(root, 'references', 'runners', 'rules.md'), 'nested\n');
+  // Depth three, a non-Markdown file and a directory holding no files: the branch that
+  // a flat all-Markdown checkout never exercises, so a future non-recursive rewrite of
+  // walkFiles fails here instead of silently shrinking both sweeps' domains.
+  assert.deepEqual(walkFiles(root),
+    ['SKILL.md', 'references/runners/rules.md', 'references/smoke-page-template.html']);
+  const shipped = shippedSkillFiles();
+  assert.deepEqual(shipped.slice().sort(), shipped, 'the shipped listing must come out sorted');
+  assert.equal(new Set(shipped).size, shipped.length, 'the shipped listing must not repeat a path');
+  for (const nonMarkdown of ['orchestrate/references/smoke-page-template.html',
+    'orchestrate/tools/build-smoke-page.mjs', 'orchestrate/tools/check-fence.mjs']) {
+    assert.ok(shipped.includes(nonMarkdown), 'the sweeps must reach ' + nonMarkdown + ', not only *.md');
+  }
+  // Shape, never a pinned total: the skill grows. Only that it is bigger than either
+  // rule's carrier set, so neither sweep can be satisfied by its own subjects alone.
+  assert.ok(shipped.length > 10, 'shipped skill listing collapsed to ' + shipped.length + ' files');
+});
+
 // BL-010: the scaffold self-check greps a brand-new ledger for `{{`, `<!--` and
 // `<title>` and called every hit an unfilled slot. A ledger that DOCUMENTS templating
 // work quotes those tokens legitimately — this repository produced eleven such hits in
 // one scaffold commit, every one inside a code span — so the absolute was false and the
-// scaffolder was told to edit correct prose away. The exemption is pinned inside the
-// same clause as the verdict: naming code spans elsewhere in the document is not the
-// same as qualifying "zero hits", the hole `[^.;]*` closes for the residual grep above.
+// scaffolder was told to edit correct prose away. What is pinned here is the PREDICATE
+// ("a hit inside a code span is not an unfilled slot"), not the noun phrase "fenced and
+// inline code spans", which the exemption and its exact inverse both contain.
 test('the scaffold self-check exempts code spans from the placeholder grep', () => {
-  const collapsed = file => read(file).replace(/\s+/g, ' ').replace(/\.md\b/g, '');
-  const exemption = /zero hits[^.;]*outside fenced and inline code spans/i;
-  const selfCheckFiles = ['orchestrate/references/scaffolding.md', 'orchestrate/SKILL.md'];
-  assert.equal(selfCheckFiles.length, 2, 'the self-check is stated in exactly two reusable documents');
+  const selfCheckText = file => collapsed(file).replace(/\.md\b/g, '');
+  const selfCheckFiles = shippedSkillFiles().filter(file => selfCheckText(file).includes('grep the new'));
+  // Derived, not asserted against itself: a third document acquiring the self-check
+  // reddens here rather than escaping the paragraph checks below.
+  assert.deepEqual(selfCheckFiles, ['orchestrate/SKILL.md', 'orchestrate/references/scaffolding.md']);
+  assert.equal(selfCheckFiles.length, 2, 'exactly two shipped documents state the scaffold self-check');
+  const bounds = {
+    'orchestrate/references/scaffolding.md': ['9. **Self-check**', '10. **Scaffold commit**'],
+    'orchestrate/SKILL.md': ['self-check (grep the new directory', 'scaffold commit on']
+  };
+  assert.deepEqual(Object.keys(bounds).sort(), selfCheckFiles.slice().sort());
   for (const file of selfCheckFiles) {
-    const text = collapsed(file);
-    assert.match(text, exemption,
-      file + ': "zero hits" must be qualified, within its own clause, to hits outside fenced and inline code spans');
-    // Polarity: a document that carries the exemption AND the old absolute still tells a
-    // scaffolder that a quoted token is a slot. "hit is an unfilled slot" is the absolute;
-    // the narrowed verdicts below read "... span is an unfilled slot" and do not match.
-    assert.doesNotMatch(text, /\bhit is an unfilled slot\b/i,
-      file + ': the unqualified absolute "Any hit is an unfilled slot" must not survive beside the exemption');
-    assert.doesNotMatch(text, /zero hits[^.;]*(?:including|even inside|regardless of)[^.;]*code span/i,
-      file + ': nothing may re-include code spans in the zero-hit verdict');
+    const text = selfCheckText(file);
+    const from = text.indexOf(bounds[file][0]), to = text.indexOf(bounds[file][1]);
+    assert.ok(from !== -1 && to > from, file + ': the self-check paragraph bounds no longer resolve');
+    const paragraph = text.slice(from, to);
+    // The three tokens and their verdict, in that order, with nothing between them that
+    // could drop one. `residualGrep` above admits a comma, so "ignoring `<title>`
+    // entirely, and require zero hits" satisfied it while the `<title>` grep was gone.
+    const grepAt = paragraph.indexOf('grep the new'), verdictAt = paragraph.indexOf('zero hits');
+    assert.ok(grepAt !== -1 && verdictAt > grepAt, file + ': the self-check must grep, then reach a zero-hit verdict');
+    const grepClause = paragraph.slice(grepAt, verdictAt);
+    for (const token of ['`{{`', '`<!--`', '`<title>`']) {
+      assert.ok(grepClause.includes(token),
+        file + ': the grep must still name ' + token + ' before its zero-hit verdict — clause reads "' + grepClause + '"');
+    }
+    assert.doesNotMatch(grepClause,
+      /\b(?:ignor\w*|skip\w*|exclud\w*|omit\w*|except|without|drop\w*|disregard\w*|no longer|never|not)\b/i,
+      file + ': no exclusion verb may stand between the grep and its zero-hit verdict — clause reads "' + grepClause + '"');
+    assert.match(paragraph, /zero hits(?:\*\*)?\s*outside fenced and inline code spans/i,
+      file + ': the zero-hit verdict must be qualified to hits OUTSIDE fenced and inline code spans');
+    assert.doesNotMatch(paragraph, /\binside and outside\b/i,
+      file + ': re-including code spans in the verdict is the exact inverse of the exemption');
+    // Polarity by counting, not by phrasing: exactly one clause may rule on a hit INSIDE
+    // a span, and it must say NOT a slot. Appending "A hit inside a code span is still an
+    // unfilled slot." makes this two; inverting the clause makes it zero.
+    const insideRulings = paragraph.split(/(?<=[.;])\s+/)
+      .filter(clause => /\binside\b[^.;]*code spans?/i.test(clause) && /unfilled slot/i.test(clause));
+    assert.equal(insideRulings.length, 1,
+      file + ': exactly one clause may rule on a hit inside a code span, found ' + insideRulings.length
+        + ' — ' + (insideRulings.join(' || ') || '(none)'));
+    assert.match(insideRulings[0], /\bis not an unfilled slot\b/i,
+      file + ': the ruling on a hit inside a code span must be that it is NOT an unfilled slot');
   }
-  // The verdict must still exist, narrowed — deleting it outright would satisfy the two
-  // negatives above while leaving the scaffolder with no rule at all.
-  assert.match(collapsed('orchestrate/references/scaffolding.md'), /Any hit outside a code span is an unfilled slot/,
-    'scaffolding.md must keep the verdict, narrowed to hits outside a code span');
-  assert.match(collapsed('orchestrate/SKILL.md'), /only a hit outside a span is an unfilled slot/i,
-    'SKILL.md must keep the verdict, narrowed to hits outside a code span');
 });
 
-// BL-016 named two files; FIVE carry the Runner: default, and the two the backlog missed
-// (the ledger contract template and the batch template) are the ones a DRIVING session and
-// a PLANNER actually read — a rule landing only in the reference docs never reaches a
-// ledger. Two examples cannot hold a five-member set, so the domain is bound three ways:
-// its own size, set-equality with every reusable document that carries the rule (derived
-// from the directory listing, not hand-written, so a sixth carrier cannot appear silently),
-// and a sweep of that same listing for any surviving default-human spelling.
+// BL-016 named two files. SIX occurrences across FIVE documents carry the rule, and two
+// of the five — the ledger contract template and the batch template — are what a DRIVING
+// session and a PLANNER read, so a rule landing only in the reference docs never reaches
+// a ledger at all. `scaffolding.md` states it twice (the planning step and the
+// environment interview, the very place `Default when unsure: every step human` lived),
+// and an `includes` check is satisfied by either copy, so the domain is a file->count map
+// and the assertions are on counts.
 test('every document carrying the Runner: default states the same rule, and no default-human spelling survives', () => {
   const RULE = 'A step is human ONLY when it needs something an agent on this machine cannot do: '
-    + 'a device, a GUI, held credentials, or a judgement about whether something looks right';
-  const RUNNER_RULE_CARRIERS = [
-    'orchestrate/references/execution-models.md',
-    'orchestrate/references/protocol.md',
-    'orchestrate/references/scaffolding.md',
-    'orchestrate/templates/00-READBEFORE.md',
-    'orchestrate/templates/02-batch.md'
-  ];
-  assert.equal(RUNNER_RULE_CARRIERS.length, 5, 'BL-016 understated its file set by three: five documents carry the rule');
-  assert.equal(new Set(RUNNER_RULE_CARRIERS).size, 5, 'the carrier list must name five distinct documents');
-  const collapsed = file => read(file).replace(/\s+/g, ' ');
-  // The domain comes from the checkout, recursed exactly as far as the consumer reads.
-  const reusable = ['orchestrate/SKILL.md', ...['orchestrate/references', 'orchestrate/templates'].flatMap(dir =>
-    fs.readdirSync(path.join(ROOT, dir)).filter(name => name.endsWith('.md')).sort().map(name => dir + '/' + name))];
-  assert.ok(reusable.length > RUNNER_RULE_CARRIERS.length,
-    'the swept listing must be wider than the carrier set, or the sweep proves nothing');
-  for (const file of RUNNER_RULE_CARRIERS) {
-    assert.ok(reusable.includes(file), file + ': carrier is not in the reusable listing this test sweeps');
-    assert.ok(collapsed(file).includes(RULE),
-      file + ': must state the runner rule verbatim — "' + RULE + '" (whitespace collapsed)');
+    + 'a device, a GUI, held credentials, a judgement about whether something looks right, '
+    + 'or something the environment contract forbids an agent here to do';
+  // The trailing clause is load-bearing, not padding: the four named grounds are
+  // illustrative, and a conductor reading a CLOSED enumeration as controlling would tag a
+  // "touches your data" or another-OS step `agent` and hand it to the QA runner against
+  // live data. BL-016's list was an example; implementing it as a closed set narrowed a
+  // safety rule that the human list one clause away already stated.
+  assert.match(RULE, /, or something the environment contract forbids an agent here to do$/,
+    'the enumeration must stay open-ended, or it narrows the grounds the human list already names');
+  const RUNNER_RULE_COUNTS = {
+    'orchestrate/references/execution-models.md': 1,
+    'orchestrate/references/protocol.md': 1,
+    'orchestrate/references/scaffolding.md': 2,
+    'orchestrate/templates/00-READBEFORE.md': 1,
+    'orchestrate/templates/02-batch.md': 1
+  };
+  const carriers = Object.keys(RUNNER_RULE_COUNTS);
+  assert.equal(carriers.length, 5, 'BL-016 understated its file set by three: five documents carry the rule');
+  assert.equal(Object.values(RUNNER_RULE_COUNTS).reduce((sum, n) => sum + n, 0), 6,
+    'five documents, six occurrences — scaffolding.md states the rule in both the planning step and the interview');
+  const occurrences = file => collapsed(file).split(RULE).length - 1;
+  const shipped = shippedSkillFiles();
+  assert.ok(shipped.length > carriers.length, 'the swept listing must be wider than the carrier set');
+  for (const file of carriers) {
+    assert.ok(shipped.includes(file), file + ': carrier is not in the shipped listing this test sweeps');
+    assert.equal(occurrences(file), RUNNER_RULE_COUNTS[file],
+      file + ': must state the runner rule verbatim exactly ' + RUNNER_RULE_COUNTS[file]
+        + ' time(s) — "' + RULE + '" (whitespace collapsed)');
   }
-  // Subject is the DOMAIN, not its members: removing the rule from one carrier, or adding
-  // it to a sixth document without listing it, both redden here.
-  const carrying = reusable.filter(file => collapsed(file).includes(RULE));
-  assert.equal(carrying.length, RUNNER_RULE_CARRIERS.length, 'exactly five reusable documents may state the runner rule, found: ' + carrying.join(', '));
-  assert.deepEqual(carrying.slice().sort(), RUNNER_RULE_CARRIERS.slice().sort());
+  // Subject is the DOMAIN: losing one of scaffolding.md's two copies, or a sixth document
+  // acquiring the rule, both redden without any member assertion changing.
+  const found = Object.fromEntries(shipped.map(file => [file, occurrences(file)]).filter(([, n]) => n > 0));
+  assert.equal(Object.keys(found).length, carriers.length,
+    'exactly five shipped files may state the runner rule, found: ' + Object.keys(found).join(', '));
+  assert.deepEqual(found, RUNNER_RULE_COUNTS);
+
+  // --- the default-human sweep -------------------------------------------------
+  // READ THIS BEFORE TRUSTING ITS SILENCE. This is a REGRESSION GUARD, not a detector.
+  // It catches the spellings this repository has actually written plus the paraphrases a
+  // review produced; English has more, and a reviewer inserted twenty an earlier version
+  // missed. A clause carrying an explicit negation is treated as a reinforcement and
+  // skipped, so "never hand a step to the user" is not a hit — and neither is a real
+  // contradiction that happens to contain the word "not". Clauses split on `.` and `;`
+  // only, so the colon form ("Default: human.") stays intact. When this is green the
+  // documents are free of THESE spellings, and nothing stronger may be read into it.
+  const TARGET = '(?:human|the user)';
   const DEFAULT_HUMAN = [
-    /default(?:s|ed)?\s+(?:is\s+|to\s+)?human/i,
-    /default when unsure/i,
-    /when (?:unsure|in doubt)[^.;]*human/i,
-    /assume[sd]?\s+human/i,
-    /(?:every|all|each)\s+steps?\s+(?:is\s+|are\s+|as\s+)?human\b/i,
-    /human\s+by\s+default/i,
-    /\berr\b[^.;]*human/i,
-    /prefers?\s+human/i,
-    /falls?\s*back[^.;]*human/i,
-    /no test[^.;]*(?:so|therefore|hence)[^.;]*human/i
+    { name: 'bare default to human', controls: ['Default human.', 'Default is human.', 'Default: human.', 'default to human'],
+      pattern: new RegExp('\\bdefault(?:s|ed|ing)?\\b\\s*(?:[:\\u2014\\u2013-]\\s*|\\b(?:is|to|be)\\b\\s*)?human\\b', 'i') },
+    { name: 'bare default to the user', controls: ['Default: the user.', 'defaults to the user'],
+      pattern: new RegExp('\\bdefault(?:s|ed|ing)?\\b\\s*(?:[:\\u2014\\u2013-]|\\b(?:is|to|be)\\b)\\s*the user\\b', 'i') },
+    { name: 'default when unsure', controls: ['Default when unsure: every step human.', 'Default if in doubt'],
+      pattern: /\bdefault\b[^.;]*\b(?:when|if)\b[^.;]*\b(?:unsure|in doubt|uncertain|unclear|not certain)\b/i },
+    { name: 'uncertainty sends it to a person', controls: ['Steps whose runner is unclear go to the user.',
+      'When you cannot be certain an agent can do it, mark the step human.', 'If in doubt, the step is human.'],
+      pattern: new RegExp('\\b(?:unsure|uncertain|in doubt|cannot be certain|not certain|unclear|ambiguous|do not know)\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    { name: 'start from a person and downgrade', controls: ['Start from human and downgrade to agent once a runner is confirmed.',
+      'Begin with the user and promote to agent later.'],
+      pattern: new RegExp('\\b(?:start|starts|starting|begin|begins|beginning)\\b[^.;]*\\b(?:from|with|as|at)\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    { name: 'by default, either order', controls: ['Steps are human by default.', 'By default the user runs them.'],
+      pattern: new RegExp('\\bby default\\b[^.;]*\\b' + TARGET + '\\b|\\b' + TARGET + '\\b[^.;]*\\bby default\\b', 'i') },
+    { name: 'every or all steps', controls: ['every step human', 'all steps go to the user'],
+      // The gap here is a whitelist of connectors, not `[^.;]*`: an open gap also matched
+      // "what every step in that section asks the user to test" in build-smoke-page.mjs,
+      // and a sweep that cries wolf gets deleted by the next author.
+      pattern: new RegExp('\\b(?:every|all|each)\\s+steps?\\b(?:\\s+(?:is|are|be|to|go|goes|stay|stays|remain|remains|become|becomes|marked|tagged|assigned|as|a|an|the))*\\s+' + TARGET + '\\b', 'i') },
+    { name: 'err, prefer or lean toward', controls: ['err on the side of human', 'prefer the user here', 'lean toward human'],
+      pattern: new RegExp('\\b(?:err|prefer|prefers|favour|favours|favor|favors|lean|leans|leaning|bias|biased)\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    { name: 'fall back to a person', controls: ['fall back to human', 'the fallback is the user'],
+      pattern: new RegExp('\\bfalls?[\\s-]*back\\b[^.;]*\\b' + TARGET + '\\b|\\bfallback\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    { name: 'no test, therefore a person', controls: ['no test can prove it, so the step is human',
+      'no fixture covers it, therefore the user runs it'],
+      pattern: new RegExp('\\bno (?:test|fixture)\\b[^.;]*\\b(?:so|therefore|hence|thus|which means)\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    { name: 'safer or more conservative', controls: ['it is safer to make the step human', 'the conservative choice is the user'],
+      pattern: new RegExp('\\b(?:safer|safest|conservative|conservatively|cautious|prudent)\\b[^.;]*\\b' + TARGET + '\\b', 'i') },
+    { name: 'human unless proven agent', controls: ['human unless proven agent-runnable', 'the user unless confirmed agent-runnable'],
+      pattern: /\bunless\b[^.;]*\b(?:proven|demonstrated|confirmed|verified|established)\b[^.;]*\bagent\b/i },
+    { name: 'hand the work to the user', controls: ['hand the step to the user when unsure', 'defer it to the user'],
+      pattern: /\b(?:hand|hands|handing|give|gives|assign|assigns|push|pushes|defer|defers)\b[^.;]*\bto the user\b/i },
+    { name: 'the user does the running', controls: ['the user executes the steps', 'the user performs every smoke step'],
+      pattern: /\bthe user\b[^.;]*\b(?:executes|performs|runs|carries out)\b[^.;]*\bsteps?\b/i }
   ];
-  // Live control: a pattern family that matches nothing sweeps clean over anything. Each
-  // spelling this batch actually removed is replayed here, so the sweep below is known to
-  // be armed before its silence is read as evidence.
-  for (const removed of ['environment. Default human. At close-out', 'fixture environment. Default is human. Before',
-    'prohibitions (default human; "touches data" is human', 'touch live data)? Default when unsure: every step human.']) {
-    assert.ok(DEFAULT_HUMAN.some(pattern => pattern.test(removed)),
-      'the default-human sweep is disarmed: it no longer matches the removed spelling "' + removed + '"');
-  }
-  for (const file of reusable) {
-    const text = collapsed(file);
-    for (const spelling of DEFAULT_HUMAN) {
-      assert.doesNotMatch(text, spelling, file + ': a blanket human default contradicts the runner rule');
+  const NEGATION = /\b(?:never|not|no longer|rather than|instead of|nothing|neither|nor)\b/i;
+  const flagClauses = text => text.split(/(?<=[.;])\s+/).flatMap(clause =>
+    NEGATION.test(clause) ? [] : DEFAULT_HUMAN.filter(({ pattern }) => pattern.test(clause))
+      .map(({ name }) => name + ' :: ' + clause.trim()));
+  // Signature 1, twice over, is what a `.some()` control invites: one armed pattern makes
+  // the whole family look alive, and nine dead ones sweep clean over anything. Every
+  // pattern is armed through the SAME code path the sweep runs, and both array sizes are
+  // pinned so a silently dropped member is caught.
+  assert.equal(DEFAULT_HUMAN.length, 14, 'the default-human family must keep all fourteen patterns');
+  assert.equal(new Set(DEFAULT_HUMAN.map(entry => entry.name)).size, 14, 'pattern names must be distinct');
+  assert.equal(DEFAULT_HUMAN.reduce((sum, entry) => sum + entry.controls.length, 0), 32,
+    'the control corpus must keep all thirty-two strings');
+  for (const { name, pattern, controls } of DEFAULT_HUMAN) {
+    assert.ok(controls.length >= 2, name + ': every pattern needs at least two control strings');
+    for (const control of controls) {
+      assert.match(control, pattern, name + ': its own control no longer matches it — "' + control + '"');
+      assert.ok(flagClauses(control).some(hit => hit.startsWith(name + ' :: ')),
+        name + ': the sweep as actually run does not flag its own control — "' + control + '"');
     }
   }
-  // The rest of BL-016: the reason the old default was wrong, and what a checkpoint costs.
+  // Spellings this repository really wrote, and the paraphrases a review inserted into
+  // protocol.md's runner paragraph while an earlier version of this sweep stayed green.
+  for (const regression of ['environment. Default human. At close-out',
+    'fixture environment. Default is human. Before',
+    'prohibitions (default human; "touches data" is human',
+    'touch live data)? Default when unsure: every step human.',
+    'Default: human.',
+    'Steps whose runner is unclear go to the user.',
+    'When you cannot be certain an agent can do it, mark the step human.',
+    'Start from human and downgrade to agent once a runner is confirmed.']) {
+    assert.ok(flagClauses(regression).length > 0, 'the sweep no longer catches: "' + regression + '"');
+  }
+  for (const file of shipped) {
+    const flagged = flagClauses(collapsed(file));
+    assert.equal(flagged.length, 0, file + ': a blanket human default contradicts the runner rule — ' + flagged.join(' || '));
+  }
+  // The rest of BL-016: why the old default was wrong, and what a checkpoint costs.
   const models = collapsed('orchestrate/references/execution-models.md');
   assert.match(models, /fixtures are isolated from the real machine by design and a subagent is not/i,
     'execution-models.md must say why "no test can verify this" is not "no agent can verify this"');

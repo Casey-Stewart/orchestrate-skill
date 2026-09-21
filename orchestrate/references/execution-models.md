@@ -89,8 +89,11 @@ batch or per wave by default.
   can do, never on what the test fixtures can do: fixtures are isolated from the real
   machine by design and a subagent is not, so "no test could prove it" is never a
   reason to hand a step to the user. A step is human ONLY when it needs something an
-  agent on this machine cannot do: a device, a GUI, held credentials, or a judgement
-  about whether something looks right. At the checkpoint
+  agent on this machine cannot do: a device, a GUI, held credentials, a judgement
+  about whether something looks right, or something the environment contract forbids
+  an agent here to do. That last kind is why the grounds listed above — another OS,
+  live data, anything "touches your data" without a disposable environment — stay
+  human; the enumeration narrows nothing. At the checkpoint
   close-out a QA runner performs the agent steps on the integration tip and records
   evidence; the user's hands are spent only on the human steps. A checkpoint asks the
   user for a VERDICT, not for labour. A repo whose contract
