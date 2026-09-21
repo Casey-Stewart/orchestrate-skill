@@ -27,7 +27,8 @@
    checkpoints (one after each hands-on wave + the mandatory final one — never per
    batch). A step is human ONLY when it needs something an agent on this machine
    cannot do: a device, a GUI, held credentials, a judgement about whether something
-   looks right, or something the environment contract forbids an agent here to do.
+   looks right, or something the environment contract forbids an agent here to do —
+   the prohibitions just named are that last kind, not exceptions to this rule.
    Pick the applicable guardrails per batch (the subset of the project's guardrail
    bullets its fence can violate).
    Inventory the exact required inputs for each step while planning: workbook
@@ -239,7 +240,7 @@ detection. Do not run it or fetch automatically.
    blanket fallback. A step is human ONLY when it needs something an agent on this
    machine cannot do: a device, a GUI, held credentials, a judgement about whether
    something looks right, or something the environment contract forbids an agent here
-   to do.
+   to do — the answers to this question are that last kind, not exceptions to it.
 4. **Default branch + merge policy** — confirm the actual default branch as a full
    local ref (`{{MAIN_BRANCH}}`, protected even if no local copy currently exists).
    Confirm whether shipment means a merge into that LOCAL branch or into its branch
