@@ -312,8 +312,9 @@ test('an unquoted value may not open with a YAML indicator, and may carry one an
     + 'meant; a tenth gets its own case here, not a quietly wider pattern over there');
   assert.equal(new Set(INDICATOR_MEMBERS).size, INDICATOR_MEMBERS.length,
     'a duplicated member would shorten the sweep while the size assertion still counted nine');
-  assert.deepEqual(INDICATOR_ON_DOUBT.filter(m => !INDICATOR_MEMBERS.includes(m)), [],
-    'a member rejected on doubt has to be a member: otherwise its wording below is never used');
+  assert.deepEqual(INDICATOR_ON_DOUBT, ['?'], 'exactly one member is rejected on doubt. Emptying '
+    + 'this list hands `?` the parse-failure wording, which is the falsehood it exists to stop; '
+    + 'adding a member claims YAML takes a character it errors on. A subset test would pass at both');
   for (const member of INDICATOR_MEMBERS) {
     const line = 'description: ' + member + 'Runs a batch';
     const verdict = frontmatterField(line);
@@ -356,6 +357,12 @@ test('an unquoted value may not open with a YAML indicator, and may carry one an
 // NAMED here rather than blessed by an unqualified "everything else is accepted". Close one of
 // them and this sweep goes red, which is the point: the member then moves into INDICATOR_MEMBERS
 // with its own case. The list is hardcoded because the suite may not import a YAML parser.
+// Seven is the count for THE FORM SWEPT BELOW — a head character in front of a longer value — and
+// a sweep is only ever complete for the shape it sweeps. A one-character value is its own column
+// and has at least two more members: PyYAML 6.0.3 raises ConstructorError on `tools: =` and loads
+// `tools: ~` as null, which this parse hands back as the string `~` — key present, no list, whole
+// catalog inherited. That column belongs to a later batch; it is named so nobody reads the seven
+// as a claim about every shape a value can take.
 const KNOWN_GAP = ['#', '&', ',', '>', ']', '|', '}'];
 // Neither list carries a quote. A leading quote opens the branch above, and the unterminated
 // scalar this sweep builds is rejected there — the verdict YAML gives it too, by another route.
@@ -365,8 +372,9 @@ test('the indicator rule rejects exactly its members at the head, and names the 
   const singles = INDICATOR_MEMBERS.filter(m => m.length === 1);
   assert.equal(singles.length, 8, 'eight of the nine members are single characters and belong to '
     + 'this sweep; `- ` is two and is pinned by its own rows, in both of its forms');
-  assert.equal(KNOWN_GAP.length, 7, 'seven characters are accepted here that YAML does not read as '
-    + 'written — fewer means one was fixed without moving it, more means one was recorded twice');
+  assert.equal(KNOWN_GAP.length, 7, 'seven characters are accepted at the head of a longer value '
+    + 'that YAML does not read as written there — fewer means one was fixed without moving it, '
+    + 'more means one was recorded twice; a one-character value is a column this sweep never enters');
   assert.deepEqual(KNOWN_GAP.filter(c => INDICATOR_MEMBERS.includes(c)), [],
     'a character cannot be both a member and a gap: one of the two lists is then unreachable');
   let swept = 0;

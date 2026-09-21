@@ -91,6 +91,12 @@ leading and when the value is quoted.
       closing one goes red and forces the member into `INDICATOR_MEMBERS` (R1 ASK-1).
 - [x] polish: `?` is rejected on doubt, not because YAML errors on it, so the sweep's loop message
       must stop claiming the document would fail to parse for that member (R1 ASK-2).
+- [x] polish: pin `INDICATOR_ON_DOUBT` by equality, not by subset — a `filter(...)` against the
+      member list passes for `[]`, which restores the very falsehood R1 ASK-2 removed, and for
+      `['?', '!']`, which claims YAML takes a character it raises on (R2 ASK-1).
+- [x] polish: scope `KNOWN_GAP`'s count to the form actually swept — a head character in front of a
+      longer value — and name `=` and `~` as the one-character-value column's own members, since
+      `tools: ~` loads null where this parse reads the string `~` (R2 ASK-2).
 
 ## Acceptance criteria
 
