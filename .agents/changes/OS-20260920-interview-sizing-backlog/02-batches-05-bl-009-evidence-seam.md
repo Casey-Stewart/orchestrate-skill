@@ -51,21 +51,52 @@ untested however correct it is."* Demonstrate both mutations in the implementer 
 
 ## Checklist
 
-- [ ] Add an internal seam — an export, or an injectable probe — that lets a test drive
+- [x] Add an internal seam — an export, or an injectable probe — that lets a test drive
       `safeResolvedFilters()` down the two guard paths, without adding any CLI subcommand or flag.
-- [ ] Cover the guard at `git-evidence.mjs:110`: the path where the index inventory cannot be
+- [x] Cover the guard at `git-evidence.mjs:110`: the path where the index inventory cannot be
       obtained. Assert the helper reports `unknown` and does NOT run `git status`.
-- [ ] Cover the guard at `:119`: the record-count mismatch. Assert the same fail-closed outcome.
-- [ ] Add a live control so the absence of a marker means something — a case in which the helper DOES
+- [x] Cover the guard at `:119`: the record-count mismatch. Assert the same fail-closed outcome.
+- [x] Add a live control so the absence of a marker means something — a case in which the helper DOES
       proceed, so "status was not run" is a real observation rather than a fixture that could never
       have run it.
-- [ ] Confirm the `--help` text and the seven published recipes are byte-unchanged.
+- [x] Confirm the `--help` text and the seven published recipes are byte-unchanged.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-009-evidence-seam` — `fix: a test seam for the unreachable evidence guards (batch 05)`.
+- [x] Commit on `fix/bl-009-evidence-seam` — `fix: a test seam for the unreachable evidence guards (batch 05)`.
+- [x] polish: R1 P1 — `if (!attributes.ok)` is a third guard of the same class in the same
+      function, unreachable from any repository and green under `return true`. Closed with the
+      smallest injection the checklist already contemplated: `options.failProbe` names a
+      subcommand this function must read as failed. Both unreadable-probe refusals are now
+      watched through the walk itself, with a live control in the same repository.
+- [x] polish: R1 ASK — the case labelled "records without the terminating NUL" was refused by
+      the count half of the guard, never the terminator half. Every case now names the half
+      that holds it, and the terminator half has an input whose field count matches exactly.
+      Also closed the two smaller notes: the probe test compares `repo.snapshot()` either side,
+      and the name and value guards pin an odd interior record, not only first and last.
+- [x] polish: R2 ASK-1 — `degradedProbe` dereferenced `options.failProbe` with no default, so
+      `safeResolvedFilters(repo, diagnostics)` threw where it had returned `true`. Every other
+      helper in the module defaults that argument; this one now does too (`options = {}`).
+- [x] polish: R2 ASK-2 — the 12-value seam sweep was itself pinned by sampling: deleting a
+      member from the domain and from the expectation together stayed green. The domain now
+      carries a size and a no-duplicates assertion, and the partition is pinned by counting the
+      `git-probe` verdicts, so neither list can shrink silently.
+- [x] polish: R2 ASK-3 — ASK-1 was a production fix with no test, which is the same vacuity
+      shape it was fixing. `safeResolvedFilters(repo.cwd, [])` now pins the optional third
+      argument, with the determinism argument recorded beside it: that fixture's path is
+      tracked and its attribute committed, so the fallback to `process.env` cannot make the
+      verdict depend on ambient Git configuration. Removing `= {}` reddens it.
+- [x] polish: R3 ASK-1 — that comment said "every other helper", which is false of the two
+      module-private ones (`provenanceOptions:50`, `safeStatusPrerequisites:153`, which
+      dereferences `options.env`). Restored the qualifier the report had and the comment had
+      lost: "every other EXPORTED helper". True of `git:18`, `capture:32`,
+      `ancestryCaptured:40`, `readBlob:222`, and of nothing it now claims.
+- [x] polish: R3 ASK-2 — the arity assertion discarded its diagnostics, so any refusal
+      satisfied it, including one caused by ambient breakage rather than the attribute. It
+      now reads the diagnostic too (`['unsafe-filter']`), so a broken probe cannot pass as
+      the verdict the fixture exists to reach. Test-only; no production file was touched.
 
 ## Acceptance criteria
 
