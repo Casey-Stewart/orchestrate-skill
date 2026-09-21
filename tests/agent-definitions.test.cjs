@@ -98,6 +98,20 @@ function frontmatterField(line) {
     }
     return { key: field[1], value: value.slice(0, i + 1) };
   }
+  // A plain scalar may not OPEN with a YAML indicator. `@` and a backtick are reserved, `*`
+  // opens an alias, `%` a directive, `!` a tag, `[` and `{` a flow collection and `- ` a block
+  // sequence entry — PyYAML 6.0.3 raises on all eight, and the end state is BL-004's over again:
+  // the document does not parse, no definition loads, and a "read-only" role inherits the whole
+  // catalog. The check is ANCHORED, because every one of these is ordinary content once anything
+  // precedes it — `Runs the a*b case` is a plain scalar YAML reads as written — and quoting the
+  // value makes any of them scalar content too. The dash is a sequence entry when a space follows
+  // it OR when the line ends there, and `-x` is an ordinary scalar: the line-break form reaches
+  // this line as a value of just `-`, which is also what `description: - ` becomes once the strip
+  // above runs, so one `-$` alternative covers both. `?` is the ninth member and the one judgement
+  // call here, since PyYAML takes `?x` while `? x` is a complex-key indicator; this parse rejects
+  // on doubt, a false rejection costing one typed quote where a false acceptance costs the catalog.
+  const indicator = /^(- |-$|[@`*%[{!?])/.exec(value);
+  if (indicator) return 'opens its unquoted value with `' + indicator[0] + '`, a YAML indicator character';
   if (/\t/.test(value)) return 'carries a TAB outside a quoted scalar, which YAML will not skip';
   // In a plain scalar a `: ` ends the scalar, and a `:` at end of line reads the same way:
   // either makes YAML look for a second mapping key on the line and error on the document.
@@ -180,6 +194,17 @@ const FRONTMATTER_CASES = [
     field: { key: 'description', value: '"Quoted\ttab: also fine"' } },
   { line: 'description: "Spaced" ',
     field: { key: 'description', value: '"Spaced"' } },
+  // The dash is the one member of the indicator family that is not a single character, and it
+  // takes four rows to pin: it opens a sequence entry when a space follows it AND when the line
+  // ends there, while `-x` stays an ordinary plain scalar. Widen the pattern to any leading dash
+  // and the first row goes red; drop either indicator form and one of the last three does. The
+  // trailing-space row is the end-of-line form in disguise — the strip in the predicate makes
+  // `description: - ` and `description: -` the same value, and PyYAML 6.0.3 raises on all three.
+  { line: 'description: -x is a plain scalar',
+    field: { key: 'description', value: '-x is a plain scalar' } },
+  { line: 'description: - x opens a block sequence', reason: /opens its unquoted value with `- `/ },
+  { line: 'description: -', reason: /opens its unquoted value with `-`/ },
+  { line: 'description: - ', reason: /opens its unquoted value with `-`/ },
   { line: 'description: Runs the steps:', reason: /ends its unquoted value with/ },
   { line: 'description: "unterminated', reason: /never closes its opening/ },
   { line: 'description: a "b: c" d', reason: /carries an unquoted/ },
@@ -268,6 +293,121 @@ test('the escape whitelist admits exactly the characters YAML defines', () => {
   // TAB is a member but is not printable, so it is swept here rather than left to its own row.
   assert.equal(typeof frontmatterField('description: "A\\\tQQ"'), 'object',
     'a literal TAB is YAML 1.2 rule 57\'s own escape and belongs to the set');
+});
+
+// The indicator family's members, written out here rather than read off the pattern in the
+// predicate, for the reason ESCAPE_MEMBERS is: a check that derives its domain from the thing it
+// is checking agrees with any edit made to both at once, and the size assertion below is what
+// catches that edit. `- ` is two characters on purpose.
+const INDICATOR_MEMBERS = ['@', '`', '*', '%', '[', '{', '- ', '?', '!'];
+// Eight of the nine are YAML errors. `?` is not: PyYAML 6.0.3 reads `?x` as a plain scalar and
+// raises only on `? x`, so rejecting it is this parse's judgement rather than YAML's verdict, and
+// the message below has to say which of the two it is making. Claiming a parse failure for `?`
+// would put the test's own message at odds with the predicate's comment, in a file where the
+// message IS the contract a later reader is handed.
+const INDICATOR_ON_DOUBT = ['?'];
+
+test('an unquoted value may not open with a YAML indicator, and may carry one anywhere else', () => {
+  assert.equal(INDICATOR_MEMBERS.length, 9, 'nine forms open a YAML node where a plain scalar was '
+    + 'meant; a tenth gets its own case here, not a quietly wider pattern over there');
+  assert.equal(new Set(INDICATOR_MEMBERS).size, INDICATOR_MEMBERS.length,
+    'a duplicated member would shorten the sweep while the size assertion still counted nine');
+  assert.deepEqual(INDICATOR_ON_DOUBT, ['?'], 'exactly one member is rejected on doubt. Emptying '
+    + 'this list hands `?` the parse-failure wording, which is the falsehood it exists to stop; '
+    + 'adding a member claims YAML takes a character it errors on. A subset test would pass at both');
+  for (const member of INDICATOR_MEMBERS) {
+    const line = 'description: ' + member + 'Runs a batch';
+    const verdict = frontmatterField(line);
+    assert.equal(typeof verdict, 'string', '`' + line + '` must be rejected: ' + (INDICATOR_ON_DOUBT.includes(member)
+      ? 'YAML itself takes this one, and `' + member + ' x` it does not, so this parse rejects on '
+        + 'doubt — a false rejection costs one typed quote, a false acceptance costs the catalog'
+      : 'it is a YAML error, so the document would not parse, no definition would load, and a '
+        + '"read-only" role would inherit the whole tool catalog'));
+    assert.equal(verdict, 'opens its unquoted value with `' + member + '`, a YAML indicator character',
+      '`' + line + '` must be rejected naming the character it opens with and why that is an error');
+    // Through the consumer's own door, and reading the FIRST LINE alone: any diff a future
+    // assertion appends down there carries the line text with it and would satisfy a
+    // whole-message check no matter what the message itself said.
+    assert.throws(() => frontmatterFields('---\n' + line + '\n---\n\nbody\n', 'synthetic.md'), err => {
+      const first = err.message.split('\n')[0];
+      return err instanceof assert.AssertionError && first.includes('a YAML indicator character')
+        && first.endsWith(line);
+    }, '`' + line + '` must fail the document parse too — a predicate the consumer never calls guards nothing');
+    // The other side of the boundary, driven from the same list: these characters are content
+    // once anything precedes them, and quoting makes them content too. A pattern that rejected
+    // them anywhere would reject `Runs the a*b case`, which YAML reads exactly as written.
+    for (const value of ['Runs a ' + member + 'batch case', '"' + member + 'Runs a batch"']) {
+      const ok = 'description: ' + value;
+      assert.deepEqual(frontmatterField(ok), { key: 'description', value },
+        '`' + ok + '` is valid YAML and has to parse as written');
+      assert.equal(frontmatterFields('---\n' + ok + '\n---\n\nbody\n', 'synthetic.md').fields.get('description'),
+        value, '`' + ok + '` has to survive the document parse, not just the predicate');
+    }
+  }
+});
+
+// The complement, which the sweep above leaves free: proving each of the nine IS rejected proves
+// nothing about a tenth character quietly added to the pattern, and six of them added at once was
+// green. Seven characters make that complement dishonest, because YAML does not read them as
+// written at the head of a value either and this parse takes them anyway. Verified against PyYAML
+// 6.0.3 on `name: reviewer\ndescription: <c>Runs a batch`: `>` and `|` open a block scalar and
+// `,`, `]`, `}` a flow context, all five raising; `&a x` silently drops the anchor and yields
+// `x`; and `#` opens a comment, yielding a description of None — a null, not a string. They are
+// the same family as the nine and were held out of this batch's fence deliberately, so they are
+// NAMED here rather than blessed by an unqualified "everything else is accepted". Close one of
+// them and this sweep goes red, which is the point: the member then moves into INDICATOR_MEMBERS
+// with its own case. The list is hardcoded because the suite may not import a YAML parser.
+// Seven is the count for THE FORM SWEPT BELOW — a head character in front of a longer value — and
+// a sweep is only ever complete for the shape it sweeps. A one-character value is its own column
+// and has at least two more members: PyYAML 6.0.3 raises ConstructorError on `tools: =` and loads
+// `tools: ~` as null, which this parse hands back as the string `~` — key present, no list, whole
+// catalog inherited. That column belongs to a later batch; it is named so nobody reads the seven
+// as a claim about every shape a value can take.
+const KNOWN_GAP = ['#', '&', ',', '>', ']', '|', '}'];
+// Neither list carries a quote. A leading quote opens the branch above, and the unterminated
+// scalar this sweep builds is rejected there — the verdict YAML gives it too, by another route.
+const QUOTE_HEADS = ['"', "'"];
+
+test('the indicator rule rejects exactly its members at the head, and names the gap it leaves', () => {
+  const singles = INDICATOR_MEMBERS.filter(m => m.length === 1);
+  assert.equal(singles.length, 8, 'eight of the nine members are single characters and belong to '
+    + 'this sweep; `- ` is two and is pinned by its own rows, in both of its forms');
+  assert.equal(KNOWN_GAP.length, 7, 'seven characters are accepted at the head of a longer value '
+    + 'that YAML does not read as written there — fewer means one was fixed without moving it, '
+    + 'more means one was recorded twice; a one-character value is a column this sweep never enters');
+  assert.deepEqual(KNOWN_GAP.filter(c => INDICATOR_MEMBERS.includes(c)), [],
+    'a character cannot be both a member and a gap: one of the two lists is then unreachable');
+  let swept = 0;
+  const met = { member: 0, gap: 0, quote: 0 };
+  for (let code = 0x20; code <= 0x7e; code++) {
+    const c = String.fromCharCode(code);
+    // A leading space never reaches the value: `: +` in the field regex consumes it and YAML
+    // treats it as separation too, so that column tests the tail on its own, as both readers see it.
+    const line = 'description: ' + c + 'Runs a batch';
+    const verdict = frontmatterField(line);
+    const rejected = typeof verdict === 'string';
+    swept += 1;
+    if (QUOTE_HEADS.includes(c)) {
+      met.quote += 1;
+      assert.ok(rejected && /never closes its opening/.test(verdict), '`' + line + '` opens a quoted '
+        + 'scalar that never closes, and the quoted branch has to keep rejecting it for that reason');
+      continue;
+    }
+    if (singles.includes(c)) met.member += 1;
+    else if (KNOWN_GAP.includes(c)) met.gap += 1;
+    assert.equal(rejected, singles.includes(c), singles.includes(c)
+      ? '`' + c + '` is a declared member and must be rejected at the head of an unquoted value'
+      : KNOWN_GAP.includes(c)
+        ? '`' + c + '` is a KNOWN GAP, not a licence: YAML does not read `' + line + '` as written, '
+          + 'and this parse accepts it anyway. If a later batch closed that, move `' + c + '` out of '
+          + 'KNOWN_GAP and into INDICATOR_MEMBERS, which gives it a rejection case of its own'
+        : '`' + line + '` is valid YAML that reads exactly as written, so it has to be accepted: '
+          + 'a pattern widened past its member list rejects it, and nothing else here would say so');
+  }
+  assert.equal(swept, 95, 'the sweep must cover every printable ASCII character, not a sample');
+  assert.deepEqual(met, { member: 8, gap: 7, quote: 2 }, 'every declared single-character member, '
+    + 'every named gap and both quote heads must be REACHED by this sweep — a list the loop never '
+    + 'meets is a branch no input reaches, and it would hold nothing however right it looked');
 });
 
 // The block parse has three failure paths of its own that no one-line case can reach, and a

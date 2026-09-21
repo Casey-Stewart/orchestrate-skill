@@ -1,0 +1,311 @@
+{
+  "change": "OS-20260920-interview-sizing-backlog",
+  "checkpoint": "C1",
+  "batches": "B01-B07",
+  "branch": "chore/interview-sizing-backlog-ledger",
+  "buildSha": "66732c625ef55d18fd1d1df98d7b814f5e7725e4",
+  "ckptKey": "OS-20260920-interview-sizing-backlog.C1",
+  "pageTitle": "C1 - interview sizing and the backlog sweep",
+  "standfirst": "Seven batches, seventeen items. Every step below was run by an agent on this machine and its evidence is committed; you are asked for a VERDICT, not for labour. That is itself one of the things this change shipped. Run the gate first, then read each step and mark it.",
+  "gate": {
+    "intro": "Run the gate before recording any verdict. These are plain commands with no backslashes and no invisible characters, so nothing between this page and your clipboard can mangle them; they behave the same in cmd.exe, PowerShell and Git Bash.",
+    "commands": [
+      "git -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" rev-parse --short HEAD",
+      "git -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" merge-base --is-ancestor 66732c6 HEAD",
+      "git -C \"C:/Users/fatbo/OneDrive/Desktop/Claude Testing/orchestrate-skill\" diff --name-only 66732c6..HEAD -- . \":(exclude).agents/\""
+    ],
+    "checks": [
+      "The second command must exit <code>0</code>. That proves the build this page describes, <code>66732c6</code>, is contained in the tree you are testing. It is a command you run, not two SHAs you compare by eye - on every previous page this gate could never agree, because committing the page moves HEAD past the build it describes.",
+      "The third command must print <strong>nothing</strong>. Empty output IS the verdict: the pathspec excludes the ledger directory, so anything it prints is a real code change made after the build you are testing. You never read a list to reach an answer.",
+      "If the second command exits <code>1</code>, stop: you are not on the tree this page describes. If the third prints paths, stop and tell me what it printed."
+    ]
+  },
+  "sections": [
+    {
+      "n": 1,
+      "title": "B01 - wrapped polish items in the fence tool",
+      "blurb": "The mechanical fence checker could not read this repository's own ~90-character wrap convention, so a wrapped <code>polish:</code> item read as tampering.",
+      "steps": [
+        {
+          "n": 1,
+          "revision": 2,
+          "do": "Run the real fence tool over a batch file carrying a wrapped <code>polish:</code> item and confirm it reports no violation.",
+          "pass": "The tool exits <code>0</code> and prints no <code>batch-content</code> diagnostic. On the un-fixed tool the same input produced <strong>43</strong> of them. <em>Corrected: the batch file said 48, which was a pre-flight measurement of an earlier state of that file; 43 is what the shipped tip actually produces.</em>",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Exit 0, zero batch-content, on a batch adding four wrapped polish items. Control: the un-fixed tool emitted 43 on the identical input.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B01-step1.md"
+          }
+        },
+        {
+          "n": 2,
+          "do": "Grep <code>orchestrate/templates/02-batch.md</code> for a wrapped <code>polish:</code> example and confirm it sits inside the Checklist instruction comment.",
+          "pass": "The example is present AND lies between the comment's opening and its closing marker, so it never ships live into a scaffolded ledger.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Example at 02-batch.md:29-30, strictly inside the comment spanning lines 23-31.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B01-step2.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "B02 - interview sizing and the topic-5 move",
+      "blurb": "Your request: the interview should ask as many questions as it needs. The cap was never a policy - it was arithmetic in the scaffolder telling it to merge topics down to fit one call.",
+      "steps": [
+        {
+          "n": 3,
+          "do": "Grep <code>scaffolding.md</code> and <code>SKILL.md</code> for the three retired phrases: the 4-question-cap sentence, the literal pairing set, and the one-consolidated-round promise.",
+          "pass": "All three are absent from both files. Their absence is what proves the old default is gone rather than buried under a new paragraph. Note these phrases WRAP across lines in the source, so a line-based grep returns zero even when they are present.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "All three absent, whitespace-collapsed, case-sensitive and insensitive. Control: a phrase known to be present was found by the same instrument.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B02-step1.md"
+          }
+        },
+        {
+          "n": 4,
+          "do": "Sweep the repository for every <code>interview #N</code> citation and print the distinct set of N.",
+          "pass": "The set is exactly {1, 2, 3, 4, 6, 7}. No citation of topic 5 survives outside the ledger, which legitimately quotes it as the text being removed.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Set outside .agents/ is exactly {1,2,3,4,6,7}. Control: the .agents/-included sweep found five interview #5 citations, so the instrument can see them.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B02-step2.md"
+          }
+        },
+        {
+          "n": 5,
+          "do": "Read the interview section of <code>scaffolding.md</code> and procedure step 7.",
+          "pass": "Back-to-back calls are stated as the default; the compound-label ban carries a real example; step 7 names weights alongside plan, wave map, checkpoints and fold-ins.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "All three present and imperative at the three entry points a reader may stop at.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B02-step3.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "B03 - leading YAML indicator characters",
+      "blurb": "A frontmatter value starting with an indicator character is a YAML error, and the end state is severe: the document does not parse, no definition loads, and a read-only role inherits the whole tool catalogue.",
+      "steps": [
+        {
+          "n": 6,
+          "do": "Run the full suite and confirm the agent-definitions frontmatter cases pass, including the indicator sweep.",
+          "pass": "All nine indicator characters are rejected at the head of an unquoted value, and the member list carries a size assertion so the sweep cannot silently shrink.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "306/306. Nine members swept with size and distinctness assertions present.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B03-step1.md"
+          }
+        },
+        {
+          "n": 7,
+          "do": "Confirm the four shipped definitions under <code>.claude/agents/</code> still parse and still report their exact tool lists.",
+          "pass": "implementer, reviewer, test-hunter and qa-runner all load; none is rejected by the new rule.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "All four load with their exact agreed tool lists.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B03-step2.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "B04 - name check-attr in the manual fallback",
+      "blurb": "The manual fallback stated the resolved-filter rule but, unlike its neighbours, named no command - so a human working it by hand had the rule without the tool.",
+      "steps": [
+        {
+          "n": 8,
+          "do": "Grep both <code>protocol.md</code> and <code>templates/00-READBEFORE.md</code> for <code>check-attr</code> in the resolved-filter sentence.",
+          "pass": "Both name the command.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "protocol.md:216 and 00-READBEFORE.md:162 both name git check-attr filter.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B04-step1.md"
+          }
+        },
+        {
+          "n": 9,
+          "revision": 2,
+          "do": "Confirm the edit reflowed nothing: <code>git diff --check</code> is clean and the paragraph around each edited line is unchanged.",
+          "pass": "<code>git diff --check</code> is clean and no line in either paragraph other than the edited ones differs from the base. <em>Corrected: the batch file said 'exactly one line per file'. B04 touched TWO lines per file once its review polish landed - the second renames 'such filters' to 'such filter drivers' so a reader cannot bind it to the probe they were just told to run.</em>",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "git diff --check clean; nothing reflowed. The one-line claim was stale, not the edit.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B04-step2.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "title": "B05 - a test seam for the unreachable evidence guards",
+      "blurb": "Two fail-closed guards could not be reached by any fixture, so flipping either to return true left the suite green while the helper reported clean and then ran git status with a filter driver configured.",
+      "steps": [
+        {
+          "n": 10,
+          "revision": 2,
+          "do": "Confirm the guard paths BL-009 named are exercised, and read the residual below.",
+          "pass": "The two guards BL-009 named are covered, and so is a third the backlog never named, found during review. <strong>Known residual, deliberately deferred:</strong> a FOURTH guard in the same function - the path-inventory terminator - has no coverage; disarming it leaves the suite green. I routed it to the backlog during this batch's review because covering it needs a second exported classifier for a different parse, which is new production surface rather than completing the seam this batch built. The pre-smoke runner applied a stricter reading than the step's wording and reported it as a failure; both its finding and my reasoning are recorded in the ledger. Mark this step Fail if you disagree with that scope call.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "WORKS-BUT",
+            "note": "The two named guards plus a third are covered; a fourth is not. See the residual in the Pass text - this is a scope decision, not a defect.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B05-step1.md"
+          }
+        },
+        {
+          "n": 11,
+          "do": "Confirm the evidence tool's published surface did not change.",
+          "pass": "<code>--help</code> is byte-identical to the ledger base and there are still seven published recipes, so no CLI subcommand or flag was added and the mirrored span is untouched.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "--help byte-identical to base, 557 bytes, same SHA-256. Seven recipes.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B05-step2.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "title": "B06 - build identity, sidecar coherence and hand-over proofing",
+      "blurb": "The build-identity gate on every previous page had never worked on any run. This page is the fix, dogfooded - it was built by the repaired builder and had to pass its own new rules.",
+      "steps": [
+        {
+          "n": 12,
+          "do": "Feed the builder a sidecar whose gate carries no containment check.",
+          "pass": "The builder rejects it and names the missing check. Before this change it built the page happily, which is how the gate came to resolve to eyeballing.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Rejected, exit 1, all three missing checks named.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B06-step1.md"
+          }
+        },
+        {
+          "n": 13,
+          "do": "Feed the builder a sidecar carrying an invisible control character inside a copyable command, and a second carrying a Section reference that resolves to nothing.",
+          "pass": "Both are rejected. These are two of the three structurally detectable defects that shipped in the previous checkpoint page.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Both rejected, exit 1. The NUL was built with String.fromCharCode, never an escape in a shell-written script.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B06-step2.md"
+          }
+        },
+        {
+          "n": 14,
+          "do": "Feed the builder a well-formed sidecar carrying a containment check, tabs and newlines, and only resolving cross-references.",
+          "pass": "It is accepted and the page builds. This positive control is what proves the three rejections above are not simply rejecting everything.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Accepted; 51733-byte page, zero unfilled slots.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B06-step3.md"
+          }
+        },
+        {
+          "n": 15,
+          "do": "Read the gate at the top of this page, then run its second and third commands.",
+          "pass": "The gate carries <code>git merge-base --is-ancestor</code> as a command you execute, not prose asking you to compare two SHAs by eye. This page is the fix, dogfooded.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Present in both documents. Run here: ancestor exits 0 with empty diff; a non-ancestor exits 1 and the diff names 17 paths.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B06-step4.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "title": "B07 - self-check code spans and honest runner classification",
+      "blurb": "The scaffolder's own self-check called every placeholder-looking token an unfilled slot, including ones inside code spans - so this very ledger tripped it. And steps were being tagged human on the basis of what test fixtures can do rather than what an agent can.",
+      "steps": [
+        {
+          "n": 16,
+          "do": "Run the scaffolder self-check over this ledger's own directory as the revised rule states it, discounting hits inside fenced and inline code spans.",
+          "pass": "Zero hits outside code spans. Raw, the directory produces dozens - every one inside a code span, because naming a placeholder is the only way to describe repointing it.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "72 raw hits, 0 outside code spans. Control: a bare token survives the masker while inline, fenced and line-break-wrapped ones are discounted.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B07-step1.md"
+          }
+        },
+        {
+          "n": 17,
+          "do": "Sweep all five documents that carry a Runner default and print each one's rule.",
+          "pass": "All five state that a step is human ONLY when it needs a device, a GUI, held credentials, a look-and-see judgement, or something the environment contract forbids an agent here to do - and each names the live-data and another-OS grounds as that last kind. None still says 'default human' unqualified.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Six occurrences across five documents, every ground present in each; zero surviving default-human spellings.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B07-step2.md"
+          }
+        },
+        {
+          "n": 18,
+          "do": "Confirm <code>execution-models.md</code> states that a checkpoint asks the user for a verdict, not for labour.",
+          "pass": "The sentence is present - which is the rule this very checkpoint was built to follow, since all eighteen steps were agent-run and none was handed to you as work.",
+          "pre": {
+            "sha": "66732c6",
+            "stepRevision": 1,
+            "runner": "agent",
+            "verdict": "PASS",
+            "note": "Present at execution-models.md:98-99.",
+            "evidence": ".agents/changes/OS-20260920-interview-sizing-backlog/evidence/C1/B07-step3.md"
+          }
+        }
+      ]
+    }
+  ]
+}

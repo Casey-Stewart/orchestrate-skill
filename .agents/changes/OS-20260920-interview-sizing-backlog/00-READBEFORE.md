@@ -1,10 +1,10 @@
 # READ BEFORE ANY BATCH — orchestration & recovery
 
-**Change**: {{CHANGE_ID}}
+**Change**: OS-20260920-interview-sizing-backlog
 **You are** either the ORCHESTRATOR (the main session the user told to "continue") or an
 IMPLEMENTER/REVIEWER/GATE sub-agent given one batch. Neither of you has the planning
 session's context. This file is the contract. Everything needed to drive this change lives
-in this ledger directory ({{LEDGER_DIR}}) — assume no other context survives between
+in this ledger directory (.agents/changes/OS-20260920-interview-sizing-backlog) — assume no other context survives between
 sessions.
 
 ## Boot sequence (orchestrator, every session)
@@ -12,17 +12,17 @@ sessions.
 1. Read [00-request.md](00-request.md) (the user's verbatim ask + decisions),
    [01-plan.md](01-plan.md) (locked scope, batch table, wave map + checkpoints), and
    [PROGRESS.md](PROGRESS.md), plus the project's always-loaded docs — especially
-   {{GUARDRAILS_REF}}; every batch diff is checked against it. [LOG.md](LOG.md) is the
+   the repository’s `CLAUDE.md` — especially its §Bug-class guardrails, restated in the Repo conventions section of this contract so a driving session needs no other file; every batch diff is checked against it. [LOG.md](LOG.md) is the
    narrative record: read it ON DEMAND by anchor (a Notes cell points at it), never at boot.
 2. Run `git status --porcelain`, `git branch --list`, `git worktree list`; note the current
    branch. **Never switch the main checkout.** Read ledger files from any branch with
    `git show <branch>:./<path>` (the `./` is required — Git Bash on Windows mangles
    `branch:path` otherwise) and write to the ledger through an integration worktree
-   (`git worktree add <scratchpad>/wt-int {{INTEGRATION_BRANCH}}`), using the main checkout
-   only if it already has `{{INTEGRATION_BRANCH}}` checked out. Run `git show` from the
+   (`git worktree add <scratchpad>/wt-int chore/interview-sizing-backlog-ledger`), using the main checkout
+   only if it already has `chore/interview-sizing-backlog-ledger` checked out. Run `git show` from the
    repo or worktree ROOT (the `./` path is cwd-relative). Reuse an integration worktree
    that `git worktree list` already shows; if its directory is gone, `git worktree prune`
-   first — never two worktrees on one branch. Run {{WORKTREE_SETUP}} in a newly created
+   first — never two worktrees on one branch. Run n/a — no dependency install step; the repo has no `package.json`, no build and no third-party module, and the tests run on Node v22.22.3 in a newly created
    integration worktree before validating in it.
 3. **Reconcile** (§Recovery below) before believing any PROGRESS row.
 4. **Resume-time validation**: run the validation commands (quiet form) on the integration
@@ -58,12 +58,25 @@ document.
   batch's OWN artifacts (its new tests' strength, smoke-step prose, comments, a doc sweep
   it owns), no production behavior change (non-blocking; closes as a polish pass).
 - **Gate agents** (read-only, run by the ORCHESTRATOR at the reviewer gate, in parallel
-  with the reviewer): {{GATE_AGENTS}}. Implementers NEVER spawn a gate agent themselves —
+  with the reviewer): the independent reviewer plus the read-only `test-hunter` defined at `.claude/agents/test-hunter.md`,
+on EVERY batch. The test-hunter reads `CLAUDE.md` §Bug-class guardrails before auditing — that list
+is this repository’s own catalogue of vacuity classes, and four of this change’s seven batches add
+assertions to suites whose entire job is catching assertions that cannot fail. S-weight batches take
+the combined reviewer+gate pass the gate shape prescribes; M and L take them as separate passes. Implementers NEVER spawn a gate agent themselves —
   a self-spawned one stalls the implementer uncommitted.
 - **QA runner** — one sub-agent that executes the agent-runnable smoke steps at a
   checkpoint close-out and writes evidence. Runners available in this repo:
-  {{AGENT_RUNNERS}}.
-- **Tiers**: {{ROLE_TIERS}}. The reviewer never runs on a less capable model than the
+  CLI only — Node v22.22.3 and git, both present and exercised by the suite. No browser, no HTTP
+service, no headed app and no GUI is involved anywhere in this change. No disposable data
+environment is needed because nothing here touches user data: every command a smoke step runs is
+read-only or confined to a scratch worktree. Prohibitions: never run a smoke step against
+`refs/heads/main`, never push, and never repoint the user’s `~/.claude/skills/orchestrate` install
+— it is a stale copy, ruled out of scope on 2026-09-20, and it lies outside this repository.
+- **Tiers**: implementers and gate agents run on the default tier; the reviewer runs at least at the
+implementer’s tier, and on the most capable model the session can spawn for any L-weight batch
+(B02, B03, B06, B07) or for the fresh implementer of a user-authorized third round. B04 is the
+only S-weight batch and takes the combined pass; B01 and B05 are M. Record the tier actually used
+in each row’s Notes. The reviewer never runs on a less capable model than the
   implementer; L-weight reviews and the fresh implementer of an authorized third round
   use the most capable model the session can spawn (the "strong tier"); if tiers are
   unavailable, use the default and keep the gate
@@ -93,13 +106,13 @@ use the self-contained manual fallback below. Neither helper writes evidence fil
 the conductor may capture stdout with the command, exit and captured SHAs.
 
 ```text
-node {{EVIDENCE_TOOL}} discovery --repo <repo>
-node {{EVIDENCE_TOOL}} worktrees --repo <repo>
-node {{EVIDENCE_TOOL}} ancestry --repo <repo> --ancestor <ref-or-sha> --descendant <ref-or-sha>
-node {{EVIDENCE_TOOL}} shipment --repo <repo> --integration <full-ref> --source local --ref <full-shipment-ref>
-node {{EVIDENCE_TOOL}} shipment --repo <repo> --integration <full-ref> --source remote --remote <name> --ref <full-shipment-ref>
-node {{EVIDENCE_TOOL}} ledger --repo <repo> --ref <full-ref> --ledger <id> --owner <ref-or-sha> --target <ref-or-sha>
-node {{FENCE_TOOL}} --repo <repo> --integration <full-ref> --batch <full-ref> --ledger <id> --batch-id <Bnn> --batch-file <repo-relative-path>
+node orchestrate/tools/git-evidence.mjs discovery --repo <repo>
+node orchestrate/tools/git-evidence.mjs worktrees --repo <repo>
+node orchestrate/tools/git-evidence.mjs ancestry --repo <repo> --ancestor <ref-or-sha> --descendant <ref-or-sha>
+node orchestrate/tools/git-evidence.mjs shipment --repo <repo> --integration <full-ref> --source local --ref <full-shipment-ref>
+node orchestrate/tools/git-evidence.mjs shipment --repo <repo> --integration <full-ref> --source remote --remote <name> --ref <full-shipment-ref>
+node orchestrate/tools/git-evidence.mjs ledger --repo <repo> --ref <full-ref> --ledger <id> --owner <ref-or-sha> --target <ref-or-sha>
+node orchestrate/tools/check-fence.mjs --repo <repo> --integration <full-ref> --batch <full-ref> --ledger <id> --batch-id <Bnn> --batch-file <repo-relative-path>
 ```
 
 Evidence stdout is one JSON object: operation, repo, completeness
@@ -159,9 +172,9 @@ body of only the selected ledger; never copy it into the default checkout.
 For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contained,
 1 not-contained, any other exit unknown. Shipment source resolution is in Recovery.
 Inspect every worktree's porcelain status including untracked files and both rename
-endpoints. Before status, run git check-attr filter on the paths status inspects:
+endpoints. Before status, resolve the filter attribute of the paths status inspects:
 a path resolving to a set filter, or a submodule, makes safe cleanliness unknown;
-unspecified, unset and mere configuration do not. Never execute such filter drivers to
+unspecified, unset and mere configuration do not. Never execute such filters to
 obtain a clean result. For the manual fence, use git diff --name-status -z -M
 integration-sha...batch-sha, inspect both rename endpoints against the committed plan
 union recorded extensions union own batch file; inspect that file's blob diff for
@@ -172,30 +185,46 @@ the same fresh semantic reviewer gate. No helper or fallback changes round caps.
 
 ## Git model (locked)
 
-- Default branch (protected local ref): `{{MAIN_BRANCH}}`. Integration branch: `{{INTEGRATION_BRANCH}}` —
+- Default branch (protected local ref): `refs/heads/main`. Integration branch: `chore/interview-sizing-backlog-ledger` —
   every reviewed batch merges into it, and it is the ONLY branch that ever merges
-  toward `{{MAIN_BRANCH}}`.
-- Shipment source: `{{SHIPMENT_SOURCE}}`. Shipment ref: `{{SHIPMENT_REF}}` — the
+  toward `refs/heads/main`.
+- Shipment source: `remote origin (https://github.com/Casey-Stewart/orchestrate-skill.git) — a merge on that remote counts as shipped; a local merge does not`. Shipment ref: `refs/heads/main` — the
   confirmed default branch on that source. `local` means a local merge counts;
   `remote <name>` means a merge on that remote counts. These are locked facts,
   distinct from permission to merge/push. Remote-tracking refs are cached evidence,
   never a substitute for the recorded source. Resolve shipment as described in
   §Recovery; do not re-detect these facts from the current checkout.
 - One branch per batch, named in the batch file (branch prefixes in this repo:
-  {{BRANCH_PREFIXES}}), cut from the integration tip when the batch's wave opens.
+  `chore/` `feat/` `fix/` `test/` `docs/` — history shows `fix/` for batch branches and `chore/` for ledger branches; this ledger uses `chore/` for its integration branch and `fix/` for every batch), cut from the integration tip when the batch's wave opens.
   Wave members run CONCURRENTLY: one implementer per batch, each in an isolated git
   worktree under the session scratchpad (never inside the repo). Per-worktree setup:
-  {{WORKTREE_SETUP}}. Same-wave fences were planned disjoint.
-- **Merge/push policy**: {{MERGE_POLICY}}
-- **Execution model: {{EXECUTION_MODEL}}** — {{EXECUTION_MODEL_RATIONALE}}
-- Wave open = ONE PROGRESS commit on `{{INTEGRATION_BRANCH}}` (member rows → `🔄`,
+  n/a — no dependency install step; the repo has no `package.json`, no build and no third-party module, and the tests run on Node v22.22.3. Same-wave fences were planned disjoint.
+- **Merge/push policy**: Each REVIEWED batch merges into `chore/interview-sizing-backlog-ledger` with `--no-ff`, so every
+batch keeps its own commits and the merge commit names the batch.
+**The integration branch is where this change stops.** Merging it into `refs/heads/main`, and any
+push to `origin`, require the user’s explicit words in the session that does it — recorded verbatim
+in the smoke-verdict log. The user’s answer at scaffold time (2026-09-20) was: stop at the
+integration branch; `main` and `origin` untouched until authorized after C1 passes. Batch commits
+survive (no squash), so surgical reverts stay available.
+- **Execution model: Waved stack — W1: B01; W2: B02+B03+B04+B05; W3: B06; W4: B07. Checkpoint: C1 final after W4, fully agent-run** — B01 runs alone and first because it repairs the fence tool every later batch is gated by:
+`validateBatchEdit` accepts only single-line `- [x] polish:` items, while this repository wraps
+every checklist line at ~90 characters, and that mismatch (BL-011) produced 48 violations on the
+tool’s first real use. Fixing it in wave 1 means waves 2–4 are checked by a working tool instead
+of by six manual fallbacks. W2’s four members are mutually file-disjoint and no member reads
+another’s output. B06 and B07 each run alone because the documents they must change are
+contested: `orchestrate/templates/00-READBEFORE.md` is wanted by B04, B06 and B07, and
+`orchestrate/references/execution-models.md` by B06 and B07. One checkpoint, final: after the
+user dropped the live `/orchestrate new` trial on 2026-09-20, nothing in this change needs a
+device, a GUI, held credentials or a look-and-see judgement, so every C1 step is agent-runnable
+and an intermediate checkpoint would prove nothing an earlier wave could not
+- Wave open = ONE PROGRESS commit on `chore/interview-sizing-backlog-ledger` (member rows → `🔄`,
   branches named, wave base SHA in the session log, `**State**` line updated) — the crash
   marker §Recovery keys on. PROGRESS, LOG and `evidence/` are edited ONLY on the
   integration branch, by the orchestrator, through the integration worktree (the QA runner
   writes `evidence/` files there; the orchestrator commits them); implementers
   touch only their own batch file, on their own branch, and only its checklist ticks,
   appended `- [ ] polish:` lines, and its Files line under a recorded fence extension.
-- **Integration procedure, per batch**: `git merge-tree --write-tree {{INTEGRATION_BRANCH}}
+- **Integration procedure, per batch**: `git merge-tree --write-tree chore/interview-sizing-backlog-ledger
   <batch>` as a dry run — a conflict is STOP AND INVESTIGATE (fence violation, unrecorded
   fence extension, or a ledger file edited on both sides; git reports the conflict, not
   the cause), never hand-resolved silently → merge → run the validation commands on the
@@ -209,7 +238,7 @@ the same fresh semantic reviewer gate. No helper or fallback changes round caps.
   the merge and tip validation like any batch. A repair is a `fix` batch for step 6b: it
   must carry a test that fails on the pre-repair tip (a revert is exempt — its proof is a
   green tip after the merge and a reviewer confirming the diff is the exact inverse). Never a direct commit on
-  `{{INTEGRATION_BRANCH}}`.
+  `chore/interview-sizing-backlog-ledger`.
 - The wave map and checkpoint placement in [01-plan.md](01-plan.md) are LOCKED: plan
   approval authorized the concurrency; deviations need the user's explicit words,
   recorded verbatim in PROGRESS (sole standing exception: a recorded `NEEDS_FENCE`
@@ -245,18 +274,40 @@ extensions ∪ the batch's own file — never the implementer's Files line alone
 
 ## Validation commands
 
-{{VALIDATION_COMMANDS}}
+Run from the designated worktree root in PowerShell:
+
+```powershell
+$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)
+if ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }
+node --test --test-reporter=spec @testFiles
+if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }
+git diff --check
+if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }
+```
+
+This is the recipe `README.md` designates for ledger validation; Node’s bare `node --test`
+discovery is a portable convenience only and is NOT the gate. `node --test tests/` is neither —
+Node’s directory-argument discovery differs and the suite fails. Baseline at the ledger base
+`efc4eec`: **260 pass, 0 fail**, ~3.3 minutes (Node v22.22.3). Report the totals line plus failing
+test NAMES; read full output only on failure.
+
+**Where the helpers run.** `orchestrate/tools/check-fence.mjs` and `orchestrate/tools/git-evidence.mjs`
+are repo-relative paths, so the copy that executes is whichever the CURRENT checkout holds. Always
+invoke them from the integration checkout or an integration worktree — never from a batch worktree
+and never from a checkout parked on `refs/heads/main`. This change edits both tools, so once B01 has
+merged the fence check is run by the FIXED tool; running it from the wrong tree silently reinstates
+the defect it just repaired.
 
 All must pass before a batch may integrate (`🟢`). Orchestrator runs use the QUIET form
 above (a totals line plus failing test NAMES, so failing sets compare by name against any
 allowlist); full output is read only on a non-zero exit. If the block above says `none`,
 the checkpoint smoke tests carry ALL verification — state that explicitly when handing
-over. Mutation runner (optional, scoped to a batch's changed files): {{MUTATION_RUNNER}}.
+over. Mutation runner (optional, scoped to a batch's changed files): none — no Stryker/mutmut/cargo-mutants/PIT configuration exists in this repo.
 
 ## Version + changelog rule (orchestrator-only)
 
-- Version files (bump in lockstep): {{VERSION_FILES}}
-- Bump cadence: {{VERSION_BUMP_RULE}} — applied on the integration branch at
+- Version files (bump in lockstep): none — this repo ships no version file
+- Bump cadence: none — nothing here is versioned, built, packaged or published. The checkpoint tells builds apart by the integration SHA carried in the smoke page, not by a version number; B06 is the batch that makes that identity check executable rather than eyeballed — applied on the integration branch at
   integration or checkpoint close-out, never inside a wave worktree.
 - **Whatever the cadence, the version MUST differ from the base branch's by the time
   a checkpoint script is handed over.** A version shared with the base makes the
@@ -264,14 +315,69 @@ over. Mutation runner (optional, scoped to a batch's changed files): {{MUTATION_
   against the wrong tree and report the un-fixed defects as failures. If the cadence
   above would leave them equal at a checkpoint, bump anyway and note it in PROGRESS. A
   checkpoint marker costs the PATCH component; the release takes ONE minor.
-- Changelog: {{CHANGELOG_RULE}}
+- Changelog: none — this repo keeps no changelog
 
 Implementer sub-agents NEVER touch version files, the changelog, PROGRESS or LOG. If all
 three lines say `none`, skip version/changelog work at close-out and say so.
 
 ## Repo conventions (binding)
 
-{{REPO_CONVENTIONS}}
+- **Markdown is source of truth.** The product of this repository IS the `orchestrate/` skill —
+  `SKILL.md`, `references/`, `templates/`, `tools/`. Editing them changes behaviour for every
+  future ledger, so they are source, not prose. Keep additions surgical; **never reflow or
+  reformat surrounding text to accommodate an insertion**, and never restate an existing rule in
+  new words.
+- **Tests are `node:test` CommonJS** under `tests/*.test.cjs`. They read the skill files as text
+  and assert on their content, so a wording change can break a test in a file you did not open.
+  **Always run the full suite**, never a single file.
+- `tests/protocol-contract.test.cjs` mirrors `orchestrate/references/protocol.md` against
+  `orchestrate/templates/00-READBEFORE.md`: the §Read-only evidence tools sections must be
+  byte-identical after placeholder substitution, and two decision tables are pinned by SHA-256.
+  It also pins `recipes.length === 7`, so no batch may add a helper subcommand or flag. A
+  one-sided edit to either mirror goes red.
+- **Line endings.** `.gitattributes` pins specific fixture files and `git diff --check` is part of
+  validation. Introduce no trailing whitespace and change no file’s EOL style. `sed -i` under Git
+  Bash silently converts this repo’s CRLF working-tree files to LF — do not use it.
+- **No build step, no package manager, no third-party dependency.** Do not add one. There is no
+  YAML parser available to the tests; `tests/agent-definitions.test.cjs` hand-rolls one
+  deliberately.
+- Commit messages are conventional: `type: summary (batch NN)`.
+
+**Bug classes this repository has actually produced.** Check a diff against the ones its own fence
+can violate — every class below was found here, not imagined:
+
+- *Assertions that cannot fail.* A guard wrapped in a permanently-false condition. An assertion
+  satisfied by a neighbouring assertion’s output — `assert.deepEqual` APPENDS its custom message to
+  the diff rather than replacing it, so a substring check passes on the diff no matter what the
+  message says; read the first line alone when you mean the message. A boundary pinned on one side
+  only. A whitelist pinned by sampling rather than swept whole, with the member list written
+  independently of the pattern so a both-at-once edit is caught by a set-size assertion. A branch no
+  input reaches. A self-fulfilling canary with no live control. A test that pins the defect and so
+  freezes the old meaning of "correct".
+- *Parsers, guards and their real consumers.* A hand-rolled parse more permissive than the real
+  consumer’s — for frontmatter that is YAML, a document that fails to parse loads NO definition, so
+  a "read-only" role inherits the entire tool catalog. Prefer rejecting on doubt: a false rejection
+  is a loud local red test, a false acceptance is a silent full-catalog inheritance. A whitelist
+  that never enumerates its directory, recursively wherever the consumer recurses. A mechanical
+  checker that cannot read its own repository’s conventions — where a machine parses human-filled
+  text, the TEMPLATE must SHOW the accepted form, not describe it. A defect fixed in the reported
+  instance and left in its sibling: on any parser or probe fix, grep for every other reader of the
+  same document. A guard whose verdict depends on the checkout rather than the code.
+- *Documents as code.* Skill source written from inside this repo but read from outside it — point
+  at an action the reader can perform anywhere, never at a path only this clone resolves.
+  **Positive-only assertions on prose**: where the production code is wording, a suite that only
+  asserts what must be PRESENT is defeated by appending a sentence — pin the passage AND sweep the
+  rest of the document for contradicting directives. Vacuous-until-later documentation: a sentence
+  true when written can be false when a later batch lands.
+- *Hand-over artifacts.* Verified means verified AS PUBLISHED — a command is verified only when
+  executed in the form the reader receives it, extracted from the rendered artifact, not from the
+  source or the shell it was composed in. Never pin a count that grows. A step whose output a human
+  cannot reasonably check is not a check. "No test can verify this" is not "no agent can verify
+  this": a checkpoint asks the user for a VERDICT, not for labour.
+- *A backlog entry is a pointer, not a specification.* Re-verify every entry against the source
+  before drawing a fence. This change’s own pre-flight found BL-014 and BL-016 understating their
+  file sets and `tests/smoke-page.test.cjs` missing from B06 entirely; all three fences were widened
+  before the scaffold commit.
 
 ## Hard prohibitions
 
@@ -283,11 +389,19 @@ three lines say `none`, skip version/changelog work at close-out and say so.
   agents; never leave untracked files in the worktree (reconcile reads that as dirt —
   scratch goes under the session scratchpad).
 - No `--no-verify`, no force-push, no history rewriting.
-- Never commit to `{{MAIN_BRANCH}}`, never push, never merge toward `{{MAIN_BRANCH}}` —
+- Never commit to `refs/heads/main`, never push, never merge toward `refs/heads/main` —
   except as the merge/push policy above allows or the user explicitly authorizes in the
-  current session. (Merging reviewed batch branches into `{{INTEGRATION_BRANCH}}` is
+  current session. (Merging reviewed batch branches into `chore/interview-sizing-backlog-ledger` is
   the orchestrator's normal job.)
-- {{EXTRA_PROHIBITIONS}}
+- **Never rewrite a completed ledger.** `.agents/archive/**`,
+  `.agents/changes/OS-20260919-agent-tool-restrictions/**` and
+  `.agents/changes/OS-20260919-backlog-sweep/**` are historical records whose own contracts make
+  this binding; read them freely, write to none. `bugs-2026-09-17.md` is a dated point-in-time
+  review record pinned to commit `af57139` and is off limits to every batch. `BACKLOG.md` is
+  ORCHESTRATOR-OWNED and appears in NO batch fence — entries close at the change-complete
+  distillation, never by the implementer who fixed them. Never repoint, replace or delete
+  `~/.claude/skills/orchestrate`: it is a stale copy of this skill, ruled out of scope by the user
+  on 2026-09-20, and it lies outside this repository entirely.
 
 ### Complete checkpoint inputs
 
@@ -359,19 +473,21 @@ the batch table); the final checkpoint is mandatory and covers everything since 
 last one. At a checkpoint the orchestrator assembles ONE combined script — every
 covered batch's smoke steps, data-touching sections first, then the rest of the
 hands-on work, steps numbered continuously. How the user smoke-tests in this project:
-{{SMOKE_PROCEDURE}}. A reached checkpoint is never skipped and never resolved without
+there is no by-hand procedure for this change and no hands-on step. Every deliverable is a file in
+this repository, so every C1 step is a command a QA-runner sub-agent executes on this machine — the
+published PowerShell validation recipe, greps over the edited documents proving both the rule that
+was added and the absence of the text it replaced, the real `check-fence.mjs` run over a wrapped
+`polish:` item, and the real `build-smoke-page.mjs` rejecting a sidecar whose gate carries no
+containment check. The user asked for the live `/orchestrate new` trial to be DROPPED (2026-09-20)
+once it emerged that the installed skill cannot see the integration branch, so C1 asks the user for
+a VERDICT on the evidence, not for labour. A reached checkpoint is never skipped and never resolved without
 the user's verdict.
 
 **Runners.** Every smoke step is tagged at planning time `Runner: agent` (executable in
 THIS repo's environment by the runners listed under Roles) or `Runner: human` (hardware,
 credentials, feel, another OS, or anything not listed). A step flagged "Touches your data"
-is human unless the runner line names a disposable fixture environment. A step is human
-ONLY when it needs something an agent on this machine cannot do: a device, a GUI, held
-credentials, a judgement about whether something looks right, or something the environment
-contract forbids an agent here to do — the data and another-OS grounds above are that last
-kind, not exceptions to this rule. A fixture's isolation is not such a thing, and a
-checkpoint asks the user for a verdict, not for labour.
-Before the page is issued, the QA runner executes every agent step on the
+is human unless the runner line names a disposable fixture environment. Default is
+human. Before the page is issued, the QA runner executes every agent step on the
 integration tip and writes `evidence/C<n>/step-NN.md` (command, exit code, output tail or
 screenshot path, the integration SHA and the environment). The page renders those steps
 as **pre-verified** with their evidence, collapsed but re-runnable; human steps are
@@ -408,31 +524,14 @@ hosts, or browsers does not transfer saved marks automatically. Use the recorded
 verdicts and the new hand-over's results; missing stored marks are not passes.
 
 Every script OPENS with a non-verdict gate: the command that prints the current
-branch, an executable containment check, the version the user must see, and a canary
-whose result is OPPOSITE on the
+branch, the version the user must see, and a canary whose result is OPPOSITE on the
 base build — run first, "if it behaves the old way, stop and say so".
-The containment check is run, never eyeballed: committing the page moves `HEAD` past
-the build the page describes, so `git rev-parse HEAD` can never equal `BUILD_SHA`.
-Put these in the sidecar's `gate.commands`, with the tested SHA written out:
-
-```text
-git merge-base --is-ancestor <buildSha> HEAD
-git diff --name-only <buildSha>..HEAD -- . ":(exclude).agents/"
-```
-
-The first must exit 0; the second must print NOTHING — the pathspec excludes the ledger
-directory, so empty output is the verdict and no one reads a list to reach one.
-`build-smoke-page.mjs` refuses a sidecar whose `gate.commands` omits either command or
-the SHA the sidecar records, a sidecar carrying any Unicode control character (C0, `DEL`
-or C1, the last for the NEL line terminator `U+0085`) other than tab or
-newline, and a `Section N` or `Step N` reference to a section or step it does not
-contain. Author embedded commands with no backslashes and no control characters.
 
 **Verdicts are four**: **pass** · **fail** (did something else — triage to the
 offending batch(es) → ❌) · **blocked** (the step could not be performed as written —
 correct the STEP and re-ask, or reclassify as fail if the app lacks the behavior) ·
 **works-but** (works exactly as specified, the user wants it different → named
-{{BACKLOG_FILE}} entry — never a failure, never blocks the pass). The user's message
+BACKLOG.md entry — never a failure, never blocks the pass). The user's message
 carries the verdict — the page's "Copy results as text" paste is the preferred form,
 recorded verbatim. On re-issues never renumber existing steps (verdicts key on step
 numbers); annotate corrected steps instead.
@@ -483,9 +582,9 @@ must be distinct from the default and shipment branches.
 Resolve the integration branch's full local ref to `<integration-sha>`. Resolve
 `<shipment-sha>` from the recorded source:
 
-- `local`: `git rev-parse --verify {{SHIPMENT_REF}}^{commit}`. This needs no remote;
+- `local`: `git rev-parse --verify refs/heads/main^{commit}`. This needs no remote;
   an unpushed local merge counts under this policy.
-- `remote <name>`: read `git ls-remote --exit-code <name> {{SHIPMENT_REF}}` now and
+- `remote <name>`: read `git ls-remote --exit-code <name> refs/heads/main` now and
   take the SHA of the exact matching ref. Verify that object exists locally as a
   commit before testing ancestry. A cached `refs/remotes/...` value alone does not
   establish current upstream state. A failed query, missing ref or missing object
@@ -502,22 +601,22 @@ For each PROGRESS row not `✅`/`👤`/`⛔ (dropped)`:
 
 ```sh
 git rev-parse --verify <branch>                                        # exists?
-git merge-base --is-ancestor <branch> {{INTEGRATION_BRANCH}} && echo INTEGRATED
+git merge-base --is-ancestor <branch> chore/interview-sizing-backlog-ledger && echo INTEGRATED
 git merge-base --is-ancestor <integration-sha> <shipment-sha>          # only after source resolution above
-git log {{INTEGRATION_BRANCH}}..<branch> --oneline                     # commits ahead
+git log chore/interview-sizing-backlog-ledger..<branch> --oneline                     # commits ahead
 git worktree list && git status --porcelain                            # dirt (check each wave worktree)
-git show <branch>:./{{LEDGER_DIR}}/02-batches-NN-<slug>.md             # checklist state (keep the ./; run from the root)
+git show <branch>:./.agents/changes/OS-20260920-interview-sizing-backlog/02-batches-NN-<slug>.md             # checklist state (keep the ./; run from the root)
 ```
 
 Rows are matched top to bottom; the first match wins.
 
 | Ledger says | Git shows | Verdict |
 |---|---|---|
-| any row whose Notes end in a spent *fix again* (`third round on <branch> @<sha>`) | no commit after `@<sha>`, branch not yet an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed before the third round landed → re-spawn the FRESH strong-tier implementer per step 2's table |
-| any row whose Notes end in a spent *fix again* | commits after `@<sha>`, branch not yet an ancestor of `{{INTEGRATION_BRANCH}}` | Third round landed → worktree dirty: re-spawn the FRESH strong-tier implementer at the open findings; clean: fence check, then the fresh re-review with both rounds' findings |
+| any row whose Notes end in a spent *fix again* (`third round on <branch> @<sha>`) | no commit after `@<sha>`, branch not yet an ancestor of `chore/interview-sizing-backlog-ledger` | Crashed before the third round landed → re-spawn the FRESH strong-tier implementer per step 2's table |
+| any row whose Notes end in a spent *fix again* | commits after `@<sha>`, branch not yet an ancestor of `chore/interview-sizing-backlog-ledger` | Third round landed → worktree dirty: re-spawn the FRESH strong-tier implementer at the open findings; clean: fence check, then the fresh re-review with both rounds' findings |
 | any row whose Notes carry a `… capped:` marker not followed by a later `verdict … spent` (a marker re-written after a spent line counts as awaiting) | any | Awaiting the user's verdict on that repair (fix again / ship with the residual / drop; ship / drop only after a spent *fix again*) — do not re-gate, do not re-spawn; a recorded verdict is consumed by step 2 |
 | any row whose Notes carry a `… repair pending:` marker (`tip repair pending:` / `pre-smoke repair pending:`) with no later spent *ship* / *drop* verdict (those retire it unmerged) | any | In-flight repair — branch missing: spawn it on the named branch; no commit after the marker's `@<sha>`: never started → resume the implementer on that branch (fresh worktree); commits after `@<sha>` but not integrated: resume / gate it per the 🔄 rows on that branch (never a same-named new one); integrated: tip validation (a pre-smoke repair also re-runs its step), remove the marker, then continue per step 2 (tip: back to step 7 or 4; pre-smoke: resume the close-out) |
-| 🔄, Notes carry `polish discarded: @<sha>` | branch not an ancestor of `{{INTEGRATION_BRANCH}}` | Discard in flight → branch tree differs from `@<sha>`: finish the revert (ONE commit spanning `@<sha>..HEAD`; never a reset); tree identical (`git diff @<sha> <tip>` empty): integrate now (dry run → merge → tip validation); the marker stays as the record |
+| 🔄, Notes carry `polish discarded: @<sha>` | branch not an ancestor of `chore/interview-sizing-backlog-ledger` | Discard in flight → branch tree differs from `@<sha>`: finish the revert (ONE commit spanning `@<sha>..HEAD`; never a reset); tree identical (`git diff @<sha> <tip>` empty): integrate now (dry run → merge → tip validation); the marker stays as the record |
 | 🔄 | Notes record `R<k> SHIP @<sha>` (no `asks=` on that line) for the current tip | Reviewed, crashed before the merge → integrate now, no re-review |
 | 🔄 | Notes record `R<k> SHIP @<sha> asks=<n>` for the current tip, worktree clean | Shipped with ASKs, crashed before the polish → polish pass (ASK list in LOG.md), then its mechanical close |
 | 🔄 | Notes record `R<k> SHIP @<sha> asks=<n>`, commits after `@<sha>`, worktree clean, every `polish:` item ticked (at least one appended) | Polish landed, crashed before its close → 6a + validations on the tip; `git diff --name-only <sha>..HEAD` touches only test/doc/prose paths → integrate; a production file → fix-diff-only re-review by a fresh reviewer |
@@ -525,10 +624,10 @@ Rows are matched top to bottom; the first match wins.
 | 🔄 | branch missing, or no commits past the wave base | Implementer never landed → re-spawn it (fresh worktree) |
 | 🔄 | dirty worktree, or commits ahead + partial checklist (incl. unticked `polish:` items; a recorded deferral is not a partial checklist) | Resume the implementer — a fresh agent, the original is gone — at the first unticked item (recreate the worktree if gone; a `SHIP … asks=` line with no `polish:` items yet → the ASK list in LOG.md) |
 | 🔄 | commits ahead, checklist fully ticked | validations green → crashed before the gate → fence check, then the reviewer gate now (latest `R<k>` line is `FIX FIRST @<sha>` → the round-<k+1> re-review, recorded `R<k+1>`: verifies that round's findings from LOG.md, scans `git diff <sha>..HEAD`); red → resume the implementer (fresh) with the failing output, not a round |
-| 🔄 | branch already an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
-| 🟢 (every member of a checkpoint-carrying wave is 🟢, ⛔ or 👤 — verdict or not) | checkpoint row not 🧪/✅ | Close-out unfinished → integrate any 🟢 member whose branch is not yet an ancestor of `{{INTEGRATION_BRANCH}}` (dry run → merge → tip validation), then finish the close-out (tip validation → pre-smoke → page → 🧪); never open the next wave |
-| 🟢 | branch NOT an ancestor of `{{INTEGRATION_BRANCH}}` | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
-| 🟢 | branch ancestor of `{{INTEGRATION_BRANCH}}` | Correct state — waits for its covering checkpoint |
+| 🔄 | branch already an ancestor of `chore/interview-sizing-backlog-ledger` | Crashed between merge and flip → tip validation, then 🟢 (red → repair mini-batch) |
+| 🟢 (every member of a checkpoint-carrying wave is 🟢, ⛔ or 👤 — verdict or not) | checkpoint row not 🧪/✅ | Close-out unfinished → integrate any 🟢 member whose branch is not yet an ancestor of `chore/interview-sizing-backlog-ledger` (dry run → merge → tip validation), then finish the close-out (tip validation → pre-smoke → page → 🧪); never open the next wave |
+| 🟢 | branch NOT an ancestor of `chore/interview-sizing-backlog-ledger` | Crashed between review and merge → integrate now (dry run → merge → tip validation) |
+| 🟢 | branch ancestor of `chore/interview-sizing-backlog-ledger` | Correct state — waits for its covering checkpoint |
 | 🧪 | shipment check confirms integration tip contained in the recorded shipment target | User merged silently → flip the checkpoint's covered rows ✅, propose branch deletes |
 | 🧪 | shipment unknown or target ambiguous | Do not infer a pass or propose cleanup; resolve the target/evidence or ask the user for the checkpoint verdict |
 | 🧪 | shipment check confirms integration tip not contained | Correct state → ask the user for the checkpoint verdict |
@@ -590,7 +689,7 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      integration procedure), then `git commit-tree <tree> -p <tip> -m trial`, check that
      commit out in a temporary worktree (`git worktree add <scratchpad>/wt-trial
      <commit>`; a stale `wt-trial` from a crashed trial is removed first), run the
-     ledger's per-worktree setup there ({{WORKTREE_SETUP}}; skip only if `n/a`), then
+     ledger's per-worktree setup there (n/a — no dependency install step; the repo has no `package.json`, no build and no third-party module, and the tests run on Node v22.22.3; skip only if `n/a`), then
      run the validations and remove the worktree; green → merge for real; red → no
      merge. A setup failure blocks the trial and the merge as an environment problem,
      not a red validation result; resolve setup and retry the trial before deciding
@@ -598,15 +697,15 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
 
    | Subject | fix again | ship with the residual | drop |
    |---|---|---|---|
-   | `⛔` batch | authorized third round: a FRESH implementer on the strong tier, on the batch branch (row → 🔄), both rounds' findings + the current diff, then a fresh re-review; `FIX FIRST` again → `⛔` (kind per step 6; the recorded `R<k> FIX FIRST` line now ends the Notes) | only for `⛔ green, residual finding open` (a `⛔ defective` is fixed again or dropped): integrate per the integration procedure; residual → severity-tagged {{BACKLOG_FILE}} entry + one `Runner: human` smoke step the orchestrator authors into the batch file's Smoke section AFTER the merge, on the integration branch (next checkpoint page, or a re-issue of the passed one) | `⛔ (dropped)`; items → {{BACKLOG_FILE}}; its `⬜` dependents re-planned or dropped on the user's words, asked at the same STOP |
-   | capped `-tip` repair | third round on the repair's own branch; `FIX FIRST` again → capped, marker re-written | trial-validate, then merge only if green (the open finding → {{BACKLOG_FILE}} + smoke step); trial red → no merge, stays capped, marker re-written, ask again | reviewed revert mini-batch `fix/<batch>-revert` of the offending merge; that batch → `⛔ (dropped)`, items → {{BACKLOG_FILE}} |
-   | capped `-presmoke` repair | as above | the human step stands; residual → {{BACKLOG_FILE}} | as ship; the repair branch is deleted (the recorded drop is the authorization) |
-   | `❌ (fix-up capped)` | third round on the fix-up's own branch; `SHIP` → row `❌` and the fix-up proceeds (dry run → merge → tip validation → 🧪 → re-issue); `FIX FIRST` again → capped, marker re-written | trial-validate, then merge only if green; indicted rows → 🧪; re-issue with the failing step annotated as a known residual ({{BACKLOG_FILE}}) | reviewed `fix/<batch>-revert` of the indicted batch's merge; that batch → `⛔ (dropped)`; the rest → 🧪 for the re-issue |
+   | `⛔` batch | authorized third round: a FRESH implementer on the strong tier, on the batch branch (row → 🔄), both rounds' findings + the current diff, then a fresh re-review; `FIX FIRST` again → `⛔` (kind per step 6; the recorded `R<k> FIX FIRST` line now ends the Notes) | only for `⛔ green, residual finding open` (a `⛔ defective` is fixed again or dropped): integrate per the integration procedure; residual → severity-tagged BACKLOG.md entry + one `Runner: human` smoke step the orchestrator authors into the batch file's Smoke section AFTER the merge, on the integration branch (next checkpoint page, or a re-issue of the passed one) | `⛔ (dropped)`; items → BACKLOG.md; its `⬜` dependents re-planned or dropped on the user's words, asked at the same STOP |
+   | capped `-tip` repair | third round on the repair's own branch; `FIX FIRST` again → capped, marker re-written | trial-validate, then merge only if green (the open finding → BACKLOG.md + smoke step); trial red → no merge, stays capped, marker re-written, ask again | reviewed revert mini-batch `fix/<batch>-revert` of the offending merge; that batch → `⛔ (dropped)`, items → BACKLOG.md |
+   | capped `-presmoke` repair | as above | the human step stands; residual → BACKLOG.md | as ship; the repair branch is deleted (the recorded drop is the authorization) |
+   | `❌ (fix-up capped)` | third round on the fix-up's own branch; `SHIP` → row `❌` and the fix-up proceeds (dry run → merge → tip validation → 🧪 → re-issue); `FIX FIRST` again → capped, marker re-written | trial-validate, then merge only if green; indicted rows → 🧪; re-issue with the failing step annotated as a known residual (BACKLOG.md) | reviewed `fix/<batch>-revert` of the indicted batch's merge; that batch → `⛔ (dropped)`; the rest → 🧪 for the re-issue |
 3. If any batch is `🧪`: a checkpoint is open — ask the user for its verdict (passed /
    failed / waive). Never open the next wave past an unanswered checkpoint.
 4. Open the next wave: the earliest wave that still has `⬜` batches (or a recorded
    deferral) whose deps are all `🟢`/`✅`. From the integration tip: cut every member's branch, create every
-   worktree (setup: {{WORKTREE_SETUP}}), then commit the wave-open PROGRESS flip
+   worktree (setup: n/a — no dependency install step; the repo has no `package.json`, no build and no third-party module, and the tests run on Node v22.22.3), then commit the wave-open PROGRESS flip
    (rows → 🔄, wave base SHA in the session log, `**State**: ACTIVE`).
    The cut is idempotent: a member branch that already exists with its tip equal to the
    current integration tip is adopted from a crashed open — its worktree, if any, removed
@@ -627,23 +726,23 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    a round).
    - **6a Fence check (mechanical, orchestrator).** Run the read-only helper above
      or its manual fallback. Worktree clean (`git status
-     --porcelain` empty); `git diff --name-status -M {{INTEGRATION_BRANCH}}...HEAD`; every
+     --porcelain` empty); `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD`; every
      path (both endpoints of a rename) in the plan's fence ∪ recorded extensions ∪ the
      batch's own file — and within the batch file only ticks, `polish:` appends and a
      recorded Files change. Anything else → no reviewer; `NEEDS_FENCE` → §Fence changes,
      otherwise resume the implementer to revert. Not a round.
    - **6b Failing-on-base (mechanical, `fix` batches and repairs).** In a temporary
-     worktree at the branch's base, run {{WORKTREE_SETUP}} there (skip only if `n/a`),
+     worktree at the branch's base, run n/a — no dependency install step; the repo has no `package.json`, no build and no third-party module, and the tests run on Node v22.22.3 there (skip only if `n/a`),
      then copy over the batch's TEST-ONLY files and run its changed tests: an
      assertion failure on the named behavior proves the regression test; every test
      PASSING on the base is a P0 (the fix is unproven); a setup failure or a run that
      cannot execute is inconclusive → reviewer duty (e).
    - **6c Reviewer + gate agents, in parallel, all fresh and read-only.** The reviewer
-     gets the batch file + the diff (`git diff {{INTEGRATION_BRANCH}}...HEAD` in the batch's
+     gets the batch file + the diff (`git diff chore/interview-sizing-backlog-ledger...HEAD` in the batch's
      worktree — three-dot isolates the batch's own changes) and must (a) map every hunk
      to a batch item — unmapped hunks are scope creep → reject (the batch file's ticks are
      exempt); (b) check each acceptance criterion against the diff; (c) run the
-     validation commands; (d) check the diff against {{GUARDRAILS_REF}} and the batch
+     validation commands; (d) check the diff against the repository’s `CLAUDE.md` — especially its §Bug-class guardrails, restated in the Repo conventions section of this contract so a driving session needs no other file and the batch
      file's applicable guardrails; (e) confirm the failing-on-base result from 6b — an
      INCONCLUSIVE run means the reviewer establishes from the test text which changed
      cell fails on the un-fixed code, or says none does — and, when no gate agent runs,
@@ -668,7 +767,7 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      pre-polish `SHIP` tip) into the row's Notes first (the marker §Recovery keys on; it is
      the recorded authorization), then ONE revert commit spanning `@<sha>..HEAD` (never a
      reset — no history rewriting; `git diff @<sha> HEAD` must come back empty), integrate
-     that reviewed tree, unclosed ASKs → {{BACKLOG_FILE}} entries; polish never
+     that reviewed tree, unclosed ASKs → BACKLOG.md entries; polish never
      turns a batch `⛔`. `FIX FIRST` → resume the SAME implementer with the
      findings verbatim, then a fresh re-review that verifies the fixes and scans only the
      fix diff. `NEEDS A CLOSER LOOK` → run the confirming check the
@@ -705,25 +804,25 @@ time), never mid-sequence.
 
 ## Change-complete close-out (after the FINAL checkpoint passes and every batch is `✅` or `⛔ (dropped)`)
 
-- **Convergence pass** — {{CONVERGENCE}}. When on: one read-only sub-agent reads the
+- **Convergence pass** — off — the coverage audit is built from PROGRESS rows plus git. When on: one read-only sub-agent reads the
   integration tip against every plan item (acceptance criteria + the full diff from the
   ledger's **Base** SHA in the PROGRESS preamble, ledger dir excluded) and classifies each `implemented / partial /
-  contradicts / unrequested`; anything but `implemented` becomes a named {{BACKLOG_FILE}}
+  contradicts / unrequested`; anything but `implemented` becomes a named BACKLOG.md
   entry or a convergence mini-batch the user is asked about. When off: the coverage audit
   is built from PROGRESS rows + git, and the hand-over says so.
 - Final coverage audit in PROGRESS: every request item (fold-ins included) maps to a
-  merged commit, an intended-behavior resolution, or a named entry in {{BACKLOG_FILE}} —
-  zero unaccounted. Fold-ins are REMOVED from {{BACKLOG_FILE}} in the close-out commit
+  merged commit, an intended-behavior resolution, or a named entry in BACKLOG.md —
+  zero unaccounted. Fold-ins are REMOVED from BACKLOG.md in the close-out commit
   (the ledger row and commit message carry provenance); a partially done fold-in is
   edited in place there with a pointer to this ledger; residuals added get ids in the
-  {{BACKLOG_ID_PREFIX}} scheme.
+  BL- scheme.
 - Distill: any NEW bug class this change uncovered → ONE-LINE guardrail bullet in
-  {{GUARDRAILS_REF}} naming the class and pointing at the test or mechanism doc that
+  the repository’s `CLAUDE.md` — especially its §Bug-class guardrails, restated in the Repo conventions section of this contract so a driving session needs no other file naming the class and pointing at the test or mechanism doc that
   enforces it (prefer adding the test in this close-out). Repo-wide rules stay in the
   always-loaded section; area-specific ones go to the area's doc. If the always-loaded
   section exceeds ~8 KB / ~120 lines, PROPOSE retirements (to a test, a linked doc, or a
   merge of bullets) for the user to accept — never delete on your own. Harvest in-run
   learnings from LOG.md.
-- Release step (only on explicit user authorization): {{RELEASE_COMMAND}}
+- Release step (only on explicit user authorization): none — nothing in this repo is built, packaged or published
 - Mark the change COMPLETE in the Session log and `**State**: COMPLETE`; propose deleting
   the merged branches and moving this ledger to `.agents/archive/` (`git mv`).

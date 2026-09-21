@@ -118,7 +118,12 @@ The builder also rejects known invalid inputs: a short `buildSha`, a storage key
 is not a nonempty string containing only `[A-Za-z0-9._-]`, section or step numbers
 that are not positive integers or that repeat
 (`1` and `"1"` are one DOM id and one verdict), agent evidence with no `stepRevision` or
-with a `sha` under 7 hex characters. Embedded JavaScript data escapes every `<`, so both
+with a `sha` under 7 hex characters, a `gate.commands` missing either containment
+command or the SHA the sidecar records, any Unicode control character — C0, `DEL` and
+C1, the last for the NEL line terminator `U+0085` — other than tab or newline
+anywhere in the sidecar (the invisible `U+0000` that made a published command a
+`SyntaxError`), and a capitalised `Section N` or `Step N` reference to a section or step
+the sidecar does not contain (`Step 0` is the gate). Embedded JavaScript data escapes every `<`, so both
 `</script>` and `<!-- <script>` remain data during HTML parsing; the original text and
 markup are restored at runtime. Plain names like `Fix "Save as"` also have their quotes
 escaped inside JavaScript strings. Slots the
@@ -134,12 +139,30 @@ and the meter compute themselves from the sections array. `BUILD_SHA` must be a 
 identity with a visible correction message: verdict entry and copying stay disabled,
 and neither saved records nor the artifact store are accessed.
 
+**Proof the published artifact — an ADDED pass, after the page is built.** The QA
+runner's pre-verification happens before the page exists and proves the steps, not the
+bytes the reader receives; this pass is additional and changes nothing about when the
+runner runs. After the page is generated and before the STOP, open the filled
+`smoke-<Cn>.html`, read each `<pre><code>` block's `textContent`, and run exactly those
+bytes in the reader's shell. **A command is verified only when it has been executed in
+the form the reader receives it** — not from the sidecar, not from the batch file, not
+from the shell it was composed in. A command that was re-authored on its way into the
+artifact is an unverified command, however carefully it was checked before. It has
+happened: a pre-verified markdown draft was re-authored into the required HTML and
+issued without anyone running it in that form, and it could not run as published.
+Author every embedded command with **no backslashes and no control characters**, so no
+transport between sidecar, HTML and clipboard can mangle it; the builder refuses a
+sidecar carrying any Unicode control character other than tab or newline. Where the output is too
+long for a person to check, have the command report the answer instead of the data.
+
 ## The gate (Step 0)
 
 `{{GATE_BODY}}` is the build-identity gate from `execution-models.md`, rendered as
 `<p class="gate-eyebrow">Before anything else</p>`, an `<h3>` ("Step 0 — prove you are
 on the right build"), prose + `<pre><code>` command blocks, and an
-`<ol class="gate-checks">` of numbered checks. It is NOT a verdict step — it decides
+`<ol class="gate-checks">` of numbered checks. Its `<pre><code>` blocks carry the
+containment commands that file specifies: they are RUN, not read, and the builder
+refuses a gate that omits them. It is NOT a verdict step — it decides
 whether the run means anything. It must contain, in order:
 
 1. Any "fully quit the app first" instruction the smoke procedure implies (testing a
@@ -147,9 +170,17 @@ whether the run means anything. It must contain, in order:
 2. The exact fetch/checkout commands for the integration branch, in the user's shell
    dialect, including known gotchas (e.g. an untracked ledger copy blocking checkout).
 3. The command that prints the current branch, and what it must print.
-4. The version the user should see and where (`Help → About reads 0.13.1; if it reads
+4. **The containment check**, in `gate.commands` where it EXECUTES — never a check
+   asking the user to compare two SHAs by eye, because committing this page moves
+   `HEAD` past the build it describes and the two can never agree:
+   `git merge-base --is-ancestor <buildSha> HEAD` (must exit 0) and
+   `git diff --name-only <buildSha>..HEAD -- . ":(exclude).agents/"` (must print
+   NOTHING — the pathspec excludes the ledger, so empty output is the verdict rather
+   than a list to read). Write the tested SHA out in both; the builder rejects a gate
+   that omits either command or that SHA.
+5. The version the user should see and where (`Help → About reads 0.13.1; if it reads
    0.13.0, stop — the checkout did not take`).
-5. **The canary**: one cheap check whose result is OPPOSITE on the base build, with
+6. **The canary**: one cheap check whose result is OPPOSITE on the base build, with
    "if it behaves the old way, stop and say so."
 
 ## Assembling the sections
@@ -300,7 +331,8 @@ from "not run".
 
 The STOP message carries: the current page link/path (or full plain-text script),
 the gate essentials **in text** (branch
-command, expected version, canary — so a page that fails to load can't cause a
+command, both containment commands with the SHA written out, expected version, canary
+— so a page that fails to load can't cause a
 wrong-build run), the step/section counts split into human steps and pre-verified
 steps (with the evidence SHA), and "run it from the page; paste the copied results (or
 just tell me) when done — pre-verified steps are yours to skip or re-run."

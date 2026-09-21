@@ -89,7 +89,8 @@ export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths,
   let i = 0, j = 0;
   for (; i < before.length; i++, j++) {
     // Polish is appended after all original checklist content, before the next section.
-    if (i === polishAt) while (/^- \[[ x]\] polish: .+$/.test(after[j] || '')) j++;
+    // An item may wrap: an indented line is consumed only once a header matched here.
+    if (i === polishAt) for (let headed = false; /^- \[[ x]\] polish: .+$/.test(after[j] || '') || (headed && /^ +\S/.test(after[j] || '')); j++) headed = true;
     if (before[i] === after[j]) continue;
     if (i > start && i < end && before[i].startsWith('- [ ] ') && after[j] === before[i].replace('- [ ] ', '- [x] ')) continue;
     if (before[i].startsWith('**Files**: ')) {

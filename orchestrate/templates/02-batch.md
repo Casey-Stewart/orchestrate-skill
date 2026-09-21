@@ -24,7 +24,11 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
      marked `[<id>]` and get their own commit. Implementers tick these as they complete
      them (the reconcile table reads them) and append `- [ ] polish: <ask>` lines only
      when the orchestrator sends a polish pass. Nothing else in this file is theirs to
-     edit. -->
+     edit. An appended item may wrap; its header starts at column 0 and every
+     continuation line is indented under it, exactly as shown:
+- [ ] polish: Pin the boundary from both directions, so a later loosening of the
+      grammar goes red instead of passing.
+-->
 
 ## Acceptance criteria
 
@@ -49,7 +53,12 @@ the merge.
        from Do.
      - Runner: `agent` (executable in THIS repo's environment by a runner the contract
        lists — say which) or `human` (hardware, credentials, feel, another OS, live
-       data). Default human. Agent steps are pre-verified before the hand-over.
+       data). A step is human ONLY when it needs something an agent on this machine
+       cannot do: a device, a GUI, held credentials, a judgement about whether
+       something looks right, or something the environment contract forbids an agent
+       here to do — the live-data and another-OS grounds above are that last kind, not
+       exceptions to this rule. A checkpoint asks the user for a verdict, not for
+       labour. Agent steps are pre-verified before the hand-over.
      - Inputs: stable IDs and exact issued file links, requirements, independently
        validated expected results, read-only or working-copy/reset commands. Conductor
        generates and delivers the files; no manual construction unless being tested.

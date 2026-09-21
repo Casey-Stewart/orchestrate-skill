@@ -11,6 +11,10 @@ const { createHash } = require('node:crypto');
 
 const template = fs.readFileSync(path.join(__dirname, '../orchestrate/references/smoke-page-template.html'), 'utf8');
 const A = 'a'.repeat(40), B = 'b'.repeat(40), C = 'c'.repeat(40);
+// The step-0 gate the builder now requires: a containment proof that executes against
+// the SHA its own sidecar records, not a SHA comparison left to the tester's eye.
+const gateFor = sha => ({ commands: [`git merge-base --is-ancestor ${sha} HEAD`,
+  `git diff --name-only ${sha}..HEAD -- . ":(exclude).agents/"`], checks: ['Verify the build.'] });
 const steps = () => [
   { n: 1, do: 'Open checkout', pass: 'Checkout opens', revision: 1 },
   { n: 2, do: 'Open help', pass: 'Help opens', revision: 1 }
@@ -109,12 +113,12 @@ async function page({ build = A, items = steps(), storage = {}, key = 'c1', clou
 test('sidecar-built reissues preserve old verdicts while appends start unmarked', async () => {
   const { buildSmokePage } = await import(pathToFileURL(path.join(__dirname, '../orchestrate/tools/build-smoke-page.mjs')));
   const previous = { change: 'App', checkpoint: 1, batches: 'B01', branch: 'integration',
-    buildSha: A, ckptKey: 'c1', gate: { checks: ['Verify the build.'] },
+    buildSha: A, ckptKey: 'c1', gate: gateFor(A),
     sections: [{ n: 1, title: 'App', steps: steps() }] };
   const first = await page({ html: buildSmokePage(previous, template) });
   first.mark(1, 'pass'); first.mark(2, 'pass'); first.note(1, 'Original observation');
   const records = [first.record(1), first.record(2)];
-  const current = structuredClone(previous); current.buildSha = B;
+  const current = structuredClone(previous); current.buildSha = B; current.gate = gateFor(B);
   current.sections[0].steps[0].do = 'Open checkout and confirm the repaired total';
   current.sections[0].steps[0].revision = 2;
   current.sections.push({ n: 2, title: 'New coverage', steps: [
@@ -152,7 +156,7 @@ test('real input reissue flows through builder, displayed files and saved verdic
       result: 'All workbook requirements passed.', env: 'Python with openpyxl, independent fixture validator' },
     mode: 'working-copy', use: 'Copy original to a temporary workbook; edit C2.', reset: 'Close copy, recopy original; total returns to 23.50.' };
   const previous = { change: 'Input handoff', checkpoint: 1, batches: 'B03', branch: 'integration', buildSha: A,
-    ckptKey: 'c1', gate: { checks: ['Verify build and canary.'] }, inputs: [input],
+    ckptKey: 'c1', gate: { ...gateFor(A), checks: ['Verify build and canary.'] }, inputs: [input],
     sections: [{ n: 1, title: 'Workbook', steps: [
       { n: 1, revision: 1, do: 'Open workbook copy.', pass: 'Three sheets.', inputs: ['orders'] },
       { n: 2, revision: 1, do: 'Check unrelated feature.', pass: 'It opens.' },

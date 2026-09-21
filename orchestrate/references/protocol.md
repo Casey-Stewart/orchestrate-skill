@@ -213,9 +213,9 @@ body of only the selected ledger; never copy it into the default checkout.
 For ancestry use git merge-base --is-ancestor with captured SHAs: exit 0 contained,
 1 not-contained, any other exit unknown. Shipment source resolution is in Recovery.
 Inspect every worktree's porcelain status including untracked files and both rename
-endpoints. Before status, resolve the filter attribute of the paths status inspects:
+endpoints. Before status, run git check-attr filter on the paths status inspects:
 a path resolving to a set filter, or a submodule, makes safe cleanliness unknown;
-unspecified, unset and mere configuration do not. Never execute such filters to
+unspecified, unset and mere configuration do not. Never execute such filter drivers to
 obtain a clean result. For the manual fence, use git diff --name-status -z -M
 integration-sha...batch-sha, inspect both rename endpoints against the committed plan
 union recorded extensions union own batch file; inspect that file's blob diff for
@@ -368,7 +368,12 @@ skipped and never resolved without the user's verdict.
 environment by a runner the contract lists — CLI, HTTP, browser, screenshot) or
 `Runner: human` (hardware, credentials, feel, another OS, anything unlisted). Steps
 flagged "Touches your data" are human unless the contract names a disposable fixture
-environment. Default human. At close-out the QA runner executes the agent steps on the
+environment. A step is human ONLY when it needs something an agent on this machine
+cannot do: a device, a GUI, held credentials, a judgement about whether something
+looks right, or something the environment contract forbids an agent here to do — the
+data and another-OS grounds above are that last kind, not exceptions to this rule. A
+fixture's isolation is not such a thing, and a checkpoint asks the user
+for a verdict, not for labour. At close-out the QA runner executes the agent steps on the
 integration tip and writes `evidence/C<n>/` (command, exit, tail or screenshot, SHA,
 environment); the page shows them as pre-verified, collapsed, re-runnable. A failing
 agent step keeps rows 🟢, goes to Notes + evidence, and is fixed by a repair mini-batch

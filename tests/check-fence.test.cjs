@@ -142,6 +142,59 @@ test('own batch permits ticks and appended polish while retaining all original l
   const f = fixture(t); f.candidate.write(BATCHFILE, f.batchText.replace('- [ ] Implement', '- [x] Implement').replace('\n\n## Acceptance', '\n- [x] polish: Strengthen test.\n- [ ] polish: Follow up.\n\n## Acceptance')); f.candidate.commit('ticks polish');
   state((await api).checkFence(f.opts), 'PASS');
 });
+test('own batch accepts wrapped polish items and still rejects indented lines with no header', async t => {
+  // Every checklist line in this repository wraps at about ninety characters, so a real
+  // polish ask arrives as a header line plus indented continuation lines.
+  const item = '- [x] polish: Accept the indented continuation lines that the authoring convention\n      of this repository produces, so the mechanical gate reads the wrapped form and\n      not the single-line form alone.';
+  const unticked = '- [ ] polish: Wrap an unticked ask too, exercising the other header box.\n      Its continuation is indented the same way.';
+  const orphan = '      An indented line with no polish header above it.';
+  // Expected lines are those of the proposed file; the baseline blank sits at line 10.
+  const cases = [
+    // Live control: the whole wrapped block is consumed, so nothing reaches the diagnostic.
+    ['wrapped ticked and unticked items', `\n${item}\n${unticked}\n\n## Acceptance`, []],
+    ['continuation with no header above it', `\n${orphan}\n## Acceptance`, [10]],
+    ['wrapped item then an unrelated appended line', `\n${item}\n- [x] Sneak in work.\n## Acceptance`, [13]],
+    ['continuation appended ahead of the blank line', `\n${orphan}\n\n## Acceptance`, [10, 11, 12, 13, 14, 15]],
+  ];
+  for (const [name, replacement, lines] of cases) await t.test(name, async t => {
+    const f = fixture(t); f.candidate.write(BATCHFILE, f.batchText.replace('\n\n## Acceptance', replacement)); f.candidate.commit(name);
+    const r = (await api).checkFence(f.opts);
+    state(r, lines.length ? 'VIOLATION' : 'PASS', lines.length ? 'batch-content' : undefined);
+    assert.deepEqual(r.violations.filter(d => d.code === 'batch-content' && d.path === BATCHFILE).map(d => d.line), lines, JSON.stringify(r.violations));
+  });
+});
+test('the polish scan is pinned to its position, a non-empty ask and the space indent', async t => {
+  const ask = '- [x] polish: An ask that wraps, as every checklist line in this repository does.';
+  const cases = [
+    // Held from BELOW as well as from column 0: one space continues an ask, a tab does not.
+    ['one-space continuation is accepted', s => s.replace('\n\n## Acceptance', `\n${ask}\n One space is enough to continue it.\n\n## Acceptance`), []],
+    ['tab continuation is rejected', s => s.replace('\n\n## Acceptance', `\n${ask}\n\tA tab is not the indent this repository writes.\n\n## Acceptance`), [11, 12, 13, 14, 15, 16]],
+    // Both spellings of an empty ask: no space at all, and the space with nothing after it.
+    ['header with no ask text is rejected', s => s.replace('\n\n## Acceptance', '\n- [ ] polish:\n\n## Acceptance'), [10, 11, 12, 13, 14, 15]],
+    ['header whose ask is empty after the space is rejected', s => s.replace('\n\n## Acceptance', '\n- [ ] polish: \n\n## Acceptance'), [10, 11, 12, 13, 14, 15]],
+    // Reaches the positional guard: consumption happens only where polish may be appended.
+    ['wrapped item outside the Checklist section is rejected', s => s.replace('Preserve this text.', () => `Preserve this text.\n${ask}\n      Its continuation is indented, but this is not the checklist.`), [14, 15]],
+  ];
+  for (const [name, edit, lines] of cases) await t.test(name, async t => {
+    const f = fixture(t), text = edit(f.batchText); assert.notEqual(text, f.batchText);
+    f.candidate.write(BATCHFILE, text); f.candidate.commit(name);
+    const r = (await api).checkFence(f.opts);
+    state(r, lines.length ? 'VIOLATION' : 'PASS', lines.length ? 'batch-content' : undefined);
+    assert.deepEqual(r.violations.filter(d => d.code === 'batch-content' && d.path === BATCHFILE).map(d => d.line), lines, JSON.stringify(r.violations));
+  });
+});
+test('the batch template SHOWS the wrapped polish form, in the exact bytes the validator accepts', async () => {
+  // Read from the shipped template, never a copy: the form shown to implementers and the
+  // form the mechanical gate accepts cannot drift apart. Either checkout style parses.
+  const template = fs.readFileSync(path.join(__dirname, '..', 'orchestrate', 'templates', '02-batch.md'), 'utf8').replace(/\r\n?/g, '\n');
+  const shown = /^- \[[ x]\] polish: .+(?:\n[ \t]+\S[^\n]*)+/m.exec(template);
+  assert.ok(shown, 'orchestrate/templates/02-batch.md must SHOW a wrapped polish item, not only describe one');
+  const block = shown[0].split('\n');
+  assert.ok(block.length >= 2 && block.slice(1).every(l => /^[ \t]+\S/.test(l)), JSON.stringify(block));
+  const baseline = makeBatch(['allowed.txt']), proposed = baseline.replace('\n\n## Acceptance', () => `\n${shown[0]}\n\n## Acceptance`);
+  assert.notEqual(proposed, baseline);
+  assert.deepEqual((await api).validateBatchEdit(baseline, proposed, ['allowed.txt'], [], BATCHFILE), []);
+});
 test('own batch rejects every forbidden structural edit with line diagnostics', async t => {
   const edits = {
     reword: s => s.replace('Implement behavior.', 'Implement something else.'), reset: s => s.replace('- [x] Keep', '- [ ] Keep'),

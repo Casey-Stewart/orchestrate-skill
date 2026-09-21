@@ -63,6 +63,21 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A test that pins the defect.** An existing assertion can encode the old, wrong meaning
   of "correct". When a fix changes what correct means, hunt for the assertion that froze
   the old one.
+- **The fix for a vacuity finding is a prime site for a vacuity finding.** Eleven times in
+  one change, the assertion written to close one contained another — the author is thinking
+  about the behaviour being pinned, not about whether the new pin can fail. Every instance was
+  caught by a gate that MUTATED the fix; none by one that read it. Two shapes are greppable
+  without understanding the code: **two literals that partition the same collection with nothing
+  relating them** — for every array literal used as a loop domain, is there an assertion whose
+  subject is the DOMAIN (size, set-equality, a count over results) rather than its members? — and
+  **an out-parameter passed inline as a fresh literal and never bound**, which declines half of
+  what the function returned. Prefer binding a domain to the checkout over hand-writing it.
+- **A guard whose coverage regressed invisibly across a rewrite.** A sweep rewritten from ten
+  patterns to fourteen — with per-pattern arming, a size assertion and a disclaimer — silently
+  lost a spelling it used to catch, while every visible signal said it grew. Nothing asserted the
+  new family was a superset of the old. Pin coverage against a corpus written independently of
+  the patterns, and assert exclusivity as a domain property: each pattern must own at least one
+  entry no other catches, or deleting it balances both sides at once. *(BL-016 round 2)*
 
 ### Parsers, guards and their real consumers
 
@@ -84,6 +99,13 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A guard whose verdict depends on the checkout rather than the code.** CRLF/LF
   behaviour that passes only because this machine happens to check out one way. Assert the
   equivalence explicitly. *(BL-004, polish)*
+- **A sweep built to catch reversals of a rule is blind to an edit that NARROWS its scope.** A
+  closed enumeration ("human ONLY when it needs a device, a GUI, held credentials, or a
+  look-and-see judgement") shipped one clause from a human list naming grounds it omitted —
+  another OS, live data — which would have licensed tagging a live-data step `agent`. The
+  contradiction sweep could not see it, because it keyed on the rule's own vocabulary and this
+  was a narrowing, not a restatement. When a fix replaces prose with an enumeration, ask what
+  the enumeration excludes that the old text allowed. *(BL-016 round 1)*
 
 ### Documents as code
 
@@ -99,6 +121,11 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A backlog entry can be right about the defect and wrong about the file.** Re-verify
   every entry against the source before drawing a fence; a backlog is a pointer, not a
   specification. *(BL-003 named the wrong file; BL-002 was wider than its text)*
+- **An illustrative list implemented as a closed set.** A backlog entry's "a device, a GUI, held
+  credentials, or a judgement" was an example, not a specification; shipping it behind an ONLY
+  narrowed a safety rule. Five figures baked into one ledger — a registry-row count, a PyYAML
+  claim, a gap-family size, a file set, a violation count — were each corrected by the agent asked
+  to act on them. Re-derive a number before relying on it; a ledger is a pointer too.
 
 ### Hand-over artifacts
 
@@ -111,6 +138,15 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   between authoring and reading. State the shape, not the number.
 - **A step whose output a human cannot reasonably check is not a check.** If verifying
   means scanning hundreds of records, have the command report the answer.
+- **The apparatus that writes or verifies the work can corrupt it, and its output looks right
+  either way.** Six sightings in one change, five tools: `Set-Content` collapsed a test file to
+  one line; `git checkout` ate an uncommitted edit mid-mutation; an editor decoded `\uXXXX` into
+  literal control bytes that behaved identically; a heredoc collapsed `\\n`; the Bash tool
+  collapsed `\\b` into a backspace inside a `new RegExp`, making every pattern dead and
+  producing a **false clean result**. The first three corrupted the work, the last two the
+  verification of it. **Run a live control through your own harness before trusting any green or
+  any zero** — it paid out twice in a single round. Restore-by-checkout is only safe once the
+  real edit is committed.
 - **"No test can verify this" is not "no agent can verify this."** Test fixtures are
   isolated from the real machine by design; a subagent is not. A step needs a human only
   when it needs a device, a GUI, held credentials, or a judgement about whether something
