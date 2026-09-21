@@ -37,10 +37,10 @@ tool rather than silently reinstating the defect.
 
 ## Checklist
 
-- [ ] Narrow the continuation predicate to exclude a checkbox line
-- [ ] Add a test: an appended indented unticked checkbox under a `polish:` header is a violation
-- [ ] Add a test: a wrapped prose continuation under a `polish:` header still passes
-- [ ] Confirm the first new test fails against the unmodified base, and record the output
+- [x] Narrow the continuation predicate to exclude a checkbox line
+- [x] Add a test: an appended indented unticked checkbox under a `polish:` header is a violation
+- [x] Add a test: a wrapped prose continuation under a `polish:` header still passes
+- [x] Confirm the first new test fails against the unmodified base, and record the output
 
 ## Acceptance criteria
 
