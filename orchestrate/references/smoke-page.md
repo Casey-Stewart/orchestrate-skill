@@ -129,8 +129,8 @@ markup are restored at runtime. Plain names like `Fix "Save as"` also have their
 escaped inside JavaScript strings. Slots the
 table above documents as HTML (`headline`, `standfirst`, the facts, the gate) keep their
 markup. Without Node, or with the sidecar lost, copy the newest committed
-`smoke-*.html`, patch the slots by hand, and grep the result for a slot marker — a `{{`,
-an upper-case name, a `}}` — zero hits; the page never
+`smoke-*.html`, patch the slots by hand, and run `grep -o '{{[A-Z_]\{1,\}}}'` over the
+result — zero hits; the page never
 depends on the tool that filled it.
 
 **Self-check before publishing**: the builder greps its TEMPLATE for a `{{` that is not

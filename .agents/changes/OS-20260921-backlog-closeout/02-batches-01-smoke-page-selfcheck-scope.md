@@ -77,7 +77,51 @@ it, STOP with `NEEDS_FENCE` — do not edit B02's test file.
 - [x] Add a test: the built HTML delivers that text to the reader (DOM harness in `tests/smoke-page.test.cjs`)
 - [x] Add a test: a template carrying a malformed slot still throws
 - [x] Add a test: a template slot the sidecar cannot fill still throws (currently unpinned)
-- [x] Confirm every new test fails against the unmodified base, and record the output
+- [x] Confirm each new test fails against the unmodified base — all but `a template slot the
+      sidecar cannot fill aborts the build`, which pins behaviour this batch does not change
+      and is armed by mutation instead — and record the output under Base-failure evidence
+- [x] polish: P1 — replace the vacuous `assert.equal(steps.length, EXPRESSIONS.length)` at
+      `tests/build-smoke-page.test.cjs:81`, and the half of its comment that claims it reddens,
+      with a subject observed on the BUILT page
+- [x] polish: P2 — assert the re-aimed family covers what the old output-side line caught: the
+      published page, outside the filled slot values, carries no `{{` at all (mutant M-G, a
+      literal `{{ leaked ` injected into the body; re-run below with a working anchor)
+- [x] polish: R2 — arm the malformed-slot sweep with the production shape
+      (`slot.replace(/\{\{[A-Z_]+\}\}/g, '').includes('{{')`), not an anchored pattern
+- [x] polish: R3 — give the hand-patch check in `smoke-page.md` a literal command to run rather
+      than a prose description of one
+- [x] polish: R4 — correct the base-failure checklist item to name the one test that pins
+      pre-existing behaviour and say how it was armed
+- [x] polish: R5 — record the base-failure and mutation output in this batch file
+- [x] polish: R6 — pin the CLI success line, or record accepting it as-is
+
+## Base-failure evidence
+
+Base `425b3d7`, builder restored by SHA-256 afterwards.
+`node --test --test-reporter=spec tests/build-smoke-page.test.cjs tests/smoke-page.test.cjs`
+against the unmodified builder — tests 67, pass 64, fail 3:
+
+```text
+not ok 2 - step content carrying a doubled-brace expression publishes unchanged
+  error: 'self-check failed: an unfilled `{{` survived the fill'
+not ok 3 - a template slot name the fill cannot match aborts the build
+  error: operator: 'deepStrictEqual'   (base throws the old fill-failure message instead)
+not ok 39 - a step command carrying a doubled-brace expression reaches the reader
+  error: 'self-check failed: an unfilled `{{` survived the fill'
+```
+
+`a template slot the sidecar cannot fill aborts the build` passes on base, because the branch
+it pins is unchanged by this batch. Armed by mutation instead — replacing that `throw` with
+`return ""` in the FIXED builder gives `not ok 4 - a template slot the sidecar cannot fill
+aborts the build`, `# pass 36 # fail 1`, so it is the only guard on that branch and it is live.
+
+Polish P2, live controls for the output-side assertion. **Mutant M-G as reported is a no-op**:
+the shipped template has no `<body` tag (`grep -c "<body" orchestrate/references/smoke-page-template.html`
+prints `0`), so `out.replace("<body", ...)` changes nothing and its green run measured nothing.
+Re-run against `<main`, which the template does have: `not ok 1 - every template slot is filled,
+and the builder fills no slot the template lacks`, `# pass 36 # fail 1` — caught by this
+assertion alone. The near-miss too: a stray `{{` inside `sidecarStamp` gives `# pass 33 # fail 4`,
+this assertion among them, where on base only the fingerprint/reissue tests reacted.
 
 ## Acceptance criteria
 
