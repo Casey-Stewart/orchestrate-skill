@@ -581,11 +581,19 @@ test('the probe seam can only refuse, and no published invocation reaches it', a
   // value makes this resolving attribute safe. The two probes it can degrade refuse as
   // unread; every other value leaves the real, resolving verdict standing.
   const domain = [undefined, null, '', 'ls-files', 'check-attr', 'status', 'config', 'ls-tree', 'filter', 'ls-files -z', 'LS-FILES', true];
+  assert.equal(domain.length, 12, 'the swept domain has twelve members');
+  assert.equal(new Set(domain).size, domain.length, 'the swept domain has no duplicates');
+  const codes = [];
   for (const failProbe of domain) {
     const diagnostics = [];
     assert.equal(safeResolvedFilters(repo.cwd, diagnostics, { env: repo.env, failProbe }), false, `failProbe=${JSON.stringify(failProbe)} must not make a resolving attribute safe`);
     assert.deepEqual(diagnostics.map(d => d.code), [['ls-files', 'check-attr'].includes(failProbe) ? 'git-probe' : 'unsafe-filter'], `failProbe=${JSON.stringify(failProbe)}`);
+    codes.push(...diagnostics.map(d => d.code));
   }
+  // The domain and the expectation are two independent lists, so deleting a member from
+  // both at once would otherwise leave this green: the partition is pinned by size too.
+  assert.equal(codes.length, domain.length, 'every swept value refused with exactly one diagnostic');
+  assert.equal(codes.filter(code => code === 'git-probe').length, 2, 'exactly two swept values name a probe this function issues');
   assert.deepEqual(repo.snapshot(), before);
 });
 test('a refusing verdict reaches the caller as the diagnostic the classifier produced', async t => {

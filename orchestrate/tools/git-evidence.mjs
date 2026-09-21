@@ -123,7 +123,7 @@ export function filterReportVerdict(pathCount, text) {
 // turns a failed probe into a successful one or a resolving attribute into a safe one, and
 // its only reachable effect is a refusal. The published CLI cannot set it: parseFlags admits
 // only the flags `--help` lists, and rejects any other as an invalid invocation.
-function degradedProbe(repo, args, options) {
+function degradedProbe(repo, args, options = {}) {
   const result = git(repo, args, options);
   return options.failProbe === args[0] ? { ...result, ok: false } : result;
 }

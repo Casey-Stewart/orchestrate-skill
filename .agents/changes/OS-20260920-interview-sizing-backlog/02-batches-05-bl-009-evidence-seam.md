@@ -76,6 +76,13 @@ untested however correct it is."* Demonstrate both mutations in the implementer 
       that holds it, and the terminator half has an input whose field count matches exactly.
       Also closed the two smaller notes: the probe test compares `repo.snapshot()` either side,
       and the name and value guards pin an odd interior record, not only first and last.
+- [x] polish: R2 ASK-1 — `degradedProbe` dereferenced `options.failProbe` with no default, so
+      `safeResolvedFilters(repo, diagnostics)` threw where it had returned `true`. Every other
+      helper in the module defaults that argument; this one now does too (`options = {}`).
+- [x] polish: R2 ASK-2 — the 12-value seam sweep was itself pinned by sampling: deleting a
+      member from the domain and from the expectation together stayed green. The domain now
+      carries a size and a no-duplicates assertion, and the partition is pinned by counting the
+      `git-probe` verdicts, so neither list can shrink silently.
 
 ## Acceptance criteria
 
