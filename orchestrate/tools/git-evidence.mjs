@@ -116,6 +116,17 @@ export function filterReportVerdict(pathCount, text) {
   }
   return null;
 }
+// Test seam: `options.failProbe` names a Git subcommand whose result this function must read
+// as failed, so a test can reach the two refusals no repository produces: a corrupt index
+// fails the index inventory too, and check-attr exits 0 on every unreadable attributes
+// source. It can only DEGRADE: it forces `ok` false and changes nothing else, so no value
+// turns a failed probe into a successful one or a resolving attribute into a safe one, and
+// its only reachable effect is a refusal. The published CLI cannot set it: parseFlags admits
+// only the flags `--help` lists, and rejects any other as an invalid invocation.
+function degradedProbe(repo, args, options) {
+  const result = git(repo, args, options);
+  return options.failProbe === args[0] ? { ...result, ok: false } : result;
+}
 // Exported for the same reason: a unit test can watch this verdict directly, where the
 // worktrees walk above it collapses every refusal into the same `unknown`. Running it
 // executes ls-files and check-attr only; it never runs status and never returns true on a
@@ -126,14 +137,14 @@ export function safeResolvedFilters(repo, diagnostics, options) {
   // filter attribute there cannot make a driver run; --exclude-standard applies the very
   // exclusions status applies, so that precision is free. Listing paths and reading their
   // attributes executes no driver: check-attr resolves text files, it converts nothing.
-  const listing = git(repo, ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], options);
+  const listing = degradedProbe(repo, ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], options);
   if (!listing.ok) { diagnostics.push({ ...listing.diagnostic, path: repo }); return false; }
   if (!listing.text) return true;
   const paths = listing.text.split('\0');
   if (paths.pop() !== '') { diagnostics.push(diagnostic('invalid-attributes', 'Malformed path inventory', { path: repo })); return false; }
   // The NUL-separated listing is fed through verbatim, so quotes, spaces and non-ASCII
   // survive; -z output is NUL-separated path/attribute/value triples, never tab-delimited.
-  const attributes = git(repo, ['check-attr', 'filter', '-z', '--stdin'], { ...options, input: listing.bytes });
+  const attributes = degradedProbe(repo, ['check-attr', 'filter', '-z', '--stdin'], { ...options, input: listing.bytes });
   if (!attributes.ok) { diagnostics.push({ ...attributes.diagnostic, path: repo }); return false; }
   const verdict = filterReportVerdict(paths.length, attributes.text);
   if (verdict) { diagnostics.push({ ...verdict, path: repo }); return false; }

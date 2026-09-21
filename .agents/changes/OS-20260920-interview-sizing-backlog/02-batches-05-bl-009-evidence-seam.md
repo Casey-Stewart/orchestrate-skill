@@ -66,6 +66,16 @@ untested however correct it is."* Demonstrate both mutations in the implementer 
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/bl-009-evidence-seam` — `fix: a test seam for the unreachable evidence guards (batch 05)`.
+- [x] polish: R1 P1 — `if (!attributes.ok)` is a third guard of the same class in the same
+      function, unreachable from any repository and green under `return true`. Closed with the
+      smallest injection the checklist already contemplated: `options.failProbe` names a
+      subcommand this function must read as failed. Both unreadable-probe refusals are now
+      watched through the walk itself, with a live control in the same repository.
+- [x] polish: R1 ASK — the case labelled "records without the terminating NUL" was refused by
+      the count half of the guard, never the terminator half. Every case now names the half
+      that holds it, and the terminator half has an input whose field count matches exactly.
+      Also closed the two smaller notes: the probe test compares `repo.snapshot()` either side,
+      and the name and value guards pin an odd interior record, not only first and last.
 
 ## Acceptance criteria
 
