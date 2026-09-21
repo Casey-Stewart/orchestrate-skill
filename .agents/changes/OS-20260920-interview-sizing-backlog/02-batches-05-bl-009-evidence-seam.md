@@ -88,6 +88,15 @@ untested however correct it is."* Demonstrate both mutations in the implementer 
       argument, with the determinism argument recorded beside it: that fixture's path is
       tracked and its attribute committed, so the fallback to `process.env` cannot make the
       verdict depend on ambient Git configuration. Removing `= {}` reddens it.
+- [x] polish: R3 ASK-1 — that comment said "every other helper", which is false of the two
+      module-private ones (`provenanceOptions:50`, `safeStatusPrerequisites:153`, which
+      dereferences `options.env`). Restored the qualifier the report had and the comment had
+      lost: "every other EXPORTED helper". True of `git:18`, `capture:32`,
+      `ancestryCaptured:40`, `readBlob:222`, and of nothing it now claims.
+- [x] polish: R3 ASK-2 — the arity assertion discarded its diagnostics, so any refusal
+      satisfied it, including one caused by ambient breakage rather than the attribute. It
+      now reads the diagnostic too (`['unsafe-filter']`), so a broken probe cannot pass as
+      the verdict the fixture exists to reach. Test-only; no production file was touched.
 
 ## Acceptance criteria
 

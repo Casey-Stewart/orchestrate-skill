@@ -578,11 +578,16 @@ test('the probe seam can only refuse, and no published invocation reaches it', a
   const help = repo.cli('git-evidence.mjs', ['--help']);
   assert.equal(help.status, 0); assert.doesNotMatch(help.stdout, /fail[- ]?probe/i);
   // Omitting the options argument is not the same as passing `failProbe: undefined`: the
-  // seam must leave the argument optional, as every other helper here does. The verdict
-  // stays deterministic despite the fallback to process.env, because the inspected path is
-  // TRACKED and its attribute comes from a committed .gitattributes: no ambient Git
-  // configuration can drop it from the listing or unresolve it, on any machine.
-  assert.equal(safeResolvedFilters(repo.cwd, []), false, 'the third argument must stay optional');
+  // seam must leave the argument optional, as every other exported helper here does. The
+  // verdict stays deterministic despite the fallback to process.env, because the inspected
+  // path is TRACKED and its attribute comes from a committed .gitattributes, which outranks
+  // core.attributesFile and the system attributes file: no ambient Git configuration can
+  // drop it from the listing or unresolve it, on any machine. The diagnostic is read as
+  // well as the boolean, so an environment that broke a probe could not pass as the
+  // attribute verdict this fixture exists to reach.
+  const optional = [];
+  assert.equal(safeResolvedFilters(repo.cwd, optional), false, 'the third argument must stay optional');
+  assert.deepEqual(optional.map(d => d.code), ['unsafe-filter'], 'and the omitted argument still reaches the real attribute verdict');
   // And in the API it degrades only: swept over its whole reachable domain and beyond, no
   // value makes this resolving attribute safe. The two probes it can degrade refuse as
   // unread; every other value leaves the real, resolving verdict standing.
