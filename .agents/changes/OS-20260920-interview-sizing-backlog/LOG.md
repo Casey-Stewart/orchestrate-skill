@@ -679,3 +679,38 @@ vacuity fix is thinking about the behaviour being pinned, not about whether the 
 B01's F4, B04's mutation 14, B03's `INDICATOR_ON_DOUBT`, and now this — four for four, every one
 found by a gate that MUTATED the fix rather than reading it. That is no longer an observation; it is
 a rule for the close-out distillation.
+
+### B05 — polish, and a greppable signature for the class this change keeps producing
+
+Polish `ee83e2a`: production diff is ONE token, `degradedProbe(repo, args, options = {})`, restoring
+the module's own convention — `git:18`, `capture:32`, `ancestryCaptured:40`, `readBlob:222` all
+default that parameter. The two-argument call returns `true` again where `572c5d3` threw.
+
+The sweep's size assertion came with something the ask did not specify and should have:
+`new Set(domain).size === domain.length`. Without it, `domain.length === 12` is defeated by the
+SAME both-at-once edit it exists to catch — delete a member, duplicate a survivor, count still
+twelve. The implementer demonstrated both mutants: deleting `'check-attr'` from the domain and its
+expectation reddens the size assertion; doing that AND editing `12` to `11` reddens the partition
+assertion instead. **Each catches what the other does not**, which is the test that a pair of
+assertions is defence in depth rather than one assertion written twice.
+
+**It then raised a residual against itself and did not act on it**: nothing pinned the `= {}`
+default, so a future edit removing it would leave the suite green — the arity regression fixed but
+not covered. It named the one-line closure, explained why that fixture's verdict is
+machine-independent despite the two-argument call falling back to `process.env`, and stopped,
+because the pass had an enumerated scope. Correct on every count: it is the fifth instance of the
+pattern, and an implementer that spots one in its own work and asks rather than widening is doing
+exactly what the fence is for. The orchestrator authorised the line.
+
+**The most valuable output of this change so far is its hindsight note**, and it belongs in the
+distillation in its own words:
+
+> the expectation at `:587` restated the domain's partition as a second literal — two lists
+> describing the same fact, with nothing tying them together. That shape is checkable without
+> insight into the behaviour, and it is what I would grep for next time.
+
+Every instance of "the fix for a vacuity finding contains a vacuity finding" has so far been caught
+by a gate agent MUTATING the fix — expensive, and it requires understanding the behaviour. This is a
+**mechanical, greppable signature for the same class**: two literals asserting the same fact with no
+assertion relating them. A future test-hunter brief can hunt it directly, without understanding the
+code under test. That is the difference between a lesson and a tool.
