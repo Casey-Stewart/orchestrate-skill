@@ -175,9 +175,6 @@ test('a gate that cannot prove containment mechanically is refused', () => {
 // three-way agreement holds only until someone edits a document. Both files are in this
 // batch's fence for exactly this reason. This is also the dogfood: what a future
 // scaffolder copies out of the contract is what the builder is fed here.
-const CONTAINMENT_DOCS = ['orchestrate/references/execution-models.md',
-  'orchestrate/templates/00-READBEFORE.md'];
-
 function publishedContainmentBlock(file) {
   const text = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
   const fenced = [...text.matchAll(/```text\r?\n([\s\S]*?)```/g)].map(m => m[1]);
@@ -188,11 +185,35 @@ function publishedContainmentBlock(file) {
   return lines;
 }
 
+// smoke-page.md states the same contract a fourth time, as two inline spans rather than
+// a fenced block. Drift there is loud rather than silent — an author following it writes
+// a sidecar the builder rejects — but it is still a statement of the contract no test
+// read, so it is read here too.
+function publishedInlineCommands(file) {
+  const text = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+  const spans = [...text.matchAll(/`([^`\r\n]+)`/g)].map(m => m[1]).filter(span => span.startsWith('git '));
+  return ['merge-base --is-ancestor', 'diff --name-only'].map(needle => {
+    const hits = [...new Set(spans.filter(span => span.includes(needle)))];
+    assert.equal(hits.length, 1,
+      file + ': exactly one inline `git ...` span must publish ' + needle + ' — found ' + JSON.stringify(hits));
+    return hits[0];
+  });
+}
+
+const CONTAINMENT_SOURCES = [
+  { file: 'orchestrate/references/execution-models.md', read: publishedContainmentBlock },
+  { file: 'orchestrate/templates/00-READBEFORE.md', read: publishedContainmentBlock },
+  { file: 'orchestrate/references/smoke-page.md', read: publishedInlineCommands }
+];
+
 test('the published containment block is the one the builder accepts', () => {
-  assert.equal(CONTAINMENT_DOCS.length, 2, 'the spec and the baked contract must both be read');
-  const [spec, contract] = CONTAINMENT_DOCS.map(publishedContainmentBlock);
-  assert.deepEqual(contract, spec, 'the scaffolded contract must bake the block execution-models.md specifies');
-  for (const [file, lines] of CONTAINMENT_DOCS.map((file, i) => [file, [spec, contract][i]])) {
+  assert.equal(CONTAINMENT_SOURCES.length, 3,
+    'the spec, the baked contract and the reference prose each state this contract and must each be read');
+  const published = CONTAINMENT_SOURCES.map(({ file, read }) => [file, read(file)]);
+  for (const [file, lines] of published) {
+    assert.deepEqual(lines, published[0][1], file + ': every statement of the contract must publish the same two commands');
+  }
+  for (const [file, lines] of published) {
     // Negative control first: the block AS PUBLISHED, placeholder unsubstituted, is
     // refused — so the acceptance below is about the commands, not about any string.
     fails({ gate: { ...gateFor(SHA), commands: lines } },
@@ -259,7 +280,15 @@ test('an invisible control character anywhere in the sidecar is refused', () => 
   // Both edges of the forbidden range. 0x1F, 0x7F, 0x80 and 0x9F are rejected in the
   // sweep above; their neighbours just outside it must build, so a narrowing is as
   // visible as a widening. U+2028/U+2029 are separators, not Cc, and stay legal.
-  for (const outside of [0x20, 0x7e, 0xa0, 0xa1, 0x2028, 0x2029]) {
+  const OUTSIDE_Cc = [0x20, 0x7e, 0xa0, 0xa1, 0x2028, 0x2029];
+  assert.equal(OUTSIDE_Cc.length, 6, 'one neighbour beyond each Cc edge (0x20 above C0, 0x7E below '
+    + 'DEL, 0xA0 above C1), plus an ordinary printable and both Unicode separators');
+  // Bound to the swept domain itself, not sampled: the code point one past the top of
+  // the forbidden range must be in this list. Without it, widening C1_LAST to 0xA0 —
+  // which rejects a no-break space, legitimate in prose — passes in silence.
+  assert.deepEqual(OUTSIDE_Cc.filter(code => code === Math.max(...points) + 1), [0xa0],
+    'the neighbour one past the top of the swept domain must be an accepted control');
+  for (const outside of OUTSIDE_Cc) {
     assert.doesNotThrow(() => build({ change: 'Edge ' + String.fromCharCode(outside) + ' case' }),
       'U+' + outside.toString(16).toUpperCase().padStart(4, '0') + ' is outside Cc and must still build');
   }
@@ -273,43 +302,54 @@ test('an invisible control character anywhere in the sidecar is refused', () => 
 // byte scan catches it for one batch. This catches it for every batch.
 //
 // Domain enforced, stated rather than implied: Unicode Cc entire (C0, DEL, C1) minus
-// tab, LF and CR — CR because this repository's working tree is CRLF — plus the Unicode
-// line and paragraph separators U+2028/U+2029, which is the pair that actually got in.
+// tab and LF, plus the Unicode line and paragraph separators U+2028/U+2029, which is the
+// pair that actually got in. CR is spared ONLY as the first half of a CRLF pair — this
+// working tree is CRLF. A LONE CR is invisible and splits a pasted command exactly as
+// the NEL this rule was widened to C1 for.
 const SOURCE_TAB = 9, SOURCE_LF = 10, SOURCE_CR = 13;
 const forbiddenInSource = code =>
   (code < 32 && code !== SOURCE_TAB && code !== SOURCE_LF && code !== SOURCE_CR)
   || code === 127 || (code >= 128 && code <= 159) || code === 0x2028 || code === 0x2029;
-// Skipped by content type, never by an allow-list of extensions: a new kind of text file
-// is swept by default rather than silently passing every assertion.
+// An extension DENY-list, not a content sniff: a new kind of TEXT file is swept by
+// default, and a binary kind nobody listed fails loudly rather than passing silently.
+// Both errors land on the safe side; neither is silent.
 const NOT_TEXT = /\.(?:xlsx|xls|png|jpe?g|gif|ico|pdf|zip|gz|woff2?|ttf|eot|exe|dll)$/i;
-function invisibleCharactersUnder(root) {
-  const found = [];
-  const walk = dir => {
+const SWEEP_EXCLUDED = ['.git', '.agents', 'node_modules'];
+
+// Returns what it FOUND and what it COVERED. The second half is the point: a sweep whose
+// domain is a hand-written array quietly shrinks when someone edits the array.
+function invisibleCharacterScan(root) {
+  const found = [], covered = new Set();
+  const walk = (dir, top) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
-      if (entry.name === '.git' || entry.name === 'node_modules') continue;
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) { walk(full); continue; }
+      if (SWEEP_EXCLUDED.includes(entry.name)) continue;
+      const full = path.join(dir, entry.name), name = top ?? entry.name;
+      covered.add(name);
+      if (entry.isDirectory()) { walk(full, name); continue; }
       if (NOT_TEXT.test(entry.name)) continue;
+      const characters = [...fs.readFileSync(full, 'utf8')];
       let line = 1;
-      for (const character of fs.readFileSync(full, 'utf8')) {
-        const code = character.codePointAt(0);
-        if (code === SOURCE_LF) line++;
-        else if (forbiddenInSource(code)) {
-          found.push(path.relative(root, full).split(path.sep).join('/') + ':' + line
-            + ': U+' + code.toString(16).toUpperCase().padStart(4, '0'));
-        }
+      for (let i = 0; i < characters.length; i++) {
+        const code = characters[i].codePointAt(0);
+        if (code === SOURCE_LF) { line++; continue; }
+        if (code === SOURCE_CR) {
+          if (characters[i + 1]?.codePointAt(0) === SOURCE_LF) continue;
+        } else if (!forbiddenInSource(code)) continue;
+        found.push(path.relative(root, full).split(path.sep).join('/') + ':' + line
+          + ': U+' + code.toString(16).toUpperCase().padStart(4, '0'));
       }
     }
   };
-  walk(root);
-  return found;
+  walk(root, undefined);
+  return { found, covered: [...covered].sort() };
 }
 
-test('no shipped skill file or test carries an invisible character', t => {
-  // The live control comes FIRST, so the silence over the repository means something.
-  // It plants one byte from each half of the domain, in a SUBDIRECTORY (the walk must
-  // recurse), beside a clean file with tabs and CRLF (which must be spared) and a binary
-  // file full of NULs (which must be skipped).
+test('no file this repository publishes carries an invisible character', t => {
+  // The live control comes FIRST, so the silence over the repository means something. It
+  // plants one byte from each part of the domain — a C0 NUL, a C1 NEL, a separator and a
+  // LONE CR — in a SUBDIRECTORY (the walk must recurse), beside a clean file whose tabs
+  // and CRLF pairs must be spared, a binary full of NULs that must be skipped, and
+  // excluded directories whose planted bytes must NOT be reported.
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'invisible-source-'));
   t.after(() => fs.rmSync(scratch, { recursive: true, maxRetries: 8, retryDelay: 100 }));
   fs.mkdirSync(path.join(scratch, 'nested'));
@@ -317,18 +357,35 @@ test('no shipped skill file or test carries an invisible character', t => {
   fs.writeFileSync(path.join(scratch, 'nested', 'planted.cjs'),
     'const nul = "' + String.fromCharCode(0x00) + '";\n'
     + 'const nel = "' + String.fromCharCode(0x85) + '";\n'
-    + 'const sep = "' + String.fromCharCode(0x2028) + '";\n');
+    + 'const sep = "' + String.fromCharCode(0x2028) + '";\n'
+    + 'const lone = "git status' + String.fromCharCode(0x0d) + ' --short";\n');
   fs.writeFileSync(path.join(scratch, 'binary.xlsx'), Buffer.from([0, 1, 2, 3]));
-  assert.deepEqual(invisibleCharactersUnder(scratch),
-    ['nested/planted.cjs:1: U+0000', 'nested/planted.cjs:2: U+0085', 'nested/planted.cjs:3: U+2028'],
-    'the sweep must recurse, report each planted byte with its line, spare tab/CR/LF, and skip binary files');
-  // `.agents/` is out of scope on purpose: those ledgers are historical records that
-  // quote published bytes verbatim and are never rewritten.
-  for (const tree of ['orchestrate', 'tests']) {
-    assert.deepEqual(invisibleCharactersUnder(path.join(__dirname, '..', tree)), [],
-      tree + ': an invisible character in source is an escape something decoded on the way in — '
-      + 'rebuild that literal with String.fromCharCode instead of exempting the file');
+  for (const excluded of SWEEP_EXCLUDED) {
+    fs.mkdirSync(path.join(scratch, excluded));
+    fs.writeFileSync(path.join(scratch, excluded, 'record.md'), 'quoted ' + String.fromCharCode(0x00) + ' verbatim\n');
   }
+  const control = invisibleCharacterScan(scratch);
+  assert.deepEqual(control.found,
+    ['nested/planted.cjs:1: U+0000', 'nested/planted.cjs:2: U+0085',
+      'nested/planted.cjs:3: U+2028', 'nested/planted.cjs:4: U+000D'],
+    'the sweep must recurse, report each planted byte with its line including a lone CR, '
+    + 'spare tab and CRLF, skip binary files, and never descend into an excluded directory');
+  assert.deepEqual(control.covered, ['binary.xlsx', 'clean.cjs', 'nested'],
+    'coverage must be the top-level entries minus the exclusions, binaries included as visited');
+
+  // The swept domain is the CHECKOUT, not a list in this file: every top-level entry
+  // except the stated exclusions. It then grows with the repository instead of needing
+  // maintenance, and narrowing it to one tree cannot pass. `.agents/` stays out on
+  // purpose — those ledgers are historical records that quote published bytes verbatim.
+  const ROOT = path.join(__dirname, '..');
+  const expected = fs.readdirSync(ROOT).filter(name => !SWEEP_EXCLUDED.includes(name)).sort();
+  assert.ok(expected.length > 2, 'the repository root must offer more than the two source trees to sweep');
+  const repository = invisibleCharacterScan(ROOT);
+  assert.deepEqual(repository.covered, expected,
+    'the sweep must cover every top-level entry of the checkout except ' + SWEEP_EXCLUDED.join(', '));
+  assert.deepEqual(repository.found, [],
+    'an invisible character in a published file is an escape something decoded on the way in — '
+    + 'rebuild that literal with String.fromCharCode instead of exempting the file');
 });
 
 // Two of the five documentation defects in a published page were a `Section 5` and a

@@ -117,6 +117,9 @@ the test.
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/bl-012-013-017-smoke-page` — `fix: smoke-page build identity, sidecar coherence and hand-over proofing (batch 06)`.
+- [x] polish: R2 ASK-1 - bind the source sweep's domain to the checkout. The swept trees were an array literal with no assertion about the domain, so narrowing it to ['orchestrate'] retired the sweep over the tree the historical U+2028 lived in, 63/63 green. Coverage is now compared against the repository root's top-level entries minus .git, .agents and node_modules, which also brings README.md - the one other document publishing a copyable command - into scope.
+- [x] polish: R2 ASK-2 - bind the outside-the-domain edge list. Setting C1_LAST = 160 and dropping 0xA0 from the list was 63/63 green while the builder began rejecting a no-break space. The list is a named const with its length asserted, and the member one past the top of the swept domain is asserted against that domain rather than sampled.
+- [x] polish: R2 ASK-3 - forbid a lone CR in source, and read the fourth statement of the contract. The sweep spared every CR while the comment claimed it spared CRLF, so a lone CR planted inside a published command stayed green; CR is now spared only before LF, with a lone CR in the live control. smoke-page.md's inline `git ...` spans extract cleanly and joined CONTAINMENT_SOURCES, so dropping --is-ancestor there no longer passes.
 
 ## Acceptance criteria
 
