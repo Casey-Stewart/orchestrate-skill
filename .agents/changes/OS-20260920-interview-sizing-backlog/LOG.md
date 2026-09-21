@@ -1141,3 +1141,59 @@ reaching for vocabulary the sweep does not carry: *the tester*, *a person*, *by 
 **State: `⛔ green, residual finding open (low)`.** The batch is green, its shipped rules are correct
 and verified, and it is OUT of integration pending the user's verdict — fix again / ship with the
 residual / drop.
+
+### B07 — third round (user-authorized): SHIP, and a severity the orchestrator had to adjudicate
+
+**`R3 SHIP @a67b7d9`.** The blocking finding and all four ASKs are **FIX VERIFIED**, each by a
+mutation the reviewer constructed independently rather than from the implementer's description —
+`BLOCKING-a2` by line-range extraction from the file itself, specifically to avoid hand-typing a
+regex through a transport that had already corrupted two scripts this round.
+
+**The class is closed, not just the instance.** Deleting the restored `assume a person` entry
+together with EVERY pin it owns — `15`→`14` twice, the "fifteen"→"fourteen" message, `60`→`56` — is
+now RED. That is the exact shape of the round-2 regression, which updated its pattern count and its
+size assertion in lockstep and sailed through. The eight-string list became a 24-entry `REGRESSION`
+**coverage authority written independently of the pattern list**, with a `deepEqual` between the
+pattern names the corpus exercises and the family's own names.
+
+**The deviation was vindicated with measurement.** The implementer refused the prescribed negation
+form and said why; the reviewer tested the claim and found it stronger than reported — the
+prescribed regex does not even match the sentence it would have broken on (`\w{0,12}` spans one
+word), so under it the sweep would have gone red on unmodified shipped prose. The substitute's live
+footprint: **5 exempted matches across 3,887 clauses, down from 570** — a ~100x reduction — and the
+reviewer independently reproduced 3,887 / 570 / 14.7% exactly. Third time this change an agent has
+refused a gate's prescription and been right.
+
+**Orchestrator adjudication, recorded because the report was internally inconsistent.** The review
+returned `SHIP` on line 1 and then labelled one new finding **P1**. Under this contract a reviewer's
+P1 "needs a production change", and `SHIP` means "no P0/P1" — so the two cannot both stand. The
+finding is test-only, needs no production change, and weakens nothing the batch ships; the six
+documents are byte-identical to `7f07f20` and verified clean. **It is an ASK by definition, the
+verdict stands, and it closes in a polish pass — which is not a round.** Recorded rather than
+silently resolved, because reading `SHIP` and ignoring a `P1` label would have been the easy error,
+and so would have been treating a mislabel as a third `FIX FIRST` and blocking the batch against the
+user's spent authorization.
+
+The finding itself is worth the attention it got: **the coverage authority protects 14 of 15
+patterns.** The name-set `deepEqual` BALANCES when a pattern is deleted, because the name leaves
+both sides at once; it only bites when a corpus entry goes unflagged. `default when unsure` owns no
+exclusive entry, so deleting it plus its entry and two pins is green while real coverage is lost.
+The blocking finding's exact class, surviving for one member — closed in polish by asserting
+**exclusivity as a domain property**.
+
+### The fifth sighting, and the control that caught it twice
+
+The reviewer was hit by the escape-decoding class itself: its first probe script had `\b` collapsed
+to a literal backspace through the Bash tool, and a second corrupted probe briefly convinced it the
+corpus was 335 clauses rather than 3,887. **Its `SANITY-POS` control caught both**, exactly as the
+implementer's control had caught the heredoc corruption in the same round. Two agents, two
+harnesses, the same transport defect, both caught — because both ran a live control before trusting
+a green.
+
+That is five sightings in this change, from four different tools (`Set-Content`, `git checkout` of
+an uncommitted edit, an editor decoding `\uXXXX`, a bash heredoc, the Bash tool's own backslash
+handling). The progression matters: the first three corrupted the WORK, the last two corrupted the
+VERIFICATION OF the work — a harness reporting success while testing nothing. **A live control
+through your own harness before trusting a green is the only thing that separates those two cases,
+and it has now paid out twice in a single round.** It goes to the distillation as a rule, not an
+observation.
