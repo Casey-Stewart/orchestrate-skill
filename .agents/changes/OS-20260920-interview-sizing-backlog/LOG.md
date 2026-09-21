@@ -1197,3 +1197,68 @@ VERIFICATION OF the work — a harness reporting success while testing nothing. 
 through your own harness before trusting a green is the only thing that separates those two cases,
 and it has now paid out twice in a single round.** It goes to the distillation as a rule, not an
 observation.
+
+## 2026-09-21 — C1 close-out
+
+### B07 polish, integration, and the vacuity it caught in its own diff
+
+Polish `894442d` + `b938449`, test-only; `git diff 7f07f20..HEAD -- orchestrate/` empty across the
+whole round. Merged `--no-ff` → **`66732c6`**, tip **306/306** (ledger base 260 + 46).
+
+**Two of its own first-cut mutations came back GREEN and changed the work.** Deleting
+`default when unsure` PLUS its exclusive entry still balanced exclusivity, so the demonstration that
+counts is the coordinator's original mutation replayed — now red on `Default if in doubt.`
+Exclusivity raises the bar to "you must knowingly delete a spelling from the authority list", not to
+"impossible", and it said so rather than claiming more. And unbinding the look-back was green
+because **the five recovered reversals were named in a comment and asserted nowhere** — the exact
+vacuity class this change exists to kill, found by the implementer in its own diff and closed with a
+pinned `RECOVERED` array whose members must each carry a negation.
+
+**Two judgement calls, both measured rather than argued.** It REJECTED the optional two-word
+narrowing: under it `execution-models.md`'s own prose loses its exemption and the sweep reddens on
+correct shipped text. It bounded the look-back at the nearest `,` `:` or dash instead, recovering 5
+of 6 named reversals with the checkout still at zero flags. And it ACCEPTED the `mark|tag|treat`
+narrowing, then found the change *created* a new false positive in `build-smoke-page.mjs` — so both
+that line and `subagent-prompts.md`'s legitimate `leave native-app steps human if no runner` are now
+pinned in a `NEVER_FLAGGED` domain with a size pin. **Every narrowing keeps the false positive that
+bought it as a live control.** That generalises past this batch.
+
+### C1 pre-smoke: 17 PASS / 1 FAIL, and the FAIL adjudicated
+
+Eighteen steps, all `Runner: agent` — the first checkpoint on this skill where nothing is handed to
+the user as labour, which is the rule B07 shipped. Evidence in `evidence/C1/`, one file per step,
+all eighteen scanned clean of invisible characters before the commit.
+
+**The FAIL is B05-step1, and the step passes as written.** The runner found that
+`git-evidence.mjs:144` — `paths.pop() !== ''` / `Malformed path inventory` — has no coverage:
+disarming it leaves 306/306 green, the string occurs once in the repository and no test names it.
+That fact is correct and well demonstrated, with the neighbouring guard going red under the same
+technique as its control. But B05's step reads "**the two** `safeResolvedFilters()` guard paths",
+meaning BL-009's two, and those are covered — as is a third the backlog never named, found during
+B05's review and closed in its fix round.
+
+**The `:144` guard is the one the orchestrator deliberately routed to the backlog during B05's round
+1**, when the reviewer and the test-hunter split on it. The recorded reasoning stands: covering it
+means driving a DIFFERENT parse through a SECOND exported classifier — new production surface —
+whereas the P1 completed a seam that already existed. *The line between completing a batch and
+widening it is whether the mechanism already exists.* So: the step PASSES as written, the runner's
+stricter reading surfaced a known and deliberately-deferred residual, and **both facts go to the
+user on the page** rather than the conductor quietly choosing one. The backlog entry is filed at
+this close-out, not deferred further.
+
+**Two smoke steps carry stale figures, both the orchestrator's to correct.** B01-step1 cites 48
+`batch-content` violations on the un-fixed tool; measured against the shipped batch tip it is **43**
+— the 48 was a pre-flight measurement of an earlier state of that file. B04-step2 says "exactly one
+line per file"; B04 touched **two** lines per file once its ASK-2 polish landed, and `efc4eec..HEAD`
+is the cumulative seven-batch diff in any case, so that command cannot show a per-batch count. Both
+are *never pin a count that grows* in the smoke steps themselves, authored at scaffold time and
+overtaken by the work. Corrected on the page; the merged batch files stay as the historical record.
+
+**A sixth sighting of the transport class, caught by the runner's own byte scan.** The Write tool
+decoded a literal `\u0000` in `B06-step2.md` into a real NUL byte. It was caught, repaired and
+re-scanned to zero — by the instrument-verification discipline this change has been accumulating,
+applied by an agent that had been told about it. An inline `node -e` sweep was also mangled by shell
+quoting into a `SyntaxError` and rewritten as a script file. Six sightings, five tools.
+
+The runner also reported one deliverable it could not produce — `summary.md` was refused by its
+Write tool — and said so plainly instead of omitting it. The table in its report is the summary.
