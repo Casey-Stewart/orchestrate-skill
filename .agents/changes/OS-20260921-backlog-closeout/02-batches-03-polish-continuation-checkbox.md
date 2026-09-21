@@ -4,7 +4,7 @@
 **Wave**: 1
 **Depends on**: none
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files** (the fence — modify NOTHING else): `orchestrate/tools/check-fence.mjs`, `tests/check-fence.test.cjs`
+**Files** (the fence — modify NOTHING else): `orchestrate/tools/check-fence.mjs`, `tests/check-fence.test.cjs`, `orchestrate/templates/02-batch.md`
 **Spec**: [01-plan.md](01-plan.md) §B03 · **Reviewer pass required**
 
 ## Implementation notes
@@ -41,6 +41,14 @@ tool rather than silently reinstating the defect.
 - [x] Add a test: an appended indented unticked checkbox under a `polish:` header is a violation
 - [x] Add a test: a wrapped prose continuation under a `polish:` header still passes
 - [x] Confirm the first new test fails against the unmodified base, and record the output
+- [x] polish: ASK-1 pin the sweep's two literals with sizes written independently of their
+      members, so dropping a spelling reddens instead of shrinking both sides together.
+- [x] polish: ASK-2 add a tab-after-marker and a two-digit ordered checkbox, killing the
+      `[ \t]+` and `\d{1,9}` mutants the gate proved the sweep left alive.
+- [x] polish: ASK-3 parse the shown template form with the space indent its real consumer
+      accepts, rather than a tab-permitting one.
+- [x] polish: ASK-4 say in the batch template that an indented checkbox is a new item and
+      not a continuation, so the generic six-line cascade is not the only hint.
 
 ## Acceptance criteria
 

@@ -193,6 +193,10 @@ test('a checkbox is excluded from the polish continuation, and only a checkbox i
     '  - [ ] Also rewrite the module into three files.', '  - [x] Also rewrite the module into three files.',
     '  * [ ] The star marker renders the same task item.', '  + [X] The plus marker, with a capital tick.',
     '  1. [ ] An ordered task item is a task item too.', '  1) [x] Ordered with a paren, already ticked.',
+    // These two are the only inputs that reach the tab and the multi-digit ordinal: without
+    // them `[ \t]+` narrows to `[ ]+` and `\d{1,9}` to `\d` with the suite still green.
+    '  -\t[ ] A tab after the marker is the whitespace markdown allows there.',
+    '  10. [ ] A two-digit ordinal, because one digit is not the whole ordered family.',
   ];
   const continuations = [
     '      of this repository produces, so the wrapped form still reads as one ask.',
@@ -205,7 +209,10 @@ test('a checkbox is excluded from the polish continuation, and only a checkbox i
   // before, so each acceptance is a live control and each rejection a real change of verdict.
   for (const line of [...smuggled, ...continuations]) assert.match(line, /^ +\S/);
   assert.equal(new Set([...smuggled, ...continuations]).size, smuggled.length + continuations.length);
-  const verdicts = [];
+  // Sizes written by hand, not derived from the arrays: dropping a spelling while simplifying
+  // would otherwise shrink both sides of every count above it and leave its path unguarded.
+  assert.equal(smuggled.length, 8);
+  assert.equal(continuations.length, 5);
   for (const [line, rejected] of [...smuggled.map(l => [l, true]), ...continuations.map(l => [l, false])]) {
     const baseline = makeBatch(['allowed.txt']), proposed = baseline.replace('\n\n## Acceptance', () => `\n${ask}\n${line}\n\n## Acceptance`);
     assert.notEqual(proposed, baseline);
@@ -215,19 +222,17 @@ test('a checkbox is excluded from the polish continuation, and only a checkbox i
     assert.deepEqual((await api).validateBatchEdit(crlf[0], crlf[1], ['allowed.txt'], [], BATCHFILE), found, line);
     assert.equal(found.length > 0, rejected, JSON.stringify([line, found]));
     if (rejected) assert.ok(found.every(d => d.code === 'batch-content' && d.path === BATCHFILE), JSON.stringify(found));
-    verdicts.push(found.length > 0);
   }
-  assert.equal(verdicts.length, smuggled.length + continuations.length);
-  assert.equal(verdicts.filter(Boolean).length, smuggled.length);
 });
 test('the batch template SHOWS the wrapped polish form, in the exact bytes the validator accepts', async () => {
   // Read from the shipped template, never a copy: the form shown to implementers and the
   // form the mechanical gate accepts cannot drift apart. Either checkout style parses.
   const template = fs.readFileSync(path.join(__dirname, '..', 'orchestrate', 'templates', '02-batch.md'), 'utf8').replace(/\r\n?/g, '\n');
-  const shown = /^- \[[ x]\] polish: .+(?:\n[ \t]+\S[^\n]*)+/m.exec(template);
+  const shown = /^- \[[ x]\] polish: .+(?:\n +\S[^\n]*)+/m.exec(template);
   assert.ok(shown, 'orchestrate/templates/02-batch.md must SHOW a wrapped polish item, not only describe one');
   const block = shown[0].split('\n');
-  assert.ok(block.length >= 2 && block.slice(1).every(l => /^[ \t]+\S/.test(l)), JSON.stringify(block));
+  // The space indent the validator itself requires, so this parse cannot admit a form it rejects.
+  assert.ok(block.length >= 2 && block.slice(1).every(l => /^ +\S/.test(l)), JSON.stringify(block));
   const baseline = makeBatch(['allowed.txt']), proposed = baseline.replace('\n\n## Acceptance', () => `\n${shown[0]}\n\n## Acceptance`);
   assert.notEqual(proposed, baseline);
   assert.deepEqual((await api).validateBatchEdit(baseline, proposed, ['allowed.txt'], [], BATCHFILE), []);
