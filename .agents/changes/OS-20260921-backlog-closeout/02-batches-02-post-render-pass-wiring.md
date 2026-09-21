@@ -79,14 +79,55 @@ The user chose BOTH homes, not either:
 
 ## Checklist
 
-- [ ] Add a separate post-page proofing block to `subagent-prompts.md`, distinct from §QA runner
-- [ ] Give the new block its `**Spawn with**` line and extend `SKELETONS` to match
-- [ ] Add the pass to the STOP hand-off in `protocol.md` §checkpoint close-out
-- [ ] Add it to the corresponding close-out sequence in `templates/00-READBEFORE.md`
-- [ ] Add a guard asserting the property over a swept domain, not a hand-written list
-- [ ] Record `execution-models.md:133` as a known un-wired sibling, in the batch's own words
-- [ ] Verify `RUNNER_RULE_COUNTS` and both mirror assertions still pass unchanged
-- [ ] Confirm the new guard fails against the unmodified base, and record the output
+- [x] Add a separate post-page proofing block to `subagent-prompts.md`, distinct from §QA runner
+- [x] Give the new block its `**Spawn with**` line and extend `SKELETONS` to match
+- [x] Add the pass to the STOP hand-off in `protocol.md` §checkpoint close-out
+- [x] Add it to the corresponding close-out sequence in `templates/00-READBEFORE.md`
+- [x] Add a guard asserting the property over a swept domain, not a hand-written list
+- [x] Record `execution-models.md:133` as a known un-wired sibling, in the batch's own words
+- [x] Verify `RUNNER_RULE_COUNTS` and both mirror assertions still pass unchanged
+- [x] Confirm the new guard fails against the unmodified base, and record the output
+- [x] polish: H1 — pin the invocation inside the close-out region, not anywhere in the file
+- [x] polish: H2 — sweep the close-out region for undoing directives, not only clauses that re-name the pass
+- [x] polish: H3 — pin contradiction coverage against an independent prose corpus with exclusivity, in both test files
+- [x] polish: H4 — drop the three entailed assertions and give the survivor a subject of its own
+- [x] polish: H5 — assert the raw clause count the emphasis boundary produces
+- [x] polish: R1 — arm the three post-page duty patterns against the post-page section
+- [x] polish: R2 — key the `KNOWN_UNWIRED` size assertion and its message on the growth direction
+- [x] polish: R3 — sweep the whole of `subagent-prompts.md` for clauses that undo the pass
+- [x] polish: R4 — "Skip RUNNING the blocks belonging to a `Runner: human` step"
+- [x] polish: R5 — record the base-failure output in this file
+
+### Base-failure evidence (checklist item 8)
+
+New guards run against the unmodified base `425b3d7` — the three edited documents
+restored from that commit, the two edited test files kept — `node --test
+--test-reporter=spec tests/protocol-contract.test.cjs
+tests/subagent-type-mapping.test.cjs`: `tests 23 / pass 17 / fail 6`.
+
+- `every document stating the checkpoint close-out also invokes the post-render proofing
+  pass` — `orchestrate/references/protocol.md: states the checkpoint close-out but invokes
+  the post-render proofing pass nowhere near it`
+- `every skeleton names its agent type above its prompt block`, `the post-page skeleton
+  actually invokes the proofing pass` and `the pre-smoke skeleton keeps its pre-page timing
+  and takes on no post-page duty` — `missing heading: ## Artifact proofer (checkpoint
+  post-page)`
+- `no prompt block escapes the mapping`, `the spawn lines are one consistent form, in the
+  mapped order`
+
+### Mutation evidence for the polish round
+
+Each gate finding re-run as the mutation that produced it, against the polished tests,
+with a no-mutation control in the same harness. All RED, control GREEN:
+
+- H1 `**proof the published artifact**` deleted from `protocol.md`'s close-out and added
+  to the file's intro instead · H2 `This step is optional when the pre-smoke passed.`
+  appended to the close-out, naming nothing · H3 the `optional|skippable|may be
+  skipped|may be omitted|can be skipped` family narrowed to bare `optional` in BOTH test
+  files at once · H4 an exemption SWAPPED rather than added (`protocol.md` into
+  `KNOWN_UNWIRED`) · H5 the clause boundary reverted to the plain whitespace split · R1
+  one duty pattern typoed to `/publshed artifact/i` · R3 an undoing appended to
+  `subagent-prompts.md` outside either skeleton.
 
 ## Acceptance criteria
 

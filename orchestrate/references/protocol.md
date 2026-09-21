@@ -636,7 +636,10 @@ evidence (a failing agent step → repair mini-batch first), covered rows `🟢`
 checkpoint-table row, session-log row recording the checkpoint's integration SHA,
 `State: AT-CHECKPOINT C<n>`, the checkpoint row's token `m: pre-smoke=<agent>/<human>
 human-smoke-min=<n> escaped=<n>` (completed when the user's verdict is recorded), the
-filled smoke page committed as `smoke-<Cn>.html` when a page was prepared,
+filled smoke page committed as `smoke-<Cn>.html` when a page was prepared, then
+**proof the published artifact** per `smoke-page.md` — after the page is built and
+before the STOP, every embedded command run out of the built page's own bytes; the
+pre-smoke's timing is unchanged —
 commit on the integration branch, STOP with the combined smoke script (smoke page link
 + gate essentials in text, or the full plain-text script; pre-verified steps marked,
 with the evidence SHA).

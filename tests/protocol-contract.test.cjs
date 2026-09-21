@@ -845,3 +845,208 @@ test('every document carrying the Runner: default states the same rule, and no d
   assert.match(models, /checkpoint asks the user for a VERDICT, not for labour/,
     'execution-models.md must say a checkpoint asks for a verdict, not for labour');
 });
+
+// ===== BL-023: the post-render proofing pass, wired ==========================
+// `smoke-page.md` DEFINED a pass that proofs the built page — every embedded command run
+// out of the page's own bytes, after the page exists and before the STOP — and nothing
+// outside that file invoked it, so no checkpoint ever ran it except by hand. The property
+// pinned below is deliberately not "these documents mention it": it is that EVERY shipped
+// document stating the checkpoint close-out sequence also names the pass, swept out of the
+// checkout rather than compared against a hand-written file list.
+//
+// The reason that distinction is load-bearing, recorded here as the known gap it is. The
+// close-out sequence is stated FIVE times, not three, and two of those five were fenced
+// away from the batch that wired the other three: `execution-models.md` step 5 of its wave
+// loop ("STOP with the combined smoke script, delivered as the smoke page") and `SKILL.md`
+// mode `continue` step 3, which wraps the same phrase across a line break and so does not
+// show up in a naive grep for it at all. Both still hand over without naming the pass. A
+// deepEqual over the wired files would have frozen those two omissions into the suite and
+// made wiring them later look like a regression. KNOWN_UNWIRED therefore says a carrier MAY
+// lack the pass, never that it must: the day either file names it, this test stays green
+// with nothing here to edit, and the day a further document states the close-out without
+// naming the pass, it reddens.
+test('every document stating the checkpoint close-out also invokes the post-render proofing pass', () => {
+  // Built fresh per use: a /g/ regex carries `lastIndex` between calls, and one shared
+  // object silently skips every other match.
+  const CLOSE_OUT = () => /combined smoke script/gi;   // the phrase every close-out ends on
+  // The pass's own imperative in `smoke-page.md`, which is what a reader greps for and
+  // what the wired documents repeat. If the defining document ever renames the pass, every
+  // pointer written into the other carriers dangles — and this is what says so.
+  const NAMES_PASS = () => /proofs? the published artifact/gi;
+  // The definition is not an invocation. `smoke-page.md` DEFINES the pass 9.5 KB away from
+  // its own mention of the close-out, so the region rule below cannot apply to it; it is
+  // held to carrying the definition instead, and to being the only file that does.
+  const DEFINES_PASS = /an ADDED pass, after the page is built/;
+  const KNOWN_UNWIRED = ['orchestrate/SKILL.md', 'orchestrate/references/execution-models.md'];
+  const shipped = shippedSkillFiles();
+  const carriers = shipped.filter(file => CLOSE_OUT().test(collapsed(file)));
+  // Written independently of the pattern, so that weakening the marker and dropping a
+  // member in one edit still reddens. Membership, not set equality: a SIXTH carrier is
+  // allowed and simply has to satisfy the property below.
+  const STATED_IN = ['orchestrate/SKILL.md', 'orchestrate/references/execution-models.md',
+    'orchestrate/references/protocol.md', 'orchestrate/references/smoke-page.md',
+    'orchestrate/templates/00-READBEFORE.md'];
+  assert.equal(STATED_IN.length, 5,
+    'five shipped documents state the close-out sequence; this list may not shrink to a sample');
+  assert.equal(new Set(STATED_IN).size, STATED_IN.length, 'no document may be listed twice to pad that size');
+  for (const file of STATED_IN) {
+    assert.ok(carriers.includes(file),
+      file + ': no longer matches the close-out marker this sweep selects on, so the sweep has stopped seeing it');
+  }
+  assert.ok(carriers.length < shipped.length,
+    'the close-out marker now selects every shipped file, so selecting on it proves nothing');
+  // Bounded on the direction that WEAKENS the guard only. Pinning equality made the
+  // cleanup edit — wiring SKILL.md and retiring its exemption — fail with a message
+  // describing the opposite edit.
+  assert.ok(KNOWN_UNWIRED.length <= 2,
+    'a THIRD carrier has been excused from the property; retiring an exemption is free, adding one is a decision');
+  assert.equal(new Set(KNOWN_UNWIRED).size, KNOWN_UNWIRED.length,
+    'a repeated exemption inflates the bound above while excusing nothing new');
+  const definers = shipped.filter(file => DEFINES_PASS.test(collapsed(file)));
+  assert.deepEqual(definers, ['orchestrate/references/smoke-page.md'],
+    'the pass must be DEFINED in exactly one shipped file — a second copy of the definition is a fork, not an invocation');
+  const wired = carriers.filter(file => !KNOWN_UNWIRED.includes(file) && !definers.includes(file));
+  // Not entailed by anything above, and the hole that dropping the three arithmetic
+  // assertions here would otherwise leave: an exemption SWAPPED rather than added keeps
+  // the bound at two and every count intact while halving what the property covers. These
+  // two were wired deliberately and may never be excused. (The dropped assertions —
+  // `carriers.length >= STATED_IN.length`, `wired.length === carriers.length -
+  // KNOWN_UNWIRED.length` and `wired.length >= 3` — were each entailed by the membership
+  // loop above, so none could ever be the first to go red.)
+  const MUST_STAY_WIRED = ['orchestrate/references/protocol.md', 'orchestrate/templates/00-READBEFORE.md'];
+  for (const file of MUST_STAY_WIRED) {
+    assert.ok(wired.includes(file),
+      file + ': this batch wired it, and it has been excused or reclassified rather than fixed');
+  }
+
+  // The INVOCATION must sit at the close-out, not anywhere in a 57 KB file. Matching the
+  // whole document let an ancestry mention two paragraphs from the top — "BL-017 once
+  // added a pass that proofs the published artifact" — satisfy a test whose own message
+  // says the close-out invokes it, which is precisely the invocation/ancestry confusion
+  // this batch exists to fix. 500 characters of collapsed text is roughly six wrapped
+  // lines either side: the two wired invocations sit 246 and 385 characters from their
+  // marker, and no window up to 800 produces a false positive in any carrier, so the bound
+  // is neither accidental nor tight.
+  const WINDOW = 500;
+  const windows = (text, pattern) => [...text.matchAll(pattern)]
+    .map(m => text.slice(Math.max(0, m.index - WINDOW), m.index + WINDOW));
+  // Armed in both directions on synthetic text, through the same helper the files go
+  // through, so neither verdict below is a shape that could only ever come out one way.
+  const ANCESTRY_ONLY = 'Historical note: BL-017 once added a pass that proofs the published artifact. '
+    + 'filler. '.repeat(250) + 'commit on the integration branch, STOP with the combined smoke script.';
+  assert.ok(!windows(ANCESTRY_ONLY, CLOSE_OUT()).some(region => NAMES_PASS().test(region)),
+    'a mention far from the close-out still satisfies the property, so the window bounds nothing');
+  const WIRED_SHAPE = 'then proof the published artifact per smoke-page.md, '
+    + 'commit on the integration branch, STOP with the combined smoke script.';
+  assert.ok(windows(WIRED_SHAPE, CLOSE_OUT()).some(region => NAMES_PASS().test(region)),
+    'the property rejects a close-out that DOES invoke the pass beside it');
+  for (const file of wired) {
+    assert.ok(windows(collapsed(file), CLOSE_OUT()).some(region => NAMES_PASS().test(region)),
+      file + ': states the checkpoint close-out but invokes the post-render proofing pass nowhere near it — a rule'
+        + ' nothing invokes never fires; name the pass AT the close-out, or record the file in KNOWN_UNWIRED');
+  }
+
+  // --- directives that undo the pass ------------------------------------------
+  // Positive matches on prose are defeated by an APPENDED sentence. Selecting only clauses
+  // that RE-NAME the pass swept up the undoing an author is least likely to write: "This
+  // step is optional when the pre-smoke passed", appended to the close-out, named nothing
+  // and sailed through. Two scopes now.
+  //   region — undoes an obligation whatever its subject, so it is run over every window
+  //            around a close-out statement or a naming of the pass, in EVERY carrier
+  //            including the exempt ones and the definer.
+  //   clause — needs the pass as its subject. The definer's own correct prose contrasts
+  //            the two timings ("the QA runner's pre-verification happens before the page
+  //            exists"), and a region sweep for the re-timing pattern flags that, so it is
+  //            bound to a clause that is about the pass.
+  const ABOUT = /proofs? the published artifact|proofing pass|artifact proofer|re-proofed/i;
+  const CONTRADICTIONS = [
+    { name: 'optional or skippable', scope: 'region',
+      pattern: /\b(?:optional|skippable|may be (?:skipped|omitted)|can be skipped|if time (?:allows|permits))\b/i },
+    { name: 'left to discretion', scope: 'region',
+      pattern: /\b(?:need not|does not have to|at (?:the orchestrator['’]s|your) discretion|when you have time)\b/i },
+    { name: 'folded back into the pre-smoke', scope: 'region',
+      pattern: /\b(?:replaces|instead of|in place of)\b[^.;]*\b(?:pre-smoke|QA runner|proofing pass|artifact proofer)\b/i },
+    { name: 'moved before the page exists', scope: 'clause',
+      pattern: /\bbefore the page (?:is built|exists|is generated)\b/i },
+  ];
+  // The clause boundary swallows the markdown emphasis that closes a sentence. Splitting
+  // on `(?<=[.;])\s+` alone left `smoke-page.md`'s definition — which ends `…after the
+  // page is built.**` — glued to the NEXT sentence, and the re-timing pattern flagged the
+  // pass for correct prose about the runner. A sweep that cries wolf gets deleted by the
+  // next author, so the narrowing and the false positive it was bought with are pinned.
+  const clauses = text => text.split(/(?<=[.;])[\s*]+/).filter(clause => ABOUT.test(clause));
+  const undoings = text => [...new Set([
+    ...[...windows(text, CLOSE_OUT()), ...windows(text, NAMES_PASS())].flatMap(region =>
+      CONTRADICTIONS.filter(e => e.scope === 'region' && e.pattern.test(region))
+        .map(e => e.name + ' :: ' + region.match(e.pattern)[0])),
+    ...clauses(text).flatMap(clause =>
+      CONTRADICTIONS.filter(e => e.pattern.test(clause)).map(e => e.name + ' :: ' + clause.trim())),
+  ])];
+  const names = text => [...new Set(undoings(text).map(hit => hit.split(' :: ')[0]))].sort();
+  // THE COVERAGE AUTHORITY. Sentences an author would actually append to undo this rule,
+  // written as prose rather than read off the alternations, with its size pinned. Its
+  // predecessor was three controls derived one-per-pattern from the patterns themselves:
+  // narrowing `optional|skippable|may be skipped|may be omitted|can be skipped` to bare
+  // `optional` dropped four spellings while the family size, the triggered-name set and
+  // every control stayed identical.
+  const UNDOINGS = ['The proofing pass is optional.',
+    'The proofing pass is skippable once the runner is green.',
+    'The proofing pass may be skipped when the pre-smoke passed.',
+    'The proofing pass may be omitted on a re-issue.',
+    'The proofing pass can be skipped when nothing changed.',
+    'Run the proofing pass if time allows.',
+    'Run the proofing pass if time permits.',
+    'The proofing pass need not run on a re-issue.',
+    'The proofing pass does not have to run when the page is unchanged.',
+    "Run the proofing pass at the orchestrator's discretion.",
+    'Run the proofing pass when you have time.',
+    'The proofing pass replaces the QA runner.',
+    'Proof the published artifact instead of the pre-smoke.',
+    'The proofing pass runs in place of the QA runner.',
+    'Proof the published artifact before the page is built.',
+    'The proofing pass runs before the page exists.',
+    'Proof the published artifact before the page is generated.'];
+  assert.equal(UNDOINGS.length, 17, 'the undoing corpus must keep all seventeen spellings');
+  assert.equal(new Set(UNDOINGS).size, 17, 'the corpus must not repeat a spelling to pad its size');
+  for (const undoing of UNDOINGS) {
+    assert.ok(undoings(undoing).length > 0, 'the sweep no longer catches: "' + undoing + '"');
+  }
+  // Subject is the DOMAIN: the corpus must exercise every family and may name none the
+  // list has lost, so neither can move without the other.
+  assert.deepEqual([...new Set(UNDOINGS.flatMap(names))].sort(),
+    CONTRADICTIONS.map(entry => entry.name).slice().sort(),
+    'every contradiction family must be exercised by the corpus, and the corpus may name none it has dropped');
+  // …and set equality alone protects only n-1 of n, because deleting a family removes its
+  // name from BOTH sides at once. EXCLUSIVITY is what makes the corpus an authority: each
+  // family must own an entry NO other family flags.
+  for (const { name } of CONTRADICTIONS) {
+    assert.ok(UNDOINGS.some(undoing => { const hit = names(undoing); return hit.length === 1 && hit[0] === name; }),
+      name + ': no corpus entry is caught by this family ALONE, so deleting it balances the set equality above');
+  }
+  // The REGION path armed independently of the clause path: this text names nothing ABOUT
+  // would select, so only the window around the close-out can flag it.
+  const REGION_ONLY = 'commit on the integration branch, STOP with the combined smoke script.'
+    + ' This step is optional when the pre-smoke passed.';
+  assert.deepEqual(clauses(REGION_ONLY), [],
+    'the clause path must not be what catches this, or the region path is never tested');
+  assert.deepEqual(names(REGION_ONLY), ['optional or skippable'],
+    'an undoing appended to the close-out that never names the pass must still be caught');
+  const EMPHASIS_BOUNDARY = '**Proof the published artifact — an ADDED pass, after the page is built.**'
+    + " The QA runner's pre-verification happens before the page exists and proves the steps, not the bytes"
+    + ' the reader receives;';
+  assert.equal(EMPHASIS_BOUNDARY.split(/(?<=[.;])[\s*]+/).length, 2,
+    'a sentence boundary closed by markdown emphasis must produce TWO raw clauses; under a plain \\s+ split it'
+      + ' produces one, and the next sentence is swept as though it were about the pass');
+  assert.deepEqual(undoings(EMPHASIS_BOUNDARY), [],
+    'the narrowing has been reopened: this is correct prose about the PRE-smoke, not a re-timing of the pass');
+  assert.ok(collapsed('orchestrate/references/smoke-page.md').includes(EMPHASIS_BOUNDARY),
+    'this false positive is no longer smoke-page.md\'s own prose — re-derive it before trusting the narrowing');
+  for (const file of [...wired, ...definers]) {
+    assert.ok(clauses(collapsed(file)).length > 0,
+      file + ': the clause path selected nothing here, so its half of the silence is about nothing');
+  }
+  for (const file of carriers) {
+    assert.deepEqual(undoings(collapsed(file)), [],
+      file + ': a directive at the close-out, beside the pass, or in a clause about it undoes the pass');
+  }
+});
