@@ -86,27 +86,67 @@ exists to close.
 
 ## Checklist
 
-- [ ] Restate the scaffolder self-check in `orchestrate/references/scaffolding.md` step 9 so a hit
+- [x] Restate the scaffolder self-check in `orchestrate/references/scaffolding.md` step 9 so a hit
       inside a fenced or inline code span is not an unfilled slot, keeping the `residualGrep` anchor
       at `tests/protocol-contract.test.cjs:157` matchable.
-- [ ] Apply the same restatement to the mirrored self-check sentence in `orchestrate/SKILL.md`.
-- [ ] Make the self-check’s absolute honest: "Any hit is an unfilled slot" becomes a statement that is
+- [x] Apply the same restatement to the mirrored self-check sentence in `orchestrate/SKILL.md`.
+- [x] Make the self-check’s absolute honest: "Any hit is an unfilled slot" becomes a statement that is
       true of hits outside code spans.
-- [ ] State the runner rule plainly in `orchestrate/references/execution-models.md`: a step needs a
+- [x] State the runner rule plainly in `orchestrate/references/execution-models.md`: a step needs a
       human only when it needs a device, a GUI, held credentials, or a judgement about whether
       something looks right.
-- [ ] State that a checkpoint asks the user for a VERDICT, not for labour.
-- [ ] Correct the `Runner:` default in all five live locations — `execution-models.md`,
+- [x] State that a checkpoint asks the user for a VERDICT, not for labour.
+- [x] Correct the `Runner:` default in all five live locations — `execution-models.md`,
       `scaffolding.md` (both `:24-25` and `:229`), `protocol.md`, `templates/00-READBEFORE.md` and
       `templates/02-batch.md` — so a driving session and a planner read the same rule the skill does.
-- [ ] Add assertions to `tests/protocol-contract.test.cjs`: the self-check exempts code spans in both
+- [x] Add assertions to `tests/protocol-contract.test.cjs`: the self-check exempts code spans in both
       files, and the runner rule is present in every one of the five locations — swept, not sampled.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-010-016-selfcheck-runners` — `fix: self-check code spans and honest runner classification (batch 07)`.
+- [x] Commit on `fix/bl-010-016-selfcheck-runners` — `fix: self-check code spans and honest runner classification (batch 07)`.
+- [x] polish: the 10→14 pattern rewrite dropped round 1’s `/assume[sd]?\s+human/i` and nothing held the
+      new family to the old one’s coverage. Restore it as an `assum\w*` pattern and make the regression
+      corpus the coverage AUTHORITY — size pinned, written independently of the pattern list, and
+      asserted to exercise every pattern — so a future rewrite cannot shrink coverage while every
+      visible signal grows. Test-only.
+- [x] polish: ASK-1 — the safety half of the round-1 fix was pinned by nothing: the pinned `RULE` stops
+      at "…forbids an agent here to do", so deleting the back-reference from every carrier, and
+      deleting the grounds it points at, were both green. Pin the back-reference per OCCURRENCE in
+      document order and the grounds per file. Test-only.
+- [x] polish: ASK-2 — the negation pre-filter exempted 570 of 3,887 clauses in front of all patterns,
+      left `not certain` / `do not know` unreachable and let "…every step human, not agent." pass.
+      Apply it to the MATCH, not the clause, give every pattern a negation-bearing control, and add
+      live reinforcement controls that match a pattern and must still be silenced. Test-only.
+- [x] polish: ASK-3 — pin the three loop domains by their DOMAIN, not their members: the placeholder
+      token array, the non-Markdown skill files (compared against the actual listing), and the
+      regression corpus; and count DISTINCT controls so duplicates cannot pad the total. Test-only.
+- [x] polish: ASK-4 — the connector whitelist missed modals: add `must|should|shall|will|always|
+      therefore|then|only` without reopening the `build-smoke-page.mjs` false positive, widen the
+      target vocabulary where it is free (`a person`, `the tester`, `by hand`), and keep the
+      disclaimer honest about the paraphrases still not caught. Test-only.
+- [x] polish: run the full published validation and `git diff --check`; commit on
+      `fix/bl-010-016-selfcheck-runners`.
+- [x] polish: the coverage authority protected 15 of 16 patterns. The name-set equality BALANCES when a
+      pattern is deleted, so it bites only on an unflagged entry — and `default when unsure` owned no
+      entry that it alone catches. Add `Default if in doubt.` and assert EXCLUSIVITY as a domain
+      property: every pattern owns a corpus entry no other pattern flags. Test-only.
+- [x] polish: the reinforcement filter excused genuine reversals. Bound the look-back at the nearest
+      `,` `:` or dash so a negation in the PRECEDING phrase no longer reinforces this one (five of the
+      named reversals recovered), and name in the comment what it still excuses — the same-phrase
+      negation and `exec`’s first-match-only scan. The prescribed two-word narrowing was measured and
+      rejected: it reddens the file sweep on shipped prose. Test-only.
+- [x] polish: `PLACEHOLDER_TOKENS` was the one loop domain with no domain subject — the loop asserts
+      each pinned token is present, never that no unpinned token exists. Derive the domain from the
+      grep clause with `matchAll` and `deepEqual` it against the pinned list plus the `*` glob. Test-only.
+- [x] polish: restore the `mark|tag|treat` family in a narrowed form — determiner plus `steps?` directly
+      after the verb — catching `Mark unplaced steps human.`; give it its own regression entry and pin
+      the false positives every narrowing was bought with, including the `hand` three-word gap. Test-only.
+- [x] polish: `Never hand a step to the user.` is invented, not this checkout’s prose, and the comment
+      claiming otherwise was held by nothing. Assert the two real reinforcements against
+      `execution-models.md` and correct the comment. Test-only.
 
 ## Acceptance criteria
 

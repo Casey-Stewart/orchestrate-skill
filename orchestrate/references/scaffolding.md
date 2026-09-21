@@ -22,11 +22,15 @@
    disjointness (seam batches, splits, merges), build the wave map (widest safe waves —
    "3 concurrent, then 2" beats 5 back-to-back), classify every batch hands-on vs
    machine-verifiable, tag every smoke step `Runner: agent | human` against the
-   detected runner set and the environment's prohibitions (default human; "touches
-   data" is human unless a disposable environment exists), and place the smoke
+   detected runner set and the environment's prohibitions ("touches data" is human
+   unless a disposable environment exists), and place the smoke
    checkpoints (one after each hands-on wave + the mandatory final one — never per
-   batch). Pick the applicable guardrails per batch (the subset of the project's
-   guardrail bullets its fence can violate).
+   batch). A step is human ONLY when it needs something an agent on this machine
+   cannot do: a device, a GUI, held credentials, a judgement about whether something
+   looks right, or something the environment contract forbids an agent here to do —
+   the prohibitions just named are that last kind, not exceptions to this rule.
+   Pick the applicable guardrails per batch (the subset of the project's guardrail
+   bullets its fence can violate).
    Inventory the exact required inputs for each step while planning: workbook
    sheets/columns/types/formulas/edge cases, independent validation, reproducible
    synthetic generation, immutable issue paths and working-copy/reset directions.
@@ -80,10 +84,13 @@
    Keep the generated delivery contract runtime-neutral: use the committed smoke HTML
    and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
 9. **Self-check** — grep the new ledger directory for `{{` and `<!--`, and its `*.md`
-   for `<title>` (a deleted marker can leave an example row behind): **zero hits**.
+   for `<title>` (a deleted marker can leave an example row behind): **zero hits**
+   outside fenced and inline code spans. A hit inside a code span is not an unfilled
+   slot — a ledger that documents templating work quotes those tokens legitimately.
    `**State**: ACTIVE` present in PROGRESS; the pre-flight verdict line present in the
    plan; every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`.
-   Any hit is an unfilled slot; fix before committing.
+   Any hit outside a code span is an unfilled slot; fix before committing. Discount
+   the ones inside a span in the commit message rather than editing them away.
 10. **Scaffold commit** — batch 00 = the ledger itself (plus the ids written onto
     accepted fold-ins in the backlog file), committed on `chore/{{CHANGE_SLUG}}-ledger`,
     which becomes the INTEGRATION BRANCH every wave stacks onto. Never on the default
@@ -229,7 +236,11 @@ detection. Do not run it or fetch automatically.
    including any gotchas like "reload the extension, then refresh the page"). Then:
    which of the detected runners may an agent use here (none / CLI / HTTP / browser /
    screenshot), is there a disposable data environment, and what must an agent never
-   do (launch the headed app, touch live data)? Default when unsure: every step human.
+   do (launch the headed app, touch live data)? The answers decide the tags, not a
+   blanket fallback. A step is human ONLY when it needs something an agent on this
+   machine cannot do: a device, a GUI, held credentials, a judgement about whether
+   something looks right, or something the environment contract forbids an agent here
+   to do — the answers to this question are that last kind, not exceptions to it.
 4. **Default branch + merge policy** — confirm the actual default branch as a full
    local ref (`{{MAIN_BRANCH}}`, protected even if no local copy currently exists).
    Confirm whether shipment means a merge into that LOCAL branch or into its branch
