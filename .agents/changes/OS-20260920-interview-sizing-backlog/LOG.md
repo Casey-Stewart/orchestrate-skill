@@ -1085,3 +1085,59 @@ often, and pattern 0 requires whitespace after `default`, so a colon defeats it.
 
 What survived scrutiny: the carrier sweep, the batch's central deliverable, is sound in both gates'
 hands — six mutations redden, including a sixth document acquiring the rule under either directory.
+
+### B07 — round 2: FIX FIRST. Second round spent → `⛔ green, residual finding open (low)`
+
+**`R2 FIX FIRST @7f07f20`.** Six of the seven round-1 findings are **FIX VERIFIED** by the
+reviewer's own mutations, and the ASK is RESOLVED. Validation 306/306. **But it is the second
+`FIX FIRST`, so the contract sets `⛔` and the session stops for the user's verdict.**
+
+**Everything that was asked for was delivered and independently verified.** All 14 patterns disarm
+individually and redden with their own name; both `scaffolding.md` occurrences redden alone through
+the `{file: count}` map; all four round-1 paraphrases are caught; the inverted exemption, the
+appended negation and all three `residualGrep` rewrites redden; the walk is genuinely recursive and
+unfiltered, proven at depth three by a fixture that reddened rather than asserted — and incidentally
+proven live when a stray backup file the reviewer dropped in `orchestrate/` was picked up by the
+walk and reddened the suite.
+
+**P1-1's safety fix is verified in full, cold.** Asked to read all six occurrences as a conductor
+holding a smoke step that reads a production database, the reviewer answers: **yes, all six now
+direct to `human`.** The orchestrator verified the same text independently. The enumeration is
+open-ended AND each carrier back-references its own neighbouring human list by name, so the ONLY
+clause cannot be read as narrowing. Commit `7f07f20` — the implementer's unrequested parity edit —
+was judged **in scope and correct**: P1-1 applied to its two siblings, three lines of prose, after
+the pinned `RULE` substring, touching no template, no placeholder, neither hashed table and neither
+byte-mirror. It closes the repository's own sibling-defect class.
+
+**The blocking finding is the same class this change has spent itself cataloguing, now one level up.**
+Round 1's ten-pattern family contained `/assume[sd]?\s+human/i`. The fourteen-member rewrite has NO
+`assume` pattern, and nothing asserts the new family is a superset of the old. Verified: `Assume
+human until a runner is named.` and `Unplaced steps are assumed human.` both pass green. So a sweep
+that was REWRITTEN TO BE STRONGER — 14 patterns, per-pattern arming, a size assertion, a capitalised
+disclaimer — silently lost a spelling it used to catch, while every visible signal says it grew.
+
+That is the round-1 lesson recursing: *a sweep built to catch reversals of a rule is blind to an edit
+that narrows the rule's scope* — and here the artifact that was narrowed **was the sweep itself.**
+There is no assertion anywhere that a guard's coverage is monotonic across a rewrite. That is a new
+bug class, it is the ninth instance in this change of a vacuity fix containing a vacuity, and it is
+the sharpest one because every proxy for rigour pointed the other way.
+
+The failure scenario is concrete: a future author writes `Assume human until a runner is named` into
+`scaffolding.md`, BL-016 is re-introduced, `306/306` stays green, and a reviewer reads the silence as
+coverage. The reviewer supplied the exact one-line patch — a fifteenth pattern with two controls,
+`14`→`15`, control total `32`→`34`. Test-only; no production, mirror or placeholder risk.
+
+**Four ASKs, all recorded, none blocking.** The `RULE` literal stops before the sentence that
+actually re-admits live data and another OS, so the safety half of P1-1's fix is held by nothing —
+deleting the back-reference from all four `59d8788` carriers, and deleting `Steps flagged "Touches
+your data" are human` from `protocol.md`, were all GREEN. The `NEGATION` pre-filter exempts 14.7% of
+the corpus (570 of 3,887 clauses) in front of all 14 patterns, is itself untested by any control,
+and makes two pattern alternatives unreachable. Three new loop domains lack a domain-subject
+assertion, and the `=== 32` control total is satisfiable by a wrong 32 — four copies of one control
+pass, silently retiring the colon and em-dash forms. And sixteen further paraphrases get through,
+reaching for vocabulary the sweep does not carry: *the tester*, *a person*, *by hand*, *operator*,
+*not automatable*.
+
+**State: `⛔ green, residual finding open (low)`.** The batch is green, its shipped rules are correct
+and verified, and it is OUT of integration pending the user's verdict — fix again / ship with the
+residual / drop.
