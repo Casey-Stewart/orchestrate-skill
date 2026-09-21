@@ -185,7 +185,9 @@ sees the plan) → front-load user gates (design/UX approvals resolved at planni
 via mockups, or scheduled as wave 1 — never mid-run) → user approves plan + wave map +
 checkpoints + weights + fold-ins in one pass → fill the templates into
 `.agents/changes/<CHANGE_ID>/` (incl. `LOG.md`) → self-check (grep the new directory
-for `{{` and `<!--`, and its `*.md` for `<title>` — zero hits; `**State**: ACTIVE` present;
+for `{{` and `<!--`, and its `*.md` for `<title>` — zero hits outside fenced and inline
+code spans, which a ledger documenting templating work quotes legitimately, so only a
+hit outside a span is an unfilled slot; `**State**: ACTIVE` present;
 every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`) → scaffold commit on
 `chore/<slug>-ledger` (which becomes the integration branch) → STOP and report.
 

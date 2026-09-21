@@ -344,3 +344,104 @@ test('actual README recursive command and portable form discover nested failure 
   for (const name of [top, nested, last]) fs.unlinkSync(path.join(repo.cwd, name));
   const empty = run(); assert.notEqual(empty.status, 0); assert.match(empty.stderr, /No Node test suites discovered/);
 });
+
+// BL-010: the scaffold self-check greps a brand-new ledger for `{{`, `<!--` and
+// `<title>` and called every hit an unfilled slot. A ledger that DOCUMENTS templating
+// work quotes those tokens legitimately — this repository produced eleven such hits in
+// one scaffold commit, every one inside a code span — so the absolute was false and the
+// scaffolder was told to edit correct prose away. The exemption is pinned inside the
+// same clause as the verdict: naming code spans elsewhere in the document is not the
+// same as qualifying "zero hits", the hole `[^.;]*` closes for the residual grep above.
+test('the scaffold self-check exempts code spans from the placeholder grep', () => {
+  const collapsed = file => read(file).replace(/\s+/g, ' ').replace(/\.md\b/g, '');
+  const exemption = /zero hits[^.;]*outside fenced and inline code spans/i;
+  const selfCheckFiles = ['orchestrate/references/scaffolding.md', 'orchestrate/SKILL.md'];
+  assert.equal(selfCheckFiles.length, 2, 'the self-check is stated in exactly two reusable documents');
+  for (const file of selfCheckFiles) {
+    const text = collapsed(file);
+    assert.match(text, exemption,
+      file + ': "zero hits" must be qualified, within its own clause, to hits outside fenced and inline code spans');
+    // Polarity: a document that carries the exemption AND the old absolute still tells a
+    // scaffolder that a quoted token is a slot. "hit is an unfilled slot" is the absolute;
+    // the narrowed verdicts below read "... span is an unfilled slot" and do not match.
+    assert.doesNotMatch(text, /\bhit is an unfilled slot\b/i,
+      file + ': the unqualified absolute "Any hit is an unfilled slot" must not survive beside the exemption');
+    assert.doesNotMatch(text, /zero hits[^.;]*(?:including|even inside|regardless of)[^.;]*code span/i,
+      file + ': nothing may re-include code spans in the zero-hit verdict');
+  }
+  // The verdict must still exist, narrowed — deleting it outright would satisfy the two
+  // negatives above while leaving the scaffolder with no rule at all.
+  assert.match(collapsed('orchestrate/references/scaffolding.md'), /Any hit outside a code span is an unfilled slot/,
+    'scaffolding.md must keep the verdict, narrowed to hits outside a code span');
+  assert.match(collapsed('orchestrate/SKILL.md'), /only a hit outside a span is an unfilled slot/i,
+    'SKILL.md must keep the verdict, narrowed to hits outside a code span');
+});
+
+// BL-016 named two files; FIVE carry the Runner: default, and the two the backlog missed
+// (the ledger contract template and the batch template) are the ones a DRIVING session and
+// a PLANNER actually read — a rule landing only in the reference docs never reaches a
+// ledger. Two examples cannot hold a five-member set, so the domain is bound three ways:
+// its own size, set-equality with every reusable document that carries the rule (derived
+// from the directory listing, not hand-written, so a sixth carrier cannot appear silently),
+// and a sweep of that same listing for any surviving default-human spelling.
+test('every document carrying the Runner: default states the same rule, and no default-human spelling survives', () => {
+  const RULE = 'A step is human ONLY when it needs something an agent on this machine cannot do: '
+    + 'a device, a GUI, held credentials, or a judgement about whether something looks right';
+  const RUNNER_RULE_CARRIERS = [
+    'orchestrate/references/execution-models.md',
+    'orchestrate/references/protocol.md',
+    'orchestrate/references/scaffolding.md',
+    'orchestrate/templates/00-READBEFORE.md',
+    'orchestrate/templates/02-batch.md'
+  ];
+  assert.equal(RUNNER_RULE_CARRIERS.length, 5, 'BL-016 understated its file set by three: five documents carry the rule');
+  assert.equal(new Set(RUNNER_RULE_CARRIERS).size, 5, 'the carrier list must name five distinct documents');
+  const collapsed = file => read(file).replace(/\s+/g, ' ');
+  // The domain comes from the checkout, recursed exactly as far as the consumer reads.
+  const reusable = ['orchestrate/SKILL.md', ...['orchestrate/references', 'orchestrate/templates'].flatMap(dir =>
+    fs.readdirSync(path.join(ROOT, dir)).filter(name => name.endsWith('.md')).sort().map(name => dir + '/' + name))];
+  assert.ok(reusable.length > RUNNER_RULE_CARRIERS.length,
+    'the swept listing must be wider than the carrier set, or the sweep proves nothing');
+  for (const file of RUNNER_RULE_CARRIERS) {
+    assert.ok(reusable.includes(file), file + ': carrier is not in the reusable listing this test sweeps');
+    assert.ok(collapsed(file).includes(RULE),
+      file + ': must state the runner rule verbatim — "' + RULE + '" (whitespace collapsed)');
+  }
+  // Subject is the DOMAIN, not its members: removing the rule from one carrier, or adding
+  // it to a sixth document without listing it, both redden here.
+  const carrying = reusable.filter(file => collapsed(file).includes(RULE));
+  assert.equal(carrying.length, RUNNER_RULE_CARRIERS.length, 'exactly five reusable documents may state the runner rule, found: ' + carrying.join(', '));
+  assert.deepEqual(carrying.slice().sort(), RUNNER_RULE_CARRIERS.slice().sort());
+  const DEFAULT_HUMAN = [
+    /default(?:s|ed)?\s+(?:is\s+|to\s+)?human/i,
+    /default when unsure/i,
+    /when (?:unsure|in doubt)[^.;]*human/i,
+    /assume[sd]?\s+human/i,
+    /(?:every|all|each)\s+steps?\s+(?:is\s+|are\s+|as\s+)?human\b/i,
+    /human\s+by\s+default/i,
+    /\berr\b[^.;]*human/i,
+    /prefers?\s+human/i,
+    /falls?\s*back[^.;]*human/i,
+    /no test[^.;]*(?:so|therefore|hence)[^.;]*human/i
+  ];
+  // Live control: a pattern family that matches nothing sweeps clean over anything. Each
+  // spelling this batch actually removed is replayed here, so the sweep below is known to
+  // be armed before its silence is read as evidence.
+  for (const removed of ['environment. Default human. At close-out', 'fixture environment. Default is human. Before',
+    'prohibitions (default human; "touches data" is human', 'touch live data)? Default when unsure: every step human.']) {
+    assert.ok(DEFAULT_HUMAN.some(pattern => pattern.test(removed)),
+      'the default-human sweep is disarmed: it no longer matches the removed spelling "' + removed + '"');
+  }
+  for (const file of reusable) {
+    const text = collapsed(file);
+    for (const spelling of DEFAULT_HUMAN) {
+      assert.doesNotMatch(text, spelling, file + ': a blanket human default contradicts the runner rule');
+    }
+  }
+  // The rest of BL-016: the reason the old default was wrong, and what a checkpoint costs.
+  const models = collapsed('orchestrate/references/execution-models.md');
+  assert.match(models, /fixtures are isolated from the real machine by design and a subagent is not/i,
+    'execution-models.md must say why "no test can verify this" is not "no agent can verify this"');
+  assert.match(models, /checkpoint asks the user for a VERDICT, not for labour/,
+    'execution-models.md must say a checkpoint asks for a verdict, not for labour');
+});

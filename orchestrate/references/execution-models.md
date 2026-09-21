@@ -85,9 +85,15 @@ batch or per wave by default.
 - Tag every smoke step `Runner: agent` (performable in THIS repo's environment by a
   runner the contract lists — CLI, HTTP, browser, screenshot) or `Runner: human`
   (hardware, credentials, feel, another OS, live data — and anything "touches your
-  data" unless a disposable environment exists). Default human. At the checkpoint
+  data" unless a disposable environment exists). Tag on what an agent on this machine
+  can do, never on what the test fixtures can do: fixtures are isolated from the real
+  machine by design and a subagent is not, so "no test could prove it" is never a
+  reason to hand a step to the user. A step is human ONLY when it needs something an
+  agent on this machine cannot do: a device, a GUI, held credentials, or a judgement
+  about whether something looks right. At the checkpoint
   close-out a QA runner performs the agent steps on the integration tip and records
-  evidence; the user's hands are spent only on the human steps. A repo whose contract
+  evidence; the user's hands are spent only on the human steps. A checkpoint asks the
+  user for a VERDICT, not for labour. A repo whose contract
   forbids running the app has no agent steps — say so rather than pretend.
 
 ## Wave mechanics (run time)

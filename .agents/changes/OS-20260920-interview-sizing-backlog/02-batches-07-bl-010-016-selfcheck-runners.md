@@ -86,27 +86,27 @@ exists to close.
 
 ## Checklist
 
-- [ ] Restate the scaffolder self-check in `orchestrate/references/scaffolding.md` step 9 so a hit
+- [x] Restate the scaffolder self-check in `orchestrate/references/scaffolding.md` step 9 so a hit
       inside a fenced or inline code span is not an unfilled slot, keeping the `residualGrep` anchor
       at `tests/protocol-contract.test.cjs:157` matchable.
-- [ ] Apply the same restatement to the mirrored self-check sentence in `orchestrate/SKILL.md`.
-- [ ] Make the self-check’s absolute honest: "Any hit is an unfilled slot" becomes a statement that is
+- [x] Apply the same restatement to the mirrored self-check sentence in `orchestrate/SKILL.md`.
+- [x] Make the self-check’s absolute honest: "Any hit is an unfilled slot" becomes a statement that is
       true of hits outside code spans.
-- [ ] State the runner rule plainly in `orchestrate/references/execution-models.md`: a step needs a
+- [x] State the runner rule plainly in `orchestrate/references/execution-models.md`: a step needs a
       human only when it needs a device, a GUI, held credentials, or a judgement about whether
       something looks right.
-- [ ] State that a checkpoint asks the user for a VERDICT, not for labour.
-- [ ] Correct the `Runner:` default in all five live locations — `execution-models.md`,
+- [x] State that a checkpoint asks the user for a VERDICT, not for labour.
+- [x] Correct the `Runner:` default in all five live locations — `execution-models.md`,
       `scaffolding.md` (both `:24-25` and `:229`), `protocol.md`, `templates/00-READBEFORE.md` and
       `templates/02-batch.md` — so a driving session and a planner read the same rule the skill does.
-- [ ] Add assertions to `tests/protocol-contract.test.cjs`: the self-check exempts code spans in both
+- [x] Add assertions to `tests/protocol-contract.test.cjs`: the self-check exempts code spans in both
       files, and the runner rule is present in every one of the five locations — swept, not sampled.
       Prove failing-on-base: name, in the report, the exact assertion that goes red when run
       against the code and documents at this batch’s base.
-- [ ] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
-- [ ] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
+- [x] Run the validation commands from [00-READBEFORE.md](00-READBEFORE.md); all green.
+- [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
-- [ ] Commit on `fix/bl-010-016-selfcheck-runners` — `fix: self-check code spans and honest runner classification (batch 07)`.
+- [x] Commit on `fix/bl-010-016-selfcheck-runners` — `fix: self-check code spans and honest runner classification (batch 07)`.
 
 ## Acceptance criteria
 
