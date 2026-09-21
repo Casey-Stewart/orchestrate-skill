@@ -83,6 +83,11 @@ untested however correct it is."* Demonstrate both mutations in the implementer 
       member from the domain and from the expectation together stayed green. The domain now
       carries a size and a no-duplicates assertion, and the partition is pinned by counting the
       `git-probe` verdicts, so neither list can shrink silently.
+- [x] polish: R2 ASK-3 — ASK-1 was a production fix with no test, which is the same vacuity
+      shape it was fixing. `safeResolvedFilters(repo.cwd, [])` now pins the optional third
+      argument, with the determinism argument recorded beside it: that fixture's path is
+      tracked and its attribute committed, so the fallback to `process.env` cannot make the
+      verdict depend on ambient Git configuration. Removing `= {}` reddens it.
 
 ## Acceptance criteria
 

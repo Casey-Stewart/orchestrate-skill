@@ -577,6 +577,12 @@ test('the probe seam can only refuse, and no published invocation reaches it', a
   }
   const help = repo.cli('git-evidence.mjs', ['--help']);
   assert.equal(help.status, 0); assert.doesNotMatch(help.stdout, /fail[- ]?probe/i);
+  // Omitting the options argument is not the same as passing `failProbe: undefined`: the
+  // seam must leave the argument optional, as every other helper here does. The verdict
+  // stays deterministic despite the fallback to process.env, because the inspected path is
+  // TRACKED and its attribute comes from a committed .gitattributes: no ambient Git
+  // configuration can drop it from the listing or unresolve it, on any machine.
+  assert.equal(safeResolvedFilters(repo.cwd, []), false, 'the third argument must stay optional');
   // And in the API it degrades only: swept over its whole reachable domain and beyond, no
   // value makes this resolving attribute safe. The two probes it can degrade refuse as
   // unread; every other value leaves the real, resolving verdict standing.
