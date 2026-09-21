@@ -256,9 +256,11 @@ bytes, and nothing about the pre-smoke's timing changes.
 Open [PAGE_PATH], read every `<pre><code>` block's `textContent`, and run exactly those
 bytes in the reader's shell [READER_SHELL]. Not the sidecar, not the batch file, not the
 shell a command was composed in: a command re-authored on its way into the page is
-unverified, however carefully it was checked before. Skip the blocks belonging to a
-`Runner: human` step and touch no data outside [DISPOSABLE_ENV or "none — steps touching
-data are human"]. Edit nothing: the page is issued, not repaired, by you.
+unverified, however carefully it was checked before. Skip RUNNING the blocks belonging to
+a `Runner: human` step — still READ them and report their bytes, since those are the ones
+a person copy-pastes and a mangled backslash costs most there — and touch no data outside
+[DISPOSABLE_ENV or "none — steps touching data are human"]. Edit nothing: the page is
+issued, not repaired, by you.
 
 REPORT: one line per block, in page order — `block NN (step NN): RAN-AS-PUBLISHED |
 FAILED-AS-PUBLISHED | COULD-NOT-RUN — <exit code, ≤5 lines of output tail>`. A block
