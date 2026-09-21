@@ -79,6 +79,9 @@ un-fixed text. This batch therefore adds the assertion that does — which is wh
       negation into the rule in either document reddens the suite; demonstrate it.
 - [x] polish: Change "such filters" to "such filter drivers" in both mirrors, so a reader
       cannot bind it to the git check-attr filter probe the rule now names.
+- [x] polish: Comment the sweep honestly — subsection scope, not the document; the
+      clause bound is load-bearing for a preceding negation, not a following one;
+      polarity-blind; and the evasions it does not claim to catch.
 
 ## Acceptance criteria
 

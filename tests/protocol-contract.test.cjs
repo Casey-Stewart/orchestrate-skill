@@ -104,8 +104,11 @@ test('the manual read-only fallback names git check-attr filter in the resolved-
     assert.ok(start !== -1 && end > start, label + ': the manual fallback must still carry the resolved-filter rule');
     assert.ok(fallback.slice(start, end).replace(/\s+/g, ' ').startsWith(rule),
       label + ': the resolved-filter step must read exactly "' + rule + '" (whitespace collapsed)');
-    // The positive pin above is defeated by a contradicting directive placed beside it, so
-    // sweep the whole fallback: nothing here may forbid the probe the rule requires.
+    // A contradiction beside the pinned clause defeats it. Scope is this subsection, not
+    // the document; the clause bound is load-bearing (`do not probe their trees` above
+    // matches an unnarrowed `.*`). Polarity-blind: reinforcements ("Never skip git
+    // check-attr filter") redden too — word one with no negation verb in its clause.
+    // Uncaught by design: negation after the command, a probe synonym, an unlisted verb.
     assert.doesNotMatch(fallback.replace(/\s+/g, ' '), /(?:never|not|avoid|skip)\b[^.;:]*\bgit check-attr\b/i,
       label + ': nothing in the manual fallback may tell a human NOT to run git check-attr');
   }
