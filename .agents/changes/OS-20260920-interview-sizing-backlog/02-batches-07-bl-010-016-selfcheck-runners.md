@@ -107,6 +107,28 @@ exists to close.
 - [x] `git diff --name-status -M chore/interview-sizing-backlog-ledger...HEAD` plus `git status --porcelain`;
       revert anything outside the fence.
 - [x] Commit on `fix/bl-010-016-selfcheck-runners` — `fix: self-check code spans and honest runner classification (batch 07)`.
+- [x] polish: the 10→14 pattern rewrite dropped round 1’s `/assume[sd]?\s+human/i` and nothing held the
+      new family to the old one’s coverage. Restore it as an `assum\w*` pattern and make the regression
+      corpus the coverage AUTHORITY — size pinned, written independently of the pattern list, and
+      asserted to exercise every pattern — so a future rewrite cannot shrink coverage while every
+      visible signal grows. Test-only.
+- [x] polish: ASK-1 — the safety half of the round-1 fix was pinned by nothing: the pinned `RULE` stops
+      at "…forbids an agent here to do", so deleting the back-reference from every carrier, and
+      deleting the grounds it points at, were both green. Pin the back-reference per OCCURRENCE in
+      document order and the grounds per file. Test-only.
+- [x] polish: ASK-2 — the negation pre-filter exempted 570 of 3,887 clauses in front of all patterns,
+      left `not certain` / `do not know` unreachable and let "…every step human, not agent." pass.
+      Apply it to the MATCH, not the clause, give every pattern a negation-bearing control, and add
+      live reinforcement controls that match a pattern and must still be silenced. Test-only.
+- [x] polish: ASK-3 — pin the three loop domains by their DOMAIN, not their members: the placeholder
+      token array, the non-Markdown skill files (compared against the actual listing), and the
+      regression corpus; and count DISTINCT controls so duplicates cannot pad the total. Test-only.
+- [x] polish: ASK-4 — the connector whitelist missed modals: add `must|should|shall|will|always|
+      therefore|then|only` without reopening the `build-smoke-page.mjs` false positive, widen the
+      target vocabulary where it is free (`a person`, `the tester`, `by hand`), and keep the
+      disclaimer honest about the paraphrases still not caught. Test-only.
+- [x] polish: run the full published validation and `git diff --check`; commit on
+      `fix/bl-010-016-selfcheck-runners`.
 
 ## Acceptance criteria
 
