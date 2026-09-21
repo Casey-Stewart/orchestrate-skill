@@ -23,12 +23,20 @@ export function buildSmokePage(data, template, { previous, resetVerdicts = false
   if (previous !== undefined) validateReissue(data, validate(previous), resetVerdicts);
   else if (resetVerdicts) throw new Error("resetting verdicts requires a previous sidecar");
   validateInputFiles(declareInputs(data), inputRoot);
+  // The documented self-check, enforced rather than remembered — over the TEMPLATE,
+  // the only document a slot can live in. What it catches is a name the fill pattern
+  // below cannot match (lower-case, spaced, hyphenated), which would otherwise ship
+  // unfilled. The filled page is NOT the subject: a step's command may legitimately
+  // carry `{{` — a GitHub Actions expression, a Handlebars or Vue binding — and
+  // scanning the fill refused to publish any page containing one.
+  if (template.replace(/\{\{[A-Z_]+\}\}/g, "").includes("{{")) {
+    throw new Error("self-check failed: the template carries a `{{` that is not a slot; "
+      + "a slot name is upper-case letters and underscores, with no spaces");
+  }
   const out = template.replace(/\{\{([A-Z_]+)\}\}/g, (_, name) => {
     if (!(name in slots)) throw new Error(`template wants a slot the sidecar cannot fill: {{${name}}}`);
     return slots[name];
   });
-  // The documented self-check, enforced rather than remembered.
-  if (out.includes("{{")) throw new Error("self-check failed: an unfilled `{{` survived the fill");
   return out + sidecarStamp(data);
 }
 
@@ -366,7 +374,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       }
     }
     writeFileSync(out, html);
-    console.log(`${out}: ${html.length} bytes, 0 unfilled slots`);
+    console.log(`${out}: ${html.length} bytes, every template slot filled`);
   } catch (e) {
     console.error(`${sidecar}: ${e.message}`);
     process.exit(1);
