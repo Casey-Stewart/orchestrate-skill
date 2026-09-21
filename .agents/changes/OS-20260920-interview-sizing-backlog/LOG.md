@@ -714,3 +714,45 @@ by a gate agent MUTATING the fix — expensive, and it requires understanding th
 **mechanical, greppable signature for the same class**: two literals asserting the same fact with no
 assertion relating them. A future test-hunter brief can hunt it directly, without understanding the
 code under test. That is the difference between a lesson and a tool.
+
+### B05 — scoped re-review: SHIP, and a determinism claim tested against the machine
+
+The scoped re-review of `572c5d3..HEAD` returned **SHIP**. The production diff for the whole polish
+range is the single token claimed — `options` → `options = {}` — verified independently by the
+orchestrator as well; the blob of `git-evidence.mjs` is byte-identical between `ee83e2a` and
+`96b4c8f`, so the last commit touched no production file at all.
+
+**The determinism argument was tested, not accepted, and this is the part worth keeping.** The
+repository has a named class — *a guard whose verdict depends on the checkout rather than the code* —
+and was bitten by exactly the Git-for-Windows LFS case in BL-003. The reviewer ran eight ambient
+configurations on a machine carrying the stock system config, noting first that line 585 genuinely
+reads it, because it omits `repo.env` and so never receives `GIT_CONFIG_NOSYSTEM`. All eight returned
+`false` with diagnostic `unsafe-filter` — the same VERDICT, not merely the same boolean.
+
+The decisive fact: a `core.attributesFile` containing both `* -filter` and `filtered.txt -filter`
+did **not** override the committed in-tree `.gitattributes`. Attribute precedence puts
+`core.attributesFile` and system attributes BELOW in-tree files. And `filter.lfs.*` is irrelevant
+here because `safeResolvedFilters` reads no configuration at all — the BL-003 surface lives in
+`safeStatusPrerequisites`. Only `GIT_DIR` and `GIT_WORK_TREE` exported together flips it, which is
+pathological and fails loudly. The implementer's `--cached` reasoning was confirmed too.
+
+It also proved the no-duplicates assertion non-redundant the only way that counts: removing THAT
+assertion alone leaves the duplicate mutant green at 51 pass / 0 fail. A defence-in-depth pair is
+only two defences if each catches something the other misses, and both directions were shown.
+
+**Two ASKs, and the second is the sixth instance of the pattern.** The comment says "every other
+helper here defaults it", which is true of the four EXPORTED helpers the author was looking at and
+false of `safeStatusPrerequisites:153` and `provenanceOptions:50`, which do not — a reader trusting
+it gets a throw. One word. And the new assertion discards the diagnostic, so `false` satisfies it
+whether it came from the intended `unsafe-filter` path or from ambient breakage: the arity purpose is
+served, but on a broken machine it would redden with no signal that the cause is environmental.
+
+Six times now, an assertion written to close a vacuity finding has itself been slightly weaker than
+it looked. That is no longer anyone's carelessness; it is structural, and it is the single most
+transferable thing this change has produced.
+
+**A third observation was correctly declined.** `safeResolvedFilters` carries no default at its own
+exported boundary — the two-argument call works only because its body never dereferences `options`.
+Covered (a future edit adding `options.env` there reddens line 585), so an observation rather than a
+defect, and adding a default would be an unrequested production change on a pass meant to touch none.
+Recorded so the next reader knows it was seen and judged, not missed.
