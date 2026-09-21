@@ -123,6 +123,26 @@ function number(value, what) {
   if (!Number.isInteger(value) || value < 1) throw new Error(`${what} must be a positive integer`);
 }
 
+// Committing the page necessarily moves HEAD past the build the page describes, so a
+// gate that asks the tester to compare `git rev-parse HEAD` against `buildSha` by eye
+// can never agree; every run so far waived the difference by hand. Require the gate to
+// RUN the containment proof against the SHA this very sidecar records.
+function gateContainment(gate, buildSha) {
+  const commands = gate.commands === undefined ? [] : gate.commands;
+  if (!Array.isArray(commands) || commands.some(command => typeof command !== "string")) {
+    throw new Error("gate.commands must be an array of command strings");
+  }
+  const text = commands.join("\n").replace(/[ \t]+/g, " ");
+  const missing = [];
+  if (!text.includes("merge-base --is-ancestor")) missing.push("`git merge-base --is-ancestor <buildSha> HEAD`");
+  if (!text.includes("diff --name-only")) missing.push("`git diff --name-only <buildSha>..HEAD`");
+  // A containment command naming some other build proves containment of that build.
+  if (!new RegExp(buildSha.slice(0, 7), "i").test(text)) missing.push(`the tested build \`${buildSha.slice(0, 7)}\` itself`);
+  if (missing.length) {
+    throw new Error(`the step-0 gate has no containment check: gate.commands must run ${missing.join(" and ")}`);
+  }
+}
+
 function validate(d) {
   const missing = ["change", "checkpoint", "batches", "branch", "buildSha", "ckptKey", "gate", "sections"]
     .filter(key => d[key] === undefined || d[key] === "");
@@ -142,6 +162,7 @@ function validate(d) {
   }
   if (!Array.isArray(d.sections) || !d.sections.length) throw new Error("sidecar has no sections");
   if (!Array.isArray(d.gate.checks) || !d.gate.checks.length) throw new Error("the step-0 gate has no checks");
+  gateContainment(d.gate, d.buildSha);
 
   const seenSections = new Set(), seenSteps = new Map();
   for (const section of d.sections) {

@@ -17,12 +17,22 @@ const SHA = 'af57139e302f85a209a9a7695f671345fc7ed6ed';
 let builder;
 test.before(async () => { builder = await import('file://' + BUILDER.replace(/\\/g, '/')); });
 
+// The gate the contract now specifies: the containment proof executes, and names the
+// SHA of the build this sidecar describes. A sidecar for another build needs its own.
+const gateFor = sha => ({ intro: 'Prove the build first.',
+  commands: ['git switch chore/smoke-hardening-ledger',
+    `git merge-base --is-ancestor ${sha} HEAD`,
+    `git diff --name-only ${sha}..HEAD`],
+  checks: ['<code>git status --porcelain</code> prints nothing.',
+    'The containment commands exit 0 and name nothing outside this ledger.'] });
+// A build change carries its gate with it, the way a real re-issue does.
+const onBuild = sha => ({ buildSha: sha, gate: gateFor(sha) });
+
 const sidecar = (over = {}) => ({
   change: 'Smoke-page hardening', checkpoint: 1, batches: 'B01–B05',
   branch: 'chore/smoke-hardening-ledger', buildSha: SHA, ckptKey: 'orch-smoke-c1',
   version: { now: '0.14.0', was: '0.13.2' }, suite: '27 / 27 pass', knownFailures: 'none',
-  gate: { intro: 'Prove the build first.', commands: ['git switch chore/smoke-hardening-ledger'],
-    checks: ['<code>git status --porcelain</code> prints nothing.'] },
+  gate: gateFor(SHA),
   sections: [
     { n: 1, title: 'Verdict persistence', steps: [
       { n: 1, do: 'Mark step 1 <strong>Fail</strong>.', pass: 'It turns red.', revision: 1 },
@@ -46,7 +56,7 @@ test('every template slot is filled, and the builder fills no slot the template 
 
 test('the same sidecar always produces the same bytes', () => {
   assert.equal(build(), build());
-  assert.notEqual(build(), build({ buildSha: 'b'.repeat(40) }));
+  assert.notEqual(build(), build(onBuild('b'.repeat(40))));
 });
 
 for (const [label, newline] of [['LF', '\n'], ['CRLF', '\r\n']]) {
@@ -101,6 +111,35 @@ test('a sidecar that would produce a broken run sheet is refused', () => {
   const noRevision = sidecar().sections; delete noRevision[1].steps[0].pre.stepRevision;
   fails({ sections: noRevision }, /evidence with no stepRevision/);
 });
+
+// The one gate whose job is "are you testing the right tree" resolved to eyeballing on
+// every run this skill has produced: committing the page moves HEAD past `buildSha`, so
+// a `git rev-parse HEAD` comparison can never agree and was waived by hand each time.
+test('a gate that cannot prove containment mechanically is refused', () => {
+  // The control the whole test rests on: the contract's own gate builds. Every case
+  // below removes exactly one thing from it, so no rejection is satisfied by an input
+  // that could never have been accepted.
+  assert.doesNotThrow(() => build(), 'the gate execution-models.md specifies must build');
+  const without = drop => ({ ...gateFor(SHA), commands: gateFor(SHA).commands.filter(c => !c.includes(drop)) });
+  fails({ gate: without('merge-base') }, /no containment check: gate\.commands must run `git merge-base --is-ancestor/);
+  fails({ gate: without('--name-only') }, /no containment check: gate\.commands must run `git diff --name-only/);
+  fails({ gate: { ...gateFor(SHA), commands: [] } },
+    /no containment check:.*merge-base --is-ancestor.*and.*diff --name-only.*and.*af57139/);
+  fails({ gate: { ...gateFor(SHA), commands: undefined } }, /no containment check/);
+  // The hand-written escape hatch both ledgers on this version carried: a prose check
+  // asking a human to adjudicate the difference, with nothing that executes.
+  fails({ gate: { checks: ['Tested source commit: <code>af57139</code>. A later commit '
+    + 'containing only checkpoint artifacts is allowed.'] } }, /no containment check/);
+  // Containment of SOME build is not containment of THIS one — and naming this one
+  // turns the very same gate into an accepted gate.
+  fails({ gate: gateFor('b'.repeat(40)) }, /no containment check:.*the tested build `af57139` itself/);
+  assert.doesNotThrow(() => build(onBuild('b'.repeat(40))), 'a gate naming its own build is accepted');
+  assert.doesNotThrow(() => build({ gate: gateFor(SHA.slice(0, 7)) }), 'the documented 7-hex short form counts');
+  for (const commands of ['git status', 42, true, [null], [42], [['git']], [{}]]) {
+    fails({ gate: { ...gateFor(SHA), commands } }, /gate\.commands must be an array of command strings/);
+  }
+});
+
 
 // A page whose script does not parse has no verdict buttons and no copy button, so
 // every fill must be checked by compiling the script the user would actually get.
@@ -185,7 +224,7 @@ const newStep = n => ({ n, do: `Perform new check ${n}.`, pass: 'It succeeds.', 
 test('reissues append after existing steps, in the final section or new sections', () => {
   const previous = sidecar();
   const original = JSON.stringify(previous);
-  const current = sidecar({ buildSha: 'b'.repeat(40) });
+  const current = sidecar(onBuild('b'.repeat(40)));
   current.sections[1].steps.push(newStep(4));
   current.sections.push({ n: 3, title: 'New coverage', steps: [newStep(5), newStep(6)] });
   const html = reissue(current, previous);
@@ -263,9 +302,9 @@ test('later reissues cannot lose previous revision increases, including by omiss
 
 test('page facts, evidence, and JSON key order do not invalidate unchanged instructions', () => {
   const previous = sidecar();
-  const current = sidecar({ buildSha: 'b'.repeat(40), suite: '30 / 30 pass',
+  const current = sidecar({ ...onBuild('b'.repeat(40)), suite: '30 / 30 pass',
     standfirst: 'Reissued after a repair.', copyHeader: 'C1 reissue',
-    gate: { checks: ['Confirm the new build.'] } });
+    gate: { ...gateFor('b'.repeat(40)), checks: ['Confirm the new build.'] } });
   current.sections[1].steps[0].pre = { sha: 'b'.repeat(40), stepRevision: 1,
     env: 'New test environment', evidence: 'evidence/C1/new-run.md' };
   current.sections[0].steps[0] = Object.fromEntries(Object.entries(current.sections[0].steps[0]).reverse());

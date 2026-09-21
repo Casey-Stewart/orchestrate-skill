@@ -403,8 +403,21 @@ hosts, or browsers does not transfer saved marks automatically. Use the recorded
 verdicts and the new hand-over's results; missing stored marks are not passes.
 
 Every script OPENS with a non-verdict gate: the command that prints the current
-branch, the version the user must see, and a canary whose result is OPPOSITE on the
+branch, an executable containment check, the version the user must see, and a canary
+whose result is OPPOSITE on the
 base build — run first, "if it behaves the old way, stop and say so".
+The containment check is run, never eyeballed: committing the page moves `HEAD` past
+the build the page describes, so `git rev-parse HEAD` can never equal `BUILD_SHA`.
+Put these in the sidecar's `gate.commands`, with the tested SHA written out:
+
+```text
+git merge-base --is-ancestor <buildSha> HEAD
+git diff --name-only <buildSha>..HEAD
+```
+
+The first must exit 0; the second must print nothing outside this ledger's directory.
+`build-smoke-page.mjs` refuses a sidecar whose `gate.commands` omits either command or
+the SHA the sidecar records.
 
 **Verdicts are four**: **pass** · **fail** (did something else — triage to the
 offending batch(es) → ❌) · **blocked** (the step could not be performed as written —

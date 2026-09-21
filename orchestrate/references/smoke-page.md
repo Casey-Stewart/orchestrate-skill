@@ -118,7 +118,8 @@ The builder also rejects known invalid inputs: a short `buildSha`, a storage key
 is not a nonempty string containing only `[A-Za-z0-9._-]`, section or step numbers
 that are not positive integers or that repeat
 (`1` and `"1"` are one DOM id and one verdict), agent evidence with no `stepRevision` or
-with a `sha` under 7 hex characters. Embedded JavaScript data escapes every `<`, so both
+with a `sha` under 7 hex characters, and a `gate.commands` missing either containment
+command or the SHA the sidecar records. Embedded JavaScript data escapes every `<`, so both
 `</script>` and `<!-- <script>` remain data during HTML parsing; the original text and
 markup are restored at runtime. Plain names like `Fix "Save as"` also have their quotes
 escaped inside JavaScript strings. Slots the
@@ -139,7 +140,9 @@ and neither saved records nor the artifact store are accessed.
 `{{GATE_BODY}}` is the build-identity gate from `execution-models.md`, rendered as
 `<p class="gate-eyebrow">Before anything else</p>`, an `<h3>` ("Step 0 — prove you are
 on the right build"), prose + `<pre><code>` command blocks, and an
-`<ol class="gate-checks">` of numbered checks. It is NOT a verdict step — it decides
+`<ol class="gate-checks">` of numbered checks. Its `<pre><code>` blocks carry the
+containment commands that file specifies: they are RUN, not read, and the builder
+refuses a gate that omits them. It is NOT a verdict step — it decides
 whether the run means anything. It must contain, in order:
 
 1. Any "fully quit the app first" instruction the smoke procedure implies (testing a
@@ -147,9 +150,16 @@ whether the run means anything. It must contain, in order:
 2. The exact fetch/checkout commands for the integration branch, in the user's shell
    dialect, including known gotchas (e.g. an untracked ledger copy blocking checkout).
 3. The command that prints the current branch, and what it must print.
-4. The version the user should see and where (`Help → About reads 0.13.1; if it reads
+4. **The containment check**, in `gate.commands` where it EXECUTES — never a check
+   asking the user to compare two SHAs by eye, because committing this page moves
+   `HEAD` past the build it describes and the two can never agree:
+   `git merge-base --is-ancestor <buildSha> HEAD` (must exit 0) and
+   `git diff --name-only <buildSha>..HEAD` (must name nothing outside the ledger
+   directory). Write the tested SHA out in both; the builder rejects a gate that omits
+   either command or that SHA.
+5. The version the user should see and where (`Help → About reads 0.13.1; if it reads
    0.13.0, stop — the checkout did not take`).
-5. **The canary**: one cheap check whose result is OPPOSITE on the base build, with
+6. **The canary**: one cheap check whose result is OPPOSITE on the base build, with
    "if it behaves the old way, stop and say so."
 
 ## Assembling the sections
