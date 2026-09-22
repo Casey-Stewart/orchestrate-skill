@@ -50,10 +50,33 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   the first line alone when you mean the message. *(BL-004, round 2)*
 - **A boundary pinned on one side only.** A range check needs a case above *and* below it;
   pinning only the strengthening direction leaves loosening undetected. *(BL-004, polish)*
-- **A whitelist pinned by sampling.** Two example rejects do not hold an 18-member set —
-  adding a nineteenth member stays green. Sweep the whole domain, and write the member
-  list independently of the pattern so a both-at-once edit is caught by a set-size
-  assertion. *(BL-004, polish)*
+- **A guard that SAMPLES the domain it claims to sweep.** The most productive class this
+  repository has: eleven sightings in one change, five in another, including in the very
+  assertions written to close earlier sightings. Every instance was caught by a gate that
+  MUTATED the fix; none by one that read it. The author is thinking about the behaviour
+  being pinned, not about whether the new pin can fail. Ask of any guard: **is its subject
+  the domain or one sample of it, and does its control exercise the tight case or the
+  comfortable one?** Greppable shapes, no understanding of the code required:
+  - Two literals that partition the same collection with nothing relating them — for every
+    array literal used as a loop domain, is there an assertion whose subject is the DOMAIN
+    (size, set-equality, a count over results) rather than its members?
+  - A set-size check that is really a uniqueness check (`new Set([...a, ...b]).size ===
+    a.length + b.length`): delete a member and both sides shrink together.
+  - `indexOf` without a loop — only the FIRST occurrence is governed, and a second one
+    appended later is applauded.
+  - A fixed ±N window per occurrence, where two occurrences closer than N overlap and the
+    second is satisfied by the first's markers — while the arming control, written with a
+    generous gap, exercises only the non-overlapping branch.
+  - A corpus whose every entry satisfies the pattern's own proximity bound, which means it
+    was derived from the pattern however the comment describes it. Write the corpus as prose
+    first, pin its size and set, and require each pattern to own an entry no other catches —
+    otherwise a family loses half itself when one alternation is replaced by a dead literal.
+  - An out-parameter passed inline as a fresh literal and never bound, declining half of
+    what the function returned.
+  On any rewrite of a guard, assert the new family is a superset of the old: a sweep grown
+  from ten patterns to fourteen once lost a spelling while every visible signal said it grew.
+  Prefer binding a domain to the checkout over hand-writing it.
+  *(BL-004 polish, BL-016 round 2, and five more in `OS-20260921-backlog-closeout`)*
 - **A branch no input reaches.** Recursion proven at depth one; an error path no fixture
   triggers; a filter attribute no test resolves. If a mutation of the branch leaves the
   suite green, the branch is untested however correct it is. *(BL-005, BL-009)*
@@ -63,36 +86,6 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A test that pins the defect.** An existing assertion can encode the old, wrong meaning
   of "correct". When a fix changes what correct means, hunt for the assertion that froze
   the old one.
-- **The fix for a vacuity finding is a prime site for a vacuity finding.** Eleven times in
-  one change, the assertion written to close one contained another — the author is thinking
-  about the behaviour being pinned, not about whether the new pin can fail. Every instance was
-  caught by a gate that MUTATED the fix; none by one that read it. Two shapes are greppable
-  without understanding the code: **two literals that partition the same collection with nothing
-  relating them** — for every array literal used as a loop domain, is there an assertion whose
-  subject is the DOMAIN (size, set-equality, a count over results) rather than its members? — and
-  **an out-parameter passed inline as a fresh literal and never bound**, which declines half of
-  what the function returned. Prefer binding a domain to the checkout over hand-writing it.
-- **A guard whose coverage regressed invisibly across a rewrite.** A sweep rewritten from ten
-  patterns to fourteen — with per-pattern arming, a size assertion and a disclaimer — silently
-  lost a spelling it used to catch, while every visible signal said it grew. Nothing asserted the
-  new family was a superset of the old. Pin coverage against a corpus written independently of
-  the patterns, and assert exclusivity as a domain property: each pattern must own at least one
-  entry no other catches, or deleting it balances both sides at once. *(BL-016 round 2)*
-- **A guard that SAMPLES the domain it claims to sweep.** Five times in one change, across
-  every batch and the repair after them. Three greppable shapes, all of which pass every
-  visible signal: `indexOf` without a loop, so only the FIRST occurrence in a file is
-  governed and a second one appended later is applauded; a fixed ±N window per occurrence,
-  so two occurrences closer than N overlap and the second is satisfied by the first's
-  markers — and the arming control, written with a generous gap, exercises only the
-  non-overlapping branch; and a corpus whose every entry happens to satisfy the pattern's
-  own proximity bound, which means it was derived from the pattern however the comment
-  describes it. Ask of any new guard: what is its subject, one sample or the domain — and
-  does its control exercise the tight case or the comfortable one?
-- **A corpus and its pattern edited away together.** A family with no size pin and no
-  per-pattern exclusivity can lose half itself silently: replacing one alternation with a
-  never-matching literal stayed green because every corpus entry was also caught by its
-  sibling. Pin the corpus size and set, and require each pattern to own an entry no other
-  catches — the same prescription as the bullet above, which did not take the first time.
 
 ### Parsers, guards and their real consumers
 
