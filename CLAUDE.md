@@ -178,7 +178,11 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   producing a **false clean result**. The first three corrupted the work, the last two the
   verification of it. **Run a live control through your own harness before trusting any green or
   any zero** — it paid out twice in a single round. Restore-by-checkout is only safe once the
-  real edit is committed.
+  real edit is committed. A seventh sighting, on the very commit that distilled the first six:
+  backticked filenames inside a DOUBLE-QUOTED `node -e "…"` string were command-substituted by
+  bash and replaced with nothing, so a close-out record read "puts  and  inside a test's domain".
+  Markdown here is full of backticks; write such content through the file tools, or single-quote
+  the script, and sweep the result for the damage signature rather than rereading the line.
 - **A GATE's evidence needs a control as much as an implementer's.** A test-hunter proved a
   real finding with a mutation anchored on a tag the shipped template does not contain, so
   it never applied and its "suite stayed green" measured nothing — and by the same token its
