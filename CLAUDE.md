@@ -78,6 +78,21 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   new family was a superset of the old. Pin coverage against a corpus written independently of
   the patterns, and assert exclusivity as a domain property: each pattern must own at least one
   entry no other catches, or deleting it balances both sides at once. *(BL-016 round 2)*
+- **A guard that SAMPLES the domain it claims to sweep.** Five times in one change, across
+  every batch and the repair after them. Three greppable shapes, all of which pass every
+  visible signal: `indexOf` without a loop, so only the FIRST occurrence in a file is
+  governed and a second one appended later is applauded; a fixed ±N window per occurrence,
+  so two occurrences closer than N overlap and the second is satisfied by the first's
+  markers — and the arming control, written with a generous gap, exercises only the
+  non-overlapping branch; and a corpus whose every entry happens to satisfy the pattern's
+  own proximity bound, which means it was derived from the pattern however the comment
+  describes it. Ask of any new guard: what is its subject, one sample or the domain — and
+  does its control exercise the tight case or the comfortable one?
+- **A corpus and its pattern edited away together.** A family with no size pin and no
+  per-pattern exclusivity can lose half itself silently: replacing one alternation with a
+  never-matching literal stayed green because every corpus entry was also caught by its
+  sibling. Pin the corpus size and set, and require each pattern to own an entry no other
+  catches — the same prescription as the bullet above, which did not take the first time.
 
 ### Parsers, guards and their real consumers
 
@@ -121,6 +136,23 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A backlog entry can be right about the defect and wrong about the file.** Re-verify
   every entry against the source before drawing a fence; a backlog is a pointer, not a
   specification. *(BL-003 named the wrong file; BL-002 was wider than its text)*
+- **…and wrong about its own FIX SHAPE.** Two of three entries in one change misdescribed
+  the repair, not the location: one proposed a code-span exemption when the real defect was
+  that the scan ran over the filled OUTPUT, and one named a wiring target that is pre-page
+  by construction while the pass it wires is post-page. Both would have shipped as written.
+  Re-derive what the fix IS, not merely where it goes.
+- **A close whose rationale points at documentation that does not contain the fact.** An
+  entry was closed as accepted on the ground that a declared `KNOWN_GAP` documented all
+  three cases; it documented two, and the same diff deleted the only other live record of
+  the third. Every signal read like a decision; the effect was a silent deletion. When a
+  close cites a document as its resolution, open that document and confirm the fact is in
+  it — and check what the same diff removes.
+- **Reading a stale copy of a document ONCE contaminates work that afterwards uses the
+  fresh one.** A ledger was scaffolded with a `**Files**` header taken from a stale
+  installed copy of this skill, read early and discarded later; the form was plausible, so
+  nothing looked wrong, and it silently killed the fence tool's Files-line branch for the
+  whole ledger. When a source turns out to be stale, re-derive what was already taken from
+  it rather than merely ceasing to read it.
 - **An illustrative list implemented as a closed set.** A backlog entry's "a device, a GUI, held
   credentials, or a judgement" was an example, not a specification; shipping it behind an ONLY
   narrowed a safety rule. Five figures baked into one ledger — a registry-row count, a PyYAML
@@ -147,6 +179,14 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   verification of it. **Run a live control through your own harness before trusting any green or
   any zero** — it paid out twice in a single round. Restore-by-checkout is only safe once the
   real edit is committed.
+- **A GATE's evidence needs a control as much as an implementer's.** A test-hunter proved a
+  real finding with a mutation anchored on a tag the shipped template does not contain, so
+  it never applied and its "suite stayed green" measured nothing — and by the same token its
+  claim about what the old code caught was unfounded too. The conclusion survived a correctly
+  anchored re-run; the proof did not. Later the same session, two more mutation scripts
+  aborted on their own anchor guards, each of which would otherwise have been a false green.
+  Treat "I mutated it and nothing reddened" as a claim to verify: every mutation script must
+  abort loudly when its anchor is absent, and say so in its report.
 - **"No test can verify this" is not "no agent can verify this."** Test fixtures are
   isolated from the real machine by design; a subagent is not. A step needs a human only
   when it needs a device, a GUI, held credentials, or a judgement about whether something
