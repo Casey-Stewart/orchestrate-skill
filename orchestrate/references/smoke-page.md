@@ -148,8 +148,11 @@ and neither saved records nor the artifact store are accessed.
 runner's pre-verification happens before the page exists and proves the steps, not the
 bytes the reader receives; this pass is additional and changes nothing about when the
 runner runs. After the page is generated and before the STOP, open the filled
-`smoke-<Cn>.html`, read each `<pre><code>` block's `textContent`, and run exactly those
-bytes in the reader's shell. **A command is verified only when it has been executed in
+`smoke-<Cn>.html` **in a browser and read the RENDERED DOM, never the file text** — the
+step blocks render client-side from the embedded `SECTIONS_JS` JSON, so a static read or
+grep of the file finds only the gate's blocks — read each `<pre><code>` block's
+`textContent`, and run exactly those bytes in the reader's shell. **A command is
+verified only when it has been executed in
 the form the reader receives it** — not from the sidecar, not from the batch file, not
 from the shell it was composed in. A command that was re-authored on its way into the
 artifact is an unverified command, however carefully it was checked before. It has

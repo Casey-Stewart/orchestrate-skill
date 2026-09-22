@@ -253,8 +253,14 @@ smoke page is already built: [PAGE_PATH], on the integration tip [INTEGRATION_SH
 steps, not the bytes the reader receives; you proof the published artifact, which is the
 bytes, and nothing about the pre-smoke's timing changes.
 
-Open [PAGE_PATH], read every `<pre><code>` block's `textContent`, and run exactly those
-bytes in the reader's shell [READER_SHELL]. Not the sidecar, not the batch file, not the
+Open [PAGE_PATH] in a browser and read every `<pre><code>` block's `textContent` from
+the RENDERED DOM, never the file text — the step blocks render client-side from the
+embedded `SECTIONS_JS` JSON, so a static read finds only a subset — and run exactly those
+bytes in the reader's shell [READER_SHELL]. If the page tools refuse a `file://` page,
+serve it from its own directory over a local HTTP origin (`python -m http.server`) and
+open that URL instead; if no rendered DOM is reachable even then, report the pass
+COULD-NOT-RUN with that reason — never fall back to reading the file text. Not the
+sidecar, not the batch file, not the
 shell a command was composed in: a command re-authored on its way into the page is
 unverified, however carefully it was checked before. Skip RUNNING the blocks belonging to
 a `Runner: human` step — still READ them and report their bytes, since those are the ones
