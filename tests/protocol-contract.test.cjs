@@ -1050,3 +1050,50 @@ test('every document stating the checkpoint close-out also invokes the post-rend
       file + ': a directive at the close-out, beside the pass, or in a clause about it undoes the pass');
   }
 });
+
+// ===== C1 follow-up: the proofing pass must read the RENDERED DOM =============
+// C1's QA runner ran the proofing pass for real and found the gap: the step blocks it
+// proofs render CLIENT-SIDE from the embedded SECTIONS_JS JSON, so a static read of the
+// file text — a grep, or a plain Read — sees only the gate's blocks and reports a false
+// clean over the rest. The domain here is swept from the checkout, not hand-listed: every
+// shipped file that carries the OPERATIONAL instruction to read a block's `textContent`
+// (as opposed to protocol.md/00-READBEFORE.md, which only point at smoke-page.md), so a
+// third document that later grows this instruction is covered without editing this test.
+test('every document instructing a block read from the artifact also requires the rendered DOM', () => {
+  const TEXTCONTENT_MARKER = "block's `textContent`";
+  const shipped = shippedSkillFiles();
+  const operational = shipped.filter(file => collapsed(file).includes(TEXTCONTENT_MARKER));
+  // Written independently of the marker: losing a true carrier and dropping it from this
+  // list together still reddens, because MUST_INCLUDE membership is checked separately.
+  const MUST_INCLUDE = ['orchestrate/references/smoke-page.md', 'orchestrate/references/subagent-prompts.md'];
+  assert.ok(operational.length >= MUST_INCLUDE.length,
+    'the operational-instruction sweep must find at least the two known carriers, found: ' + operational.join(', '));
+  for (const file of MUST_INCLUDE) {
+    assert.ok(operational.includes(file),
+      file + ': no longer carries the operational block-read instruction this sweep selects on');
+  }
+  const DOM_MARKER = /RENDERED DOM/;
+  const REASON = 'the step blocks render client-side from the embedded `SECTIONS_JS` JSON, so a static read';
+  const WINDOW = 400;
+  // A hit anywhere in a 57 KB file proves nothing; the requirement must sit beside the
+  // instruction it governs, the same discipline BL-023's windows() applies above.
+  for (const file of operational) {
+    const text = collapsed(file);
+    const at = text.indexOf(TEXTCONTENT_MARKER);
+    assert.notEqual(at, -1, file + ': marker vanished between the sweep and the check');
+    const region = text.slice(Math.max(0, at - WINDOW), at + WINDOW);
+    assert.match(region, DOM_MARKER,
+      file + ': the block-read instruction must require reading the RENDERED DOM nearby, not merely somewhere in the document');
+    assert.ok(region.includes(REASON),
+      file + ': the DOM requirement must carry its reason — "' + REASON + '" — near the block-read instruction');
+  }
+  // Armed both ways on synthetic text, so neither verdict above is a shape that could only
+  // ever come out one way: a block-read instruction missing the requirement must fail this
+  // property, and one stating it must pass.
+  const MISSING = "Open the page and read every block's `textContent`, then run it.";
+  assert.doesNotMatch(MISSING, DOM_MARKER, 'the negative control must not already satisfy the DOM marker');
+  const PRESENT = "Open the page in a browser and read every block's `textContent` from the RENDERED DOM — "
+    + REASON + ' finds only a subset.';
+  assert.match(PRESENT, DOM_MARKER, 'the positive control must satisfy the DOM marker');
+  assert.ok(PRESENT.includes(REASON), 'the positive control must carry the reason clause');
+});
