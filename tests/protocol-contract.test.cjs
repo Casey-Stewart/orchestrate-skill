@@ -1072,28 +1072,105 @@ test('every document instructing a block read from the artifact also requires th
     assert.ok(operational.includes(file),
       file + ': no longer carries the operational block-read instruction this sweep selects on');
   }
+
   const DOM_MARKER = /RENDERED DOM/;
   const REASON = 'the step blocks render client-side from the embedded `SECTIONS_JS` JSON, so a static read';
+  const PROHIBITION = 'never the file text';
   const WINDOW = 400;
-  // A hit anywhere in a 57 KB file proves nothing; the requirement must sit beside the
-  // instruction it governs, the same discipline BL-023's windows() applies above.
-  for (const file of operational) {
-    const text = collapsed(file);
-    const at = text.indexOf(TEXTCONTENT_MARKER);
-    assert.notEqual(at, -1, file + ': marker vanished between the sweep and the check');
-    const region = text.slice(Math.max(0, at - WINDOW), at + WINDOW);
-    assert.match(region, DOM_MARKER,
-      file + ': the block-read instruction must require reading the RENDERED DOM nearby, not merely somewhere in the document');
-    assert.ok(region.includes(REASON),
-      file + ': the DOM requirement must carry its reason — "' + REASON + '" — near the block-read instruction');
+  // Every occurrence, not the first: a second block-read instruction grown later (a
+  // re-issue proofer, a second skeleton) must carry the same requirement too, or a guard
+  // that only samples `indexOf`'s first hit applauds its own defect. The subject asserted
+  // per file is the whole occurrence set, not one sample of it.
+  function occurrencesOf(text) {
+    const at = [];
+    let i = -1;
+    while ((i = text.indexOf(TEXTCONTENT_MARKER, i + 1)) !== -1) at.push(i);
+    return at;
   }
-  // Armed both ways on synthetic text, so neither verdict above is a shape that could only
-  // ever come out one way: a block-read instruction missing the requirement must fail this
-  // property, and one stating it must pass.
-  const MISSING = "Open the page and read every block's `textContent`, then run it.";
-  assert.doesNotMatch(MISSING, DOM_MARKER, 'the negative control must not already satisfy the DOM marker');
-  const PRESENT = "Open the page in a browser and read every block's `textContent` from the RENDERED DOM — "
-    + REASON + ' finds only a subset.';
-  assert.match(PRESENT, DOM_MARKER, 'the positive control must satisfy the DOM marker');
-  assert.ok(PRESENT.includes(REASON), 'the positive control must carry the reason clause');
+  function checkFile(text, label) {
+    const at = occurrencesOf(text);
+    assert.ok(at.length > 0, label + ': marker vanished between the sweep and the check');
+    at.forEach((index, n) => {
+      const region = text.slice(Math.max(0, index - WINDOW), index + WINDOW);
+      assert.match(region, DOM_MARKER,
+        label + ': occurrence ' + (n + 1) + ' of ' + at.length + ' block-read instructions must require the RENDERED DOM nearby');
+      assert.ok(region.includes(REASON),
+        label + ': occurrence ' + (n + 1) + ' of ' + at.length + ' must carry the reason clause nearby — "' + REASON + '"');
+      assert.ok(region.includes(PROHIBITION),
+        label + ': occurrence ' + (n + 1) + ' of ' + at.length + ' must carry the prohibition nearby — "' + PROHIBITION + '"');
+    });
+    return at.length;
+  }
+  for (const file of operational) checkFile(collapsed(file), file);
+
+  // Armed: a SECOND block-read instruction, appended far enough away that its own window
+  // carries none of the first one's text, must still fail this property on its own even
+  // though the first occurrence is correct — the exact shape the gate demonstrated by
+  // appending an ungoverned second section to subagent-prompts.md. `FIRST_OK` alone must
+  // still pass, so the control isn't failing for some unrelated reason.
+  const FIRST_OK = "Open the page in a browser and read every block's `textContent` from the "
+    + 'RENDERED DOM, never the file text — ' + REASON + ' finds only a subset.';
+  const FILLER = ' filler '.repeat(150);
+  const SECOND_BAD = "Open the page file and read every block's `textContent` with a grep, then run those bytes.";
+  assert.throws(() => checkFile(FIRST_OK + FILLER + SECOND_BAD, 'two-occurrence control'),
+    /occurrence 2 of 2/, 'a second, unguarded block-read instruction must fail the sweep even though the first one is correct');
+  assert.doesNotThrow(() => checkFile(FIRST_OK, 'single-occurrence control'),
+    'the single correct occurrence must still pass on its own');
+
+  // --- the static-read/file-text/grep downgrade, licensed by if/when/unless/or --------
+  // Demonstrated: rewriting the prohibition itself ("never the file text") is caught by
+  // PROHIBITION above, but a downgrade can also be ADDED beside it without touching that
+  // clause at all — "…RENDERED DOM, or the file text when no browser is at hand" — which
+  // restores the false-clean route in full. Scanning is CLAUSE-scoped: this document's own
+  // correct prose reads "a static read or grep of the file finds only the gate's blocks"
+  // in the very same sentence as the requirement, so a bare "or…grep" alternation would
+  // flag the fix's own prose. BEFORE only admits "file text" as the licensed target (never
+  // "or grep", which the correct prose contains verbatim); AFTER admits all three nouns
+  // but only when if/when/unless follows within a few words, which none of this document's
+  // own prose does today — both measured empirically against the real files, not assumed.
+  const LICENSE_BEFORE = /\b(?:or|if|when|unless)\b(?:\s+\S+){0,2}\s+(?:the\s+)?file text\b/i;
+  const LICENSE_AFTER = /\b(?:file text|grep|static read)\b(?:\s+\S+){0,4}\s+\b(?:if|when|unless)\b/i;
+  const DOWNGRADE_ABOUT = /\bfile text\b|\bgrep\b|\bstatic read\b/i;
+  const splitClauses = text => text.split(/(?<=[.;])[\s*]+/).filter(clause => DOWNGRADE_ABOUT.test(clause));
+  const isDowngrade = clause => LICENSE_BEFORE.test(clause) || LICENSE_AFTER.test(clause);
+
+  // THE COVERAGE AUTHORITY: prose an author would actually append to license the
+  // downgrade, written independently of the patterns above.
+  const DOWNGRADE_CORPUS = ['Read the RENDERED DOM, or the file text when no browser is at hand.',
+    'Grep the file text if no browser is available.',
+    'The file text is an acceptable substitute unless a browser can render the page.',
+    'Grep the file text when no browser is at hand instead.',
+    'Fall back to the file text if the RENDERED DOM cannot be reached.',
+    'A static read is acceptable when the rendered DOM cannot be produced.'];
+  for (const undoing of DOWNGRADE_CORPUS) {
+    assert.ok(isDowngrade(undoing), 'the sweep no longer catches: "' + undoing + '"');
+  }
+  // Exclusivity: this family is genuinely new territory, not a restatement of one of the
+  // four proofing-pass contradiction families defined above this test — none of their
+  // trigger vocabulary appears anywhere in this corpus.
+  const OTHER_FAMILIES = [/\b(?:optional|skippable|may be (?:skipped|omitted)|can be skipped|if time (?:allows|permits))\b/i,
+    /\b(?:need not|does not have to|at (?:the orchestrator['’]s|your) discretion|when you have time)\b/i,
+    /\b(?:replaces|instead of|in place of)\b[^.;]*\b(?:pre-smoke|QA runner|proofing pass|artifact proofer)\b/i,
+    /\bbefore the page (?:is built|exists|is generated)\b/i];
+  for (const undoing of DOWNGRADE_CORPUS) {
+    for (const other of OTHER_FAMILIES) {
+      assert.doesNotMatch(undoing, other,
+        'this corpus entry must not already belong to an existing family, or the new family adds nothing: "' + undoing + '"');
+    }
+  }
+  // Negative control: the correct prose this repair itself wrote — including the sentence
+  // that discusses "a static read or grep" as the PROBLEM, not a licensed alternative —
+  // must not trip the sweep, or it cries wolf on the very fix it exists to protect.
+  const CORRECT_PROSE_CONTROL = 'the step blocks render client-side from the embedded `SECTIONS_JS` JSON, '
+    + "so a static read or grep of the file finds only the gate's blocks.";
+  assert.ok(splitClauses(CORRECT_PROSE_CONTROL).length > 0,
+    'the negative control must reach the clause filter, or its silence proves nothing');
+  assert.ok(!isDowngrade(CORRECT_PROSE_CONTROL),
+    'the sweep flags this repository\'s own correct prose ("a static read or grep…") as a downgrade');
+
+  for (const file of operational) {
+    const flagged = splitClauses(collapsed(file)).filter(isDowngrade);
+    assert.deepEqual(flagged, [],
+      file + ': a clause elsewhere in the document licenses the file text, grep or a static read as a substitute for the rendered DOM');
+  }
 });
