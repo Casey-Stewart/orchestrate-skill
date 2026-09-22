@@ -49,10 +49,16 @@ file under `.agents/**`, or any entry in the Closed table that predates this cha
 - [x] BL-015 carries an explicit close condition
 - [x] The open-items table is empty, or gone with a line saying so
 - [x] No duplicate-meaning section left behind
-- [ ] polish: fence extension to `tests/agent-definitions.test.cjs` — closing BL-019 as
+- [x] polish: fence extension to `tests/agent-definitions.test.cjs` — closing BL-019 as
       accepted makes its "that column belongs to a later batch" comment false, so correct
       the comment and carry the digit case into it. Comment accuracy only; no assertion
       and no `KNOWN_GAP` member changes.
+- [x] polish: ASK-1 scope BL-019's "and nowhere else" to live source — the fact also sits
+      in a COMPLETE ledger's LOG.md, so an agent who verifies the row instead of trusting
+      it would read the row as false.
+- [x] polish: ASK-2 say "the cases known today" rather than "all three cases" in the
+      KNOWN_GAP comment, so the one-character column is not stated as a closed set the
+      source record deliberately declined to claim.
 
 ## Acceptance criteria
 
