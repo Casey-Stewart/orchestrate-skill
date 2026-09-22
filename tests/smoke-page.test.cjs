@@ -140,6 +140,30 @@ test('sidecar-built reissues preserve old verdicts while appends start unmarked'
   assert.deepEqual(reissue.record(2), records[1], 'marking appended work cannot overwrite an old verdict');
 });
 
+// BL-022: a builder that scanned its own OUTPUT for `{{` could not publish a step whose
+// command quotes a GitHub Actions expression. Bytes in the file are not enough — the
+// expression has to survive the JSON embed and the script parse and land on the step the
+// reader reads, so it is read back off the rendered DOM.
+test('a step command carrying a doubled-brace expression reaches the reader', async () => {
+  const { buildSmokePage } = await import(pathToFileURL(path.join(__dirname, '../orchestrate/tools/build-smoke-page.mjs')));
+  const EXPRESSION = '${{ github.event.inputs.tag }}';
+  const data = { change: 'Release workflow', checkpoint: 1, batches: 'B01', branch: 'integration',
+    buildSha: A, ckptKey: 'c1', gate: gateFor(A),
+    sections: [{ n: 1, title: 'Workflow', steps: [
+      { n: 1, revision: 1, do: `Run <code>gh workflow run release.yml -f tag=${EXPRESSION}</code>.`,
+        pass: `The run summary shows <code>${EXPRESSION}</code>.`,
+        pre: { sha: A.slice(0, 7), stepRevision: 1, env: `GitHub runner, tag ${EXPRESSION}`,
+          evidence: 'evidence/C1/step-01.md' } }] }] };
+  const rendered = await page({ html: buildSmokePage(data, template) });
+  const step = rendered.el('step-1');
+  assert.ok(step.querySelector('.step-do').innerHTML.includes(EXPRESSION),
+    'the command paragraph must carry the expression the sidecar wrote');
+  assert.ok(step.querySelector('.step-pass').innerHTML.includes(EXPRESSION),
+    'so must the acceptance criterion');
+  assert.ok(step.querySelector('.step-pre-note').textContent.includes(EXPRESSION),
+    'and the text the page composes itself, read as textContent');
+});
+
 test('real input reissue flows through builder, displayed files and saved verdicts on the same build', async t => {
   const { buildSmokePage } = await import(pathToFileURL(path.join(__dirname, '../orchestrate/tools/build-smoke-page.mjs')));
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'smoke-input-page-'));

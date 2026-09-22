@@ -172,6 +172,8 @@ test('the polish scan is pinned to its position, a non-empty ask and the space i
     // Both spellings of an empty ask: no space at all, and the space with nothing after it.
     ['header with no ask text is rejected', s => s.replace('\n\n## Acceptance', '\n- [ ] polish:\n\n## Acceptance'), [10, 11, 12, 13, 14, 15]],
     ['header whose ask is empty after the space is rejected', s => s.replace('\n\n## Acceptance', '\n- [ ] polish: \n\n## Acceptance'), [10, 11, 12, 13, 14, 15]],
+    // An appended checkbox is a new item, never the continuation of the ask above it.
+    ['indented checkbox continuation is rejected', s => s.replace('\n\n## Acceptance', `\n${ask}\n  - [ ] Also rewrite the module into three files.\n\n## Acceptance`), [11, 12, 13, 14, 15, 16]],
     // Reaches the positional guard: consumption happens only where polish may be appended.
     ['wrapped item outside the Checklist section is rejected', s => s.replace('Preserve this text.', () => `Preserve this text.\n${ask}\n      Its continuation is indented, but this is not the checklist.`), [14, 15]],
   ];
@@ -183,14 +185,54 @@ test('the polish scan is pinned to its position, a non-empty ask and the space i
     assert.deepEqual(r.violations.filter(d => d.code === 'batch-content' && d.path === BATCHFILE).map(d => d.line), lines, JSON.stringify(r.violations));
   });
 });
+test('a checkbox is excluded from the polish continuation, and only a checkbox is', async () => {
+  // Any indented non-blank line used to be consumed, so an appended checkbox rode in as if it
+  // were wrapped prose. Every other indented form this repository writes must still continue.
+  const ask = '- [x] polish: An ask that wraps, as every checklist line in this repository does.';
+  const smuggled = [
+    '  - [ ] Also rewrite the module into three files.', '  - [x] Also rewrite the module into three files.',
+    '  * [ ] The star marker renders the same task item.', '  + [X] The plus marker, with a capital tick.',
+    '  1. [ ] An ordered task item is a task item too.', '  1) [x] Ordered with a paren, already ticked.',
+    // These two are the only inputs that reach the tab and the multi-digit ordinal: without
+    // them `[ \t]+` narrows to `[ ]+` and `\d{1,9}` to `\d` with the suite still green.
+    '  -\t[ ] A tab after the marker is the whitespace markdown allows there.',
+    '  10. [ ] A two-digit ordinal, because one digit is not the whole ordered family.',
+  ];
+  const continuations = [
+    '      of this repository produces, so the wrapped form still reads as one ask.',
+    '      - a plain bullet sub-point, which is not a checkbox.',
+    '      - [] an empty bracket pair, the only indented bracket form `.agents` holds.',
+    '      -[x] no space after the marker, so no renderer makes this a task item.',
+    '      [x] a bare bracket pair with no list marker at all.',
+  ];
+  // Relate both literals to the predicate being narrowed: every line in EITHER list was consumed
+  // before, so each acceptance is a live control and each rejection a real change of verdict.
+  for (const line of [...smuggled, ...continuations]) assert.match(line, /^ +\S/);
+  assert.equal(new Set([...smuggled, ...continuations]).size, smuggled.length + continuations.length);
+  // Sizes written by hand, not derived from the arrays: dropping a spelling while simplifying
+  // would otherwise shrink both sides of every count above it and leave its path unguarded.
+  assert.equal(smuggled.length, 8);
+  assert.equal(continuations.length, 5);
+  for (const [line, rejected] of [...smuggled.map(l => [l, true]), ...continuations.map(l => [l, false])]) {
+    const baseline = makeBatch(['allowed.txt']), proposed = baseline.replace('\n\n## Acceptance', () => `\n${ask}\n${line}\n\n## Acceptance`);
+    assert.notEqual(proposed, baseline);
+    const crlf = [baseline, proposed].map(s => s.replace(/\n/g, '\r\n'));
+    const found = (await api).validateBatchEdit(baseline, proposed, ['allowed.txt'], [], BATCHFILE);
+    // A verdict that turned on the checkout rather than the code would differ between these.
+    assert.deepEqual((await api).validateBatchEdit(crlf[0], crlf[1], ['allowed.txt'], [], BATCHFILE), found, line);
+    assert.equal(found.length > 0, rejected, JSON.stringify([line, found]));
+    if (rejected) assert.ok(found.every(d => d.code === 'batch-content' && d.path === BATCHFILE), JSON.stringify(found));
+  }
+});
 test('the batch template SHOWS the wrapped polish form, in the exact bytes the validator accepts', async () => {
   // Read from the shipped template, never a copy: the form shown to implementers and the
   // form the mechanical gate accepts cannot drift apart. Either checkout style parses.
   const template = fs.readFileSync(path.join(__dirname, '..', 'orchestrate', 'templates', '02-batch.md'), 'utf8').replace(/\r\n?/g, '\n');
-  const shown = /^- \[[ x]\] polish: .+(?:\n[ \t]+\S[^\n]*)+/m.exec(template);
+  const shown = /^- \[[ x]\] polish: .+(?:\n +\S[^\n]*)+/m.exec(template);
   assert.ok(shown, 'orchestrate/templates/02-batch.md must SHOW a wrapped polish item, not only describe one');
   const block = shown[0].split('\n');
-  assert.ok(block.length >= 2 && block.slice(1).every(l => /^[ \t]+\S/.test(l)), JSON.stringify(block));
+  // The space indent the validator itself requires, so this parse cannot admit a form it rejects.
+  assert.ok(block.length >= 2 && block.slice(1).every(l => /^ +\S/.test(l)), JSON.stringify(block));
   const baseline = makeBatch(['allowed.txt']), proposed = baseline.replace('\n\n## Acceptance', () => `\n${shown[0]}\n\n## Acceptance`);
   assert.notEqual(proposed, baseline);
   assert.deepEqual((await api).validateBatchEdit(baseline, proposed, ['allowed.txt'], [], BATCHFILE), []);

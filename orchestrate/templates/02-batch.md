@@ -25,7 +25,8 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
      them (the reconcile table reads them) and append `- [ ] polish: <ask>` lines only
      when the orchestrator sends a polish pass. Nothing else in this file is theirs to
      edit. An appended item may wrap; its header starts at column 0 and every
-     continuation line is indented under it, exactly as shown:
+     continuation line is indented under it — an indented checkbox is a new item,
+     not a continuation, and the fence rejects it — exactly as shown:
 - [ ] polish: Pin the boundary from both directions, so a later loosening of the
       grammar goes red instead of passing.
 -->

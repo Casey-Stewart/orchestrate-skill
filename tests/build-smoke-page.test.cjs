@@ -51,7 +51,71 @@ test('every template slot is filled, and the builder fills no slot the template 
   const declared = new Set(template.match(/\{\{([A-Z_]+)\}\}/g).map(s => s.slice(2, -2)));
   const rendered = new Set(Object.keys(builder.renderSlots(sidecar())));
   assert.deepEqual([...rendered].sort(), [...declared].sort());
-  assert.equal(build().includes('{{'), false);
+  // Re-aimed at the TEMPLATE, where slots live. This line used to read
+  // `build().includes('{{')`, which pinned the defect: step content carrying `{{` is
+  // content, not an unfilled slot. What is worth holding is that the shipped template
+  // carries no `{{` the fill pattern cannot match, and that no well-formed slot
+  // survives the fill.
+  assert.equal(template.replace(/\{\{[A-Z_]+\}\}/g, '').includes('{{'), false,
+    'the shipped template must carry no `{{` outside a well-formed slot marker');
+  assert.equal(build().match(/\{\{[A-Z_]+\}\}/g), null, 'no slot may survive the fill');
+  // Companion over the OUTPUT, because the two lines above are template-side only and a
+  // `{{` injected into the page body — outside every slot — escaped both. Subject is the
+  // non-content region: strip the values the fill supplied, and what remains is template
+  // bytes, which carry no `{{` at all. That is the reach the old output-side line had,
+  // without its defect: content that may legitimately carry `{{` arrives inside a value.
+  const outsideSlots = Object.values(builder.renderSlots(sidecar()))
+    .reduce((page, value) => value ? page.split(value).join('') : page, build());
+  assert.equal(outsideSlots.includes('{{'), false,
+    'the published page carries `{{` outside every filled slot value');
+});
+
+// BL-022: the residual scan ran over the FILLED page, so a Do command quoting a
+// GitHub Actions expression, a Handlebars block or a Vue binding could not be published
+// at all — the builder blamed an "unfilled" slot for the reader's own content.
+test('step content carrying a doubled-brace expression publishes unchanged', () => {
+  const EXPRESSIONS = ['${{ github.event.inputs.tag }}', '{{ site.title }}', '{{#if ok}}yes{{/if}}'];
+  assert.equal(new Set(EXPRESSIONS).size, 3, 'the three published templating dialects must be distinct');
+  for (const expression of EXPRESSIONS) {
+    assert.doesNotMatch(expression, /\{\{[A-Z_]+\}\}/,
+      expression + ': a fixture that IS a slot marker would prove nothing about content');
+  }
+  const steps = EXPRESSIONS.map((expression, i) => ({ n: i + 1, revision: 1,
+    do: `Run <code>echo ${expression}</code>.`, pass: `It prints ${expression}.` }));
+  const html = build({ sections: [{ n: 1, title: 'Templating', steps }] });
+  // The domain pin for the list is the set size above; this holds each member.
+  assert.deepEqual(EXPRESSIONS.filter(expression => html.split(expression).length - 1 === 2), EXPRESSIONS,
+    'every expression must reach the page verbatim, in both the do and the pass text');
+  // Subject observed on the BUILT page, not on the literal the steps were made from: the
+  // embedded sections carry one step per expression, so a builder that dropped, merged or
+  // duplicated a step while still emitting its text reddens here.
+  const embedded = JSON.parse(html.match(/var SECTIONS = (\[[\s\S]*?\]);\r?\n/)[1]);
+  assert.equal(embedded.reduce((n, section) => n + section.steps.length, 0), EXPRESSIONS.length,
+    'the page must publish one step per expression');
+});
+
+test('a template slot name the fill cannot match aborts the build', () => {
+  // Written independently of the `[A-Z_]+` pattern, and asserted below to be outside it.
+  const MALFORMED = ['{{page_title}}', '{{PAGE TITLE}}', '{{PAGE-TITLE}}', '{{ PAGE_TITLE }}', '{{Page_Title}}'];
+  assert.equal(new Set(MALFORMED).size, 5, 'five distinct malformed spellings, not a sample of one');
+  const caught = MALFORMED.filter(slot => {
+    // Armed in the production shape — unanchored, as the scan is. An anchored check
+    // would pass `{{{HEADLINE}}}`, which the scan skips, and leave the deepEqual to fail
+    // instead of this line.
+    assert.ok(slot.replace(/\{\{[A-Z_]+\}\}/g, '').includes('{{'),
+      slot + ' must leave a `{{` the fill pattern cannot match');
+    try { builder.buildSmokePage(sidecar(), template + '\n' + slot); return false; }
+    catch (e) { return /^self-check failed: the template carries a `\{\{` that is not a slot/.test(e.message); }
+  });
+  assert.deepEqual(caught, MALFORMED, 'every malformed slot name must abort the build, naming the template');
+  // The other side of the boundary: the same template, plus a WELL-FORMED marker, builds.
+  assert.doesNotThrow(() => builder.buildSmokePage(sidecar(), template + '\n{{HEADLINE}}'));
+});
+
+test('a template slot the sidecar cannot fill aborts the build', () => {
+  assert.throws(() => builder.buildSmokePage(sidecar(), template + '\n{{NO_SUCH_SLOT}}'),
+    /^Error: template wants a slot the sidecar cannot fill: \{\{NO_SUCH_SLOT\}\}$/m);
+  assert.doesNotThrow(() => builder.buildSmokePage(sidecar(), template + '\n{{BUILD_SHA}}'));
 });
 
 test('the same sidecar always produces the same bytes', () => {
@@ -613,6 +677,10 @@ test('the command line writes the page, or explains why it did not', () => {
   const ok = spawnSync(process.execPath, [BUILDER, json, out], { encoding: 'utf8' });
   assert.equal(ok.status, 0, ok.stderr);
   assert.equal(fs.readFileSync(out, 'utf8'), build());
+  // The success line is itself a claim about what was checked. The builder no longer
+  // inspects the filled page, so it may not report a tally of unfilled slots in one.
+  assert.equal(ok.stdout.trim(), out + ': ' + build().length + ' bytes, every template slot filled');
+  assert.doesNotMatch(ok.stdout, /unfilled/, 'the success line may not claim a check the builder does not perform');
 
   fs.writeFileSync(json, JSON.stringify(sidecar({ buildSha: 'nope' })));
   const bad = spawnSync(process.execPath, [BUILDER, json, out], { encoding: 'utf8' });

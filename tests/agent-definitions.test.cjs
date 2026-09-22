@@ -361,8 +361,11 @@ test('an unquoted value may not open with a YAML indicator, and may carry one an
 // a sweep is only ever complete for the shape it sweeps. A one-character value is its own column
 // and has at least two more members: PyYAML 6.0.3 raises ConstructorError on `tools: =` and loads
 // `tools: ~` as null, which this parse hands back as the string `~` — key present, no list, whole
-// catalog inherited. That column belongs to a later batch; it is named so nobody reads the seven
-// as a claim about every shape a value can take.
+// catalog inherited. A third case is its own: `tools: 0` reaches a consumer as an int, not a
+// string. That column is CLOSED AS ACCEPTED rather than deferred — BL-019, closed by
+// OS-20260921-backlog-closeout — so there is no later batch to carry it. The cases known today
+// are named here, not a complete count of the column, so nobody reads the seven as a claim
+// about every shape a value can take.
 const KNOWN_GAP = ['#', '&', ',', '>', ']', '|', '}'];
 // Neither list carries a quote. A leading quote opens the branch above, and the unterminated
 // scalar this sweep builds is rejected there — the verdict YAML gives it too, by another route.

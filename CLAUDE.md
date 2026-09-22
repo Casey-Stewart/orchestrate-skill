@@ -50,10 +50,33 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   the first line alone when you mean the message. *(BL-004, round 2)*
 - **A boundary pinned on one side only.** A range check needs a case above *and* below it;
   pinning only the strengthening direction leaves loosening undetected. *(BL-004, polish)*
-- **A whitelist pinned by sampling.** Two example rejects do not hold an 18-member set —
-  adding a nineteenth member stays green. Sweep the whole domain, and write the member
-  list independently of the pattern so a both-at-once edit is caught by a set-size
-  assertion. *(BL-004, polish)*
+- **A guard that SAMPLES the domain it claims to sweep.** The most productive class this
+  repository has: eleven sightings in one change, five in another, including in the very
+  assertions written to close earlier sightings. Every instance was caught by a gate that
+  MUTATED the fix; none by one that read it. The author is thinking about the behaviour
+  being pinned, not about whether the new pin can fail. Ask of any guard: **is its subject
+  the domain or one sample of it, and does its control exercise the tight case or the
+  comfortable one?** Greppable shapes, no understanding of the code required:
+  - Two literals that partition the same collection with nothing relating them — for every
+    array literal used as a loop domain, is there an assertion whose subject is the DOMAIN
+    (size, set-equality, a count over results) rather than its members?
+  - A set-size check that is really a uniqueness check (`new Set([...a, ...b]).size ===
+    a.length + b.length`): delete a member and both sides shrink together.
+  - `indexOf` without a loop — only the FIRST occurrence is governed, and a second one
+    appended later is applauded.
+  - A fixed ±N window per occurrence, where two occurrences closer than N overlap and the
+    second is satisfied by the first's markers — while the arming control, written with a
+    generous gap, exercises only the non-overlapping branch.
+  - A corpus whose every entry satisfies the pattern's own proximity bound, which means it
+    was derived from the pattern however the comment describes it. Write the corpus as prose
+    first, pin its size and set, and require each pattern to own an entry no other catches —
+    otherwise a family loses half itself when one alternation is replaced by a dead literal.
+  - An out-parameter passed inline as a fresh literal and never bound, declining half of
+    what the function returned.
+  On any rewrite of a guard, assert the new family is a superset of the old: a sweep grown
+  from ten patterns to fourteen once lost a spelling while every visible signal said it grew.
+  Prefer binding a domain to the checkout over hand-writing it.
+  *(BL-004 polish, BL-016 round 2, and five more in `OS-20260921-backlog-closeout`)*
 - **A branch no input reaches.** Recursion proven at depth one; an error path no fixture
   triggers; a filter attribute no test resolves. If a mutation of the branch leaves the
   suite green, the branch is untested however correct it is. *(BL-005, BL-009)*
@@ -63,21 +86,6 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A test that pins the defect.** An existing assertion can encode the old, wrong meaning
   of "correct". When a fix changes what correct means, hunt for the assertion that froze
   the old one.
-- **The fix for a vacuity finding is a prime site for a vacuity finding.** Eleven times in
-  one change, the assertion written to close one contained another — the author is thinking
-  about the behaviour being pinned, not about whether the new pin can fail. Every instance was
-  caught by a gate that MUTATED the fix; none by one that read it. Two shapes are greppable
-  without understanding the code: **two literals that partition the same collection with nothing
-  relating them** — for every array literal used as a loop domain, is there an assertion whose
-  subject is the DOMAIN (size, set-equality, a count over results) rather than its members? — and
-  **an out-parameter passed inline as a fresh literal and never bound**, which declines half of
-  what the function returned. Prefer binding a domain to the checkout over hand-writing it.
-- **A guard whose coverage regressed invisibly across a rewrite.** A sweep rewritten from ten
-  patterns to fourteen — with per-pattern arming, a size assertion and a disclaimer — silently
-  lost a spelling it used to catch, while every visible signal said it grew. Nothing asserted the
-  new family was a superset of the old. Pin coverage against a corpus written independently of
-  the patterns, and assert exclusivity as a domain property: each pattern must own at least one
-  entry no other catches, or deleting it balances both sides at once. *(BL-016 round 2)*
 
 ### Parsers, guards and their real consumers
 
@@ -121,6 +129,23 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A backlog entry can be right about the defect and wrong about the file.** Re-verify
   every entry against the source before drawing a fence; a backlog is a pointer, not a
   specification. *(BL-003 named the wrong file; BL-002 was wider than its text)*
+- **…and wrong about its own FIX SHAPE.** Two of three entries in one change misdescribed
+  the repair, not the location: one proposed a code-span exemption when the real defect was
+  that the scan ran over the filled OUTPUT, and one named a wiring target that is pre-page
+  by construction while the pass it wires is post-page. Both would have shipped as written.
+  Re-derive what the fix IS, not merely where it goes.
+- **A close whose rationale points at documentation that does not contain the fact.** An
+  entry was closed as accepted on the ground that a declared `KNOWN_GAP` documented all
+  three cases; it documented two, and the same diff deleted the only other live record of
+  the third. Every signal read like a decision; the effect was a silent deletion. When a
+  close cites a document as its resolution, open that document and confirm the fact is in
+  it — and check what the same diff removes.
+- **Reading a stale copy of a document ONCE contaminates work that afterwards uses the
+  fresh one.** A ledger was scaffolded with a `**Files**` header taken from a stale
+  installed copy of this skill, read early and discarded later; the form was plausible, so
+  nothing looked wrong, and it silently killed the fence tool's Files-line branch for the
+  whole ledger. When a source turns out to be stale, re-derive what was already taken from
+  it rather than merely ceasing to read it.
 - **An illustrative list implemented as a closed set.** A backlog entry's "a device, a GUI, held
   credentials, or a judgement" was an example, not a specification; shipping it behind an ONLY
   narrowed a safety rule. Five figures baked into one ledger — a registry-row count, a PyYAML
@@ -146,7 +171,19 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   producing a **false clean result**. The first three corrupted the work, the last two the
   verification of it. **Run a live control through your own harness before trusting any green or
   any zero** — it paid out twice in a single round. Restore-by-checkout is only safe once the
-  real edit is committed.
+  real edit is committed. A seventh sighting, on the very commit that distilled the first six:
+  backticked filenames inside a DOUBLE-QUOTED `node -e "…"` string were command-substituted by
+  bash and replaced with nothing, so a close-out record read "puts  and  inside a test's domain".
+  Markdown here is full of backticks; write such content through the file tools, or single-quote
+  the script, and sweep the result for the damage signature rather than rereading the line.
+- **A GATE's evidence needs a control as much as an implementer's.** A test-hunter proved a
+  real finding with a mutation anchored on a tag the shipped template does not contain, so
+  it never applied and its "suite stayed green" measured nothing — and by the same token its
+  claim about what the old code caught was unfounded too. The conclusion survived a correctly
+  anchored re-run; the proof did not. Later the same session, two more mutation scripts
+  aborted on their own anchor guards, each of which would otherwise have been a false green.
+  Treat "I mutated it and nothing reddened" as a claim to verify: every mutation script must
+  abort loudly when its anchor is absent, and say so in its report.
 - **"No test can verify this" is not "no agent can verify this."** Test fixtures are
   isolated from the real machine by design; a subagent is not. A step needs a human only
   when it needs a device, a GUI, held credentials, or a judgement about whether something

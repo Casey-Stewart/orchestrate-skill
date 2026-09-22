@@ -129,11 +129,16 @@ markup are restored at runtime. Plain names like `Fix "Save as"` also have their
 escaped inside JavaScript strings. Slots the
 table above documents as HTML (`headline`, `standfirst`, the facts, the gate) keep their
 markup. Without Node, or with the sidecar lost, copy the newest committed
-`smoke-*.html`, patch the slots by hand, and run the self-check below; the page never
+`smoke-*.html`, patch the slots by hand, and run `grep -o '{{[A-Z_]\{1,\}}}'` over the
+result — zero hits; the page never
 depends on the tool that filled it.
 
-**Self-check before publishing**: grep the filled file for `{{` — zero hits (the builder
-enforces this and refuses to write a page that fails it). Totals
+**Self-check before publishing**: the builder greps its TEMPLATE for a `{{` that is not
+a well-formed slot marker — a lower-case, spaced or hyphenated name it would leave
+unfilled — and refuses to write a page from that template, as it refuses a slot the
+sidecar cannot fill. It does not grep the filled page: step content may carry `{{` of its
+own (a GitHub Actions expression, a Handlebars or Vue binding), which is content and not
+a slot. Totals
 and the meter compute themselves from the sections array. `BUILD_SHA` must be a full
 40- or 64-character hexadecimal Git object ID. The page rejects an invalid or unfilled
 identity with a visible correction message: verdict entry and copying stay disabled,
@@ -143,8 +148,11 @@ and neither saved records nor the artifact store are accessed.
 runner's pre-verification happens before the page exists and proves the steps, not the
 bytes the reader receives; this pass is additional and changes nothing about when the
 runner runs. After the page is generated and before the STOP, open the filled
-`smoke-<Cn>.html`, read each `<pre><code>` block's `textContent`, and run exactly those
-bytes in the reader's shell. **A command is verified only when it has been executed in
+`smoke-<Cn>.html` **in a browser and read the RENDERED DOM, never the file text** — the
+step blocks render client-side from the embedded `SECTIONS_JS` JSON, so a static read or
+grep of the file finds only the gate's blocks — read each `<pre><code>` block's
+`textContent`, and run exactly those bytes in the reader's shell. **A command is
+verified only when it has been executed in
 the form the reader receives it** — not from the sidecar, not from the batch file, not
 from the shell it was composed in. A command that was re-authored on its way into the
 artifact is an unverified command, however carefully it was checked before. It has
