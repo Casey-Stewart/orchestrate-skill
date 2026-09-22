@@ -3,7 +3,7 @@
 **Identifier**: OS-20260921-backlog-closeout
 **Started**: 2026-09-21 · **Base**: 5efd484 (the default-branch commit the ledger
 branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
-**State**: AT-CHECKPOINT C1
+**State**: ACTIVE
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
@@ -66,6 +66,7 @@ hash/size manifest and the delivery location, plus working-copy and reset instru
 
 | Date | Checkpoint | Verdict | User notes |
 |------|------------|---------|------------|
+| 2026-09-21 | C1 | **PASSED** — user chose *"Pass — and fix the DOM gap first"*: "Passes C1, then one small repair batch adds the 'read from the rendered DOM, not the file text' clause to smoke-page.md and the Artifact-proofer skeleton, plus the 127.0.0.1 note." | Same message, on BL-020: *"Keep it accepted"* — "proving the terminator guard costs a second exported classifier for a different parse — new production surface bought to test one existing line. The decision is written down with its reasoning." BL-020 stays Accepted as shipped; not reopened. **No merge or push authorization was given in this message** — the change stops at the integration branch. |
 
 ## Item → batch coverage audit
 
