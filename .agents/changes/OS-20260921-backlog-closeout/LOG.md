@@ -34,6 +34,51 @@ heading per session (date), one `###` per batch or event. Never edit an earlier 
   Treat a gate's "I mutated it and the suite stayed green" as a claim to verify, not a
   result to act on.
 
+## 2026-09-21 — C1
+
+Seven steps, all `Runner: agent`, all PASS, zero human steps. Every zero was
+control-armed, and the controls repeatedly earned their cost:
+
+- The table counter was proved able to speak by three mutations — an injected blank line,
+  a deleted separator, a duplicated row — each of which it named.
+- Step 1 carried a REGRESSION control, not just a presence check: the pre-fix builder was
+  copied to scratch and run on the identical sidecar, where it threw the old
+  "an unfilled `{{` survived the fill". So the input provably exercises the fixed branch.
+- Step 3 proved `KNOWN_UNWIRED`'s permissiveness by MUTATION rather than by reading:
+  making `SKILL.md` name the pass at its close-out left the suite GREEN, and dropping the
+  pass from `protocol.md` turned it RED. One earlier mutation attempt aborted on the
+  runner's own anchor guard because `SKILL.md` wraps "combined smoke / script" across
+  lines — which would have been a false green had the guard not been there.
+
+### Step 7 — the proofing pass on its own first live exercise
+
+BL-017's thesis reproduced immediately. Two findings, neither a defect in the shipped
+work, both about authoring:
+
+1. **A command can reach the reader re-authored by a layer nobody suspects.** A step
+   authored as `printf 'alpha\nbeta\ngamma\n'` was rewritten by the sidecar's own JSON
+   layer into a three-line literal, so the published block is not what the author wrote.
+   No pre-smoke could catch this, because the pre-smoke runs before the artifact exists.
+   This is exactly why the pass was built.
+2. **`${{ … }}` inside a double-quoted block is not runnable in sh** — the published block
+   failed with `bad substitution`. The builder is RIGHT to publish it (B01's whole point is
+   that such content is legal), and the pass is right to flag that it cannot be pasted.
+   The authoring rule "no backslashes, no control characters" should grow a sibling: no
+   `${{` inside a double-quoted block intended to be run.
+
+### The gap step 7 found in what B02 just shipped
+
+The proofing pass requires a RENDERED DOM and neither `smoke-page.md` nor the new Artifact
+proofer skeleton says so. A static read of the built HTML finds **3** `<pre><code>` blocks;
+the DOM yields **6**, because the step blocks are rendered client-side from the embedded
+`SECTIONS_JS` JSON. A proofer who greps the file therefore proofs only the gate and reports
+a clean pass over half the artifact — a FALSE CLEAN of precisely the shape this repository
+keeps producing, in the very mechanism built to prevent it.
+
+Related: the browser tool refuses to script `file://` pages, so the runner had to serve the
+page over `127.0.0.1`. A future proofer meets the same wall and, without guidance, will
+downgrade the pass to a grep — arriving at the false clean by a second route.
+
 ## 2026-09-21 — wave 1
 
 ### gates — three batches, three instances of the same class
