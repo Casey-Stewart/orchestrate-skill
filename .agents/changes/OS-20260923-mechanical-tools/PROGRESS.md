@@ -70,4 +70,4 @@ smoke-input inventory, under `evidence/C1/inputs/issue-001/`.
 
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
-| 2026-09-23 | Scaffold: discovery (no active ledger), interview, plan, pre-flight, approval; base `fceab31`, baseline 318/318 — LOG "2026-09-23 — scaffold" | scaffold complete; wave 1 opens on the user's word |
+| 2026-09-23 | Scaffold: discovery (no active ledger), interview, plan, pre-flight, approval; base `fceab31`, baseline 318/318, tip `fd3f922` 318/318 — LOG "2026-09-23 — scaffold" | scaffold complete; wave 1 opens on the user's word |

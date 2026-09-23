@@ -105,3 +105,10 @@ limited to rendered roles (11); the scratch-tree sweep scoped to the hunter (12)
 `validate.json` for a `none` recipe, B05 raised to L, `--timeout` on smoke step 1, the error
 digest named as an exclusion, and the acceptance lines that only restated `NON_MARKDOWN`
 checklist items removed (13).
+
+### Tip validation after the scaffold commit
+
+`fd3f922`: 318 pass, 0 fail, `git diff --check` clean, in 8m21s with no concurrent disk scan —
+so the ~8.5-minute run time is this machine's, not the scan's, which the contract's baseline note
+suggests. It sits close to the Bash tool's 10-minute cap: every validation run needs the maximum
+tool timeout, and B01's smoke step 1 carries `--timeout 570` for the same reason.
