@@ -141,8 +141,8 @@ test('an unfilled pin passes the code-span-exempt grep, so the pin check is what
 
 // Every occurrence of a skill-directory token, in every shipped document and the README,
 // is either a quoted argument ("TOKEN" or "TOKEN/path", closed before any whitespace) or a
-// code span naming the token alone.
-const SKILL_TOKENS = /\{\{SKILL_DIR\}\}|<SKILL_DIR>|<skill-dir>/g;
+// code span naming the token alone. `[SKILL_DIR]` is the prompt skeletons' slot for it.
+const SKILL_TOKENS = /\{\{SKILL_DIR\}\}|<SKILL_DIR>|<skill-dir>|\[SKILL_DIR\]/g;
 function unquotedSkillDirs(text) {
   const bad = [];
   for (const m of text.matchAll(SKILL_TOKENS)) {
@@ -159,6 +159,7 @@ test('every command that uses the skill directory quotes it', () => {
   assert.equal(unquotedSkillDirs('`skill --dir <SKILL_DIR>`').length, 1);
   assert.equal(unquotedSkillDirs('`node "<skill-dir>/tools/x.mjs"`, `--dir "<SKILL_DIR>"` and `{{SKILL_DIR}}`').length, 0);
   assert.equal(unquotedSkillDirs('`--dir "<SKILL_DIR> x` `--dir <SKILL_DIR>"`').length, 2, 'a quote on one side only is not quoting');
+  assert.equal(unquotedSkillDirs('`node [SKILL_DIR]/tools/x.mjs` and `node "[SKILL_DIR]/tools/x.mjs"`').length, 1, 'the skeleton slot is held to the same rule');
   // A quote that closes only after whitespace leaves the tool path and its arguments as one argument.
   assert.equal(unquotedSkillDirs('`node "<SKILL_DIR>/tools/check-ledger.mjs skill --dir "<SKILL_DIR>"`').length, 1,
     'a quoted run must close before any whitespace');
@@ -396,15 +397,15 @@ const MIRRORED = /### Read-only evidence tools\n[\s\S]*?(?=\n## )/;
 const outsideMirror = text => text.replace(MIRRORED, '');
 // Structural: every occurrence of `tools/<name>` or `tools\<name>`, for every tool the skill
 // ships (bound to the directory listing, not a hand list of spellings), must be the tail of a
-// quoted placeholder directory — `"{{X}}/tools/<name>"` or `"<x>/tools/<name>"` — closing
-// right after the name.
+// quoted placeholder directory — `"{{X}}/tools/<name>"`, `"<x>/tools/<name>"` or, inside a
+// prompt skeleton, `"[X]/tools/<name>"` — closing right after the name.
 const toolNames = () => fs.readdirSync(path.join(ROOT, 'orchestrate/tools')).filter(n => n.endsWith('.mjs'));
 function toolPathFaults(text, names) {
   const escaped = names.map(n => n.replace(/\./g, '\\.')).join('|');
   const faults = [];
   for (const m of text.matchAll(new RegExp('tools[\\\\/](?:' + escaped + ')', 'g'))) {
     const before = text.slice(Math.max(0, m.index - 80), m.index), after = text[m.index + m[0].length];
-    const quotedDir = /"(?:\{\{[A-Z_]+\}\}|<[A-Za-z_ -]+>)\/$/.test(before);
+    const quotedDir = /"(?:\{\{[A-Z_]+\}\}|<[A-Za-z_ -]+>|\[[A-Z_]+\])\/$/.test(before);
     if (!quotedDir || after !== '"') faults.push(text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 10));
   }
   return faults;
@@ -418,10 +419,10 @@ test('every shipped command naming a skill tool quotes a placeholder directory, 
   // Controls: each broken shape is caught, the accepted shapes are not.
   for (const bad of ['`node <skill>/tools/check-ledger.mjs skill --contract x`', '`node orchestrate\\tools\\check-ledger.mjs`',
     '`node "orchestrate/tools/validate.mjs"`', '`node "<SKILL_DIR>/tools/check-ledger.mjs skill --dir "<SKILL_DIR>"`',
-    '`node tools/build-smoke-page.mjs a b`']) {
+    '`node tools/build-smoke-page.mjs a b`', '`node [SKILL_DIR]/tools/validate.mjs`', '`node "[SKILL_DIR]/tools/validate.mjs --spec x"`']) {
     assert.equal(toolPathFaults(bad, names).length, 1, 'must be caught: ' + bad);
   }
-  assert.deepEqual(toolPathFaults('`node "{{SKILL_DIR}}/tools/validate.mjs" --spec x` `node "<skill-dir>/tools/git-evidence.mjs" discovery`', names), []);
+  assert.deepEqual(toolPathFaults('`node "{{SKILL_DIR}}/tools/validate.mjs" --spec x` `node "<skill-dir>/tools/git-evidence.mjs" discovery` `node "[SKILL_DIR]/tools/validate.mjs" --spec x`', names), []);
   assert.ok(Object.values(KNOWN_TOOL_PATH_FAULTS).reduce((a, b) => a + b, 0) <= 2, 'a known fault may be retired, never added');
   let seen = 0;
   for (const file of documents().filter(f => f.endsWith('.md'))) {
@@ -578,4 +579,190 @@ test('the load-bearing passages and registry rows match their pinned text exactl
   }
   assert.equal(PINNED.length, 5, 'five passages are pinned; the list may not shrink to a sample');
   for (const [key, row] of Object.entries(PINNED_ROWS)) assert.equal(registryRow(key), row, '{{' + key + '}} registry row changed');
+});
+
+// ===== Rendered prompts: report shapes, the pointer, findings by path =================
+const PROMPTS = 'orchestrate/references/subagent-prompts.md';
+const promptTool = () => import(require('node:url').pathToFileURL(path.join(ROOT, 'orchestrate/tools/prompt.mjs')).href);
+// Every fenced block of the skeleton document with its info string: the whole domain.
+function fencedBlocks(text) {
+  const blocks = [];
+  let open = null;
+  for (const line of text.split('\n')) {
+    if (line.startsWith('```')) { if (open) { blocks.push(open); open = null; } else open = { info: line.slice(3), lines: [] }; }
+    else if (open) open.lines.push(line);
+  }
+  assert.equal(open, null, 'balanced fences');
+  return blocks;
+}
+const NONCE_LINE = 'Line 2, directly under line 1: NONCE [NONCE]';
+// A rendered block states line 1 and ends on the nonce line, its only [NONCE]; the round-2
+// fragment (composed into the reviewer's) and every pasted skeleton carry no nonce at all.
+function reportShapeFaults(blocks) {
+  return blocks.flatMap(b => {
+    const body = b.lines.join('\n'), label = b.info || (b.lines[0] || '').slice(0, 40);
+    if (!b.info.startsWith('prompt:') || b.info === 'prompt:round-2') return /NONCE/.test(body) ? [label + ': carries a nonce'] : [];
+    const faults = [];
+    if (body.split('[NONCE]').length !== 2) faults.push(label + ': [NONCE] must occur exactly once');
+    if (b.lines.filter(l => l.trim()).pop() !== NONCE_LINE) faults.push(label + ': the last line must be "' + NONCE_LINE + '"');
+    if (!/^Line 1, exactly one of: |line 1 exactly `CLEAN` or `FINDINGS <n>`|^Same REPORT shape\.$/m.test(body)) faults.push(label + ': states no line 1');
+    return faults;
+  });
+}
+test('every rendered REPORT shape carries NONCE [NONCE] as line 2, last; no pasted skeleton carries a nonce', async () => {
+  const { BLOCKS } = await promptTool(), doc = read(PROMPTS), blocks = fencedBlocks(doc);
+  assert.deepEqual(blocks.filter(b => b.info.startsWith('prompt:')).map(b => b.info.slice(7)).sort(), BLOCKS.slice().sort(),
+    'the rendered blocks are exactly the renderer\'s');
+  const pasted = blocks.filter(b => !b.info.startsWith('prompt:')).map(b => b.lines[0]);
+  for (const opener of ['You are the QA RUNNER', 'You are the ARTIFACT PROOFER', 'You are the independent PRE-FLIGHT', 'You verify that change', 'You are fixing']) {
+    assert.ok(pasted.some(first => first.startsWith(opener)), 'the pasted domain must still hold: ' + opener);
+  }
+  assert.deepEqual(reportShapeFaults(blocks), []);
+  // Controls: a nonce planted in a pasted skeleton, a nonce line moved up, a nonce line lost.
+  const qa = doc.replace('REPORT: one line per step', 'NONCE [NONCE]\nREPORT: one line per step');
+  const moved = doc.replace(NONCE_LINE + '\n```\n\nMain-checkout variant', '```\n\nMain-checkout variant')
+    .replace('REPORT (fixed shape — the orchestrator acts on nothing else):\nLine 1', 'REPORT (fixed shape — the orchestrator acts on nothing else):\n' + NONCE_LINE + '\nLine 1');
+  const lost = doc.replace('line; line 3 `FINDINGS <n>`; line 4 the path [FINDINGS_FILE].\n' + NONCE_LINE + '\n', 'line; line 3 `FINDINGS <n>`; line 4 the path [FINDINGS_FILE].\n');
+  for (const [name, text, expected] of [['qa', qa, /carries a nonce/], ['moved', moved, /prompt:implementer: the last line/], ['lost', lost, /prompt:test-hunter: \[NONCE\] must occur exactly once/]]) {
+    assert.notEqual(text, doc, name + ': the control anchor must exist');
+    assert.match(reportShapeFaults(fencedBlocks(text)).join(' || '), expected, name);
+  }
+});
+
+const pointerOf = text => {
+  const found = [...collapse(text).matchAll(/`(Your complete instructions are in the file <prompt file>\.[^`]*)`/g)].map(m => m[1]);
+  assert.equal(found.length, 1, 'exactly one pointer message');
+  return found[0];
+};
+test('§Spawning rules renders with prompt.mjs and points with ONE fixed message that holds no nonce', async () => {
+  const { ROLES } = await promptTool(), doc = read(PROMPTS);
+  const rules = collapse(section(doc, '## Spawning rules (orchestrator)'));
+  const command = '`node "<skill-dir>/tools/prompt.mjs" --ledger <ledger-dir> --role <role> --batch <Bnn> --facts <facts.json> --out <scratchpad>/prompts`';
+  assert.ok(rules.includes(command), 'the rendering command');
+  assert.ok(rules.includes('(roles ' + Object.keys(ROLES).map(r => '`' + r + '`').join(', ') + ';'), 'every role the renderer knows, and no other');
+  const pointer = pointerOf(rules);
+  assert.doesNotMatch(pointer, /nonce|\[NONCE\]|[0-9a-f]{12}/i, 'the pointer never holds the nonce');
+  for (const needed of ['<prompt file>', 'last line', 'line 2']) assert.ok(pointer.includes(needed), 'the pointer says: ' + needed);
+  assert.equal(pointerOf(section(template, '\n5. Spawn ALL', '\n6. Gate PER BATCH')), pointer, 'the template spawns with the same bytes');
+  for (const needed of ['The nonce stays with the orchestrator and never enters the pointer.',
+    'A report whose line 2 is not `NONCE <the nonce>` is treated as no report: the agent did not read its instructions to the end.',
+    'The QA runner, artifact proofer, pre-flight, convergence and fix-up skeletons are always filled and pasted and carry NO nonce',
+    'the manual procedure is the skeleton filled by hand and pasted without its nonce line']) {
+    assert.ok(rules.includes(needed), '§Spawning rules must say: ' + needed);
+  }
+  // The flags published are the ones the real tool documents.
+  const help = spawnSync(process.execPath, [path.join(ROOT, 'orchestrate/tools/prompt.mjs'), '--help'], { encoding: 'utf8', windowsHide: true });
+  assert.equal(help.status, 0);
+  assert.ok(help.stdout.startsWith('prompt.mjs --ledger <ledger-dir> --role <role> --batch <Bnn> --facts <facts.json> --out <dir>'));
+});
+
+test('template step 5 renders, then points, and keeps its self-contained list as the manual procedure', () => {
+  const spawn = collapse(section(template, '\n5. Spawn ALL', '\n6. Gate PER BATCH'));
+  assert.ok(spawn.includes('`node "{{SKILL_DIR}}/tools/prompt.mjs" --ledger {{LEDGER_DIR}} --role implementer --batch <Bnn> --facts <facts.json> --out "<session scratchpad>/prompts"`'));
+  const manual = spawn.indexOf('When the renderer is unavailable or refuses (`UNKNOWN …`), the manual procedure is a pasted prompt');
+  const list = spawn.indexOf('every such prompt must be SELF-CONTAINED:');
+  assert.ok(manual !== -1 && list > manual, 'the self-contained list is the manual procedure');
+  for (const item of ['the spec text + codebase facts from the batch file', 'the exact file fence', 'acceptance criteria', 'the applicable guardrails',
+    'validation commands (the wrapper command and its recipe)', 'the conventions + prohibitions blocks above', 'report shape',
+    'tick your checklist items in the batch file as you complete them']) {
+    assert.ok(spawn.slice(list).includes(item), 'the manual list keeps: ' + item);
+  }
+  assert.ok(collapse(section(template, '\n6. Gate PER BATCH', '- **6a')).includes('or with the wrong nonce'), 'the gate treats a wrong nonce as no report');
+  const protocol = read('orchestrate/references/protocol.md');
+  const step5 = collapse(section(protocol, '\n5. Spawn ALL', '\n6. Gate per batch'));
+  assert.ok(step5.includes('When the renderer is unavailable or refuses, the manual procedure is a pasted prompt with no nonce line; pasted prompts are SELF-CONTAINED'));
+  assert.ok(collapse(section(protocol, '\n6. Gate per batch', '6a fence check')).includes('or with the wrong nonce'));
+});
+
+// Every findings file reaches LOG.md, byte for byte, BEFORE its path is forwarded: in each
+// paragraph or list item about findings, every "forward" comes after the append command.
+const APPEND = 'cat -- "<findings file>" >>';
+function forwardFaults(text) {
+  const faults = [];
+  for (const block of text.split(/\n[ \t]*\n|\n(?=[ \t]*(?:[-*]|\d+\.) )/).map(collapse)) {
+    if (!/findings/i.test(block)) continue;
+    for (const m of block.matchAll(/\bforward(?:s|ed|ing)?\b/gi)) {
+      const at = block.indexOf(APPEND);
+      if (at === -1 || at > m.index) faults.push(block.slice(Math.max(0, m.index - 60), m.index + 40));
+    }
+  }
+  return faults;
+}
+const agentDefinitions = () => fs.readdirSync(path.join(ROOT, '.claude/agents')).filter(n => n.endsWith('.md')).map(n => '.claude/agents/' + n);
+test('the LOG append precedes forwarding wherever forwarding is stated', () => {
+  assert.deepEqual(forwardFaults('Forward the findings file to the implementer.').length, 1);
+  assert.deepEqual(forwardFaults('Forward the findings path, then run `' + APPEND + ' LOG.md`.').length, 1);
+  assert.deepEqual(forwardFaults('Run `' + APPEND + ' LOG.md`, then forward the findings path.'), []);
+  assert.deepEqual(forwardFaults('- Run `' + APPEND + ' LOG.md` for the findings.\n- Forward the findings path.').length, 1, 'an append in another list item does not count');
+  let forwards = 0;
+  for (const file of [...documents(), ...agentDefinitions()]) {
+    const text = read(file);
+    assert.deepEqual(forwardFaults(text), [], file + ': findings forwarded without the LOG append first');
+    if (/findings/i.test(text)) forwards += [...text.matchAll(/\bforward(?:s|ed|ing)?\b/gi)].length;
+  }
+  for (const file of [TEMPLATE, 'orchestrate/references/protocol.md', PROMPTS]) {
+    const text = collapse(read(file));
+    assert.ok(text.includes(APPEND) && /never re-typed through (?:its own|the orchestrator's) context/.test(text), file + ': states the byte-for-byte LOG append');
+    assert.ok(/\bforward(?:s|ed|ing)?\b/.test(text), file + ': states the forwarding the append must precede');
+  }
+  assert.ok(forwards >= 3);
+});
+
+// Directives that would reinstate pasting for a rendered role, or give a gate agent a second
+// write. Clause-level, negation-aware (the same reader as the undo sweep above).
+const REINSTATE = [
+  ["paste, don't point", /\bpaste,? don['’]t point\b/i, "Paste, don't point: the batch text goes into the prompt."],
+  ['findings handed over verbatim', /\b(?:findings|ASK list|ASKs)\b[^.;:]{0,30}\bverbatim\b/i, 'Resume the SAME implementer with the findings verbatim'],
+  ['a rendered prompt or findings pasted', /\bpast(?:e|es|ed|ing)\b[^.;:]*\b(?:rendered|prompt file|batch text|contract excerpts|findings|ASK list)\b/i, 'Paste the rendered prompt into the spawn call'],
+  ['findings relayed through the context', /\b(?:relay|re-?typ|restat)\w*\b[^.;:]*\bfindings\b/i, "Relay the reviewer's findings to the implementer"],
+  ['a gate agent licensed to write more', /\b(?:reviewer|test[- ]hunter|gate agents?)\b[^.;:]*\b(?:may|can|should|also)\s+(?:write|edit|create|modify)\b/i, 'The test hunter may also write a scratch file for each mutation'],
+  ['a second file for a gate agent', /\b(?:reviewer|test[- ]hunter|gate agents?)\b[^.;:]*\b(?:second|another|additional|extra|other)\s+(?:file|write)s?\b/i, 'The reviewer keeps a second file with its raw notes'],
+];
+const reinstating = text => clauses(text).flatMap(c => REINSTATE.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
+test('no shipped text reinstates pasting for a rendered role or a second write for a gate agent', () => {
+  assert.equal(new Set(REINSTATE.map(r => r[0])).size, REINSTATE.length);
+  for (const [name, pattern, specimen] of REINSTATE) {
+    assert.deepEqual(REINSTATE.filter(([, p]) => p.test(specimen)).map(r => r[0]), [name], name + ': its specimen must be caught by it alone');
+    assert.equal(reinstating(specimen + '.').length, 1, name);
+  }
+  // Written as prose, not read off the patterns.
+  for (const planted of ['Polish pass: resume the implementer with the ASK list verbatim.', 'Paste the batch text and contract excerpts into the prompt.',
+    'Paste the findings into the fix-round message.', 'Relay the round-1 findings to the fresh reviewer.', 'The reviewer can write its notes into the worktree.',
+    'Gate agents may also create a summary file.', 'The test hunter keeps another file for surviving mutants.']) {
+    assert.ok(reinstating(planted).length >= 1, 'must be reported: ' + planted);
+  }
+  assert.deepEqual(reinstating('Writing that ONE file, outside every worktree, is the only write you make. Findings travel by path, never re-typed through its own context. '
+    + 'When the renderer is unavailable or refuses, the manual procedure is the skeleton filled by hand and pasted without its nonce line. '
+    + 'The QA runner, artifact proofer, pre-flight, convergence and fix-up skeletons are always filled and pasted and carry NO nonce.'), [],
+  'the rules themselves are not reinstatements');
+  const files = [...documents(), ...agentDefinitions()];
+  assert.ok(files.includes(PROMPTS) && files.includes('.claude/agents/reviewer.md') && files.includes('.claude/agents/test-hunter.md'));
+  for (const file of files) assert.deepEqual(reinstating(read(file)), [], file);
+});
+
+const CARVE_OUT = 'writing that ONE file, outside every worktree, is the only write you make';
+const EXCEPTION = 'Keep to reading files and read-only git, with one exception: the ONE findings file your prompt names, which is the only file you write.';
+test('each gate skeleton and definition grants exactly one write: the findings file its prompt names', () => {
+  const doc = collapse(read(PROMPTS));
+  assert.equal(doc.split(CARVE_OUT).length - 1, 2, 'the carve-out is stated twice in the skeletons, once per gate skeleton');
+  for (const [from, to, heading] of [['## Reviewer (the gate', '## Test hunter', 'reviewer'], ['## Test hunter (optional', '## QA runner', 'test-hunter']]) {
+    const skeleton = collapse(section(read(PROMPTS), from, to));
+    assert.equal(skeleton.split(CARVE_OUT).length - 1, 1, from + ': the carve-out exactly once');
+    assert.ok(skeleton.includes('write your full report to [FINDINGS_FILE]') && skeleton.includes('`### B[NN] R[ROUND] ' + heading + ' findings`'),
+      from + ': the one file is the named findings file, headed for LOG.md');
+  }
+  // The gate texts address the agent as "you", which the subject-keyed sweep above cannot see.
+  const SECOND_PERSON = /\byou\b[^.;:]*\b(?:may|can|should|also)\s+(?:write|edit|create|modify|keep|save)\b/i;
+  const licences = text => clauses(text).filter(c => fires(SECOND_PERSON, c));
+  assert.equal(licences('You may also write a scratch file for each mutant.').length, 1);
+  assert.equal(licences('You can save your notes in the worktree.').length, 1);
+  assert.deepEqual(licences('You edit nothing. ' + CARVE_OUT + '. ' + EXCEPTION), []);
+  const gateTexts = [section(read(PROMPTS), '## Reviewer (the gate', '## Test hunter'), section(read(PROMPTS), '## Test hunter (optional', '## QA runner')];
+  for (const file of ['.claude/agents/reviewer.md', '.claude/agents/test-hunter.md']) {
+    const text = collapse(read(file));
+    assert.equal(text.split(EXCEPTION).length - 1, 1, file + ': the one exception, verbatim, once');
+    assert.equal(text.split('exception').length - 1, 1, file + ': no second exception');
+    gateTexts.push(text);
+  }
+  for (const text of gateTexts) assert.deepEqual(licences(text), [], 'a gate text licenses a further write');
 });

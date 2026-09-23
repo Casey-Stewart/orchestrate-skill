@@ -1,9 +1,12 @@
 # Sub-agent prompt skeletons
 
 Spawn via the Agent tool. Insertion slots are [BRACKETED CAPS] — fill every slot from
-the ledger files. Prompts must stand alone: sub-agents have NO session context, so paste
-the actual text into the prompt (don't just point at files an agent might skip). Every
-skeleton ends with a REPORT shape; the orchestrator acts on nothing that lacks it.
+the ledger files. Prompts must stand alone: sub-agents have NO session context, so the
+actual text goes into the prompt, never a pointer at ledger files an agent might skip.
+The six per-batch prompts — the blocks opening ```` ```prompt:<name> ```` — are rendered,
+text and all, into one file by `node "<skill-dir>/tools/prompt.mjs"` and spawned with ONE
+fixed pointer at that file (§Spawning rules); the other skeletons are filled and pasted.
+Every skeleton ends with a REPORT shape; the orchestrator acts on nothing that lacks it.
 
 The conductor prepares checkpoint inputs as real immutable files with stable IDs,
 per-step references, raw hashes/sizes, requirements, independent validation evidence
@@ -22,7 +25,7 @@ ledger contracts keep their own rules; tool diagnostics never authorize state ch
 
 **Spawn with** `subagent_type: implementer`.
 
-```
+```prompt:implementer
 You are the IMPLEMENTER for batch B[NN] of change [CHANGE_ID] in [REPO_PATH].
 You have no other context; everything you need is below.
 
@@ -46,8 +49,9 @@ CONTRACT EXCERPTS (binding):
   recorded. Nothing else in it changes.
 - Conventions: [REPO CONVENTIONS BLOCK FROM THE READBEFORE]
 - Applicable guardrails: [APPLICABLE GUARDRAILS FROM THE BATCH FILE]
+- Project guardrails: [GUARDRAILS SECTION TEXT]
 - Prohibitions: [HARD PROHIBITIONS BLOCK FROM THE READBEFORE]
-- Validation commands (all must pass; quiet form): [VALIDATION COMMANDS]
+- Validation commands (all must pass; the wrapper command and its recipe): [VALIDATION COMMANDS]
 - NEVER touch version files, the changelog, PROGRESS.md or LOG.md — the orchestrator does
   that at integration. NEVER spawn a gate or reviewer agent yourself.
 
@@ -55,17 +59,24 @@ DO: implement each checklist item; tick items in [LEDGER_DIR]/[BATCH FILENAME] a
 complete them; run the validation commands; before committing run
 `git diff --name-status -M [INTEGRATION_BRANCH]...HEAD` plus `git status --porcelain` and
 revert anything outside your fence; commit on your batch branch with a conventional
-message ("[TYPE]: [summary] (batch [NN])") — one separate commit per backlog fold-in item,
+message ("[TYPE]: <summary> (batch [NN])") — one separate commit per backlog fold-in item,
 its message carrying the item's id.
+RULES: read a file before you edit it. Chain a command and its check with `&&` (in bash,
+after `set -o pipefail`), never `;`. Run the validation from the worktree root as
+`node "[SKILL_DIR]/tools/validate.mjs" --spec [LEDGER_DIR]/validate.json --log "[SCRATCHPAD_PATH]/<label>.log"`:
+its one line is the result and its exit code the real one. Never pipe or tail it; when it
+may outlast the runtime's command timeout, run it as a background task whose completion
+reports the one line and the exit code, and never read the log before it exits.
 
 REPORT (fixed shape — the orchestrator acts on nothing else):
 Line 1, exactly one of: DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED
-EVIDENCE: for each validation command — the command, its exit code, its last ~10 lines;
+EVIDENCE: for each validation run — its `validate.mjs` line and its exit code;
 the commit SHA(s); checklist ticked n/m.
 Then at most 40 lines: what you changed and why; anything out-of-fence you noticed
 (notes only). For NEEDS_FENCE or BLOCKED use exactly:
   Expected: … / Found: … / Why it matters: … / How to proceed: …
   (NEEDS_FENCE names the path(s), the checklist item, and why the fence must grow.)
+Line 2, directly under line 1: NONCE [NONCE]
 ```
 
 Main-checkout variant (degraded environments, or a width-1 wave run directly in the
@@ -73,30 +84,47 @@ repo): replace the worktree paragraph with "Work on the CURRENT branch
 ([BATCH_BRANCH]) — do not create or switch branches, never push."
 
 **Polish pass** (after a `SHIP` that carries ASKs): resume the SAME implementer
-(SendMessage) with:
+(SendMessage) with the pointer to this block, rendered as role `polish`:
 
-```
-Your batch reviewed SHIP with these ASKs (in-fence, no production behavior change):
-[ASK LIST, verbatim]
+```prompt:polish
+Your batch reviewed SHIP with ASKs (in-fence, no production behavior change); the
+findings file [FINDINGS_FILE] lists them.
 First append one `- [ ] polish: <ask>` checklist line per ask to your batch file, then do
 them, tick them, run the validation commands, commit ("polish: batch [NN] — <summary>").
 Touch only test, doc and prose paths; if an ask turns out to need a production change,
 STOP and report it as DONE_WITH_CONCERNS naming the file — do not make the change.
 Same REPORT shape.
+Line 2, directly under line 1: NONCE [NONCE]
 ```
 
-**Fix round 1** (after a `FIX FIRST`): resume the SAME implementer with the reviewer's
-findings verbatim and "fix each, tick nothing new, run validations, commit, same REPORT
-shape". **Authorized third round** (the user chose "fix again" after `⛔`): a FRESH
-implementer on the strong tier, given the full implementer skeleton + both rounds'
-findings + `git diff [INTEGRATION_BRANCH]...HEAD`, told "you own this batch now", then a
+**Fix round 1** (after a `FIX FIRST`): resume the SAME implementer with the pointer to
+this block, rendered as role `fix-round`:
+
+```prompt:fix-round
+Your batch reviewed FIX FIRST; the findings file [FINDINGS_FILE] lists what to fix.
+Fix each, tick nothing new, run the validation commands, commit
+("fix: batch [NN] round 1 — <summary>").
+RULES: read a file before you edit it. Chain a command and its check with `&&` (in bash,
+after `set -o pipefail`), never `;`. Run the validation from the worktree root as
+`node "[SKILL_DIR]/tools/validate.mjs" --spec [LEDGER_DIR]/validate.json --log "[SCRATCHPAD_PATH]/<label>.log"`:
+its one line is the result and its exit code the real one. Never pipe or tail it; when it
+may outlast the runtime's command timeout, run it as a background task whose completion
+reports the one line and the exit code, and never read the log before it exits.
+Same REPORT shape.
+Line 2, directly under line 1: NONCE [NONCE]
+```
+
+**Authorized third round** (the user chose "fix again" after `⛔`): a FRESH
+implementer on the strong tier, given its rendered implementer prompt, then the fix-round
+prompt rendered with both rounds' findings files joined into one, told "you own this
+batch now" (`git diff [INTEGRATION_BRANCH]...HEAD` is the diff it inherits), then a
 fresh re-review.
 
 ## Reviewer (the gate — read-only)
 
 **Spawn with** `subagent_type: reviewer`.
 
-```
+```prompt:reviewer
 You are the INDEPENDENT REVIEWER for batch B[NN] of change [CHANGE_ID] in [REPO_PATH].
 You did not write this code. Use only Read/Grep/Glob and read-only git (diff, log,
 show, status). You edit nothing. Work in the batch's worktree at [WORKTREE_PATH]
@@ -119,16 +147,19 @@ DUTIES, in order:
    claims.
 3. Run the validation commands: [VALIDATION COMMANDS]. Report the totals line and
    failing names.
-4. Check the diff against the project guardrails: [GUARDRAILS SECTION TEXT — or "none
-   recorded; apply general correctness scrutiny to async/lifecycle/state boundaries"]
-   and the batch's applicable guardrails: [APPLICABLE GUARDRAILS].
+4. Check the diff against the project guardrails: [GUARDRAILS SECTION TEXT]
+   and the batch's applicable guardrails: [APPLICABLE GUARDRAILS FROM THE BATCH FILE].
 5. Confirm the orchestrator's failing-on-base result ([FAILING_ON_BASE_RESULT]) is
    consistent with the diff; if it is INCONCLUSIVE, establish from the test text which
-   changed cell fails on the un-fixed code, or say that none does. [IF NO GATE AGENT RUNS FOR THIS BATCH: also, for every new
-   or re-pointed test, name the production mutation that would still pass it.]
+   changed cell fails on the un-fixed code, or say that none does.
+   [NO GATE AGENT DUTY]
 6. Confirm every doc/comment sweep the batch file names happened in the same commit.
+[ROUND 2 BLOCK]
 
-OUTPUT (fixed shape):
+OUTPUT (fixed shape): write your full report to [FINDINGS_FILE] with Bash (a quoted
+heredoc, `<<'EOF'`, expands nothing); writing that ONE file, outside every worktree, is
+the only write you make. Its first line is exactly `### B[NN] R[ROUND] reviewer findings`,
+then:
 Line 1, exactly one of: SHIP | FIX FIRST | NEEDS A CLOSER LOOK
 Then findings, each: file:line, the criterion or guardrail it violates, a one-line
 CONCRETE failure scenario (inputs → wrong outcome), a minimal suggested fix, and a class:
@@ -141,14 +172,25 @@ SHIP = no P0/P1 (ASKs allowed). FIX FIRST = at least one P0/P1. NEEDS A CLOSER L
 suspected but unconfirmed — say exactly what check would confirm it. At most 40 lines
 of prose beyond the findings. Never pad: one real bug named precisely outweighs a page
 of maybes.
+FINAL MESSAGE (four lines, nothing else): line 1 the verdict line; line 3
+`P0=<n> P1=<n> ASK=<n>`; line 4 the path [FINDINGS_FILE].
+Line 2, directly under line 1: NONCE [NONCE]
 ```
 
-**Round 2** (after a FIX FIRST — always a FRESH reviewer): same prompt, plus:
+`prompt.mjs` fills `[GUARDRAILS SECTION TEXT]` from the section the `guardrails` fact
+names, or with "none recorded; apply general correctness scrutiny to async/lifecycle/state
+boundaries" when that fact is `"none"`; and `[NO GATE AGENT DUTY]` with "Also, for every
+new or re-pointed test, name the production mutation that would still pass it." when the
+`gateAgentsRun` fact is false, dropping the line when it is true.
 
-```
-PREVIOUS FINDINGS: [ROUND-1 FINDINGS]. For each, verify the fix in the current diff and
-mark it FIX VERIFIED or NOT FIXED. Then re-scan only what changed since round 1
-(`git diff [ROUND1_SHA]..HEAD`).
+**Round 2** (after a FIX FIRST — always a FRESH reviewer): the same prompt with this block
+at its `[ROUND 2 BLOCK]` slot, rendered as role `reviewer-round2` (role `reviewer` drops
+that line):
+
+```prompt:round-2
+PREVIOUS FINDINGS: the round-1 report in [PREVIOUS_FINDINGS_FILE]. For each finding,
+verify the fix in the current diff and mark it FIX VERIFIED or NOT FIXED. Then re-scan
+only what changed since round 1 (`git diff [ROUND1_SHA]..HEAD`).
 ```
 
 **Scoped re-review** (a polish commit touched a production file): a fresh reviewer given
@@ -176,13 +218,13 @@ not such a replacement.
 
 **Spawn with** `subagent_type: test-hunter`.
 
-```
+```prompt:test-hunter
 You hunt tests that cannot fail, for batch B[NN] of [CHANGE_ID] in [REPO_PATH]. Use only
 Read/Grep/Glob and read-only git; edit nothing. Worktree: [WORKTREE_PATH].
 
 Scope: every test added or modified in `git diff [INTEGRATION_BRANCH]...HEAD`, plus the
 production code each claims to cover. Testing guide / vacuity catalog, if the repo has
-one: [TESTING_GUIDE_PATH or "none"].
+one: [TESTING_GUIDE_PATH].
 
 For each test ask ONE question: what production mutation would this test still pass
 under? If you can name a deletion or breakage of the production path that stays green,
@@ -192,13 +234,22 @@ whose mutation stays green. No hunches. Look especially for fixtures handed stra
 the code under test where production should FETCH them, and guards never fed the input
 shape their real channel delivers. Flag any shape not in the catalog as NEW CLASS.
 
-OUTPUT: line 1 exactly `CLEAN` or `FINDINGS <n>`; then per finding — test file:line,
+OUTPUT: write your full report to [FINDINGS_FILE] with Bash (a quoted heredoc, `<<'EOF'`,
+expands nothing); writing that ONE file, outside every worktree, is the only write you
+make. Its first line is exactly `### B[NN] R[ROUND] test-hunter findings`, then:
+line 1 exactly `CLEAN` or `FINDINGS <n>`; then per finding — test file:line,
 catalog class or NEW CLASS, the exact mutation that
 stays green, the positive assertion to add, and whether closing it needs a PRODUCTION
 change (→ P1) or a test-only change (→ ASK). Rank by risk. If nothing is found, list
 what you checked and which mutations you tried — never a bare "looks fine". ≤40 lines
 plus the findings.
+FINAL MESSAGE (four lines, nothing else): line 1 the report's `CLEAN` or `FINDINGS <n>`
+line; line 3 `FINDINGS <n>`; line 4 the path [FINDINGS_FILE].
+Line 2, directly under line 1: NONCE [NONCE]
 ```
+
+`prompt.mjs` fills `[TESTING_GUIDE_PATH]` from the `testingGuidePath` fact, which is
+`"none"` when the repo has no guide.
 
 Mutation runner (if the contract names one): the orchestrator runs it scoped to the
 batch's changed production files and hands the surviving mutants to the hunter as input.
@@ -375,7 +426,8 @@ fence; add or re-point the test that fails on the un-fixed code (this repair is 
 batch — the orchestrator runs failing-on-base against it); run the validation commands;
 commit "fix: batch [NN] repair — [symptom]".
 
-REPORT: same fixed shape as the implementer (status line, evidence block, ≤40 lines:
+REPORT: same fixed shape as the implementer, without its nonce line (status line,
+evidence block, ≤40 lines:
 root cause, the fix, and what the user's checkpoint re-run should now check).
 ```
 
@@ -409,14 +461,39 @@ unmerged and the session STOPs with the three verdicts.
   read-only. Never spawn a reviewer before the fence check passes. S-weight batches: one
   combined reviewer+gate agent (reviewer only when the contract names no gate agents).
 - Resume vs fresh: polish passes and the first fix round RESUME the same implementer
-  (SendMessage, findings verbatim); a user-authorized third round is a FRESH implementer
-  on the strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
+  (SendMessage, with the pointer to the rendered `polish` or `fix-round` prompt); a
+  user-authorized third round is a FRESH implementer on the strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
   fresh at the first unticked item.
 - Tiers: the reviewer never runs on a less capable model than the implementer; L-weight
   reviews and the fresh implementer of an authorized third round on the most capable
   model available (the strong tier); record
   the tier in the row's Notes. Reconcile, status and discovery are never delegated.
-- Paste, don't point: the batch text and contract excerpts go INTO the prompt verbatim.
+- Render, then point: `node "<skill-dir>/tools/prompt.mjs" --ledger <ledger-dir> --role
+  <role> --batch <Bnn> --facts <facts.json> --out <scratchpad>/prompts` renders one of the
+  six per-batch prompts (roles `implementer`, `polish`, `fix-round`, `reviewer`,
+  `reviewer-round2`, `test-hunter`; its `--help` lists each role's facts), with the batch
+  text and contract excerpts in it verbatim, and prints `PROMPT <path> NONCE <nonce>`.
+  Spawn or resume the agent with this ONE fixed pointer message, `<prompt file>` replaced
+  by that path:
+  `Your complete instructions are in the file <prompt file>. Open it with the Read tool before doing anything else and follow it to its last line, which gives your report's exact line 2.`
+  The nonce stays with the orchestrator and never enters the pointer. A report whose line
+  2 is not `NONCE <the nonce>` is treated as no report: the agent did not read its
+  instructions to the end. A gate agent's `findingsFile` is
+  `<scratchpad>/gates/<change-id>-B<NN>-R<k>-<role>.md`. When the renderer is unavailable
+  or refuses (`UNKNOWN …`), the manual procedure is the skeleton filled by hand and pasted
+  without its nonce line, and no nonce is checked. The QA runner, artifact proofer,
+  pre-flight, convergence and fix-up skeletons are always filled and pasted and carry NO
+  nonce — the fix-up's "same fixed shape as the implementer" is that shape without the
+  nonce line.
+- Findings travel by path, and reach LOG.md first: the orchestrator appends each findings
+  file to the ledger's LOG.md byte-for-byte on the integration worktree —
+  `cat -- "<findings file>" >> <ledger-dir>/LOG.md` from Git Bash, or an equivalent byte
+  copy, never re-typed through its own context — commits it with the PROGRESS update, and
+  only then forwards the path, as the `findingsFile` of a polish or fix-round prompt or the
+  `previousFindingsFile` of a round-2 review. The scratchpad does not survive the session;
+  LOG.md is what §Recovery resumes a crashed polish or fix round from. When the reviewer
+  and a gate agent both reported, their appended files are joined byte-for-byte into one
+  (`cat -- "<reviewer file>" "<gate file>" > "<joined file>"`) and that path is forwarded.
 - Pass the named type: spawn each skeleton with the `subagent_type` that skeleton names,
   never a wildcard-tool agent standing in for a read-only role. Bash can still write, so
   "read-only" stays partly conventional; removing Write/Edit closes the easy path, not

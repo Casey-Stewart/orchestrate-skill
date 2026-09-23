@@ -213,6 +213,7 @@ orchestrate/
     ├── validate.mjs                runs a ledger's validation spec in the foreground: one result line, the real exit code, a full log
     ├── ledger-parse.mjs            the one parser for plan, PROGRESS and batch tables and the contract's skill pin
     ├── check-ledger.mjs            scaffold-time ledger parse check and the skill-pin hash check
+    ├── prompt.mjs                  renders one per-batch sub-agent prompt from the ledger and a facts file, ending in the nonce its report echoes
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 

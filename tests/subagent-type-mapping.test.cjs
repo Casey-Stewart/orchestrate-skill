@@ -19,9 +19,10 @@ const CAVEAT = 'Bash can still write, so "read-only" stays partly conventional; 
 // Heading → the type its spawn line must name, plus the opening of the prompt block
 // that line governs, in document order. Enumerated rather than counted, so a skeleton
 // added later cannot inherit the silence. The opening line is pinned because two of
-// these sections hold a second fenced block (the Implementer's polish prompt, the
-// Reviewer's round-2 addendum): without it, deleting a skeleton's actual prompt body
-// would leave the later block to satisfy every structural check here.
+// these sections hold further fenced blocks (the Implementer's polish and fix-round
+// prompts, the Reviewer's round-2 block): without it, deleting a skeleton's actual prompt
+// body would leave a later block to satisfy every structural check here. RESUMES below
+// pins those further blocks, so the whole block set is enumerated.
 const SKELETONS = [
   { heading: '## Implementer', type: 'implementer',
     opens: 'You are the IMPLEMENTER for batch B[NN]' },
@@ -46,7 +47,7 @@ const SPAWN = /^\*\*Spawn with\*\* `subagent_type: ([a-z-]+)`\.$/;
 const spawnLine = type => '**Spawn with** `subagent_type: ' + type + '`.';
 
 // One fence-aware pass. A `## ` line inside a fenced body is body text, not a heading
-// — these skeletons tell sub-agents to paste ledger markdown verbatim, so a pasted
+// — these skeletons carry ledger markdown verbatim (rendered or pasted), so an inserted
 // heading is a real possibility. A "prompt block" is a fenced block addressed to the
 // agent ("You …"), which is what a spawn line governs; a shell, YAML or output example
 // in some future section is not one and must not be dragged into the rule.
@@ -61,6 +62,7 @@ function parse(text) {
       else { blocks.push({ open, first: lines[open + 1] || '' }); open = -1; }
     } else if (open !== -1) fenced[i] = true;
   }
+  blocks.forEach(b => { b.info = lines[b.open].slice(3); });
   assert.equal(open, -1, 'unbalanced ``` fence — the parse below would be wrong');
   const pick = predicate => lines.flatMap((line, at) => !fenced[at] && predicate(line) ? [{ line, at }] : []);
   const headings = pick(l => l.startsWith('## '));
@@ -86,6 +88,7 @@ function parse(text) {
       return found.map(b => b.join('\n'));
     },
     spawns: pick(l => SPAWN.test(l)).map(s => ({ ...s, type: SPAWN.exec(s.line)[1] })),
+    blocks,
     promptBlocks: blocks.filter(b => /^You /.test(b.first)),
   };
 }
@@ -113,6 +116,42 @@ test('no prompt block escapes the mapping', () => {
   };
   assert.deepEqual(doc.promptBlocks.map(owner), SKELETONS.map(s => s.heading),
     'a fenced block addressed to a sub-agent is a skeleton and needs a subagent_type line');
+});
+
+// The blocks a skeleton section holds after its prompt: resumed or composed, never spawned,
+// so they carry no spawn line. Paired with the fence line prompt.mjs renders them by.
+const RESUMES = [
+  { heading: '## Implementer', opens: 'Your batch reviewed SHIP with ASKs', info: 'prompt:polish' },
+  { heading: '## Implementer', opens: 'Your batch reviewed FIX FIRST', info: 'prompt:fix-round' },
+  { heading: '## Reviewer (the gate — read-only)', opens: 'PREVIOUS FINDINGS:', info: 'prompt:round-2' },
+];
+// Which skeletons prompt.mjs renders (the rest are filled and pasted), by fence line.
+const RENDERED = new Map([['## Implementer', 'prompt:implementer'], ['## Reviewer (the gate — read-only)', 'prompt:reviewer'],
+  ['## Test hunter (optional gate agent — read-only)', 'prompt:test-hunter']]);
+
+test('the whole block set: every fenced block is a mapped skeleton or a named resume block, in document order', () => {
+  const owner = at => { const h = [...doc.headings].reverse().find(x => x.at < at); return h ? h.line : '(before the first heading)'; };
+  const expected = [];
+  for (const s of SKELETONS) {
+    expected.push({ heading: s.heading, opens: s.opens, info: RENDERED.get(s.heading) || '' });
+    expected.push(...RESUMES.filter(r => r.heading === s.heading));
+  }
+  const actual = doc.blocks.map(b => {
+    const want = expected.find(e => e.heading === owner(b.open) && b.first.startsWith(e.opens));
+    return want ? { heading: want.heading, opens: want.opens, info: b.info } : { heading: owner(b.open), opens: b.first, info: b.info };
+  });
+  assert.deepEqual(actual, expected, 'a fenced block was added, dropped, reordered or re-fenced');
+  assert.equal(expected.length, SKELETONS.length + RESUMES.length);
+  // The pasted skeletons carry a bare fence: rendering one would need prompt.mjs to know it.
+  assert.deepEqual(doc.blocks.filter(b => b.info).length, RENDERED.size + RESUMES.length);
+  // No spawn line governs a resume block: each sits after its section's spawned prompt block.
+  for (const r of RESUMES) {
+    const block = doc.blocks.find(b => b.first.startsWith(r.opens));
+    const [start] = doc.bounds(r.heading);
+    const prompt = doc.promptBlocks.find(b => b.open > start);
+    assert.ok(prompt.open < block.open, r.opens + ' must follow its section\'s prompt block');
+    assert.ok(!doc.spawns.some(s => s.at > prompt.open && s.at < block.open), r.opens + ' is resumed or composed, never spawned');
+  }
 });
 
 test('the spawn lines are one consistent form, in the mapped order', () => {

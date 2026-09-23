@@ -54,20 +54,26 @@ document.
   close-outs, all user communication. The ONLY role that edits version files, the
   changelog, PROGRESS or LOG.
 - **Implementer** — one per batch, in its own worktree on its own branch. Reports in the
-  fixed shape: first line `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`, then an
-  evidence block (each validation command, exit code, last ~10 lines; commit SHAs;
+  fixed shape: first line `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`, second
+  line `NONCE <nonce>` (the nonce its rendered prompt ends with), then an
+  evidence block (each validation run's `validate.mjs` line and exit code; commit SHAs;
   checklist n/m), then ≤40 lines of prose. `NEEDS_FENCE` and `BLOCKED` use the mismatch
   form: Expected / Found / Why it matters / How to proceed.
 - **Reviewer** — ONE fresh read-only sub-agent per batch per round, never the implementer,
   never reused. Verdict on line 1: `SHIP` (no P0/P1; may carry ASKs) · `FIX FIRST` (a P0
   or P1 with a concrete failure scenario) · `NEEDS A CLOSER LOOK` (names what would confirm
-  it). Report capped like the implementer's. Finding classes: **P0** — wrong behavior, a
+  it), `NONCE <nonce>` on line 2. The full report goes to the ONE findings file its prompt
+  names, first line its LOG heading (`### B<NN> R<k> reviewer findings`); the final
+  message is four lines: verdict, nonce, `P0=<n> P1=<n> ASK=<n>`, the file's path.
+  Report capped like the implementer's. Finding classes: **P0** — wrong behavior, a
   violated criterion or guardrail, concrete scenario (blocking); **P1** — should fix,
   needs a production change, concrete scenario (blocking); **ASK** — in-fence, about the
   batch's OWN artifacts (its new tests' strength, smoke-step prose, comments, a doc sweep
   it owns), no production behavior change (non-blocking; closes as a polish pass).
 - **Gate agents** (read-only, run by the ORCHESTRATOR at the reviewer gate, in parallel
-  with the reviewer): {{GATE_AGENTS}}. Implementers NEVER spawn a gate agent themselves —
+  with the reviewer): {{GATE_AGENTS}}. Each writes its full report to the ONE findings file
+  its prompt names — its only write — and returns four lines: its verdict, `NONCE <nonce>`,
+  `FINDINGS <n>`, the file's path. Implementers NEVER spawn a gate agent themselves —
   a self-spawned one stalls the implementer uncommitted.
 - **QA runner** — one sub-agent that executes the agent-runnable smoke steps at a
   checkpoint close-out and writes evidence. Runners available in this repo:
@@ -638,8 +644,15 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    user's word; never delete unasked).
 5. Spawn ALL of the wave's implementers CONCURRENTLY (one per batch, in a single
    message, each pinned to its worktree, on the tier the batch's weight calls for).
-   Every prompt must be SELF-CONTAINED: the spec text + codebase facts from the batch
-   file, the exact file fence, acceptance criteria, the applicable guardrails, the
+   Render each prompt first, from the integration worktree root:
+   `node "{{SKILL_DIR}}/tools/prompt.mjs" --ledger {{LEDGER_DIR}} --role implementer --batch <Bnn> --facts <facts.json> --out "<session scratchpad>/prompts"`
+   (`--help` lists each role's facts) prints `PROMPT <path> NONCE <nonce>`; spawn the
+   agent with this fixed pointer message, `<prompt file>` replaced by that path:
+   `Your complete instructions are in the file <prompt file>. Open it with the Read tool before doing anything else and follow it to its last line, which gives your report's exact line 2.`
+   Keep the nonce for the gate (step 6); it never enters the pointer. When the renderer
+   is unavailable or refuses (`UNKNOWN …`), the manual procedure is a pasted prompt with
+   no nonce line, and every such prompt must be SELF-CONTAINED: the spec text + codebase
+   facts from the batch file, the exact file fence, acceptance criteria, the applicable guardrails, the
    validation commands (the wrapper command and its recipe), the conventions +
    prohibitions blocks above, the
    report shape, and "tick your checklist items in the batch file as you complete them;
@@ -647,8 +660,9 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    revert anything outside your fence; commit on your batch branch (one commit per
    fold-in item)".
 6. Gate PER BATCH, as each implementer reports (don't wait for the wave's slowest). A
-   report without the status line + evidence block → resume the implementer for it (not
-   a round).
+   report without the status line + evidence block, or with the wrong nonce (line 2 not
+   `NONCE <the nonce the renderer printed>`: the agent did not read its prompt to the end),
+   is no report → resume the implementer for it (not a round).
    - **6a Fence check (mechanical, orchestrator).** Run the read-only helper above
      or its manual fallback. Worktree clean (`git status
      --porcelain` empty); `git diff --name-status -M {{INTEGRATION_BRANCH}}...HEAD`; every
@@ -662,8 +676,10 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      assertion failure on the named behavior proves the regression test; every test
      PASSING on the base is a P0 (the fix is unproven); a setup failure or a run that
      cannot execute is inconclusive → reviewer duty (e).
-   - **6c Reviewer + gate agents, in parallel, all fresh and read-only.** The reviewer
-     gets the batch file + the diff (`git diff {{INTEGRATION_BRANCH}}...HEAD` in the batch's
+   - **6c Reviewer + gate agents, in parallel, all fresh and read-only.** Each is
+     rendered and spawned as in step 5 (`--role reviewer`, `reviewer-round2` or
+     `test-hunter`); a gate report with the wrong nonce is no report and its agent is
+     respawned fresh. The reviewer gets the batch file + the diff (`git diff {{INTEGRATION_BRANCH}}...HEAD` in the batch's
      worktree — three-dot isolates the batch's own changes) and must (a) map every hunk
      to a batch item — unmapped hunks are scope creep → reject (the batch file's ticks are
      exempt); (b) check each acceptance criterion against the diff; (c) run the
@@ -677,8 +693,12 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      a test-only finding is an ASK. S-weight batches: one combined reviewer+gate pass.
    - **Verdicts** (each recorded in the row's Notes as `R<k> <verdict> @<sha>`, `asks=<n>`
      appended when a `SHIP` carries ASKs; the findings go to LOG.md under the row's
-     heading). `SHIP` with ASKs → polish pass: resume the implementer with the ASK
-     list; it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
+     heading: every findings file reaches LOG.md first — from the integration worktree
+     root, `cat -- "<findings file>" >> {{LEDGER_DIR}}/LOG.md` in Git Bash or an equivalent
+     byte copy, never re-typed through the orchestrator's context, committed with the
+     PROGRESS update — and only then is its path forwarded). `SHIP` with ASKs → polish
+     pass: resume the implementer with the pointer to its rendered `polish` prompt (the
+     findings file by path); it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
      closes mechanically (6a + validations on the polished tip; polish commits touch only
      test/doc/prose paths — a production file touched → a fix-diff-only re-review by a
      fresh reviewer). Not a round.
@@ -693,8 +713,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      the recorded authorization), then ONE revert commit spanning `@<sha>..HEAD` (never a
      reset — no history rewriting; `git diff @<sha> HEAD` must come back empty), integrate
      that reviewed tree, unclosed ASKs → {{BACKLOG_FILE}} entries; polish never
-     turns a batch `⛔`. `FIX FIRST` → resume the SAME implementer with the
-     findings verbatim, then a fresh re-review that verifies the fixes and scans only the
+     turns a batch `⛔`. `FIX FIRST` → resume the SAME implementer with the pointer to
+     its rendered `fix-round` prompt (the findings file by path), then a fresh re-review that verifies the fixes and scans only the
      fix diff. `NEEDS A CLOSER LOOK` → run the confirming check the
      reviewer named (or have the implementer add the probe) → `FIX FIRST` or `SHIP`; not a
      round. Only `FIX FIRST` rounds count; the SECOND `FIX FIRST` sets `⛔ defective` (not

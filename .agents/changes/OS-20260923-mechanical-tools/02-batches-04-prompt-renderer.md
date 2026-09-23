@@ -175,13 +175,13 @@ the same skill copy the contract's pin covers). Roles: `implementer`, `polish`,
 
 ## Checklist
 
-- [ ] `orchestrate/tools/prompt.mjs`: six roles, ledger- and fact-derived slots (guardrails from a fact), one-pass substitution, nonce last in the body and nowhere else, independent file id, one-line output, fail closed on any unfilled skeleton slot, `--help` listing each role's facts
-- [ ] Irregular slots in the in-scope skeletons normalised to regular slots with stated defaults
-- [ ] `subagent-prompts.md`: render-then-point preamble and spawning rule with the fixed pointer text, nonce on report line 2 for rendered roles only, findings by file for gate agents (LOG heading first) and by path for resumes, fenced fix-round block, #12's three rules
-- [ ] `.claude/agents/reviewer.md` and `test-hunter.md`: the single findings-file exception
-- [ ] Template and protocol: Roles report shapes, spawn step with the self-contained list kept as the manual procedure, gate report check, byte-for-byte LOG append before forwarding by path — pinned paragraph and pinned line breaks untouched
-- [ ] SKILL.md Mode: continue renders prompts with `prompt.mjs`; README tools tree gains `prompt.mjs`
-- [ ] Tests: `tests/prompt.test.cjs`, `tests/tool-wiring.test.cjs` additions, re-aimed `tests/subagent-type-mapping.test.cjs` pins, `NON_MARKDOWN` length 9
+- [x] `orchestrate/tools/prompt.mjs`: six roles, ledger- and fact-derived slots (guardrails from a fact), one-pass substitution, nonce last in the body and nowhere else, independent file id, one-line output, fail closed on any unfilled skeleton slot, `--help` listing each role's facts
+- [x] Irregular slots in the in-scope skeletons normalised to regular slots with stated defaults
+- [x] `subagent-prompts.md`: render-then-point preamble and spawning rule with the fixed pointer text, nonce on report line 2 for rendered roles only, findings by file for gate agents (LOG heading first) and by path for resumes, fenced fix-round block, #12's three rules
+- [x] `.claude/agents/reviewer.md` and `test-hunter.md`: the single findings-file exception
+- [x] Template and protocol: Roles report shapes, spawn step with the self-contained list kept as the manual procedure, gate report check, byte-for-byte LOG append before forwarding by path — pinned paragraph and pinned line breaks untouched
+- [x] SKILL.md Mode: continue renders prompts with `prompt.mjs`; README tools tree gains `prompt.mjs`
+- [x] Tests: `tests/prompt.test.cjs`, `tests/tool-wiring.test.cjs` additions, re-aimed `tests/subagent-type-mapping.test.cjs` pins, `NON_MARKDOWN` length 9
 
 ## Acceptance criteria
 

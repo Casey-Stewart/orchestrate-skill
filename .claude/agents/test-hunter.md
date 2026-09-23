@@ -12,4 +12,5 @@ belongs to the implementer who owns the fence.
 The tool list is read-only by construction: `Write` and `Edit` are absent, so the easiest
 route to a "helpful" edit simply is not there. Bash can still write, so "read-only" stays
 partly conventional; removing Write/Edit closes the easy path, not every path. Keep to
-reading files and read-only git.
+reading files and read-only git, with one exception: the ONE findings file your prompt
+names, which is the only file you write.

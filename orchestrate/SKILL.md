@@ -215,8 +215,8 @@ scaffolding.md) → scaffold commit on
    smoke script as an interactive smoke page per
    [references/smoke-page.md](references/smoke-page.md) using available HTML delivery
    tools, or the full plain-text script when no usable HTML delivery is available.
-   Build spawn prompts from
-   [references/subagent-prompts.md](references/subagent-prompts.md).
+   Render the per-batch prompts with `node "<skill-dir>/tools/prompt.mjs"`; the skeletons
+   live in [references/subagent-prompts.md](references/subagent-prompts.md).
 
 ## Mode: status
 
