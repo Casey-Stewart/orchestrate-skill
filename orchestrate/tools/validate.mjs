@@ -168,9 +168,11 @@ function commandOf(step, bash = 'bash') {
 // (WSL's System32 or WindowsApps bash.exe) rejoins and re-evaluates it, so a quoted script
 // runs ALTERED rather than failing. Each PATH candidate must echo this probe back byte for
 // byte; the first that does is used, and none is a step that could not start. Elsewhere
-// argv reaches bash intact by construction.
-const BASH_PROBE = [String.raw`printf '%s' 'q "b" \" $c'`, String.raw`printf '%s' ' z'`].join('\n');
+// argv reaches bash intact by construction. Each part catches its own alteration: "b" quote
+// stripping, \" a consumed backslash, $c a second evaluation, line two a cut at the newline.
+export const BASH_PROBE = [String.raw`printf '%s' 'q "b" \" $c'`, String.raw`printf '%s' ' z'`].join('\n');
 const BASH_PROBE_OUT = String.raw`q "b" \" $c z`;
+export const bashProbeIntact = ({ status, stdout }) => status === 0 && stdout === BASH_PROBE_OUT;
 const bashCache = new Map();
 function resolveBash(env) {
   if (process.platform !== 'win32') return { bash: 'bash', rejected: [] };
@@ -182,7 +184,7 @@ function resolveBash(env) {
     for (const file of ['.com', '.exe'].map(ext => path.join(dir, 'bash' + ext))) {
       try { if (fs.lstatSync(file).isDirectory()) continue; } catch { continue; }
       const r = spawnSync(file, ['-o', 'pipefail', '-c', BASH_PROBE], { env, encoding: 'utf8', timeout: 30000, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
-      if (r.status === 0 && r.stdout === BASH_PROBE_OUT) { bash = file; break; }
+      if (bashProbeIntact(r)) { bash = file; break; }
       rejected.push(file);
     }
     if (bash) break;

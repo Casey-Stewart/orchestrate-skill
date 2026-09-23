@@ -45,9 +45,9 @@ function writeSpec(dir, steps, file = 'spec.json') {
   fs.writeFileSync(f, JSON.stringify({ steps }));
   return f;
 }
-function run(t, steps, extra = []) {
+function run(t, steps, extra = [], env = cleanEnv()) {
   const dir = tmp(t), log = path.join(dir, 'out', 'validate.log');
-  const result = cli(['--spec', writeSpec(dir, steps), '--log', log, ...extra]);
+  const result = cli(['--spec', writeSpec(dir, steps), '--log', log, ...extra], { env });
   return { ...result, dir, logPath: log, log: fs.existsSync(log) ? fs.readFileSync(log, 'utf8') : null };
 }
 const isAlive = pid => { try { process.kill(pid, 0); return true; } catch { return false; } };
@@ -596,6 +596,9 @@ function shellWorks(shell) {
 // running the real quoted script through every candidate rather than the tool's probe. On
 // Windows a bash that merely RUNS may be WSL's launcher, which re-evaluates the script.
 const QUOTED_BASH = lines("x='said \"quoted\" words'", 'echo "$x"', 'exit 7');
+// A refused bash must never run the script: an unquoted marker that any launcher still runs,
+// printed and written to a file in the cwd.
+const MARKED_BASH = lines('echo ran-anyway; echo ran-anyway > ran-anyway.txt', QUOTED_BASH);
 const bashIntact = file => {
   const r = spawnSync(file, ['-o', 'pipefail', '-c', QUOTED_BASH], { encoding: 'utf8', timeout: 30000, windowsHide: true });
   return r.status === 7 && r.stdout.replace(/\r/g, '') === 'said "quoted" words\n';
@@ -605,74 +608,160 @@ const bashOnPath = pathVar => pathVar.split(';').map(d => d.replace(/"/g, '')).f
   .flatMap(d => ['bash.com', 'bash.exe'].map(f => path.join(d, f))).filter(f => { try { return !fs.lstatSync(f).isDirectory(); } catch { return false; } });
 const INTACT_BASH = process.platform !== 'win32' ? (bashIntact('bash') ? 'bash' : null)
   : bashOnPath(PATH_KEYS.length ? process.env[PATH_KEYS[0]] : '').find(bashIntact) ?? null;
-const SHELLS = SHELL_ORDER.filter(s => s === 'bash' ? INTACT_BASH !== null : shellWorks(s));
 function withPath(pathVar) {
   const env = cleanEnv();
   for (const key of PATH_KEYS) delete env[key];
   return { ...env, PATH: pathVar };
 }
+// Git for Windows' own bash: intact, and reachable however PATH is set (a PowerShell PATH may
+// hold only WSL's launcher). When PATH has no intact bash, bash steps run with Git's first,
+// so pipefail and the exit code stay pinned under the contract's PowerShell validation too.
+const GIT_BASH = process.platform !== 'win32' ? null
+  : path.resolve(spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim(), '..', '..', '..', 'usr', 'bin', 'bash.exe');
+const BASH_ENV = INTACT_BASH !== null || GIT_BASH === null ? cleanEnv()
+  : withPath([path.dirname(GIT_BASH), PATH_KEYS.length ? process.env[PATH_KEYS[0]] : ''].join(';'));
+const SHELLS = SHELL_ORDER.filter(s => s === 'bash' ? INTACT_BASH !== null || (GIT_BASH !== null && bashIntact(GIT_BASH)) : shellWorks(s));
+// A refused run: the tool's own lines only (nothing any launcher printed) and no marker file.
+function assertRefused(r, logPath, cwd, label) {
+  assert.equal(r.line, `UNKNOWN sh COULD-NOT-START (BASH-ARGV-ALTERED) — log: ${logPath}`, label);
+  assert.equal(r.code, 2, label);
+  const text = fs.readFileSync(logPath, 'utf8');
+  assert.deepEqual(text.split('\n').filter(l => l && !l.startsWith('==> ')), [], label + ': only the tool\'s own lines');
+  assert.equal(fs.existsSync(path.join(cwd, 'ran-anyway.txt')), false, label + ': a refused bash must never run the script');
+  return text;
+}
 
 test('shell steps run the script as one argument and propagate its exit code', t => {
   assert.ok(SHELLS.length >= 1, 'at least one of pwsh, powershell, bash must run here, or this branch silently skips');
+  if (process.platform === 'win32') assert.ok(SHELLS.includes('bash'), `Git for Windows' bash (${GIT_BASH}) must run here, or bash steps go unexercised`);
   if (INTACT_BASH === null && shellWorks('bash')) {
     // A bash that runs but alters a quoted script (WSL's launcher first on PATH) is refused, never run.
-    const refused = run(t, [{ name: 'sh', shell: 'bash', script: QUOTED_BASH, parser: 'none' }]);
-    assert.equal(refused.line, `UNKNOWN sh COULD-NOT-START (BASH-ARGV-ALTERED) — log: ${refused.logPath}`, 'a bash that alters the script must not run it');
-    assert.equal(refused.code, 2);
-    assert.doesNotMatch(refused.log, /said/);
+    const dir = tmp(t), log = path.join(dir, 'refused.log');
+    const refused = cli(['--spec', writeSpec(dir, [{ name: 'sh', shell: 'bash', script: MARKED_BASH, parser: 'none' }]), '--log', log], { cwd: dir });
+    assertRefused(refused, log, dir, 'the bash first on PATH');
   }
   for (const shell of SHELLS) {
-    const bash = shell === 'bash';
+    const bash = shell === 'bash', env = bash ? BASH_ENV : cleanEnv();
     const quoted = bash ? QUOTED_BASH : lines('$x = "said ""quoted"" words"', 'Write-Output $x', 'exit 7');
-    const red = run(t, [{ name: 'sh', shell, script: quoted, parser: 'none' }]);
+    const red = run(t, [{ name: 'sh', shell, script: quoted, parser: 'none' }], [], env);
     assert.equal(red.code, 1, shell);
     assert.equal(red.line, `FAIL sh exit 7 — log: ${red.logPath}`, shell);
     assert.match(red.log, /said "quoted" words/, shell + ' must receive embedded double quotes intact');
     assert.match(red.log, new RegExp(`==> step sh: shell ${shell}`));
-    const green = run(t, [{ name: 'sh', shell, script: bash ? 'echo fine' : 'Write-Output fine', parser: 'none' }]);
+    const green = run(t, [{ name: 'sh', shell, script: bash ? 'echo fine' : 'Write-Output fine', parser: 'none' }], [], env);
     assert.equal(green.code, 0, shell);
     assert.match(green.line, /^PASS sh ok \(\d+s\)$/);
     if (bash) {
-      const piped = run(t, [{ name: 'sh', shell, script: 'false | true', parser: 'none' }]);
+      const piped = run(t, [{ name: 'sh', shell, script: 'false | true', parser: 'none' }], [], env);
       assert.equal(piped.line, `FAIL sh exit 1 — log: ${piped.logPath}`, 'bash runs with -o pipefail');
     } else {
       // The script travels encoded, never as command text: the process sees only base64.
-      const seen = run(t, [{ name: 'sh', shell, script: 'Write-Output ([Environment]::CommandLine)', parser: 'none' }]);
+      const seen = run(t, [{ name: 'sh', shell, script: 'Write-Output ([Environment]::CommandLine)', parser: 'none' }], [], env);
       assert.match(seen.log, /-NoProfile -NonInteractive -OutputFormat Text -EncodedCommand [A-Za-z0-9+/]+=*\s*$/m, shell);
       assert.doesNotMatch(seen.log, /\[Environment\]::CommandLine/, shell);
     }
   }
 });
 
-test('on Windows a bash that alters a quoted script is skipped for a later intact one, and refused when none follows', t => {
+test('the bash probe catches each launcher alteration through a part of its own', async () => {
+  const { BASH_PROBE, bashProbeIntact } = await api;
+  const bash = GIT_BASH ?? 'bash';
+  assert.ok(bashIntact(bash), `an intact bash (${bash}) must run here, or the probe is proved against nothing`);
+  const through = script => spawnSync(bash, ['-o', 'pipefail', '-c', script], { encoding: 'utf8', timeout: 30000, windowsHide: true });
+  const intact = through(BASH_PROBE);
+  assert.equal(bashProbeIntact(intact), true, 'the unaltered probe passes: ' + JSON.stringify(intact.stdout));
+  // One simulated alteration per probe part, each keyed on that part alone: a probe that loses
+  // the part leaves its alteration a no-op, undetected.
+  const ALTERATIONS = [
+    ['plain double quotes stripped', s => s.replace(/(?<!\\)"/g, '')],
+    ['a backslash before a quote consumed', s => s.replace(/\\"/g, '"')],
+    ['a second evaluation expanding $ variables', s => s.replace(/\$\w+/g, '')],
+    ['a cut at the first newline', s => s.split('\n')[0]],
+  ];
+  assert.equal(ALTERATIONS.length, 4, 'one alteration per probe part');
+  for (const [what, alter] of ALTERATIONS) {
+    const altered = alter(BASH_PROBE);
+    assert.notEqual(altered, BASH_PROBE, what + ': the probe must hold the part this alteration touches');
+    assert.equal(bashProbeIntact(through(altered)), false, what);
+  }
+  assert.equal(bashProbeIntact({ ...intact, status: 1 }), false, 'the right output with a non-zero exit');
+});
+
+test('on Windows a bash that alters a quoted script is skipped for a later intact one, and refused when none follows', async t => {
   if (process.platform !== 'win32') { t.skip('Windows only: elsewhere argv reaches bash intact by construction'); return; }
-  const dir = tmp(t), standIn = path.join(dir, 'launcher'), spec = writeSpec(dir, [{ name: 'sh', shell: 'bash', script: QUOTED_BASH, parser: 'none' }]);
-  fs.mkdirSync(standIn);
-  // node.exe named bash.exe: a bash-named program that does not run the script as given.
-  try { fs.linkSync(NODE, path.join(standIn, 'bash.exe')); } catch { fs.copyFileSync(NODE, path.join(standIn, 'bash.exe')); }
-  // Live control: the real WSL launcher wherever it is installed.
+  const { BASH_PROBE } = await api;
+  const dir = tmp(t), spec = writeSpec(dir, [{ name: 'sh', shell: 'bash', script: MARKED_BASH, parser: 'none' }]);
+  const place = (sub, name, source) => {
+    const d = path.join(dir, sub);
+    fs.mkdirSync(d);
+    try { fs.linkSync(source, path.join(d, name)); } catch { fs.copyFileSync(source, path.join(d, name)); }
+    return d;
+  };
+  const cmdExe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
+  // Stand-ins failing the probe on different grounds, proved rather than assumed: node.exe
+  // named bash.exe exits non-zero; cmd.exe named bash.exe exits 0 with the wrong output.
+  const alterers = [place('node', 'bash.exe', NODE), place('cmd', 'bash.exe', cmdExe)];
+  const [viaNode, viaCmd] = alterers.map(d => spawnSync(path.join(d, 'bash.exe'), ['-o', 'pipefail', '-c', BASH_PROBE], { encoding: 'utf8', timeout: 30000, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }));
+  assert.ok(viaNode.status !== 0 && viaNode.status !== null, 'the node stand-in exits non-zero: ' + viaNode.status);
+  assert.ok(viaCmd.status === 0 && viaCmd.stdout !== '' && !viaCmd.stdout.includes('q "b"'), 'the cmd stand-in exits 0 printing something else: ' + JSON.stringify(viaCmd));
+  // Live control: WSL's launcher, wherever installed, must RUN the marked script and alter it.
   const wsl = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'bash.exe');
-  const alterers = [standIn, ...(fs.existsSync(wsl) ? [path.dirname(wsl)] : [])];
-  const gitBash = path.join(spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim(), '..', '..', '..', 'usr', 'bin', 'bash.exe');
-  assert.ok(bashIntact(gitBash), 'Git for Windows ships an intact bash at ' + gitBash + ', or the skip-to-next branch goes unexercised');
+  if (fs.existsSync(wsl)) {
+    const ctl = path.join(dir, 'wsl-control');
+    fs.mkdirSync(ctl);
+    const r = spawnSync(wsl, ['-o', 'pipefail', '-c', MARKED_BASH], { cwd: ctl, encoding: 'utf8', timeout: 60000, windowsHide: true });
+    assert.equal(r.status, 7, `${wsl} exists but does not run a script (no distribution?), so it is no live control: ${JSON.stringify(r.stdout)}`);
+    assert.match(r.stdout, /ran-anyway/);
+    assert.ok(fs.existsSync(path.join(ctl, 'ran-anyway.txt')), 'the marker file is how a refused bash that ran anyway shows');
+    assert.doesNotMatch(r.stdout, /said "quoted" words/, 'it alters the quoted script');
+    alterers.push(path.dirname(wsl));
+  }
+  assert.ok(bashIntact(GIT_BASH), `Git for Windows ships an intact bash at ${GIT_BASH}, or the skip-to-next branch goes unexercised`);
+  const gitDir = path.dirname(GIT_BASH), rejectedNote = file => `==> step sh: ${file} does not receive a quoted script intact (a launcher such as WSL's); not used`;
   for (const [i, alterer] of alterers.entries()) {
-    const log = path.join(dir, `refused-${i}.log`);
-    const refused = cli(['--spec', spec, '--log', log], { env: withPath(alterer) });
-    assert.equal(refused.line, `UNKNOWN sh COULD-NOT-START (BASH-ARGV-ALTERED) — log: ${log}`, alterer);
-    assert.equal(refused.code, 2, alterer);
-    const text = fs.readFileSync(log, 'utf8');
-    assert.ok(text.includes(`${path.join(alterer, 'bash.exe')} does not receive a quoted script intact`), text);
-    assert.doesNotMatch(text, /said/, alterer);
-    const skipLog = path.join(dir, `skipped-${i}.log`);
-    const skipped = cli(['--spec', spec, '--log', skipLog], { env: withPath([alterer, path.dirname(gitBash)].join(';')) });
+    const cwd = path.join(dir, `refused-${i}`), log = path.join(dir, `refused-${i}.log`);
+    fs.mkdirSync(cwd);
+    const text = assertRefused(cli(['--spec', spec, '--log', log], { env: withPath(alterer), cwd }), log, cwd, alterer);
+    assert.ok(text.includes(rejectedNote(path.join(alterer, 'bash.exe'))), text);
+    const skipCwd = path.join(dir, `skipped-${i}`), skipLog = path.join(dir, `skipped-${i}.log`);
+    fs.mkdirSync(skipCwd);
+    const skipped = cli(['--spec', spec, '--log', skipLog], { env: withPath([alterer, gitDir].join(';')), cwd: skipCwd });
     assert.equal(skipped.line, `FAIL sh exit 7 — log: ${skipLog}`, alterer);
     const skipText = fs.readFileSync(skipLog, 'utf8');
-    assert.ok(skipText.includes(`${path.join(alterer, 'bash.exe')} does not receive a quoted script intact`), skipText);
-    assert.ok(skipText.includes(`bash is ${path.resolve(gitBash)}`), skipText);
+    assert.ok(skipText.includes(rejectedNote(path.join(alterer, 'bash.exe'))), skipText);
+    assert.ok(skipText.includes(`==> step sh: bash is ${GIT_BASH}`), skipText);
     assert.match(skipText, /said "quoted" words/);
+    assert.ok(fs.existsSync(path.join(skipCwd, 'ran-anyway.txt')), 'the marker is live: a bash that runs the script writes it');
   }
-  const none = path.join(dir, 'none.log'), missing = cli(['--spec', spec, '--log', none], { env: withPath(path.join(dir, 'empty')) });
+  // The candidate list: a relative entry and a folder named bash.exe are never candidates,
+  // bash.com is tried, a quoted entry is unquoted, and the FIRST intact bash wins, so the same
+  // folder spelt in upper case later is never named.
+  place('rel', 'bash.exe', cmdExe);
+  fs.mkdirSync(path.join(dir, 'folder', 'bash.exe'), { recursive: true });
+  const com = place('com', 'bash.com', cmdExe), listLog = path.join(dir, 'listed.log');
+  const listed = cli(['--spec', spec, '--log', listLog], { env: withPath(['rel', path.join(dir, 'folder'), com, `"${gitDir}"`, gitDir.toUpperCase()].join(';')), cwd: dir });
+  assert.equal(listed.line, `FAIL sh exit 7 — log: ${listLog}`);
+  assert.notEqual(gitDir.toUpperCase(), gitDir, 'the upper-case spelling must differ, or first-wins is unpinned');
+  assert.deepEqual(fs.readFileSync(listLog, 'utf8').split('\n').filter(l => / does not receive | bash is /.test(l)),
+    [rejectedNote(path.join(com, 'bash.com')), `==> step sh: bash is ${GIT_BASH}`]);
+  const none = path.join(dir, 'none.log'), missing = cli(['--spec', spec, '--log', none], { env: withPath(path.join(dir, 'empty')), cwd: dir });
   assert.equal(missing.line, `UNKNOWN sh COULD-NOT-START (ENOENT) — log: ${none}`);
+});
+
+test('on Windows the bash a step uses is resolved per PATH within one process', async t => {
+  if (process.platform !== 'win32') { t.skip('Windows only: elsewhere bash is not resolved by the tool'); return; }
+  const { runSpec } = await api;
+  const dir = tmp(t), cmdDir = path.join(dir, 'cmd');
+  fs.mkdirSync(cmdDir);
+  fs.copyFileSync(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe'), path.join(cmdDir, 'bash.exe'));
+  const key = PATH_KEYS[0] ?? 'PATH', saved = process.env[key], spec = { steps: [{ name: 'sh', shell: 'bash', script: QUOTED_BASH, parser: 'none' }] }, results = [];
+  try {
+    for (const [i, pathVar] of [cmdDir, path.dirname(GIT_BASH), cmdDir].entries()) {
+      process.env[key] = pathVar;
+      results.push(await runSpec(spec, { cwd: dir, logPath: path.join(dir, `cache-${i}.log`) }));
+    }
+  } finally { if (saved === undefined) delete process.env[key]; else process.env[key] = saved; }
+  assert.deepEqual(results.map(r => [r.steps[0].result, r.steps[0].exit]), [['COULD-NOT-START', null], ['FAIL', 7], ['COULD-NOT-START', null]]);
 });
 
 test('a shell step outliving its timeout ends with its grandchildren killed', t => {
