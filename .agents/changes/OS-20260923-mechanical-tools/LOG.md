@@ -166,3 +166,23 @@ R2 test-hunter (FINDINGS 3, all test-only; control 35/35; every round-1 hunter f
 2. ASK — one-line guard covers only one echo point: tests/validate.test.cjs:320-338 exercises only the UNKNOWN cannot-open-log / cannot-read-spec paths; validate.mjs:258 `line: oneLine(line)` (the PASS/FAIL line, carrying failing names and the log path) is unguarded — mutation `return { status, line, steps };` stays 35/35 green, and TAP names containing U+2028/TAB/U+0085 do reach it. Add: loop over BREAKERS minus \n and \r, each a fake TAP runner with `not ok 1 - a<b>b`, assert leaksBreaker(r.line) === false; plus one case with a breaker in logPath.
 3. ASK — log header spacing pinned one side only: validate.mjs:175 `|| data[data.length - 1] === 10` (Buffer arm) can be deleted green (headers after newline-terminated output gain a blank line). Add to the four-step log test (:515) `assert.ok(!text.includes('\n\n==> step'))` or equivalent.
 4. ASK — TAP directive `/^# (?:TODO|SKIP)\b/i` (validate.mjs:57): the i flag has no case (dropping it stays green). Add a `not ok 8 - x # skip` corpus entry pinning the chosen behaviour (test-only; dropping /i instead would be a production change).
+
+### B01 — tip red after merge
+
+Polish @`0310056` (4 ASKs closed, tests only; 354/354 in the implementer run) — fence PASS (integration `4af4814`), polish touched only `tests/validate.test.cjs` + the batch file → mechanical close. Dry run clean (tree `07ade61`), merged `--no-ff` as `437c42a`. Tip validation RED, reproduced once with full output:
+
+Tip validation on 437c42a (the B01 merge), the contract's PowerShell recipe, run from the PowerShell tool — twice, identical:
+ℹ tests 354 / ℹ pass 353 / ℹ fail 1
+✖ shell steps run the script as one argument and propagate its exit code (6959.863ms)
+  AssertionError [ERR_ASSERTION]: bash must receive embedded double quotes intact
+      at TestContext.<anonymous> (tests\validate.test.cjs:605:12)
+    actual: '==> step sh: shell bash\n\n',
+    expected: /said "quoted" words/,
+
+Orchestrator diagnosis (verify, do not trust):
+- The same test passes 3/3 when run alone from Git Bash, and FAILS when run alone from PowerShell (`node --test --test-name-pattern='shell steps run the script' tests/validate.test.cjs` → exit 1).
+- In PowerShell, `Get-Command bash -All` resolves `C:\Windows\system32\bash.exe` (the WSL launcher) first, then `…\WindowsApps\bash.exe`; Git Bash's own `bash` is not on that PATH. From Git Bash, `bash` is Git's bash.
+- A trivial `spawnSync('bash', ['-o','pipefail','-c','x=1; echo hello; exit 7'])` from PowerShell's node returns status 7 and stdout "hello" — so WSL bash runs simple scripts, but the test's quoted script (`x='said "quoted" words'` / `echo "$x"` / `exit 7`) arrives mangled: exit 7 propagates, the echoed text is empty.
+- Every green run during B01's review launched pwsh FROM Git Bash (inheriting Git's PATH), which is why no gate saw it. The contract's validation shell is PowerShell.
+
+Repair: `fix/B01-tip` cut from `437c42a`, worktree `wt-os923/b01tip`, fresh implementer (default tier). Removing the merged `b01` worktree left `.git/worktrees/b01` undeletable (Permission denied — the OneDrive-synced main checkout); git no longer lists it; prune later.
