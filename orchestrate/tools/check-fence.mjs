@@ -3,80 +3,8 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { git, capture, readBlob, worktrees, validId, validPath, validFullRef, parseFlags, diagnostic } from './git-evidence.mjs';
+import { linesOf, exactPaths, table, oneRow, branchCell, extensions } from './ledger-parse.mjs';
 
-const linesOf = text => text.split(/\r?\n/);
-function exactPaths(text) {
-  const paths = [];
-  let remaining = text.trim();
-  while (remaining) {
-    const m = /^`([^`]+)`(?:\s*,\s*|$)/.exec(remaining);
-    if (!m || !validPath(m[1]) || paths.includes(m[1])) throw new Error('Expected unique exact repository-relative backtick paths (globs unsupported)');
-    paths.push(m[1]); remaining = remaining.slice(m[0].length);
-  }
-  if (!paths.length) throw new Error('Empty file fence');
-  return paths;
-}
-function table(text, required) {
-  const lines = linesOf(text), matches = [];
-  for (let i = 0; i < lines.length; i++) {
-    if (!lines[i].startsWith('|')) continue;
-    const header = lines[i].split('|').slice(1, -1).map(x => x.trim());
-    if (!required.every(key => header.includes(key))) continue;
-    if (new Set(header).size !== header.length || !/^\|[\s:|-]+\|$/.test(lines[++i] || '')) throw new Error('Malformed table header');
-    const rows = [];
-    while (++i < lines.length && lines[i].startsWith('|')) {
-      const cells = lines[i].split('|').slice(1, -1).map(x => x.trim());
-      if (cells.length !== header.length) throw new Error('Malformed table row');
-      rows.push({ ...Object.fromEntries(header.map((key, n) => [key, cells[n]])), line: i + 1 });
-    }
-    matches.push(rows);
-  }
-  if (matches.length !== 1) throw new Error('Missing or ambiguous authority table');
-  return matches[0];
-}
-function oneRow(rows, id) {
-  const ids = rows.map(r => r['#']);
-  if (new Set(ids).size !== ids.length || ids.some(x => !/^B\d{2,}$/.test(x))) throw new Error('Duplicate or malformed batch IDs');
-  const matches = rows.filter(r => r['#'] === id);
-  if (matches.length !== 1) throw new Error('Missing or duplicate requested batch');
-  return matches[0];
-}
-function branchCell(text) {
-  const match = /^(?:`([^`]+)`|([^`]+))$/.exec(text);
-  if (!match) throw new Error('Malformed branch cell');
-  return match[1] || match[2];
-}
-function records(text, rowId) {
-  const results = [], re = /(?<!\S)fence \+(`[^`]+`|[^\r\n()]+?) \(([^()\r\n]+)\)/g;
-  for (const m of text.matchAll(re)) {
-    const file = m[1].startsWith('`') ? m[1].slice(1, -1) : m[1];
-    const parts = m[2].split(',').map(x => x.trim());
-    let id = rowId;
-    if (parts.length === 4) id = parts.shift();
-    if (parts.length !== 3 || !parts.every(Boolean) || !/^\d{4}-\d{2}-\d{2}$/.test(parts[2]) || !/^B\d{2,}$/.test(id || '') || !validPath(file)) throw new Error('Malformed fence extension');
-    results.push({ path: file, id, item: parts[0], reason: parts[1], date: parts[2], spelling: m[0] });
-  }
-  if ((text.match(/fence\s*\+/g) || []).length !== results.length) throw new Error('Unsupported fence extension grammar');
-  return results;
-}
-function extensions(progress, row, id) {
-  const authorized = records(row.Notes, id);
-  if (authorized.some(r => r.id !== id) || new Set(authorized.map(r => r.path)).size !== authorized.length) throw new Error('Mismatched or ambiguous extension in Notes');
-  const sections = [...progress.matchAll(/^## Session log\s*\r?$/gm)];
-  if (!authorized.length) return [];
-  if (sections.length !== 1) throw new Error('Extension needs an unambiguous session log');
-  const tail = progress.slice(sections[0].index + sections[0][0].length).split(/^## /m)[0];
-  // Short records are bound by their identical text to one Notes row, never by a substring.
-  const logs = records(tail, id);
-  const allRows = table(progress, ['#', 'Branch', 'Notes']);
-  for (const r of authorized) {
-    const matching = logs.filter(l => l.id === r.id && l.path === r.path && l.item === r.item && l.reason === r.reason && l.date === r.date);
-    if (matching.length !== 1) throw new Error('Extension needs exactly one matching session-log authorization');
-    const notesOwners = allRows.filter(candidate => records(candidate.Notes, candidate['#']).some(n => n.path === r.path && n.item === r.item && n.reason === r.reason && n.date === r.date));
-    if (notesOwners.length !== 1) throw new Error('Extension cannot be bound to one batch row');
-  }
-  return authorized.map(r => r.path);
-}
 export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths, batchPath) {
   const violations = [], add = (code, message, line) => violations.push(diagnostic(code, message, { path: batchPath, ...(line ? { line } : {}) }));
   const before = linesOf(baseline), after = linesOf(proposed);
