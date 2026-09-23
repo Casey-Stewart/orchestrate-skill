@@ -158,10 +158,40 @@ function checkSpec(spec) {
 // The script is one argument, never composed into a command string. PowerShell gets it
 // encoded: Windows PowerShell 5.1 strips embedded double quotes from a -Command argument.
 // -OutputFormat Text keeps pwsh's error stream readable text rather than CLIXML in the log.
-function commandOf(step) {
+function commandOf(step, bash = 'bash') {
   if (step.argv) return step.argv;
-  if (step.shell === 'bash') return ['bash', '-o', 'pipefail', '-c', step.script];
+  if (step.shell === 'bash') return [bash, '-o', 'pipefail', '-c', step.script];
   return [step.shell, '-NoProfile', '-NonInteractive', '-OutputFormat', 'Text', '-EncodedCommand', Buffer.from(step.script, 'utf16le').toString('base64')];
+}
+
+// On Windows every program splits its own command line. A `bash` that is really a launcher
+// (WSL's System32 or WindowsApps bash.exe) rejoins and re-evaluates it, so a quoted script
+// runs ALTERED rather than failing. Each PATH candidate must echo this probe back byte for
+// byte; the first that does is used, and none is a step that could not start. Elsewhere
+// argv reaches bash intact by construction. Each part catches its own alteration: "b" quote
+// stripping, \" a consumed backslash, $c a second evaluation, line two a cut at the newline.
+export const BASH_PROBE = [String.raw`printf '%s' 'q "b" \" $c'`, String.raw`printf '%s' ' z'`].join('\n');
+const BASH_PROBE_OUT = String.raw`q "b" \" $c z`;
+export const bashProbeIntact = ({ status, stdout }) => status === 0 && stdout === BASH_PROBE_OUT;
+const bashCache = new Map();
+function resolveBash(env) {
+  if (process.platform !== 'win32') return { bash: 'bash', rejected: [] };
+  const pathVar = Object.entries(env).find(([k]) => k.toUpperCase() === 'PATH')?.[1] ?? '';
+  if (bashCache.has(pathVar)) return bashCache.get(pathVar);
+  const rejected = [];
+  let bash = null;
+  for (const dir of pathVar.split(';').map(d => d.replace(/"/g, '')).filter(d => path.isAbsolute(d))) {
+    for (const file of ['.com', '.exe'].map(ext => path.join(dir, 'bash' + ext))) {
+      try { if (fs.lstatSync(file).isDirectory()) continue; } catch { continue; }
+      const r = spawnSync(file, ['-o', 'pipefail', '-c', BASH_PROBE], { env, encoding: 'utf8', timeout: 30000, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
+      if (bashProbeIntact(r)) { bash = file; break; }
+      rejected.push(file);
+    }
+    if (bash) break;
+  }
+  const found = { bash, rejected };
+  bashCache.set(pathVar, found);
+  return found;
 }
 
 function killTree(pid) {
@@ -178,7 +208,13 @@ function logWriter(fd) {
 
 function runStep(step, { cwd, env, timeoutMs, log }) {
   return new Promise(resolve => {
-    const [command, ...args] = commandOf(step), pieces = [];
+    let resolved = { bash: 'bash', rejected: [] };
+    if (step.shell === 'bash') {
+      resolved = resolveBash(env);
+      for (const file of resolved.rejected) log.note(`==> step ${step.name}: ${file} does not receive a quoted script intact (a launcher such as WSL's); not used`);
+      if (resolved.bash && resolved.bash !== 'bash') log.note(`==> step ${step.name}: bash is ${resolved.bash}`);
+    }
+    const [command, ...args] = commandOf(step, resolved.bash), pieces = [];
     const decoders = { stdout: new StringDecoder('utf8'), stderr: new StringDecoder('utf8') };
     let child, settled = false, timedOut = false, timer, grace;
     const finish = outcome => {
@@ -187,6 +223,7 @@ function runStep(step, { cwd, env, timeoutMs, log }) {
       pieces.push(decoders.stdout.end(), decoders.stderr.end());
       resolve({ ...outcome, timedOut, text: pieces.join('') });
     };
+    if (!command) { finish({ error: resolved.rejected.length ? 'BASH-ARGV-ALTERED' : 'ENOENT' }); return; }
     try {
       child = spawn(command, args, { cwd, env, shell: false, windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (e) { finish({ error: e.code || e.name }); return; }
@@ -268,7 +305,8 @@ the step's process tree. Spec (JSON; any other key is rejected):
     { "name": "tests", "shell": "pwsh", "script": "<multi-line recipe>", "parser": "node" },
     { "name": "diff-check", "argv": ["git", "diff", "--check"], "parser": "none" } ] }
 name: unique, [A-Za-z0-9._-]+. Exactly one of argv (spawned without a shell) or shell + script;
-shell: pwsh | powershell | bash (bash runs with -o pipefail). parser: node | jest | pytest |
+shell: pwsh | powershell | bash (bash runs with -o pipefail; on Windows the first bash on PATH
+that receives a quoted script intact, so never WSL's launcher). parser: node | jest | pytest |
 cargo | none. A parsed step passes only when its summary shows zero failures and it exits 0.
 `;
 
