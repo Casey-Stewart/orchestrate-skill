@@ -153,6 +153,12 @@ parser, per build rule 3.
 - [x] `orchestrate/tools/check-ledger.mjs skill` hash and `--contract` pin check, with the exact line form above
 - [x] `tests/check-ledger.test.cjs`: OK fixture from the real templates, one case per check, fence parity, live corpus control, one-parser domain property with a live control, hash properties
 - [x] `tests/protocol-contract.test.cjs`: register both new tools in `NON_MARKDOWN`; length pin 8
+- [x] polish: T1 — every unknowns/violations push in check-fence.mjs is a literal-code `diagnostic(` or a named exemption, and the fence's code literals equal MEASURED plus a declared operational list, both sizes pinned, with planted controls for a new code and an object-literal push
+- [x] polish: T2 — the extractor follows calls into check-fence.mjs's own module-level functions and reads their throws, a locally caught throw declared by its catch, with a planted control in validateBatchEdit
+- [x] polish: T3 — the guarding condition found by a balanced-bracket scan and each try block taken as the one whose closing brace meets its catch, with the wrapped-condition and nested-try plants as controls
+- [x] polish: T4 — a non-UTF-8 batch file case, the harness measuring invalid-encoding by the ledger document it names
+- [x] polish: T5 — `#distinct-refs` re-declared as a known gap with its true reason: parse never reads 00-READBEFORE.md
+- [x] polish: T6 — parser bodies split on every top-level declaration, with a planted helper above the first export as a control
 
 ## Acceptance criteria
 

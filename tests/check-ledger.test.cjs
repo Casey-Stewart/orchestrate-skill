@@ -101,6 +101,8 @@ const PL = m => A(m) + ' @plan', PR = m => A(m) + ' @progress', BD = m => BL(m) 
 const IDS = 'Duplicate or malformed batch IDs', REQUESTED = 'Missing or duplicate requested batch', CELL = 'Malformed branch cell';
 const HEADER = 'Malformed table header', TABLE_ROW = 'Malformed table row', AMBIGUOUS = 'Missing or ambiguous authority table';
 const NAME = BL('Batch ID and ledger batch filename do not agree');
+// Raised by git-evidence.mjs when a blob the fence reads is not UTF-8, keyed by the document read.
+const ENC = 'invalid-encoding: Git output is not valid UTF-8';
 const BRANCH = A('Plan/PROGRESS branch linkage does not agree'), REDUNDANT = A('Redundant or ambiguous extension');
 const MISSING = A('Missing authoritative ledger text'), TITLE = BL('Batch title does not match ID');
 const FILES_BRANCH = BL('Baseline batch Files/Branch must match authoritative plan'), STRUCTURE = 'batch-structure: Unsupported original Checklist section';
@@ -178,8 +180,9 @@ const CASES = [
   // Authority files the fence will not read: missing, undecodable, or a link.
   { name: 'missing plan', sites: [MISSING + ' #plan', AUTH_FILE + ' @plan'], edit: f => without(f, PLAN), unknown: /^UNKNOWN cannot read .*01-plan\.md$/ },
   { name: 'missing PROGRESS', sites: [MISSING + ' #progress', AUTH_FILE + ' @progress'], edit: f => without(f, PROG), unknown: /^UNKNOWN cannot read .*PROGRESS\.md$/ },
-  { name: 'plan not UTF-8', sites: [MISSING + ' #plan'], edit: f => appendBytes(f, PLAN), unknown: /^UNKNOWN not UTF-8: .*01-plan\.md$/ },
-  { name: 'PROGRESS not UTF-8', sites: [MISSING + ' #progress'], edit: f => appendBytes(f, PROG), unknown: /^UNKNOWN not UTF-8: .*PROGRESS\.md$/ },
+  { name: 'plan not UTF-8', sites: [MISSING + ' #plan', ENC + ' @plan'], edit: f => appendBytes(f, PLAN), unknown: /^UNKNOWN not UTF-8: .*01-plan\.md$/ },
+  { name: 'PROGRESS not UTF-8', sites: [MISSING + ' #progress', ENC + ' @progress'], edit: f => appendBytes(f, PROG), unknown: /^UNKNOWN not UTF-8: .*PROGRESS\.md$/ },
+  { name: 'batch file not UTF-8', sites: [ENC + ' @batch'], edit: f => appendBytes(f, B1), unknown: /^UNKNOWN not UTF-8: .*02-batches-01-one\.md$/ },
   { name: 'linked plan', sites: [AUTH_FILE + ' @plan'], link: PLAN, edit: f => f, unknown: /^UNKNOWN a link, not an ordinary file: .*01-plan\.md$/ },
   { name: 'linked PROGRESS', sites: [AUTH_FILE + ' @progress'], link: PROG, edit: f => f, unknown: /^UNKNOWN a link, not an ordinary file: .*PROGRESS\.md$/ },
   // What the fence is invoked with, each derived from the ledger: a ledger it refuses to gate.
@@ -241,8 +244,17 @@ const CASES = [
   { name: 'Checklist is the last heading', sites: [STRUCTURE + ' #no-later-heading'], edit: f => edit(f, B1, /\n## Acceptance criteria[\s\S]*$/, '\n'),
     expect: f => [[B1, lineOf(f[B1], /^## Checklist$/), /^needs exactly one "## Checklist" line followed by another "## " heading$/]] },
 ];
-// The diagnostic codes by which the fence rejects a ledger shape.
+// The diagnostic codes by which the fence rejects a ledger shape, and every other code it raises:
+// operational evidence about refs, worktrees, the diff and the batch's edits, never its linkage.
 const MEASURED = ['authority', 'batch-linkage', 'authority-file', 'batch-baseline', 'batch-structure', 'usage'];
+const OPERATIONAL = ['merge-base', 'candidate-worktree', 'dirty-worktree', 'outside-fence', 'batch-type', 'batch-files', 'batch-content', 'invalid-diff', 'ref-race', 'worktree-race'];
+// Codes raised in git-evidence.mjs that the harness measures by the ledger document they name.
+const BY_DOC = ['authority-file', 'invalid-encoding'];
+// Every value pushed onto the fence's verdict arrays is a diagnostic( with a literal code, or one
+// of these, each named by its exact text: a diagnostic git-evidence.mjs or validateBatchEdit built.
+const PUSHED = ['{ ...r.diagnostic, path: file }', 'bases.diagnostic', 'diff.diagnostic', '...wt.diagnostics', '...after.diagnostics',
+  "...batchFindings.filter(f => f.code === 'batch-structure')", "...batchFindings.filter(f => f.code !== 'batch-structure')",
+  'diagnostic(code, message, { path: batchPath, ...(line ? { line } : {}) })'];
 // Each fence condition joining several clauses, pinned whole, with every clause named by its
 // own text: a clause moved between conditions changes both pins.
 const CLAUSES = {
@@ -264,115 +276,232 @@ const CLAUSES = {
 // A site raised once per authority file by the loop on its source line.
 const PER_FILE = { [AUTH_FILE]: { loop: 'for (const file of [planPath, progressPath]) if (', docs: ['plan', 'progress'] } };
 // Operator inputs, never ledger shapes: the fence is always invoked with the repository, the
-// contract's integration branch (a file parse does not read) and `refs/heads/<plan branch>`.
-const UNREACHABLE = [USAGE + ' #repo', USAGE + ' #integration-ref', USAGE + ' #distinct-refs', BRANCH + ' #ref-not-heads'];
+// contract's integration branch and `refs/heads/<plan branch>`.
+const OPERATOR = [USAGE + ' #repo', USAGE + ' #integration-ref', BRANCH + ' #ref-not-heads'];
+// A known gap, reachable from a ledger but not by parse: a plan Branch naming the integration
+// branch is refused by the fence at usage, and that branch is named only in 00-READBEFORE.md,
+// which parse never reads. Closing it is a production and specification change.
+const KNOWN_GAP = [USAGE + ' #distinct-refs'];
+const UNREACHABLE = [...OPERATOR, ...KNOWN_GAP];
+// Sites a ledger shape reaches only together: the fence has no authority text exactly when its
+// blob is undecodable, since a missing one is an authority-file site as well.
+const TIED = [[MISSING + ' #plan', ENC + ' @plan'], [MISSING + ' #progress', ENC + ' @progress']];
 // A measured code raised outside checkFence, on the fence command line's own flags.
 const EXEMPT = ['usage: Unknown, missing or duplicate flag; use --help'];
-// The ledger document a parser call reads, by the names in its arguments.
-const DOC = { plan: 'plan', planRow: 'plan', progress: 'progress', progressRow: 'progress', baseline: 'batch', fileLines: 'batch', branchLines: 'batch' };
+// The ledger document a parser call reads, by the names in its arguments, and the one a blob
+// read names by its path argument.
+const DOC = { plan: 'plan', planRow: 'plan', progress: 'progress', progressRow: 'progress', baseline: 'batch', proposed: 'batch', fileLines: 'batch', branchLines: 'batch' };
+const READS = { planPath: 'plan', progressPath: 'progress', batchFile: 'batch' };
 const LITERAL = /^(?:'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`)/;
-const THROW = /throw new Error\((?:'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`)\)/g;
-// Every throw must be one this reads, in any quoting, so no throw is silently outside the domain.
-function throwsOf(text, where) {
-  const found = [...text.matchAll(THROW)].map(m => ({ message: m[1] ?? m[2] ?? m[3], index: m.index }));
-  assert.equal((text.match(/\bthrow\b/g) || []).length, found.length, where + ': every throw raises an Error with a literal message');
-  return found;
-}
-// The end of the string or template literal opening at `i`; a template's ${…} may hold literals.
-function skipLiteral(src, i) {
-  for (let j = i + 1; j < src.length; j++) {
-    if (src[j] === '\\') j++;
-    else if (src[j] === src[i]) return j;
-    else if (src[i] === '`' && src.startsWith('${', j)) j = closing(src, j + 1, '{', '}');
+const THROW_AT = /throw new Error\((?:'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`)\)/y;
+// The source with every comment and every string, template and regular-expression literal
+// blanked (newlines kept), so bracket, keyword and call scans read code only, at the same offsets.
+function codeMask(src) {
+  const out = src.split(''), fail = at => assert.fail('unterminated literal at ' + at);
+  const blank = (a, b) => { for (let k = a; k < b; k++) if (out[k] !== '\n') out[k] = ' '; };
+  // The index after the string, template or regular expression opening at i.
+  function literal(i) {
+    const q = src[i];
+    for (let j = i + 1; j < src.length; j++) {
+      if (src[j] === '\\') j++;
+      else if (q !== '`' && src[j] === '\n') fail(i);
+      else if (q === '/' && src[j] === '[') { while (++j < src.length && src[j] !== ']') if (src[j] === '\\') j++; }
+      else if (src[j] === q) { let k = j + 1; if (q === '/') while (/[a-z]/i.test(src[k] || '')) k++; return k; }
+      else if (q === '`' && src.startsWith('${', j)) j = code(j + 2, true) - 1;
+    }
+    fail(i);
   }
-  assert.fail('unterminated literal at ' + i);
+  // Scans code from i; inside a template's ${…}, returns the index after its closing brace.
+  function code(i, inner) {
+    let depth = 0, prev = '', word = '';
+    while (i < src.length) {
+      const ch = src[i];
+      if (src.startsWith('//', i) || src.startsWith('/*', i)) {
+        const end = src[i + 1] === '/' ? (src.indexOf('\n', i) + 1 || src.length + 1) - 1 : src.indexOf('*/', i) + 2;
+        blank(i, end); i = end; continue;
+      }
+      const regex = ch === '/' && (prev === '' || '(,=:[!&|?{};+-*%<>~^'.includes(prev) || /^(?:return|typeof|case|void|delete|in|of|throw|else)$/.test(word));
+      if (ch === "'" || ch === '"' || ch === '`' || regex) { const end = literal(i); blank(i, end); i = end; prev = 'a'; word = ''; continue; }
+      if (inner && ch === '{') depth++;
+      if (inner && ch === '}' && depth-- === 0) return i + 1;
+      if (/[\w$]/.test(ch)) { let j = i; while (/[\w$]/.test(src[j] || '')) j++; word = src.slice(i, j); prev = 'a'; i = j; continue; }
+      if (!/\s/.test(ch)) { prev = ch; word = ''; }
+      i++;
+    }
+    return i;
+  }
+  code(0, false);
+  return out.join('');
 }
-// The index of the bracket closing the one at `open`, literals skipped.
-function closing(src, open, o = '(', c = ')') {
-  for (let depth = 0, j = open; j < src.length; j++) {
-    if ("'\"`".includes(src[j])) j = skipLiteral(src, j);
-    else if (src[j] === o) depth++;
-    else if (src[j] === c && --depth === 0) return j;
+// The index of the bracket closing the one at `open`, in a masked source.
+function closing(mask, open, o = '(', c = ')') {
+  for (let depth = 0, j = open; j < mask.length; j++) {
+    if (mask[j] === o) depth++;
+    else if (mask[j] === c && --depth === 0) return j;
   }
   assert.fail('unbalanced ' + o + ' at ' + open);
 }
-// The condition guarding the raise at `at`: an `if (` on its line, or on the line before when
-// that line opens the block holding it; null when the raise is unconditional.
-function conditionOf(src, at) {
-  const lineStart = src.lastIndexOf('\n', at - 1) + 1;
-  let ifAt = src.lastIndexOf('if (', at);
-  if (ifAt < lineStart) {
-    const prevStart = src.lastIndexOf('\n', lineStart - 2) + 1, prev = src.slice(prevStart, lineStart - 1);
-    ifAt = /\{\s*$/.test(prev) && prev.includes('if (') ? prevStart + prev.lastIndexOf('if (') : -1;
+// Every declaration at the top level of a module, by a bracket-depth scan: name, start and end,
+// each ending where the next begins.
+function topLevel(mask) {
+  const decls = [];
+  for (let depth = 0, i = 0; i < mask.length; i++) {
+    const ch = mask[i];
+    if ('({['.includes(ch)) depth++;
+    else if (')}]'.includes(ch)) depth--;
+    else if (!depth && !/[\w$]/.test(mask[i - 1] || '')) {
+      const m = /^(?:export\s+)?(?:async\s+)?(?:function\b\s*\*?\s*|class\s+|(?:const|let|var)\s+)([A-Za-z_$][\w$]*)/.exec(mask.slice(i, i + 200));
+      if (m) { decls.push({ name: m[1], start: i }); i += m[0].length - 1; }
+    }
   }
-  return ifAt < 0 ? null : src.slice(ifAt + 4, closing(src, ifAt + 3));
+  const byName = {};
+  decls.forEach((d, n) => { assert.ok(!Object.hasOwn(byName, d.name), 'one top-level declaration of ' + d.name); byName[d.name] = { start: d.start, end: n + 1 < decls.length ? decls[n + 1].start : mask.length }; });
+  return byName;
 }
-function sitesAt(src, key, at) {
+// The throws and calls in [a, b) of a source, with every try blanked whose catch does not rethrow:
+// a throw inside one is caught where it is raised. Every throw left must raise a literal Error.
+function region(src, mask, a, b, where) {
+  const m = mask.slice(a, b).split('');
+  for (const t of mask.slice(a, b).matchAll(/\btry\s*\{/g)) {
+    if (m[t.index] === ' ') continue;
+    const text = m.join(''), open = t.index + t[0].length - 1, close = closing(text, open, '{', '}');
+    const c = /^\s*catch\s*(?:\([^)]*\))?\s*\{/.exec(text.slice(close + 1));
+    assert.ok(c, where + ': a try without a catch');
+    const cOpen = close + c[0].length, cClose = closing(text, cOpen, '{', '}');
+    assert.ok(!/\bthrow\b/.test(text.slice(cOpen, cClose)), where + ': a catch that rethrows');
+    for (let k = t.index; k <= cClose; k++) if (m[k] !== '\n') m[k] = ' ';
+  }
+  const text = m.join(''), throws = [], calls = [];
+  for (const t of text.matchAll(/\bthrow\b/g)) {
+    THROW_AT.lastIndex = a + t.index;
+    const lit = THROW_AT.exec(src);
+    assert.ok(lit, where + ': every throw raises an Error with a literal message');
+    throws.push({ message: lit[1] ?? lit[2] ?? lit[3], at: a + t.index });
+  }
+  for (const t of text.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\s*\(/g)) calls.push({ name: t[1], open: a + t.index + t[0].length - 1 });
+  return { throws, calls };
+}
+// The condition guarding the raise at `at`: the `if (…)` whose closing bracket is followed only by
+// an opening brace or a push before the raise; null when the raise is unconditional.
+function conditionOf(mask, at) {
+  for (const t of [...mask.slice(0, at).matchAll(/(?<![\w$])if\s*\(/g)].reverse()) {
+    const open = t.index + t[0].length - 1, close = closing(mask, open);
+    if (close < at && /^\s*\{?\s*(?:(?:unknowns|violations)\s*\.\s*push\s*\(\s*)?$/.test(mask.slice(close + 1, at))) return [open + 1, close];
+  }
+  return null;
+}
+function sitesAt(src, mask, key, at) {
   const line = src.slice(src.lastIndexOf('\n', at - 1) + 1, (src.indexOf('\n', at) + 1 || src.length + 1) - 1);
   let keys = [key];
   if (PER_FILE[key]) {
     assert.ok(line.trimStart().startsWith(PER_FILE[key].loop), key + ': raised once per authority file');
     keys = PER_FILE[key].docs.map(d => key + ' @' + d);
   }
-  const when = conditionOf(src, at), pinned = CLAUSES[key];
+  const span = conditionOf(mask, at), pinned = CLAUSES[key];
+  const when = span && src.slice(...span), code = span && mask.slice(...span);
   if (!pinned) {
-    assert.ok(when === null || !when.includes('||'), key + ': a condition joining clauses needs them named: ' + when);
+    assert.ok(!span || !code.includes('||'), key + ': a condition joining clauses needs them named: ' + when);
     return keys;
   }
-  assert.equal(when, pinned.when, key + ': the pinned condition');
+  assert.ok(when === pinned.when, key + ': the pinned condition');
   let from = 0, gaps = '';
   for (const text of Object.values(pinned.clauses)) {
     const i = when.indexOf(text, from);
     assert.ok(i >= 0 && when.indexOf(text, i + 1) < 0, key + ': each clause once, in order: ' + text);
-    gaps += when.slice(from, i); from = i + text.length;
+    gaps += code.slice(from, i); from = i + text.length;
   }
-  assert.equal((gaps + when.slice(from)).split('||').length, Object.keys(pinned.clauses).length, key + ': every clause is named');
+  assert.ok((gaps + code.slice(from)).split('||').length === Object.keys(pinned.clauses).length, key + ': every clause is named');
   return keys.flatMap(k => Object.keys(pinned.clauses).map(c => k + ' #' + c));
 }
 // Every site at which the fence rejects a ledger shape, derived from the source: each message
-// thrown in the fence's authority and linkage try blocks, or by a parser they reach (keyed by
-// the ledger document the call reads), every measured diagnostic the fence raises with a literal
-// message, and each clause of a joined condition. The sources are parameters so a planted copy
-// can prove the extractor sees what is planted.
-function fenceRejectionSites(fence = read('orchestrate/tools/check-fence.mjs'), parser = read('orchestrate/tools/ledger-parse.mjs')) {
-  const bodies = Object.fromEntries(parser.split(/^export /m).slice(1).map(part => [/^(?:const|function)\s+([\w$]+)/.exec(part)[1], part]));
-  const calls = text => [...text.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\(/g)].map(m => m[1]).filter(n => Object.hasOwn(bodies, n));
-  const reach = name => {
-    const seen = new Set(), todo = [name];
-    while (todo.length) { const n = todo.pop(); if (!seen.has(n)) { seen.add(n); todo.push(...calls(bodies[n])); } }
-    return [...seen];
+// thrown in the fence's authority and linkage try blocks, directly, through the fence's own
+// functions, or by a parser they reach (keyed by the ledger document the call reads); every
+// measured diagnostic the fence raises with a literal message; each blob read, which git-evidence
+// reports as undecodable by its path; and each clause of a joined condition. The sources are
+// parameters so a planted copy can prove the extractor sees what is planted.
+function fenceRejectionSites(fence = read('orchestrate/tools/check-fence.mjs'), parser = read('orchestrate/tools/ledger-parse.mjs'), evidence = read('orchestrate/tools/git-evidence.mjs')) {
+  const fmask = codeMask(fence), pmask = codeMask(parser), emask = codeMask(evidence);
+  const fenceDecls = topLevel(fmask), parserDecls = topLevel(pmask);
+  // Each parser's throws, following its calls into the parser's other declarations.
+  const parserThrows = (name, seen = new Set()) => {
+    if (seen.has(name)) return [];
+    seen.add(name);
+    const { throws, calls } = region(parser, pmask, parserDecls[name].start, parserDecls[name].end, name);
+    return [...throws, ...calls.filter(c => Object.hasOwn(parserDecls, c.name)).flatMap(c => parserThrows(c.name, seen))];
   };
   const parsed = new Set(), own = [], raised = new Set(), sinks = [], exempt = [];
-  const raise = (key, at) => { assert.ok(!raised.has(key), 'one source site raises ' + key); raised.add(key); own.push(...sitesAt(fence, key, at)); };
-  for (const code of ['authority', 'batch-linkage']) {
-    const sink = `catch (e) { unknowns.push(diagnostic('${code}', e.message`, end = fence.indexOf(sink), start = fence.lastIndexOf('try {', end);
-    assert.ok(end >= 0 && fence.indexOf(sink, end + 1) < 0 && start >= 0, 'one try block ending in the ' + code + ' catch');
-    const block = fence.slice(start, end);
-    sinks.push(end + sink.indexOf('diagnostic('));
-    for (const t of throwsOf(block, code + ' block')) raise(code + ': ' + t.message, start + t.index);
-    for (const m of block.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\(/g)) {
-      if (!Object.hasOwn(bodies, m[1])) continue;
-      const open = m.index + m[1].length, args = block.slice(open + 1, closing(block, open));
-      const names = [...args.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, '').matchAll(/[A-Za-z_$][\w$]*/g)].map(t => t[0]);
-      const docs = [...new Set(names.filter(n => Object.hasOwn(DOC, n)).map(n => DOC[n]))];
-      assert.equal(docs.length, 1, `${m[1]}(${args}) must read exactly one ledger document`);
-      for (const n of reach(m[1])) for (const t of throwsOf(bodies[n], n)) parsed.add(`${code}: ${t.message} @${docs[0]}`);
+  const raise = (key, at) => { assert.ok(!raised.has(key), 'one source site raises ' + key); raised.add(key); own.push(...sitesAt(fence, fmask, key, at)); };
+  const walk = (code, a, b, where, seen) => {
+    const { throws, calls } = region(fence, fmask, a, b, where);
+    for (const t of throws) raise(code + ': ' + t.message, t.at);
+    for (const c of calls) {
+      if (Object.hasOwn(parserDecls, c.name)) {
+        const found = parserThrows(c.name);
+        if (!found.length) continue;
+        const names = [...fmask.slice(c.open + 1, closing(fmask, c.open)).matchAll(/[A-Za-z_$][\w$]*/g)].map(t => t[0]);
+        const docs = [...new Set(names.filter(n => Object.hasOwn(DOC, n)).map(n => DOC[n]))];
+        assert.ok(docs.length === 1, `${c.name}(${fence.slice(c.open + 1, closing(fmask, c.open))}) must read exactly one ledger document`);
+        for (const t of found) parsed.add(`${code}: ${t.message} @${docs[0]}`);
+      } else if (Object.hasOwn(fenceDecls, c.name) && !seen.has(c.name)) {
+        seen.add(c.name);
+        walk(code, fenceDecls[c.name].start, fenceDecls[c.name].end, c.name, seen);
+      }
     }
+  };
+  for (const code of ['authority', 'batch-linkage']) {
+    const sink = `catch (e) { unknowns.push(diagnostic('${code}', e.message`, end = fence.indexOf(sink);
+    assert.ok(end >= 0 && fence.indexOf(sink, end + 1) < 0, 'one catch for ' + code);
+    // The try block is the one whose closing brace meets the catch.
+    const opens = [...fmask.slice(0, end).matchAll(/\btry\s*\{/g)].map(t => t.index + t[0].length - 1)
+      .filter(open => fmask.slice(closing(fmask, open, '{', '}') + 1, end).trim() === '');
+    assert.ok(opens.length === 1, 'one try block ending in the ' + code + ' catch');
+    sinks.push(end + sink.indexOf('diagnostic('));
+    walk(code, opens[0] + 1, closing(fmask, opens[0], '{', '}'), code + ' block', new Set());
   }
-  for (const m of fence.matchAll(/(?<![\w$.])(diagnostic|add)\(\s*(['"`])([\w-]+)\2\s*,\s*/g)) {
-    if (!MEASURED.includes(m[3])) continue;
-    const lit = LITERAL.exec(fence.slice(m.index + m[0].length));
+  const codes = new Set();
+  let computed = 0;
+  for (const m of fmask.matchAll(/(?<![\w$.])(diagnostic|add)\s*\(/g)) {
+    const after = fence.slice(m.index + m[0].length), at = m.index + m[0].length + /^\s*/.exec(after)[0].length, lit = LITERAL.exec(fence.slice(at));
     if (!lit) {
-      assert.ok(sinks.includes(m.index), m[3] + ': a measured diagnostic with a computed message outside the two catches');
+      assert.ok(fence.startsWith(PUSHED[PUSHED.length - 1], m.index) && !computed++, 'a diagnostic with a computed code: ' + fence.slice(m.index, m.index + 60));
+      continue;
+    }
+    const code = lit[1] ?? lit[2] ?? lit[3];
+    codes.add(code);
+    if (!MEASURED.includes(code)) continue;
+    const rest = fence.slice(at + lit[0].length), sep = /^\s*,\s*/.exec(rest), msg = sep && LITERAL.exec(rest.slice(sep[0].length));
+    if (!msg) {
+      assert.ok(sinks.includes(m.index), code + ': a measured diagnostic with a computed message outside the two catches');
       sinks.splice(sinks.indexOf(m.index), 1); continue;
     }
-    const key = m[3] + ': ' + (lit[1] ?? lit[2] ?? lit[3]);
+    const key = code + ': ' + (msg[1] ?? msg[2] ?? msg[3]);
     if (EXEMPT.includes(key)) exempt.push(key); else raise(key, m.index);
   }
-  assert.deepEqual(sinks, [], 'each try block ends in its measured catch');
-  assert.deepEqual(exempt, EXEMPT, 'every exemption names one live site');
+  assert.ok(sameSet([...codes], [...MEASURED, ...OPERATIONAL]), "the fence's diagnostic codes are exactly the measured and the operational ones: " + [...codes].join(', '));
+  const pushed = [];
+  for (const m of fmask.matchAll(/(?<![\w$.])(unknowns|violations)\s*\.\s*([A-Za-z_$][\w$]*)\s*\(/g)) {
+    assert.ok(m[2] === 'push', `${m[1]}.${m[2]}(: the verdict arrays grow by push alone`);
+    const open = m.index + m[0].length - 1, arg = fence.slice(open + 1, closing(fmask, open)).trim();
+    if (PUSHED.includes(arg)) { pushed.push(arg); continue; }
+    assert.ok(/^diagnostic\(\s*(['"`])[\w-]+\1/.test(arg), `${m[1]}.push(${arg}): a push that is neither a literal-code diagnostic nor a named exemption`);
+  }
+  assert.ok(pushed.length === PUSHED.length && sameSet(pushed, PUSHED), 'every push exemption names one live push: ' + pushed.join(' | '));
+  // Blob reads: git-evidence's readBlob reports an undecodable blob as invalid-encoding by path.
+  const encodings = [...evidence.matchAll(/diagnostic\('invalid-encoding', '([^']+)'/g)];
+  const readBlob = topLevel(emask).readBlob, blobBody = readBlob && evidence.slice(readBlob.start, readBlob.end);
+  assert.ok(encodings.length === 1 && ENC === 'invalid-encoding: ' + encodings[0][1] && /\bgit\(/.test(blobBody) && blobBody.includes('diagnostics.push({ ...r.diagnostic, path: file })'),
+    'readBlob reports an undecodable blob as ' + ENC + ' with its path');
+  const reads = new Set();
+  for (const m of fmask.matchAll(/(?<![\w$.])readBlob\s*\(/g)) {
+    const open = m.index + m[0].length - 1, file = fmask.slice(open + 1, closing(fmask, open)).split(',')[2].trim();
+    assert.ok(Object.hasOwn(READS, file), 'readBlob reads a known ledger document: ' + file);
+    reads.add(ENC + ' @' + READS[file]);
+  }
+  own.push(...reads);
+  assert.ok(sinks.length === 0, 'each try block ends in its measured catch');
+  assert.ok(sameSet(exempt, EXEMPT) && exempt.length === EXEMPT.length, 'every exemption names one live site');
   const domain = [...parsed, ...own];
-  assert.equal(new Set(domain).size, domain.length, 'a parsed site is never also raised directly');
+  assert.ok(new Set(domain).size === domain.length, 'a parsed site is never also raised directly');
   return domain;
 }
 function problemsOf(line) {
@@ -399,21 +528,24 @@ function linkInPlace(file, content, outside) {
 test('the fence rejection domain is derived from the source, and every site is owned by a case', () => {
   const domain = fenceRejectionSites();
   // Pinned by hand: a site dropped from the source AND from the cases still goes red here.
-  assert.equal(domain.length, 50, JSON.stringify(domain, null, 1));
+  assert.equal(domain.length, 53, JSON.stringify(domain, null, 1));
   assert.equal(new Set(domain).size, domain.length);
-  for (const site of UNREACHABLE) assert.ok(domain.includes(site), site);
-  assert.equal(CASES.length, 61);
+  for (const site of [...UNREACHABLE, ...TIED.flat()]) assert.ok(domain.includes(site), site);
+  assert.deepEqual([MEASURED.length, OPERATIONAL.length, PUSHED.length, OPERATOR.length, KNOWN_GAP.length], [6, 10, 8, 3, 1]);
+  assert.equal(new Set([...MEASURED, ...OPERATIONAL]).size, 16);
+  assert.equal(CASES.length, 62);
   assert.equal(new Set(CASES.map(c => c.name)).size, CASES.length);
   for (const c of CASES) {
     for (const site of c.sites) assert.ok(domain.includes(site), c.name + ': not a fence rejection site: ' + site);
     // A case the fence rejects never demands PARSE OK: that would pin the looser parse.
     assert.ok(!c.sites.length || c.unknown || c.expect(c.edit(baseLedger())).length, c.name + ': rejected by the fence, so parse must not pass it');
   }
-  // Owned: some case is rejected by the fence at this site and no other, so the parse check
-  // standing opposite it is the only thing that can make that case fail.
+  // Owned: some case is rejected by the fence at this site and no other (or only with the site it
+  // is tied to), so the parse check standing opposite it is the only thing that can fail it.
   for (const site of domain) {
     if (UNREACHABLE.includes(site)) { assert.ok(!CASES.some(c => c.sites.includes(site)), site); continue; }
-    assert.ok(CASES.some(c => sameSet(c.sites, [site])), 'no case is rejected at this site alone: ' + site);
+    const tie = TIED.find(t => t.includes(site)) ?? [site];
+    assert.ok(CASES.some(c => sameSet(c.sites, tie) && c.sites.length === tie.length), 'no case is rejected at this site alone: ' + site);
   }
   assert.ok(CASES.some(c => !c.sites.length && c.expect(c.edit(baseLedger())).length), 'a case where parse is stricter than the fence');
 });
@@ -430,6 +562,14 @@ test('the rejection-site extractor: a planted site grows the domain, an unreadab
       ['authority: Sentinel batch file']],
     ['a double-quoted throw in a parser the fence reaches', fence, swap(parser, 'export function table(text, required) {\n', 'export function table(text, required) {\n  if (text === \'zzz\') throw new Error("Sentinel table");\n'),
       ['authority: Sentinel table @plan', 'authority: Sentinel table @progress']],
+    ['a throw in a fence function the linkage block calls', swap(fence, 'export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths, batchPath) {\n',
+      "export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths, batchPath) {\n  if (baseline.includes('ZZZ-M1')) throw new Error('Sentinel baseline rejected');\n"), parser, ['batch-linkage: Sentinel baseline rejected']],
+    ['a throw before a nested try in the linkage block', swap(fence, '      try {\n        if (!new RegExp(`^# ${batchId}',
+      "      try {\n        if (baseline.includes('ZZZ-M7B')) throw new Error('Sentinel before nested try');\n        try { JSON.parse('0'); } catch { }\n        if (!new RegExp(`^# ${batchId}"), parser,
+      ['batch-linkage: Sentinel before nested try']],
+    ['a condition wrapped onto a second line', swap(fence, '(?:—|-) `).test(baseline)) throw', '(?:—|-) `)\n          .test(baseline)) throw'), parser, []],
+    ['a throw in a parser helper above the first export', fence, swap(swap(parser, 'export const linesOf', "function guard(text) { if (text.includes('ZZZ-M4')) throw new Error('Sentinel helper'); }\nexport const linesOf"),
+      '  const lines = linesOf(text), matches = [];', '  guard(text);\n  const lines = linesOf(text), matches = [];'), ['authority: Sentinel helper @plan', 'authority: Sentinel helper @progress']],
   ];
   for (const [name, f, p, added] of grows) {
     const grown = fenceRejectionSites(f, p);
@@ -441,6 +581,17 @@ test('the rejection-site extractor: a planted site grows the domain, an unreadab
     ['a throw the extractor cannot read', swap(fence, '    if (plan === null', "    if (plan === 'zzz') throw sentinel;\n    if (plan === null"), parser, /^authority block: every throw raises an Error with a literal message$/],
     ['a measured diagnostic with a computed message', swap(fence, "{ path: file }));\n", "{ path: file }));\n  unknowns.push(diagnostic('authority', String(plan)));\n"), parser,
       /^authority: a measured diagnostic with a computed message outside the two catches$/],
+    ['a diagnostic code neither measured nor operational', swap(fence, 'progressPath, unknowns, options);\n',
+      "progressPath, unknowns, options);\n  if (plan !== null && plan.includes('ZZZ-M8')) unknowns.push(diagnostic('ledger-shape', 'Sentinel new code', { path: planPath }));\n"), parser,
+      /^the fence's diagnostic codes are exactly the measured and the operational ones: /],
+    ['an object-literal push', swap(fence, 'progressPath, unknowns, options);\n', "progressPath, unknowns, options);\n  unknowns.push({ code: 'authority', message: 'Sentinel object literal', path: planPath });\n"), parser,
+      /^unknowns\.push\(\{ code: 'authority', .*\): a push that is neither a literal-code diagnostic nor a named exemption$/],
+    ['a verdict array grown by another method', swap(fence, 'progressPath, unknowns, options);\n', "progressPath, unknowns, options);\n  unknowns.unshift(diagnostic('authority', 'Sentinel unshift'));\n"), parser,
+      /^unknowns\.unshift\(: the verdict arrays grow by push alone$/],
+    ['a catch that rethrows in a fence function the linkage block calls', swap(fence, 'export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths, batchPath) {\n',
+      "export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths, batchPath) {\n  try { JSON.parse(baseline); } catch { throw new Error('Sentinel rethrown'); }\n"), parser, /^validateBatchEdit: a catch that rethrows$/],
+    ['a clause joined to a condition wrapped onto a second line', swap(fence, '(?:—|-) `).test(baseline)) throw', "(?:—|-) `)\n          .test(baseline) || baseline === 'zzz') throw"), parser,
+      /^batch-linkage: Batch title does not match ID: a condition joining clauses needs them named: /],
     // The exempt clause moved into the usage guard, a ledger-shape clause left in its place.
     ['a clause moved from the branch condition into the usage guard', swap(swap(fence, 'if (!repo || ', "if (!repo || !batch.startsWith('refs/heads/') || "),
       "!batch.startsWith('refs/heads/') || branchCell(planRow.Branch)", '!planRow.Batch || branchCell(planRow.Branch)'), parser,
@@ -468,7 +619,7 @@ test('parse is never looser than the fence: each case in parse and in the real f
   const FILE_OF = { plan: PLAN, progress: PROG }, DOC_OF = { [PLAN]: 'plan', [PROG]: 'progress' };
   // The fence's own key for a site: the clause is never visible to it, the document only where
   // its diagnostic carries the authority file's path.
-  const fenceKey = s => { const k = s.replace(/ #[\w-]+$/, ''); return k.startsWith('authority-file: ') ? k : k.replace(/ @\w+$/, ''); };
+  const fenceKey = s => { const k = s.replace(/ #[\w-]+$/, ''); return BY_DOC.some(c => k.startsWith(c + ': ')) ? k : k.replace(/ @\w+$/, ''); };
   await Promise.all(CASES.map(c => t.test(c.name, async () => {
     const slot = pool.pop();
     assert.ok(slot, 'a free fixture repository');
@@ -512,8 +663,9 @@ test('parse is never looser than the fence: each case in parse and in the real f
     repo.git('update-ref', 'refs/heads/integration', repo.git('rev-parse', 'HEAD'));
     const { code, verdict } = await fenceRun(repo.cwd, repo.env, gate);
     assert.equal(code, { PASS: 0, VIOLATION: 1, UNKNOWN: 2 }[verdict.status], JSON.stringify(verdict));
-    const measured = [...verdict.unknowns, ...verdict.violations].filter(d => MEASURED.includes(d.code))
-      .map(d => d.code + ': ' + d.message + (d.code === 'authority-file' ? ' @' + DOC_OF[path.posix.basename(d.path)] : ''));
+    const docOf = p => p === gate['batch-file'] ? 'batch' : DOC_OF[path.posix.basename(p)];
+    const measured = [...verdict.unknowns, ...verdict.violations].filter(d => MEASURED.includes(d.code) || BY_DOC.includes(d.code))
+      .map(d => d.code + ': ' + d.message + (BY_DOC.includes(d.code) ? ' @' + docOf(d.path) : ''));
     assert.ok(sameSet(measured, c.sites.map(fenceKey)), JSON.stringify(verdict));
     if (!c.sites.length) assert.equal(verdict.status, 'PASS', JSON.stringify(verdict));
   }
