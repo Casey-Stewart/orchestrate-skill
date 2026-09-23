@@ -32,7 +32,7 @@ before believing any row (§Recovery in the contract).
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
 | B01 | Validation wrapper `validate.mjs` | `feat/validate-wrapper` | 1 | — | 🟢 | 2026-09-23 | merged `437c42a` (R1 FIX FIRST @fbe839e → R2 SHIP @a70582d asks=4 → polish @0310056); tip red (bash = WSL launcher under PowerShell) → repair `fix/B01-tip` merged `224a84c` (repair R1 FIX FIRST @56b8e1c → R2 SHIP @6f5bfc3 asks=4 → polish @c1babae; failing-on-base proven from real PowerShell); tip `224a84c` 357/357; tier default (implementer, reviewers, hunters); residuals: POSIX grace-path holder left running, bash timeout path unexercised on Windows, `pytest -q` unsupported (fails closed) — LOG "2026-09-23 — continue" §B01 · m: rounds=1 asks=8 fence-bounces=0 gate=20/3 tip-red=1 |
-| B02 | Shared ledger parser and `check-ledger.mjs` | `feat/ledger-parser` | 2 | — | ⛔ | 2026-09-23 | ⛔ green, residual finding open (P1): parse passes a ledger id failing validId / a batch-file path failing validPath that the fence refuses at usage (`OS-20260923-café` → PARSE OK; fence UNKNOWN usage) — LOG §B02 round 2. fence PASS @7516682, R1 FIX FIRST @7516682; fence PASS @29430d6, R2 FIX FIRST @29430d6 (+ 3 reviewer ASKs, 6 hunter ASKs, test-only); branch green 409/409 from real PowerShell; tier default. Awaiting verdict: fix again / ship with the residual / drop |
+| B02 | Shared ledger parser and `check-ledger.mjs` | `feat/ledger-parser` | 2 | — | 🔄 | 2026-09-23 | was ⛔ green, residual finding open (P1): parse passes a ledger id failing validId / a batch-file path failing validPath that the fence refuses at usage (`OS-20260923-café` → PARSE OK; fence UNKNOWN usage) — LOG §B02 round 2. fence PASS @7516682, R1 FIX FIRST @7516682; fence PASS @29430d6, R2 FIX FIRST @29430d6 (+ 3 reviewer ASKs, 6 hunter ASKs, test-only); branch green 409/409 from real PowerShell; tier default. verdict 2026-09-23 fix again spent → third round on feat/ledger-parser @29430d6 (fresh implementer, strong tier) |
 | B03 | Wire the skill pin, validation wrapper and parse check into the contract | `feat/contract-tool-wiring` | 3 | — | ⬜ | 2026-09-23 | — |
 | B04 | Rendered prompts and file-based findings: `prompt.mjs` | `feat/prompt-renderer` | 4 | — | ⬜ | 2026-09-23 | — |
 | B05 | Mutation and probe harness: `mutate.mjs`, `run-at-ref.mjs` | `feat/mutation-harness` | 5 | — | ⬜ | 2026-09-23 | — |
@@ -52,6 +52,7 @@ smoke-input inventory, under `evidence/C1/inputs/issue-001/`.
 
 | Date | Checkpoint | Verdict | User notes |
 |------|------------|---------|------------|
+| 2026-09-23 | B02 | fix again | User, answering the capped-B02 question: "Fix again (Recommended)" |
 
 ## Item → batch coverage audit
 
@@ -72,3 +73,4 @@ smoke-input inventory, under `evidence/C1/inputs/issue-001/`.
 |------|-------------|-----------------|
 | 2026-09-23 | Scaffold: discovery (no active ledger), interview, plan, pre-flight, approval; base `fceab31`, baseline 318/318, tip `fd3f922` 318/318 — LOG "2026-09-23 — scaffold" | scaffold complete; wave 1 opens on the user's word |
 | 2026-09-23 | `continue`: discovery (one ACTIVE ledger), reconcile clean (all ⬜, no batch branches), resume-time validation on `2238eac` 318/318 + diff-check clean (8m40s); W1 opened — wave base `2238eac`, B01 on `feat/validate-wrapper`; B01 R1 FIX FIRST → R2 SHIP asks=4 → polish → merged `437c42a`; tip red → repair `fix/B01-tip` (2 rounds + polish) merged `224a84c`, tip 357/357 → B01 🟢; W2 opened — wave base `955f549`, B02 on `feat/ledger-parser`; B02 R1 FIX FIRST → R2 FIX FIRST → ⛔ green, residual finding open (P1) | B02 capped at two FIX FIRST rounds — awaiting the user's verdict |
+| 2026-09-23 | Verdict on B02 recorded: fix again — third round on `feat/ledger-parser` @`29430d6`, fresh strong-tier implementer | — |
