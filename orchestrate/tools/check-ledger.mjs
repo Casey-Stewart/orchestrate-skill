@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { decode, parseFlags, validFullRef } from './git-evidence.mjs';
+import { decode, parseFlags, validFullRef, validId, validPath } from './git-evidence.mjs';
 import { linesOf, exactPaths, table, oneRow, branchCell, extensions, skillPin } from './ledger-parse.mjs';
 
 const PLAN = '01-plan.md', PROGRESS = 'PROGRESS.md';
@@ -70,6 +70,8 @@ function checkBatch(name, text, id, branch, fence, add) {
 // (the directory name the fence finds it under, `.agents/changes/<ledger>`).
 export function checkLedger(plan, progress, batches, ledger) {
   const problems = [], add = (file, line, message) => problems.push({ file, line, message });
+  // The fence refuses to run at all for a ledger id or a batch-file path it cannot accept.
+  if (!validId(ledger)) add(PLAN, 1, `ledger directory ${ledger} is not a valid ledger id`);
   const planRows = rowsOf(plan, PLAN, PLAN_KEYS, add);
   const progressRows = rowsOf(progress, PROGRESS, PROGRESS_KEYS, add);
   // Rows already blamed for their id are counted as present but checked no further.
@@ -112,6 +114,7 @@ export function checkLedger(plan, progress, batches, ledger) {
     for (const [id, entry] of planned) {
       const { own } = entry;
       if (own.length !== 1) { add(PLAN, entry.row.line, `${id}: ${own.length} batch files 02-batches-${id.slice(1)}-*.md, expected exactly one`); continue; }
+      if (!validPath(entry.ownPath)) add(own[0], 1, `batch file path ${entry.ownPath} is not a valid repository path`);
       checkBatch(own[0], batches.get(own[0]), id, entry.branch, entry.fence, add);
     }
     for (const name of names) {

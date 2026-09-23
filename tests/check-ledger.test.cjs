@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { createHash } = require('node:crypto');
-const { spawnSync } = require('node:child_process');
+const { spawnSync, execFile } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -8,8 +8,7 @@ const test = require('node:test');
 const { makeRepo, LEDGER } = require('./support/git-fixture.cjs');
 const ROOT = path.resolve(__dirname, '..');
 const TOOLS = path.join(ROOT, 'orchestrate', 'tools');
-const TOOL = path.join(TOOLS, 'check-ledger.mjs');
-const fenceApi = import('../orchestrate/tools/check-fence.mjs');
+const TOOL = path.join(TOOLS, 'check-ledger.mjs'), FENCE = path.join(TOOLS, 'check-fence.mjs');
 const parserApi = import('../orchestrate/tools/ledger-parse.mjs');
 const ledgerApi = import('../orchestrate/tools/check-ledger.mjs');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g, '\n');
@@ -82,6 +81,8 @@ function swap(text, from, to) {
 }
 const edit = (files, name, from, to) => ({ ...files, [name]: swap(files[name], from, to) });
 const without = (files, name) => { assert.ok(files[name]); const copy = { ...files }; delete copy[name]; return copy; };
+const rename = (files, from, to) => ({ ...without(files, from), [to]: files[from] });
+const appendBytes = (files, name) => ({ ...files, [name]: Buffer.concat([Buffer.from(files[name]), Buffer.from([0xff, 0xfe])]) });
 const lineOf = (text, re, nth = 0) => text.split('\n').flatMap((l, i) => re.test(l) ? [i + 1] : [])[nth];
 const NOTES = { B01: /^(\| B01 \| One \|.*\| )— \|$/m, B02: /^(\| B02 \| Two \|.*\| )— \|$/m };
 const notes = (files, value, id = 'B01') => edit(files, PROG, NOTES[id], '$1' + value + ' |');
@@ -91,10 +92,15 @@ const authorizeInLog = (files, record, ids = ['B01']) => edit(ids.reduce((f, id)
 const setBranch = (files, branch) => edit(edit(edit(files, PLAN, '`feat/one`', '`' + branch + '`'), PROG, '`feat/one`', '`' + branch + '`'),
   B1, '**Branch**: `feat/one`', '**Branch**: `' + branch + '`');
 
-// Fence rejection sites as `<code>: <message>`, a clause of a multi-clause condition as
-// ` #<clause>`. Written by hand here; the domain they are checked against is DERIVED from the
-// fence's and the parser's source below, so the two cannot drift apart silently.
+// Fence rejection sites as `<code>: <message>`, then ` @<document>` where one site is raised for
+// more than one ledger document, and ` #<clause>` for one clause of a condition joining several.
+// Written by hand here; the domain they are checked against is DERIVED from the fence's and the
+// parser's source below, so the two cannot drift apart silently.
 const A = m => 'authority: ' + m, BL = m => 'batch-linkage: ' + m;
+const PL = m => A(m) + ' @plan', PR = m => A(m) + ' @progress', BD = m => BL(m) + ' @batch';
+const IDS = 'Duplicate or malformed batch IDs', REQUESTED = 'Missing or duplicate requested batch', CELL = 'Malformed branch cell';
+const HEADER = 'Malformed table header', TABLE_ROW = 'Malformed table row', AMBIGUOUS = 'Missing or ambiguous authority table';
+const NAME = BL('Batch ID and ledger batch filename do not agree');
 const BRANCH = A('Plan/PROGRESS branch linkage does not agree'), REDUNDANT = A('Redundant or ambiguous extension');
 const MISSING = A('Missing authoritative ledger text'), TITLE = BL('Batch title does not match ID');
 const FILES_BRANCH = BL('Baseline batch Files/Branch must match authoritative plan'), STRUCTURE = 'batch-structure: Unsupported original Checklist section';
@@ -105,63 +111,99 @@ const row = (f, file, id = 'B01') => lineOf(f[file], new RegExp('^\\| ' + id + '
 
 // Each case: the ledger edit, what `parse` must say (the problems it names by file, line and
 // message, or an UNKNOWN), and the fence rejection sites the REAL fence reports when the same
-// ledger is committed and B01 gated: no sites means the fence PASSes.
+// ledger is committed and B01 gated: no sites means the fence PASSes. `ledger` names the ledger
+// directory and `gate` overrides what the fence is invoked with, each derived from the ledger.
 const CASES = [
   { name: 'ledger from the real templates', edit: f => f, expect: () => [], sites: [] },
   { name: 'authorized fence extension', edit: f => authorizeInLog(f, EXTENSION), expect: () => [], sites: [] },
+  { name: 'title with a hyphen for the dash', sites: [], edit: f => edit(f, B1, '# B01 — ', '# B01 - '), expect: () => [] },
   // Stricter than the fence, which reads only the batch it gates.
   { name: 'orphan batch file', sites: [], edit: f => ({ ...f, '02-batches-03-three.md': swap(f[B2], '# B02 — ', '# B03 — ') }),
     expect: () => [['02-batches-03-three.md', 1, /^no plan row claims this batch file$/]] },
   { name: 'two batch files for one id', sites: [], edit: f => ({ ...f, '02-batches-01-copy.md': f[B1] }),
     expect: f => [[PLAN, row(f, PLAN), /^B01: 2 batch files 02-batches-01-\*\.md, expected exactly one$/]] },
   // Ledger authority: the plan and PROGRESS tables, cells and extension records.
-  { name: 'glob in the plan fence', sites: [A(PATHS)], edit: f => edit(f, PLAN, '`a.txt`, `b.txt` |', '`*.txt` |'),
+  { name: 'glob in the plan fence', sites: [PL(PATHS)], edit: f => edit(f, PLAN, '`a.txt`, `b.txt` |', '`*.txt` |'),
     expect: f => [[PLAN, row(f, PLAN), /^B01 Files \(fence\): Expected unique exact repository-relative backtick paths \(globs unsupported\)$/]] },
-  { name: 'empty plan fence cell', sites: [A('Empty file fence')], edit: f => edit(f, PLAN, '`a.txt`, `b.txt` |', '|'),
+  { name: 'empty plan fence cell', sites: [PL('Empty file fence')], edit: f => edit(f, PLAN, '`a.txt`, `b.txt` |', '|'),
     expect: f => [[PLAN, row(f, PLAN), /^B01 Files \(fence\): Empty file fence$/]] },
-  { name: 'malformed plan table header', sites: [A('Malformed table header')], edit: f => edit(f, PLAN, '|---|-------|', '|---|--x----|'),
+  { name: 'malformed plan table header', sites: [PL(HEADER)], edit: f => edit(f, PLAN, '|---|-------|', '|---|--x----|'),
     expect: () => [[PLAN, 1, /^batch table \(#, Branch, Files \(fence\)\): Malformed table header$/]] },
-  { name: 'plan row missing a cell', sites: [A('Malformed table row')], edit: f => edit(f, PLAN, /^(\| B02 \|.*) — \|$/m, '$1'),
+  { name: 'malformed PROGRESS table header', sites: [PR(HEADER)], edit: f => edit(f, PROG, '|---|-------|', '|---|--x----|'),
+    expect: () => [[PROG, 1, /^batch table \(#, Branch, Notes\): Malformed table header$/]] },
+  { name: 'plan row missing a cell', sites: [PL(TABLE_ROW)], edit: f => edit(f, PLAN, /^(\| B02 \|.*) — \|$/m, '$1'),
     expect: () => [[PLAN, 1, /^batch table \(#, Branch, Files \(fence\)\): Malformed table row$/]] },
-  { name: 'two PROGRESS batch tables', sites: [A('Missing or ambiguous authority table')],
+  { name: 'PROGRESS row missing a cell', sites: [PR(TABLE_ROW)], edit: f => edit(f, PROG, /^(\| B02 \|.*) — \|$/m, '$1'),
+    expect: () => [[PROG, 1, /^batch table \(#, Branch, Notes\): Malformed table row$/]] },
+  { name: 'two plan batch tables', sites: [PL(AMBIGUOUS)],
+    edit: f => edit(f, PLAN, '## Wave map & checkpoints', '| # | Branch | Files (fence) |\n|---|---|---|\n| B01 | `feat/one` | `a.txt`, `b.txt` |\n\n## Wave map & checkpoints'),
+    expect: () => [[PLAN, 1, /^batch table \(#, Branch, Files \(fence\)\): Missing or ambiguous authority table$/]] },
+  { name: 'two PROGRESS batch tables', sites: [PR(AMBIGUOUS)],
     edit: f => edit(f, PROG, '## Checkpoints', '| # | Branch | Notes |\n|---|---|---|\n| B01 | `feat/one` | — |\n\n## Checkpoints'),
     expect: () => [[PROG, 1, /^batch table \(#, Branch, Notes\): Missing or ambiguous authority table$/]] },
-  { name: 'malformed Bnn', sites: [A('Duplicate or malformed batch IDs')], edit: f => edit(f, PLAN, /^\| B02 \|/m, '| B2 |'),
+  { name: 'malformed Bnn', sites: [PL(IDS)], edit: f => edit(f, PLAN, /^\| B02 \|/m, '| B2 |'),
     expect: f => [[PLAN, row(f, PLAN, 'B2'), /^B2: Duplicate or malformed batch IDs$/], [PROG, row(f, PROG, 'B02'), /^B02: no plan row$/], [B2, 1, /^no plan row claims this batch file$/]] },
-  { name: 'plan and PROGRESS ids differ', sites: [A('Missing or duplicate requested batch')], edit: f => edit(f, PROG, /^\| B01 \| One \|/m, '| B03 | One |'),
+  { name: 'duplicate PROGRESS row', sites: [PR(IDS)], edit: f => edit(f, PROG, /^(\| B02 \|.*)$/m, '$1\n$1'),
+    expect: f => [[PROG, lineOf(f[PROG], /^\| B02 \|/), /^B02: Duplicate or malformed batch IDs$/], [PROG, lineOf(f[PROG], /^\| B02 \|/, 1), /^B02: Duplicate or malformed batch IDs$/]] },
+  { name: 'plan lacks the gated id', sites: [PL(REQUESTED)], edit: f => edit(f, PLAN, /^\| B01 \| One \|/m, '| B03 | One |'),
+    expect: f => [[PROG, row(f, PROG), /^B01: no plan row$/], [PLAN, row(f, PLAN, 'B03'), /^B03: no PROGRESS row$/],
+      [PLAN, row(f, PLAN, 'B03'), /^B03: 0 batch files 02-batches-03-\*\.md, expected exactly one$/], [B1, 1, /^no plan row claims this batch file$/]] },
+  { name: 'plan and PROGRESS ids differ', sites: [PR(REQUESTED)], edit: f => edit(f, PROG, /^\| B01 \| One \|/m, '| B03 | One |'),
     expect: f => [[PROG, row(f, PROG, 'B03'), /^B03: no plan row$/], [PLAN, row(f, PLAN), /^B01: no PROGRESS row$/]] },
-  { name: 'malformed plan branch cell', sites: [A('Malformed branch cell')], edit: f => edit(f, PLAN, '`feat/one`', '`feat/one`x'),
+  { name: 'malformed plan branch cell', sites: [PL(CELL)], edit: f => edit(f, PLAN, '`feat/one`', '`feat/one`x'),
     expect: f => [[PLAN, row(f, PLAN), /^B01 Branch: Malformed branch cell$/]] },
-  { name: 'malformed PROGRESS branch cell', sites: [A('Malformed branch cell')], edit: f => edit(f, PROG, '`feat/one`', '`feat/one`x'),
+  { name: 'malformed PROGRESS branch cell', sites: [PR(CELL)], edit: f => edit(f, PROG, '`feat/one`', '`feat/one`x'),
     expect: f => [[PROG, row(f, PROG), /^B01 Branch: Malformed branch cell$/]] },
   { name: 'plan branch disagrees with PROGRESS and the batch file', sites: [BRANCH + ' #plan-branch'], edit: f => edit(f, PLAN, '`feat/one`', '`feat/other`'),
     expect: f => [[PROG, row(f, PROG), /^B01: Branch feat\/one differs from the plan's feat\/other$/], [B1, lineOf(f[B1], /^\*\*Branch\*\*: /), /^Branch line must read exactly \*\*Branch\*\*: `feat\/other`$/]] },
   { name: 'PROGRESS branch disagrees with the plan', sites: [BRANCH + ' #progress-branch'], edit: f => edit(f, PROG, '`feat/one`', '`feat/other`'),
     expect: f => [[PROG, row(f, PROG), /^B01: Branch feat\/other differs from the plan's feat\/one$/]] },
-  { name: 'malformed fence extension', sites: [A('Malformed fence extension')], edit: f => notes(f, 'fence +x.txt (item, reason)'),
+  { name: 'malformed fence extension', sites: [PR('Malformed fence extension')], edit: f => notes(f, 'fence +x.txt (item, reason)'),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: Malformed fence extension$/]] },
-  { name: 'unsupported fence extension grammar', sites: [A('Unsupported fence extension grammar')], edit: f => notes(f, 'fence +x.txt'),
+  { name: 'unsupported fence extension grammar', sites: [PR('Unsupported fence extension grammar')], edit: f => notes(f, 'fence +x.txt'),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: Unsupported fence extension grammar$/]] },
-  { name: 'extension recorded for another id', sites: [A('Mismatched or ambiguous extension in Notes')], edit: f => notes(f, 'fence +x.txt (B02, item, reason, 2026-09-23)'),
+  { name: 'extension recorded for another id', sites: [PR('Mismatched or ambiguous extension in Notes')], edit: f => notes(f, 'fence +x.txt (B02, item, reason, 2026-09-23)'),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: Mismatched or ambiguous extension in Notes$/]] },
-  { name: 'extension with two session logs', sites: [A('Extension needs an unambiguous session log')],
+  { name: 'extension with two session logs', sites: [PR('Extension needs an unambiguous session log')],
     edit: f => edit(authorizeInLog(f, EXTENSION), PROG, '## Session log', '## Session log\n\n## Session log'),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: Extension needs an unambiguous session log$/]] },
-  { name: 'extension with no session-log authorization', sites: [A('Extension needs exactly one matching session-log authorization')], edit: f => notes(f, EXTENSION),
+  { name: 'extension with no session-log authorization', sites: [PR('Extension needs exactly one matching session-log authorization')], edit: f => notes(f, EXTENSION),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: Extension needs exactly one matching session-log authorization$/]] },
-  { name: 'extension owned by two rows', sites: [A('Extension cannot be bound to one batch row')], edit: f => authorizeInLog(f, EXTENSION, ['B01', 'B02']),
+  { name: 'extension owned by two rows', sites: [PR('Extension cannot be bound to one batch row')], edit: f => authorizeInLog(f, EXTENSION, ['B01', 'B02']),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: Extension cannot be bound to one batch row$/], [PROG, row(f, PROG, 'B02'), /^B02 Notes: Extension cannot be bound to one batch row$/]] },
   { name: 'authorized extension repeating a fence path', sites: [REDUNDANT + ' #in-fence'], edit: f => authorizeInLog(f, EXTENSION.replace('x.txt', 'a.txt')),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: extension repeats a fence path$/]] },
   { name: 'authorized extension naming the batch file itself', sites: [REDUNDANT + ' #own-batch-file'], edit: f => authorizeInLog(f, EXTENSION.replace('x.txt', `${LEDGER}/${B1}`)),
     expect: f => [[PROG, row(f, PROG), /^B01 Notes: extension names the batch's own file$/]] },
-  // Authority files the fence will not read: missing, or a link.
-  { name: 'missing plan', sites: [MISSING + ' #plan', AUTH_FILE], edit: f => without(f, PLAN), unknown: /^UNKNOWN cannot read .*01-plan\.md$/ },
-  { name: 'missing PROGRESS', sites: [MISSING + ' #progress', AUTH_FILE], edit: f => without(f, PROG), unknown: /^UNKNOWN cannot read .*PROGRESS\.md$/ },
-  { name: 'linked plan', sites: [AUTH_FILE], link: PLAN, edit: f => f, unknown: /^UNKNOWN a link, not an ordinary file: .*01-plan\.md$/ },
-  // A branch the fence can never be invoked for.
-  { name: 'impossible branch name', sites: [USAGE], ref: 'feat/one x', edit: f => setBranch(f, 'feat/one x'),
+  // Authority files the fence will not read: missing, undecodable, or a link.
+  { name: 'missing plan', sites: [MISSING + ' #plan', AUTH_FILE + ' @plan'], edit: f => without(f, PLAN), unknown: /^UNKNOWN cannot read .*01-plan\.md$/ },
+  { name: 'missing PROGRESS', sites: [MISSING + ' #progress', AUTH_FILE + ' @progress'], edit: f => without(f, PROG), unknown: /^UNKNOWN cannot read .*PROGRESS\.md$/ },
+  { name: 'plan not UTF-8', sites: [MISSING + ' #plan'], edit: f => appendBytes(f, PLAN), unknown: /^UNKNOWN not UTF-8: .*01-plan\.md$/ },
+  { name: 'PROGRESS not UTF-8', sites: [MISSING + ' #progress'], edit: f => appendBytes(f, PROG), unknown: /^UNKNOWN not UTF-8: .*PROGRESS\.md$/ },
+  { name: 'linked plan', sites: [AUTH_FILE + ' @plan'], link: PLAN, edit: f => f, unknown: /^UNKNOWN a link, not an ordinary file: .*01-plan\.md$/ },
+  { name: 'linked PROGRESS', sites: [AUTH_FILE + ' @progress'], link: PROG, edit: f => f, unknown: /^UNKNOWN a link, not an ordinary file: .*PROGRESS\.md$/ },
+  // What the fence is invoked with, each derived from the ledger: a ledger it refuses to gate.
+  { name: 'impossible branch name', sites: [USAGE + ' #batch-ref'], gate: { batch: 'refs/heads/feat/one x' }, edit: f => setBranch(f, 'feat/one x'),
     expect: f => [[PLAN, row(f, PLAN), /^B01 Branch: feat\/one x is not a valid branch name$/]] },
+  { name: 'branch name with a double dot', sites: [USAGE + ' #batch-ref'], gate: { batch: 'refs/heads/feat/one..x' }, edit: f => setBranch(f, 'feat/one..x'),
+    expect: f => [[PLAN, row(f, PLAN), /^B01 Branch: feat\/one\.\.x is not a valid branch name$/]] },
+  { name: 'ledger id the fence refuses', sites: [USAGE + ' #ledger-id'], ledger: 'OS-20260923-café', edit: f => f,
+    expect: () => [[PLAN, 1, /^ledger directory OS-20260923-café is not a valid ledger id$/]] },
+  { name: 'batch id the fence refuses', sites: [USAGE + ' #batch-id'], gate: { 'batch-id': 'B1' },
+    edit: f => edit(edit(f, PLAN, /^\| B01 \| One \|/m, '| B1 | One |'), PROG, /^\| B01 \| One \|/m, '| B1 | One |'),
+    expect: f => [[PLAN, row(f, PLAN, 'B1'), /^B1: Duplicate or malformed batch IDs$/], [PROG, row(f, PROG, 'B1'), /^B1: Duplicate or malformed batch IDs$/], [B1, 1, /^no plan row claims this batch file$/]] },
+  { name: 'batch file path the fence refuses', sites: [USAGE + ' #batch-file'], gate: { 'batch-file': `${LEDGER}/02-batches-01-one[1].md` },
+    edit: f => rename(f, B1, '02-batches-01-one[1].md'),
+    expect: () => [['02-batches-01-one[1].md', 1, /^batch file path \.agents\/changes\/FIXTURE\/02-batches-01-one\[1\]\.md is not a valid repository path$/]] },
+  { name: 'batch file numbered unlike its id', sites: [NAME + ' #prefix'], gate: { 'batch-file': `${LEDGER}/02-batches-1-one.md` },
+    edit: f => rename(f, B1, '02-batches-1-one.md'),
+    expect: f => [[PLAN, row(f, PLAN), /^B01: 0 batch files 02-batches-01-\*\.md, expected exactly one$/], ['02-batches-1-one.md', 1, /^no plan row claims this batch file$/]] },
+  { name: 'batch file not Markdown', sites: [NAME + ' #suffix'], gate: { 'batch-file': `${LEDGER}/02-batches-01-one.markdown` },
+    edit: f => rename(f, B1, '02-batches-01-one.markdown'),
+    expect: f => [[PLAN, row(f, PLAN), /^B01: 0 batch files 02-batches-01-\*\.md, expected exactly one$/]] },
+  { name: 'batch file in a subdirectory', sites: [NAME + ' #subdir'], gate: { 'batch-file': `${LEDGER}/02-batches-01-x/one.md` },
+    edit: f => rename(f, B1, '02-batches-01-x/one.md'),
+    expect: f => [[PLAN, row(f, PLAN), /^B01: 0 batch files 02-batches-01-\*\.md, expected exactly one$/]] },
   // The batch file: its linkage to the plan, and its structure.
   { name: 'missing batch file', sites: [BASELINE], edit: f => without(f, B1),
     expect: f => [[PLAN, row(f, PLAN), /^B01: 0 batch files 02-batches-01-\*\.md, expected exactly one$/]] },
@@ -170,8 +212,16 @@ const CASES = [
     expect: () => [[B1, 1, /^title must open "# B01 — "$/]] },
   { name: 'title with a colon for the dash', sites: [TITLE], edit: f => edit(f, B1, '# B01 — ', '# B01: '),
     expect: () => [[B1, 1, /^title must open "# B01 — "$/]] },
+  { name: 'title with no dash', sites: [TITLE], edit: f => edit(f, B1, '# B01 — ', '# B01 '),
+    expect: () => [[B1, 1, /^title must open "# B01 — "$/]] },
+  { name: 'title with no space after the dash', sites: [TITLE], edit: f => edit(f, B1, '# B01 — ', '# B01 —'),
+    expect: () => [[B1, 1, /^title must open "# B01 — "$/]] },
+  { name: 'missing Files line', sites: [FILES_BRANCH + ' #files-count'], edit: f => edit(f, B1, /^\*\*Files\*\*: .*\n/m, ''),
+    expect: () => [[B1, 1, /^0 lines start "\*\*Files\*\*: ", expected exactly one$/]] },
   { name: 'duplicate Files line', sites: [FILES_BRANCH + ' #files-count'], edit: f => edit(f, B1, /^(\*\*Files\*\*: .*)$/m, '$1\n$1'),
     expect: f => [[B1, lineOf(f[B1], /^\*\*Files\*\*: /, 1), /^2 lines start "\*\*Files\*\*: ", expected exactly one$/]] },
+  { name: 'missing Branch line', sites: [FILES_BRANCH + ' #branch-count'], edit: f => edit(f, B1, /^\*\*Branch\*\*: .*\n/m, ''),
+    expect: () => [[B1, 1, /^0 lines start "\*\*Branch\*\*: ", expected exactly one$/]] },
   { name: 'duplicate Branch line', sites: [FILES_BRANCH + ' #branch-count'], edit: f => edit(f, B1, /^(\*\*Branch\*\*: .*)$/m, '$1\n$1'),
     expect: f => [[B1, lineOf(f[B1], /^\*\*Branch\*\*: /, 1), /^2 lines start "\*\*Branch\*\*: ", expected exactly one$/]] },
   { name: 'text after the Branch backtick', sites: [FILES_BRANCH + ' #branch-exact'], edit: f => edit(f, B1, '**Branch**: `feat/one`', '**Branch**: `feat/one` (cut from the tip)'),
@@ -180,9 +230,9 @@ const CASES = [
     expect: f => [[B1, lineOf(f[B1], /^\*\*Files\*\*: /), /^Files line differs from the plan fence$/]] },
   { name: 'reordered Files line', sites: [FILES_BRANCH + ' #files-equal'], edit: f => edit(f, B1, '**Files**: `a.txt`, `b.txt`', '**Files**: `b.txt`, `a.txt`'),
     expect: f => [[B1, lineOf(f[B1], /^\*\*Files\*\*: /), /^Files line differs from the plan fence$/]] },
-  { name: 'glob in the Files line', sites: [BL(PATHS)], edit: f => edit(f, B1, '**Files**: `a.txt`, `b.txt`', '**Files**: `*.txt`'),
+  { name: 'glob in the Files line', sites: [BD(PATHS)], edit: f => edit(f, B1, '**Files**: `a.txt`, `b.txt`', '**Files**: `*.txt`'),
     expect: f => [[B1, lineOf(f[B1], /^\*\*Files\*\*: /), /^Files line: Expected unique exact repository-relative backtick paths \(globs unsupported\)$/]] },
-  { name: 'empty Files line', sites: [BL('Empty file fence')], edit: f => edit(f, B1, '**Files**: `a.txt`, `b.txt`', '**Files**: '),
+  { name: 'empty Files line', sites: [BD('Empty file fence')], edit: f => edit(f, B1, '**Files**: `a.txt`, `b.txt`', '**Files**: '),
     expect: f => [[B1, lineOf(f[B1], /^\*\*Files\*\*: /), /^Files line: Empty file fence$/]] },
   { name: 'missing Checklist', sites: [STRUCTURE + ' #no-checklist'], edit: f => edit(f, B1, '## Checklist', '## Tasks'),
     expect: () => [[B1, 1, /^needs exactly one "## Checklist" line followed by another "## " heading$/]] },
@@ -191,52 +241,139 @@ const CASES = [
   { name: 'Checklist is the last heading', sites: [STRUCTURE + ' #no-later-heading'], edit: f => edit(f, B1, /\n## Acceptance criteria[\s\S]*$/, '\n'),
     expect: f => [[B1, lineOf(f[B1], /^## Checklist$/), /^needs exactly one "## Checklist" line followed by another "## " heading$/]] },
 ];
-// Clause names for each fence condition that joins several clauses with `||`; their number
-// is checked against the source line that raises the site.
+// The diagnostic codes by which the fence rejects a ledger shape.
+const MEASURED = ['authority', 'batch-linkage', 'authority-file', 'batch-baseline', 'batch-structure', 'usage'];
+// Each fence condition joining several clauses, pinned whole, with every clause named by its
+// own text: a clause moved between conditions changes both pins.
 const CLAUSES = {
-  [BRANCH]: ['ref-not-heads', 'plan-branch', 'progress-branch'], [REDUNDANT]: ['in-fence', 'own-batch-file'],
-  [MISSING]: ['plan', 'progress'], [FILES_BRANCH]: ['files-count', 'branch-count', 'branch-exact', 'files-equal'],
-  [STRUCTURE]: ['no-checklist', 'two-checklists', 'no-later-heading'],
+  [USAGE]: { when: "!repo || !validFullRef(integration) || !validFullRef(batch) || integration === batch || !validId(id) || !/^B\\d{2,}$/.test(batchId || '') || !validPath(batchFile)",
+    clauses: { repo: '!repo', 'integration-ref': '!validFullRef(integration)', 'batch-ref': '!validFullRef(batch)', 'distinct-refs': 'integration === batch',
+      'ledger-id': '!validId(id)', 'batch-id': "!/^B\\d{2,}$/.test(batchId || '')", 'batch-file': '!validPath(batchFile)' } },
+  [NAME]: { when: "!batchFile.startsWith(`${root}/02-batches-${number}-`) || !batchFile.endsWith('.md') || batchFile.slice(root.length + 1).includes('/')",
+    clauses: { prefix: '!batchFile.startsWith(`${root}/02-batches-${number}-`)', suffix: "!batchFile.endsWith('.md')", subdir: "batchFile.slice(root.length + 1).includes('/')" } },
+  [MISSING]: { when: 'plan === null || progress === null', clauses: { plan: 'plan === null', progress: 'progress === null' } },
+  [BRANCH]: { when: "!batch.startsWith('refs/heads/') || branchCell(planRow.Branch) !== branch || branchCell(progressRow.Branch) !== branch",
+    clauses: { 'ref-not-heads': "!batch.startsWith('refs/heads/')", 'plan-branch': 'branchCell(planRow.Branch) !== branch', 'progress-branch': 'branchCell(progressRow.Branch) !== branch' } },
+  [REDUNDANT]: { when: 'extension.some(p => fence.includes(p) || p === batchFile)', clauses: { 'in-fence': 'fence.includes(p)', 'own-batch-file': 'p === batchFile' } },
+  [FILES_BRANCH]: { when: "fileLines.length !== 1 || branchLines.length !== 1 || branchLines[0] !== `**Branch**: \\`${batch.slice('refs/heads/'.length)}\\`` || JSON.stringify(exactPaths(fileLines[0].slice(11))) !== JSON.stringify(fence)",
+    clauses: { 'files-count': 'fileLines.length !== 1', 'branch-count': 'branchLines.length !== 1',
+      'branch-exact': "branchLines[0] !== `**Branch**: \\`${batch.slice('refs/heads/'.length)}\\``", 'files-equal': 'JSON.stringify(exactPaths(fileLines[0].slice(11))) !== JSON.stringify(fence)' } },
+  [STRUCTURE]: { when: "start < 0 || before.filter(l => l === '## Checklist').length !== 1 || !ends.length",
+    clauses: { 'no-checklist': 'start < 0', 'two-checklists': "before.filter(l => l === '## Checklist').length !== 1", 'no-later-heading': '!ends.length' } },
 };
-// The gated ref is the operator's input, never a ledger shape.
-const UNREACHABLE = [BRANCH + ' #ref-not-heads'];
-// A missing authority file is always also a non-ordinary one: the two sites cannot part.
-const PAIRED = [MISSING + ' #plan', MISSING + ' #progress'];
+// A site raised once per authority file by the loop on its source line.
+const PER_FILE = { [AUTH_FILE]: { loop: 'for (const file of [planPath, progressPath]) if (', docs: ['plan', 'progress'] } };
+// Operator inputs, never ledger shapes: the fence is always invoked with the repository, the
+// contract's integration branch (a file parse does not read) and `refs/heads/<plan branch>`.
+const UNREACHABLE = [USAGE + ' #repo', USAGE + ' #integration-ref', USAGE + ' #distinct-refs', BRANCH + ' #ref-not-heads'];
+// A measured code raised outside checkFence, on the fence command line's own flags.
+const EXEMPT = ['usage: Unknown, missing or duplicate flag; use --help'];
+// The ledger document a parser call reads, by the names in its arguments.
+const DOC = { plan: 'plan', planRow: 'plan', progress: 'progress', progressRow: 'progress', baseline: 'batch', fileLines: 'batch', branchLines: 'batch' };
+const LITERAL = /^(?:'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`)/;
+const THROW = /throw new Error\((?:'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`)\)/g;
+// Every throw must be one this reads, in any quoting, so no throw is silently outside the domain.
+function throwsOf(text, where) {
+  const found = [...text.matchAll(THROW)].map(m => ({ message: m[1] ?? m[2] ?? m[3], index: m.index }));
+  assert.equal((text.match(/\bthrow\b/g) || []).length, found.length, where + ': every throw raises an Error with a literal message');
+  return found;
+}
+// The end of the string or template literal opening at `i`; a template's ${…} may hold literals.
+function skipLiteral(src, i) {
+  for (let j = i + 1; j < src.length; j++) {
+    if (src[j] === '\\') j++;
+    else if (src[j] === src[i]) return j;
+    else if (src[i] === '`' && src.startsWith('${', j)) j = closing(src, j + 1, '{', '}');
+  }
+  assert.fail('unterminated literal at ' + i);
+}
+// The index of the bracket closing the one at `open`, literals skipped.
+function closing(src, open, o = '(', c = ')') {
+  for (let depth = 0, j = open; j < src.length; j++) {
+    if ("'\"`".includes(src[j])) j = skipLiteral(src, j);
+    else if (src[j] === o) depth++;
+    else if (src[j] === c && --depth === 0) return j;
+  }
+  assert.fail('unbalanced ' + o + ' at ' + open);
+}
+// The condition guarding the raise at `at`: an `if (` on its line, or on the line before when
+// that line opens the block holding it; null when the raise is unconditional.
+function conditionOf(src, at) {
+  const lineStart = src.lastIndexOf('\n', at - 1) + 1;
+  let ifAt = src.lastIndexOf('if (', at);
+  if (ifAt < lineStart) {
+    const prevStart = src.lastIndexOf('\n', lineStart - 2) + 1, prev = src.slice(prevStart, lineStart - 1);
+    ifAt = /\{\s*$/.test(prev) && prev.includes('if (') ? prevStart + prev.lastIndexOf('if (') : -1;
+  }
+  return ifAt < 0 ? null : src.slice(ifAt + 4, closing(src, ifAt + 3));
+}
+function sitesAt(src, key, at) {
+  const line = src.slice(src.lastIndexOf('\n', at - 1) + 1, (src.indexOf('\n', at) + 1 || src.length + 1) - 1);
+  let keys = [key];
+  if (PER_FILE[key]) {
+    assert.ok(line.trimStart().startsWith(PER_FILE[key].loop), key + ': raised once per authority file');
+    keys = PER_FILE[key].docs.map(d => key + ' @' + d);
+  }
+  const when = conditionOf(src, at), pinned = CLAUSES[key];
+  if (!pinned) {
+    assert.ok(when === null || !when.includes('||'), key + ': a condition joining clauses needs them named: ' + when);
+    return keys;
+  }
+  assert.equal(when, pinned.when, key + ': the pinned condition');
+  let from = 0, gaps = '';
+  for (const text of Object.values(pinned.clauses)) {
+    const i = when.indexOf(text, from);
+    assert.ok(i >= 0 && when.indexOf(text, i + 1) < 0, key + ': each clause once, in order: ' + text);
+    gaps += when.slice(from, i); from = i + text.length;
+  }
+  assert.equal((gaps + when.slice(from)).split('||').length, Object.keys(pinned.clauses).length, key + ': every clause is named');
+  return keys.flatMap(k => Object.keys(pinned.clauses).map(c => k + ' #' + c));
+}
 // Every site at which the fence rejects a ledger shape, derived from the source: each message
-// thrown in the fence's authority and linkage blocks or by any parser those blocks reach, the
-// fence's non-ordinary-file and structure diagnostics, and each clause of a joined condition.
-function fenceRejectionSites() {
-  const fence = read('orchestrate/tools/check-fence.mjs'), parser = read('orchestrate/tools/ledger-parse.mjs');
-  const throwsIn = text => [...text.matchAll(/throw new Error\('([^']+)'\)/g)].map(m => m[1]);
+// thrown in the fence's authority and linkage try blocks, or by a parser they reach (keyed by
+// the ledger document the call reads), every measured diagnostic the fence raises with a literal
+// message, and each clause of a joined condition. The sources are parameters so a planted copy
+// can prove the extractor sees what is planted.
+function fenceRejectionSites(fence = read('orchestrate/tools/check-fence.mjs'), parser = read('orchestrate/tools/ledger-parse.mjs')) {
   const bodies = Object.fromEntries(parser.split(/^export /m).slice(1).map(part => [/^(?:const|function)\s+([\w$]+)/.exec(part)[1], part]));
   const calls = text => [...text.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\(/g)].map(m => m[1]).filter(n => Object.hasOwn(bodies, n));
-  const reach = text => {
-    const seen = new Set(), todo = calls(text);
+  const reach = name => {
+    const seen = new Set(), todo = [name];
     while (todo.length) { const n = todo.pop(); if (!seen.has(n)) { seen.add(n); todo.push(...calls(bodies[n])); } }
     return [...seen];
   };
-  const block = (from, to) => {
-    const start = fence.indexOf(from), end = fence.indexOf(to, start);
-    assert.ok(start >= 0 && end > start, 'check-fence.mjs block not found: ' + from);
-    return fence.slice(start, end);
-  };
-  const own = [], parsed = [];
-  for (const [code, text] of [['authority', block('if (plan === null', "diagnostic('authority', e.message")],
-    ['batch-linkage', block('if (!new RegExp(`^# ${batchId}', "diagnostic('batch-linkage', e.message")]]) {
-    own.push(...throwsIn(text).map(m => code + ': ' + m));
-    parsed.push(...reach(text).flatMap(n => throwsIn(bodies[n])).map(m => code + ': ' + m));
+  const parsed = new Set(), own = [], raised = new Set(), sinks = [], exempt = [];
+  const raise = (key, at) => { assert.ok(!raised.has(key), 'one source site raises ' + key); raised.add(key); own.push(...sitesAt(fence, key, at)); };
+  for (const code of ['authority', 'batch-linkage']) {
+    const sink = `catch (e) { unknowns.push(diagnostic('${code}', e.message`, end = fence.indexOf(sink), start = fence.lastIndexOf('try {', end);
+    assert.ok(end >= 0 && fence.indexOf(sink, end + 1) < 0 && start >= 0, 'one try block ending in the ' + code + ' catch');
+    const block = fence.slice(start, end);
+    sinks.push(end + sink.indexOf('diagnostic('));
+    for (const t of throwsOf(block, code + ' block')) raise(code + ': ' + t.message, start + t.index);
+    for (const m of block.matchAll(/(?<![\w$.])([A-Za-z_$][\w$]*)\(/g)) {
+      if (!Object.hasOwn(bodies, m[1])) continue;
+      const open = m.index + m[1].length, args = block.slice(open + 1, closing(block, open));
+      const names = [...args.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, '').matchAll(/[A-Za-z_$][\w$]*/g)].map(t => t[0]);
+      const docs = [...new Set(names.filter(n => Object.hasOwn(DOC, n)).map(n => DOC[n]))];
+      assert.equal(docs.length, 1, `${m[1]}(${args}) must read exactly one ledger document`);
+      for (const n of reach(m[1])) for (const t of throwsOf(bodies[n], n)) parsed.add(`${code}: ${t.message} @${docs[0]}`);
+    }
   }
-  for (const m of fence.matchAll(/diagnostic\('(authority-file|batch-baseline)', '([^']+)'/g)) own.push(m[1] + ': ' + m[2]);
-  for (const m of fence.matchAll(/add\('(batch-structure)', '([^']+)'/g)) own.push(m[1] + ': ' + m[2]);
-  const sites = [...new Set(parsed)];
-  for (const site of new Set(own)) {
-    const message = site.slice(site.indexOf(': ') + 2), lines = fence.split('\n').filter(l => l.includes("'" + message + "'"));
-    assert.equal(lines.length, 1, 'one source line raises ' + site);
-    const clauses = lines[0].split(' || ').length;
-    assert.equal(clauses, CLAUSES[site]?.length ?? 1, site + ': the clause names must match the conditions joined on its source line');
-    sites.push(...(CLAUSES[site] ? CLAUSES[site].map(c => site + ' #' + c) : [site]));
+  for (const m of fence.matchAll(/(?<![\w$.])(diagnostic|add)\(\s*(['"`])([\w-]+)\2\s*,\s*/g)) {
+    if (!MEASURED.includes(m[3])) continue;
+    const lit = LITERAL.exec(fence.slice(m.index + m[0].length));
+    if (!lit) {
+      assert.ok(sinks.includes(m.index), m[3] + ': a measured diagnostic with a computed message outside the two catches');
+      sinks.splice(sinks.indexOf(m.index), 1); continue;
+    }
+    const key = m[3] + ': ' + (lit[1] ?? lit[2] ?? lit[3]);
+    if (EXEMPT.includes(key)) exempt.push(key); else raise(key, m.index);
   }
-  return sites;
+  assert.deepEqual(sinks, [], 'each try block ends in its measured catch');
+  assert.deepEqual(exempt, EXEMPT, 'every exemption names one live site');
+  const domain = [...parsed, ...own];
+  assert.equal(new Set(domain).size, domain.length, 'a parsed site is never also raised directly');
+  return domain;
 }
 function problemsOf(line) {
   const m = /^PARSE FAIL (\d+) problem\(s\): (.*)$/.exec(line);
@@ -262,42 +399,99 @@ function linkInPlace(file, content, outside) {
 test('the fence rejection domain is derived from the source, and every site is owned by a case', () => {
   const domain = fenceRejectionSites();
   // Pinned by hand: a site dropped from the source AND from the cases still goes red here.
-  assert.equal(domain.length, 33, JSON.stringify(domain, null, 1));
+  assert.equal(domain.length, 50, JSON.stringify(domain, null, 1));
   assert.equal(new Set(domain).size, domain.length);
-  for (const site of [...UNREACHABLE, ...PAIRED]) assert.ok(domain.includes(site), site);
-  assert.equal(CASES.length, 41);
+  for (const site of UNREACHABLE) assert.ok(domain.includes(site), site);
+  assert.equal(CASES.length, 61);
   assert.equal(new Set(CASES.map(c => c.name)).size, CASES.length);
-  for (const c of CASES) for (const site of c.sites) assert.ok(domain.includes(site) || site === USAGE, c.name + ': not a fence rejection site: ' + site);
+  for (const c of CASES) {
+    for (const site of c.sites) assert.ok(domain.includes(site), c.name + ': not a fence rejection site: ' + site);
+    // A case the fence rejects never demands PARSE OK: that would pin the looser parse.
+    assert.ok(!c.sites.length || c.unknown || c.expect(c.edit(baseLedger())).length, c.name + ': rejected by the fence, so parse must not pass it');
+  }
   // Owned: some case is rejected by the fence at this site and no other, so the parse check
   // standing opposite it is the only thing that can make that case fail.
   for (const site of domain) {
     if (UNREACHABLE.includes(site)) { assert.ok(!CASES.some(c => c.sites.includes(site)), site); continue; }
-    const alone = PAIRED.includes(site) ? [site, AUTH_FILE] : [site];
-    assert.ok(CASES.some(c => sameSet(c.sites, alone)), 'no case is rejected at this site alone: ' + site);
+    assert.ok(CASES.some(c => sameSet(c.sites, [site])), 'no case is rejected at this site alone: ' + site);
   }
-  assert.ok(CASES.some(c => sameSet(c.sites, [USAGE])), 'a branch the fence can never gate');
   assert.ok(CASES.some(c => !c.sites.length && c.expect(c.edit(baseLedger())).length), 'a case where parse is stricter than the fence');
 });
 
-test('parse is never looser than the fence: each case in parse and in the real fence', async t => {
-  const { checkFence } = await fenceApi;
-  const MEASURED = ['authority', 'batch-linkage', 'authority-file', 'batch-baseline', 'batch-structure', 'usage'];
-  // One shared repository for every case: each commit replaces the whole ledger.
-  const repo = makeRepo(t), outside = tmp(t); repo.git('checkout', '-b', 'feat/one'); repo.git('config', 'core.symlinks', 'false');
-  const dir = path.join(repo.cwd, ...LEDGER.split('/'));
-  const opts = { repo: repo.cwd, integration: 'refs/heads/integration', batch: 'refs/heads/feat/one', ledger: 'FIXTURE',
-    'batch-id': 'B01', 'batch-file': `${LEDGER}/${B1}`, env: repo.env };
-  for (const c of CASES) await t.test(c.name, () => {
-    const files = c.edit(baseLedger());
-    // Only the base control and the link cases, which change the file type, keep the bytes.
-    if (c.name !== 'ledger from the real templates' && !c.link) assert.notDeepEqual(files, baseLedger());
+test('the rejection-site extractor: a planted site grows the domain, an unreadable one stops it', () => {
+  const fence = read('orchestrate/tools/check-fence.mjs'), parser = read('orchestrate/tools/ledger-parse.mjs');
+  const base = fenceRejectionSites(fence, parser);
+  const grows = [
+    ['a throw before the first authority statement', swap(fence, '  try {\n    if (plan === null', "  try {\n    if (plan !== null && plan.includes('ZZZ-SENTINEL')) throw new Error('Sentinel plan rejected');\n    if (plan === null"), parser,
+      ['authority: Sentinel plan rejected']],
+    ['a template-literal throw in the authority block', swap(fence, "    const branch = batch.slice('refs/heads/'.length);\n",
+      "    const branch = batch.slice('refs/heads/'.length);\n    if (branch === 'zzz') throw new Error(`Sentinel ${branch}`);\n"), parser, ['authority: Sentinel ${branch}']],
+    ['a measured diagnostic with a literal message', swap(fence, "{ path: file }));\n", "{ path: file }));\n  unknowns.push(diagnostic('authority', 'Sentinel batch file'));\n"), parser,
+      ['authority: Sentinel batch file']],
+    ['a double-quoted throw in a parser the fence reaches', fence, swap(parser, 'export function table(text, required) {\n', 'export function table(text, required) {\n  if (text === \'zzz\') throw new Error("Sentinel table");\n'),
+      ['authority: Sentinel table @plan', 'authority: Sentinel table @progress']],
+  ];
+  for (const [name, f, p, added] of grows) {
+    const grown = fenceRejectionSites(f, p);
+    assert.deepEqual(base.filter(s => !grown.includes(s)), [], name + ': nothing lost');
+    assert.deepEqual(grown.filter(s => !base.includes(s)).sort(), added.slice().sort(), name);
+  }
+  const firstLine = re => err => re.test(String(err.message).split('\n')[0]);
+  const stops = [
+    ['a throw the extractor cannot read', swap(fence, '    if (plan === null', "    if (plan === 'zzz') throw sentinel;\n    if (plan === null"), parser, /^authority block: every throw raises an Error with a literal message$/],
+    ['a measured diagnostic with a computed message', swap(fence, "{ path: file }));\n", "{ path: file }));\n  unknowns.push(diagnostic('authority', String(plan)));\n"), parser,
+      /^authority: a measured diagnostic with a computed message outside the two catches$/],
+    // The exempt clause moved into the usage guard, a ledger-shape clause left in its place.
+    ['a clause moved from the branch condition into the usage guard', swap(swap(fence, 'if (!repo || ', "if (!repo || !batch.startsWith('refs/heads/') || "),
+      "!batch.startsWith('refs/heads/') || branchCell(planRow.Branch)", '!planRow.Batch || branchCell(planRow.Branch)'), parser,
+      /^authority: Plan\/PROGRESS branch linkage does not agree: the pinned condition$/],
+    ['a clause added to the usage guard alone', swap(fence, 'if (!repo || ', "if (!repo || !batch.startsWith('refs/heads/') || "), parser, /^usage: .*: the pinned condition$/],
+    ['a clause joined to a single-clause condition', swap(fence, 'if (!baselineMode) ', "if (!baselineMode || plan === 'zzz') "), parser, /^batch-baseline: .*: a condition joining clauses needs them named: /],
+  ];
+  for (const [name, f, p, re] of stops) assert.throws(() => fenceRejectionSites(f, p), firstLine(re), name);
+});
+
+// The real fence command line, run asynchronously so one case's fence overlaps the next case's setup.
+function fenceRun(cwd, env, gate) {
+  const args = ['--repo', cwd, ...['integration', 'batch', 'ledger', 'batch-id', 'batch-file'].flatMap(k => ['--' + k, gate[k]])];
+  return new Promise((resolve, reject) => execFile(process.execPath, [FENCE, ...args], { cwd, env, encoding: 'utf8', windowsHide: true, timeout: 120000, maxBuffer: 16 * 1024 * 1024 },
+    (error, stdout) => error && typeof error.code !== 'number' ? reject(error) : resolve({ code: error ? error.code : 0, verdict: JSON.parse(stdout) })));
+}
+const POOL = 4;
+test('parse is never looser than the fence: each case in parse and in the real fence', { concurrency: POOL }, async t => {
+  // One fixture repository per concurrent case: each commit replaces that repository's whole ledger.
+  const pool = Array.from({ length: POOL }, () => {
+    const repo = makeRepo(t); repo.git('checkout', '-b', 'feat/one'); repo.git('config', 'core.symlinks', 'false');
+    return { repo, outside: tmp(t) };
+  });
+  const opts = { integration: 'refs/heads/integration', batch: 'refs/heads/feat/one', 'batch-id': 'B01' };
+  const FILE_OF = { plan: PLAN, progress: PROG }, DOC_OF = { [PLAN]: 'plan', [PROG]: 'progress' };
+  // The fence's own key for a site: the clause is never visible to it, the document only where
+  // its diagnostic carries the authority file's path.
+  const fenceKey = s => { const k = s.replace(/ #[\w-]+$/, ''); return k.startsWith('authority-file: ') ? k : k.replace(/ @\w+$/, ''); };
+  await Promise.all(CASES.map(c => t.test(c.name, async () => {
+    const slot = pool.pop();
+    assert.ok(slot, 'a free fixture repository');
+    try { await fenceCase(c, slot); } finally { pool.push(slot); }
+  })));
+  async function fenceCase(c, { repo, outside }) {
+    const files = c.edit(baseLedger()), ledger = c.ledger ?? path.posix.basename(LEDGER);
+    const gate = { ...opts, ledger, 'batch-file': `.agents/changes/${ledger}/${B1}`, ...c.gate };
+    // Only the base control and the cases that change the file type or the ledger's name keep the bytes.
+    if (c.name !== 'ledger from the real templates' && !c.link && !c.ledger) assert.notDeepEqual(files, baseLedger());
+    fs.rmSync(path.join(repo.cwd, '.agents'), { recursive: true, force: true });
+    const dir = path.join(repo.cwd, '.agents', 'changes', ledger);
     writeTree(dir, files);
     // The working tree, before any commit: the scaffold-time reading.
     const restore = c.link ? linkInPlace(path.join(dir, c.link), files[c.link], outside) : null;
     const r = run(['parse', '--dir', dir]);
     if (restore) restore();
-    if (c.unknown) { assert.equal(r.status, 2, r.line); assert.match(r.line, c.unknown); }
-    else {
+    // Each ledger document a site is keyed by is one parse names too.
+    const docs = c.sites.flatMap(s => / @(\w+)(?: #|$)/.exec(s)?.slice(1) ?? []).map(d => FILE_OF[d] ?? path.posix.basename(gate['batch-file']));
+    if (c.unknown) {
+      assert.equal(r.status, 2, r.line); assert.match(r.line, c.unknown);
+      for (const file of docs) assert.ok(r.line.includes(file), c.name + ': parse must name ' + file);
+    } else {
       const expected = c.expect(files);
       if (!expected.length) assert.deepEqual(r, { status: 0, line: 'PARSE OK 2 batches' });
       else {
@@ -305,21 +499,24 @@ test('parse is never looser than the fence: each case in parse and in the real f
         const found = problemsOf(r.line);
         assert.deepEqual(found.map(p => p.slice(0, 2)), expected.map(e => e.slice(0, 2)), r.line);
         found.forEach((p, i) => assert.match(p[2], expected[i][2], r.line));
+        for (const file of docs) assert.ok(found.some(p => p[0] === file), c.name + ': parse must name ' + file);
       }
     }
     // Committed with the same bytes; a linked file is committed as a symlink blob.
     repo.git('rm', '-r', '-q', '--cached', '--ignore-unmatch', '--', '.agents'); repo.git('add', '--all');
     if (c.link) {
-      const rel = `${LEDGER}/${c.link}`, blob = repo.git('hash-object', '-w', '--', rel);
+      const rel = `.agents/changes/${ledger}/${c.link}`, blob = repo.git('hash-object', '-w', '--', rel);
       repo.git('update-index', '--cacheinfo', `120000,${blob},${rel}`);
     }
     repo.git('commit', '--allow-empty', '-q', '-m', c.name);
     repo.git('update-ref', 'refs/heads/integration', repo.git('rev-parse', 'HEAD'));
-    const verdict = checkFence(c.ref ? { ...opts, batch: 'refs/heads/' + c.ref } : opts);
-    const measured = [...verdict.unknowns, ...verdict.violations].filter(d => MEASURED.includes(d.code)).map(d => d.code + ': ' + d.message);
-    assert.ok(sameSet(measured, c.sites.map(s => s.split(' #')[0])), JSON.stringify(verdict));
+    const { code, verdict } = await fenceRun(repo.cwd, repo.env, gate);
+    assert.equal(code, { PASS: 0, VIOLATION: 1, UNKNOWN: 2 }[verdict.status], JSON.stringify(verdict));
+    const measured = [...verdict.unknowns, ...verdict.violations].filter(d => MEASURED.includes(d.code))
+      .map(d => d.code + ': ' + d.message + (d.code === 'authority-file' ? ' @' + DOC_OF[path.posix.basename(d.path)] : ''));
+    assert.ok(sameSet(measured, c.sites.map(fenceKey)), JSON.stringify(verdict));
     if (!c.sites.length) assert.equal(verdict.status, 'PASS', JSON.stringify(verdict));
-  });
+  }
 });
 
 test('parse-only shapes, the problem cap from both sides, and unreadable input', async t => {
@@ -328,7 +525,6 @@ test('parse-only shapes, the problem cap from both sides, and unreadable input',
     ['empty plan table', f => edit(f, PLAN, /^\| B01 \|.*\n\| B02 \|.*\n/m, ''), [[PLAN, 1, /^batch table \(#, Branch, Files \(fence\)\) has no rows$/]]],
     ['batch file with no number', f => ({ ...f, '02-batches-x-foo.md': f[B2] }), [['02-batches-x-foo.md', 1, /^no plan row claims this batch file$/]]],
     ['duplicate id', f => edit(f, PLAN, /^\| B02 \|/m, '| B01 |'), null],
-    ['missing Branch line', f => edit(f, B1, /^\*\*Branch\*\*: .*\n/m, ''), [[B1, 1, /^0 lines start "\*\*Branch\*\*: ", expected exactly one$/]]],
   ];
   for (const [name, change, expected] of shapes) {
     const files = change(baseLedger()); writeTree(dir, files);
