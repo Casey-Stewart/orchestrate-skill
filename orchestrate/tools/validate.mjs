@@ -11,7 +11,10 @@ import { parseFlags } from './git-evidence.mjs';
 const PARSERS = ['node', 'jest', 'pytest', 'cargo', 'none'];
 const SHELLS = ['pwsh', 'powershell', 'bash'];
 const MAX_NAMES = 10;
+// setTimeout's ceiling: a longer delay silently becomes 1 ms, which would kill every step.
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 // After a step exits, output pipes still held by a stray descendant stop being read after this.
+// The descendant is left running: once the step's own process is gone it cannot be found portably.
 const GRACE_MS = 5000;
 // CSI, OSC (BEL or ST terminated), nF (e.g. charset selection) and Fe escapes. The escape
 // character is written as an escape sequence: a literal ESC byte is an invisible character.
@@ -42,7 +45,7 @@ function parseNode(text) {
     if (inBlock && /^[ℹ✔▶﹣]/.test(line)) inBlock = false;
     const at = /^test at (.+):\d+:\d+$/.exec(line);
     if (inBlock && at) { location = at[1]; continue; }
-    const m = /^[ \t]*✖ (.+) \(\d+(?:\.\d+)?m?s\)$/.exec(line);
+    const m = /^[ \t]*✖ (.+) \(\d+(?:\.\d+)?ms\)$/.exec(line);
     if (!m) continue;
     if (!inBlock) inline.push({ name: m[1], location: null });
     else { block.push({ name: m[1], location }); location = null; }
@@ -54,7 +57,6 @@ function parseNode(text) {
     if (!m || /^# (?:TODO|SKIP)\b/i.test(m[3] || '')) continue;
     let skip = false, tapLocation = null;
     for (let j = i + 1; j < lines.length && lines[j].startsWith(m[1] + '  '); j++) {
-      if (lines[j] === m[1] + '  ...') break;
       if (/^\s*(?:type: 'suite'|failureType: 'subtestsFailed')$/.test(lines[j])) skip = true;
       const loc = /^\s*location: '(.*):\d+:\d+'$/.exec(lines[j]);
       if (loc) tapLocation = loc[1];
@@ -193,8 +195,8 @@ function runStep(step, { cwd, env, timeoutMs, log }) {
     child.on('exit', (code, signal) => {
       clearTimeout(timer);
       grace = setTimeout(() => {
-        log.note(`==> step ${step.name}: exited but its output pipes are still held open; stopped reading`);
-        killTree(child.pid); child.stdout.destroy(); child.stderr.destroy();
+        log.note(`==> step ${step.name}: exited but its output pipes are still held open; stopped reading (the holder is left running)`);
+        child.stdout.destroy(); child.stderr.destroy();
         finish({ exit: code ?? signal });
       }, GRACE_MS);
     });
@@ -233,7 +235,7 @@ export async function runSpec(spec, { cwd = process.cwd(), logPath, timeoutMs } 
   const problem = checkSpec(spec);
   if (problem) return unknown(`spec: ${problem}`);
   if (typeof logPath !== 'string' || !logPath) return unknown('a log path is required');
-  if (timeoutMs !== undefined && !(Number.isFinite(timeoutMs) && timeoutMs > 0)) return unknown('the timeout must be a positive number');
+  if (timeoutMs !== undefined && !(Number.isFinite(timeoutMs) && timeoutMs > 0 && timeoutMs <= MAX_TIMEOUT_MS)) return unknown(`the timeout must be a positive number of ms, at most ${MAX_TIMEOUT_MS}`);
   let log;
   try { fs.mkdirSync(path.dirname(path.resolve(logPath)), { recursive: true }); log = logWriter(fs.openSync(logPath, 'w')); }
   catch (e) { return unknown(`cannot open log ${logPath} (${e.code || e.name})`); }
@@ -260,7 +262,7 @@ const HELP = `validate.mjs --spec <file.json> --log <file> [--cwd <dir>] [--time
 Runs every step in order in the foreground, writes all output to --log, prints ONE line:
   PASS <step>; <step> (<duration>)  |  FAIL <step>; <step> — log: <path>  |  UNKNOWN <reason>
 Exit 0 PASS; 1 FAIL; 2 UNKNOWN (usage, spec, or a step that could not start).
---cwd defaults to the current directory; --timeout (whole seconds) applies per step and kills
+--cwd defaults to the current directory; --timeout (whole seconds, at most 2147483) applies per step and kills
 the step's process tree. Spec (JSON; any other key is rejected):
   { "steps": [
     { "name": "tests", "shell": "pwsh", "script": "<multi-line recipe>", "parser": "node" },
@@ -276,7 +278,9 @@ export async function validateCli(args) {
   let flags;
   try { flags = parseFlags(args, ['spec', 'log', 'cwd', 'timeout'], ['spec', 'log']); }
   catch { return unknown('usage: unknown, missing or duplicate flag; use --help'); }
-  if (flags.timeout !== undefined && !/^[1-9]\d*$/.test(flags.timeout)) return unknown('usage: --timeout must be a positive whole number of seconds');
+  if (flags.timeout !== undefined && (!/^[1-9]\d*$/.test(flags.timeout) || Number(flags.timeout) * 1000 > MAX_TIMEOUT_MS)) {
+    return unknown(`usage: --timeout must be a positive whole number of seconds, at most ${Math.floor(MAX_TIMEOUT_MS / 1000)}`);
+  }
   const cwd = path.resolve(flags.cwd ?? process.cwd());
   try { if (!fs.statSync(cwd).isDirectory()) throw new Error(); } catch { return unknown(`usage: --cwd is not a directory: ${flags.cwd}`); }
   let text, spec;

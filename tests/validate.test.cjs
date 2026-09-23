@@ -23,12 +23,16 @@ function cleanEnv(extra = {}) {
   for (const key of Object.keys(env)) if (key.toUpperCase() === 'NODE_TEST_CONTEXT') delete env[key];
   return { ...env, ...extra };
 }
+// Everything that can break or hide a line: C0, DEL, C1 (NEL included) and U+2028/U+2029.
+const BREAKERS = [...Array.from({ length: 0x20 }, (_, i) => i), ...Array.from({ length: 0x21 }, (_, i) => 0x7f + i), 0x2028, 0x2029]
+  .map(c => String.fromCharCode(c));
+const leaksBreaker = text => BREAKERS.some(b => text.includes(b));
 // Every CLI call asserts the single-line contract, then hands back the FIRST line alone.
 function cli(args, { env = cleanEnv(), cwd } = {}) {
   const started = Date.now();
   const r = spawnSync(NODE, [TOOL, ...args], { encoding: 'utf8', env, cwd, timeout: 120000 });
   assert.equal(r.error, undefined, 'the CLI itself must run');
-  assert.match(r.stdout, /^[^\r\n]+\n$/, 'stdout must be exactly one line: ' + JSON.stringify(r.stdout));
+  assert.ok(r.stdout.endsWith('\n') && !leaksBreaker(r.stdout.slice(0, -1)), 'stdout must be exactly one line: ' + JSON.stringify(r.stdout));
   return { code: r.status, line: r.stdout.split('\n')[0], ms: Date.now() - started };
 }
 function fake(dir, file, transcript, code = 0) {
@@ -138,8 +142,9 @@ const NODE_TAP_FAIL = lines(
   "  type: 'test'",
   "  failureType: 'testTimeoutFailure'",
   '  ...',
-  '1..6',
-  nodeSummary('#', { tests: 6, suites: 1, pass: 1, fail: 3, cancelled: 1, todo: 1 }));
+  'not ok 7 - tap skip directive # SKIP',
+  '1..7',
+  nodeSummary('#', { tests: 7, suites: 1, pass: 1, fail: 3, cancelled: 1, skipped: 1, todo: 1 }));
 const NODE_TAP_LOAD = lines(
   'TAP version 13',
   'not ok 1 - C:\\\\work\\\\tests\\\\broken.test.cjs',
@@ -232,6 +237,16 @@ const CARGO_FAIL = lines(
   'test src/lib.rs - doc (line 3) ... FAILED',
   '',
   'test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s');
+// Location-less entries: every script extension is a load failure, anything else is not, and
+// only millisecond durations are the reporter's.
+const SCRIPT_NAMES = ['a/one.test.js', 'two.test.mjs', 'three.test.cjs', 'four.test.ts', 'five.test.mts', 'six.test.cts', 'seven.test.tsx', 'eight.test.jsx'];
+const NODE_SPEC_SCRIPTS = lines(...[...SCRIPT_NAMES, 'nine.test.json', 'ten.js.map'].map(n => `✖ ${n} (3ms)`), '✖ in seconds (1.5s)',
+  nodeSummary('ℹ', { tests: 11, pass: 0, fail: 11 }));
+const JEST_TOKENS = lines('PASS src/t.test.js', 'Tests:       1 skipped, 2 todo, 1 pending, 3 passed, 7 total');
+// A plugin item can fail under a bare file name: FAILED, so a failure but never a load failure.
+const PYTEST_TOKENS = lines('FAILED checks/lint.py', 'ERROR tests/test_t.py::test_a - boom',
+  '== 1 failed, 2 passed, 1 xfailed, 1 xpassed, 2 errors, 1 warning, 1 rerun in 1.00s ==');
+const CARGO_NO_TIME = 'test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out';
 
 const ok = (passed, total) => ({ summary: true, passed, failed: 0, total, names: [], loadFailures: [] });
 const CASES = [
@@ -240,17 +255,21 @@ const CASES = [
   { parser: 'node', label: 'spec load failure', text: NODE_SPEC_LOAD, expect: { summary: true, passed: 0, failed: 2, total: 2, names: ['C:\\work\\tests\\broken.test.cjs', 'parses x.test.cjs'], loadFailures: ['C:\\work\\tests\\broken.test.cjs'] } },
   { parser: 'node', label: 'spec inline only', text: NODE_SPEC_INLINE, expect: { summary: true, passed: 1, failed: 3, total: 4, names: ['tests/broken.test.cjs', 'inline only failure', 'nested inline failure'], loadFailures: ['tests/broken.test.cjs'] } },
   { parser: 'node', label: 'tap pass', text: NODE_TAP_PASS, expect: ok(1, 1) },
-  { parser: 'node', label: 'tap fail', text: NODE_TAP_FAIL, expect: { summary: true, passed: 1, failed: 4, total: 6, names: ['tap nested failure', 'tap # hashed failure', 'tap cancelled'], loadFailures: [] } },
+  { parser: 'node', label: 'tap fail', text: NODE_TAP_FAIL, expect: { summary: true, passed: 1, failed: 4, total: 7, names: ['tap nested failure', 'tap # hashed failure', 'tap cancelled'], loadFailures: [] } },
+  { parser: 'node', label: 'spec script-named entries without location', text: NODE_SPEC_SCRIPTS, expect: { summary: true, passed: 0, failed: 11, total: 11, names: [...SCRIPT_NAMES, 'nine.test.json', 'ten.js.map'], loadFailures: SCRIPT_NAMES } },
   { parser: 'node', label: 'tap load failure', text: NODE_TAP_LOAD, expect: { summary: true, passed: 0, failed: 2, total: 2, names: ['C:\\work\\tests\\broken.test.cjs', 'parses broken.test.cjs'], loadFailures: ['C:\\work\\tests\\broken.test.cjs'] } },
   { parser: 'jest', label: 'pass', text: JEST_PASS, expect: ok(2, 2) },
   { parser: 'jest', label: 'fail', text: JEST_FAIL, expect: { summary: true, passed: 1, failed: 1, total: 3, names: ['math › subtracts'], loadFailures: [] } },
   { parser: 'jest', label: 'suite failed to run', text: JEST_LOAD, expect: { summary: true, passed: 0, failed: 1, total: 1, names: ['src/broken.test.js'], loadFailures: ['src/broken.test.js'] } },
+  { parser: 'jest', label: 'skipped, todo and pending tokens', text: JEST_TOKENS, expect: ok(3, 7) },
   { parser: 'pytest', label: 'pass', text: PYTEST_PASS, expect: ok(3, 3) },
   { parser: 'pytest', label: 'no tests ran', text: PYTEST_EMPTY, expect: ok(0, 0) },
   { parser: 'pytest', label: 'fail', text: PYTEST_FAIL, expect: { summary: true, passed: 1, failed: 2, total: 4, names: ['tests/test_app.py::test_pytest_fails[a - b]', 'tests/test_app.py::test_fixture_breaks'], loadFailures: [] } },
   { parser: 'pytest', label: 'collection error', text: PYTEST_LOAD, expect: { summary: true, passed: 0, failed: 1, total: 1, names: ['tests/test_broken.py'], loadFailures: ['tests/test_broken.py'] } },
+  { parser: 'pytest', label: 'every other token', text: PYTEST_TOKENS, expect: { summary: true, passed: 2, failed: 3, total: 7, names: ['checks/lint.py', 'tests/test_t.py::test_a'], loadFailures: [] } },
   { parser: 'cargo', label: 'pass', text: CARGO_PASS, expect: ok(1, 2) },
   { parser: 'cargo', label: 'fail', text: CARGO_FAIL, expect: { summary: true, passed: 1, failed: 2, total: 4, names: ['tests::cargo_fails', 'src/lib.rs - doc (line 3)'], loadFailures: [] } },
+  { parser: 'cargo', label: 'result line without a finish time', text: CARGO_NO_TIME, expect: ok(3, 3) },
 ];
 // Text that resembles a summary but is not one must never count as one (fail closed).
 const NOT_SUMMARIES = [
@@ -289,18 +308,32 @@ test('runSpec and parseRunnerOutput are exported with the documented shapes', as
   assert.equal(noLog.status, 'UNKNOWN');
   assert.equal(noLog.line, 'UNKNOWN a log path is required');
   assert.deepEqual(noLog.steps, [], 'without a log path nothing runs');
-  for (const timeoutMs of [0, -5, Number.NaN, '1000']) {
+  // Both sides of setTimeout's ceiling (2^31-1 ms): above it Node would fire after 1 ms.
+  for (const timeoutMs of [0, -5, Number.NaN, '1000', 2 ** 31, Number.POSITIVE_INFINITY]) {
     const bad = await runSpec({ steps: [{ name: 'one', argv: [NODE, '-e', ''], parser: 'none' }] }, { cwd: dir, logPath, timeoutMs });
-    assert.equal(bad.line, 'UNKNOWN the timeout must be a positive number', String(timeoutMs));
+    assert.equal(bad.line, 'UNKNOWN the timeout must be a positive number of ms, at most 2147483647', String(timeoutMs));
   }
+  const ceiling = await runSpec({ steps: [{ name: 'one', argv: [NODE, '-e', ''], parser: 'none' }] }, { cwd: dir, logPath, timeoutMs: 2 ** 31 - 1 });
+  assert.equal(ceiling.status, 'PASS', 'the ceiling itself is accepted and does not fire early');
 });
 
-test('the one line survives control characters and line separators in anything it echoes', t => {
-  const dir = tmp(t), log = path.join(dir, 'x.log');
-  for (const breaker of ['\n', '\r', String.fromCharCode(0x2028), String.fromCharCode(0x85)]) {
-    const r = cli(['--spec', path.join(dir, `a${breaker}b.json`), '--log', log]);
-    assert.equal(r.code, 2);
-    assert.match(r.line, /^UNKNOWN cannot read spec .*a b\.json/);
+test('the one line survives every control character and line separator in anything it echoes', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), log = path.join(dir, 'x.log'), blocker = path.join(dir, 'a-file');
+  fs.writeFileSync(blocker, '');
+  const good = { steps: [{ name: 'a', argv: [NODE, '-e', ''], parser: 'none' }] };
+  assert.equal(BREAKERS.length, 67);
+  for (const breaker of BREAKERS) {
+    const code = breaker.charCodeAt(0).toString(16);
+    // In-process, NUL included: a log path under a plain file cannot be opened and is echoed.
+    const r = await runSpec(good, { cwd: dir, logPath: path.join(blocker, `a${breaker}b.log`) });
+    assert.match(r.line, /^UNKNOWN cannot open log .*a b\.log/, code);
+    assert.equal(leaksBreaker(r.line), false, code);
+    // Through the CLI for every breaker an OS argument can carry.
+    if (breaker === String.fromCharCode(0)) continue;
+    const viaCli = cli(['--spec', path.join(dir, `a${breaker}b.json`), '--log', log]);
+    assert.equal(viaCli.code, 2, code);
+    assert.match(viaCli.line, /^UNKNOWN cannot read spec .*a b\.json/, code);
   }
 });
 
@@ -366,6 +399,8 @@ test('CRLF and LF transcripts produce identical results', async () => {
     assert.deepEqual(parseRunnerOutput(c.parser, crlf), parseRunnerOutput(c.parser, c.text), `${c.parser} ${c.label}`);
   }
   for (const c of CASES) assert.deepEqual(parseRunnerOutput(c.parser, c.text.replace(/\n/g, '\r\n')), c.expect, `${c.parser} ${c.label}`);
+  // A lone CR (old line endings, progress redraws) ends a line too.
+  for (const c of CASES) assert.deepEqual(parseRunnerOutput(c.parser, c.text.replace(/\n/g, '\r')), c.expect, `CR: ${c.parser} ${c.label}`);
 });
 
 test('ANSI-coloured output parses identically to plain output, for every kind of escape', async () => {
@@ -463,7 +498,8 @@ test('row: a command that cannot start is UNKNOWN, outranks a FAIL, and later st
     { name: 'red', argv: fake(dir, 'r.js', 'x\n', 1), parser: 'none' }, { name: 'after', argv: fake(dir, 'a.js', 'x\n'), parser: 'none' }]);
   assert.equal(r.code, 2);
   assert.equal(r.line, `UNKNOWN missing COULD-NOT-START (ENOENT); red exit 1; after ok — log: ${r.logPath}`);
-  assert.match(r.log, /==> step missing: COULD-NOT-START \(ENOENT\)/);
+  // Two tool lines in a row: the second follows the first directly, with no blank line between.
+  assert.ok(r.log.includes('==> step missing: argv ["validate-no-such-command-4f2a"]\n==> step missing: COULD-NOT-START (ENOENT)\n'), r.log);
 });
 
 test('names are capped at ten, then counted (both sides of the cap)', t => {
@@ -589,7 +625,9 @@ test('a step that exits while a stray descendant holds its output ends after a g
   assert.ok(pid, 'the stray descendant must have started, or this proves nothing');
   assert.match(r.line, /^PASS orphan ok \(\d+s\)$/);
   assert.ok(r.ms < 20000, 'the run ended ' + r.ms + 'ms after start');
-  assert.match(r.log, /==> step orphan: exited but its output pipes are still held open; stopped reading/);
+  // The holder is deliberately NOT killed (its parent is gone, so no tree leads to it); the
+  // log says so, and t.after above cleans it up.
+  assert.match(r.log, /==> step orphan: exited but its output pipes are still held open; stopped reading \(the holder is left running\)/);
 });
 
 // ---------------------------------------------------------------------------------------
@@ -698,6 +736,7 @@ test('flags: unknown, duplicate, missing or malformed are UNKNOWN exit 2; --help
     'timeout negative': ['--spec', spec, '--log', log, '--timeout', '-1'],
     'timeout fractional': ['--spec', spec, '--log', log, '--timeout', '1.5'],
     'timeout text': ['--spec', spec, '--log', log, '--timeout', 'soon'],
+    'timeout above the timer ceiling': ['--spec', spec, '--log', log, '--timeout', '2147484'],
     'cwd missing': ['--spec', spec, '--log', log, '--cwd', path.join(dir, 'nowhere')],
     'help plus more': ['--help', '--spec', spec],
   };
@@ -706,6 +745,8 @@ test('flags: unknown, duplicate, missing or malformed are UNKNOWN exit 2; --help
     assert.equal(r.code, 2, label);
     assert.match(r.line, /^UNKNOWN usage: /, label);
   }
+  const largest = cli(['--spec', spec, '--log', log, '--timeout', '2147483']);
+  assert.match(largest.line, /^PASS a ok \(\d+s\)$/, 'the largest timeout is accepted and does not fire early');
   const accepted = cli(['--spec', spec, '--log', log, '--timeout', '1', '--cwd', dir]);
   assert.equal(accepted.code, 0, 'the smallest timeout and an explicit cwd are accepted');
   const help = spawnSync(NODE, [TOOL, '--help'], { encoding: 'utf8' });
