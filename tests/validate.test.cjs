@@ -592,13 +592,38 @@ function shellWorks(shell) {
   const args = shell === 'bash' ? ['-c', 'exit 0'] : ['-NoProfile', '-NonInteractive', '-Command', 'exit 0'];
   return spawnSync(shell, args, { stdio: 'ignore', timeout: 30000, windowsHide: true }).status === 0;
 }
-const SHELLS = SHELL_ORDER.filter(shellWorks);
+// The test's own answer to "which bash on PATH receives a quoted script intact", found by
+// running the real quoted script through every candidate rather than the tool's probe. On
+// Windows a bash that merely RUNS may be WSL's launcher, which re-evaluates the script.
+const QUOTED_BASH = lines("x='said \"quoted\" words'", 'echo "$x"', 'exit 7');
+const bashIntact = file => {
+  const r = spawnSync(file, ['-o', 'pipefail', '-c', QUOTED_BASH], { encoding: 'utf8', timeout: 30000, windowsHide: true });
+  return r.status === 7 && r.stdout.replace(/\r/g, '') === 'said "quoted" words\n';
+};
+const PATH_KEYS = Object.keys(process.env).filter(k => k.toUpperCase() === 'PATH');
+const bashOnPath = pathVar => pathVar.split(';').map(d => d.replace(/"/g, '')).filter(d => path.isAbsolute(d))
+  .flatMap(d => ['bash.com', 'bash.exe'].map(f => path.join(d, f))).filter(f => { try { return !fs.lstatSync(f).isDirectory(); } catch { return false; } });
+const INTACT_BASH = process.platform !== 'win32' ? (bashIntact('bash') ? 'bash' : null)
+  : bashOnPath(PATH_KEYS.length ? process.env[PATH_KEYS[0]] : '').find(bashIntact) ?? null;
+const SHELLS = SHELL_ORDER.filter(s => s === 'bash' ? INTACT_BASH !== null : shellWorks(s));
+function withPath(pathVar) {
+  const env = cleanEnv();
+  for (const key of PATH_KEYS) delete env[key];
+  return { ...env, PATH: pathVar };
+}
 
 test('shell steps run the script as one argument and propagate its exit code', t => {
   assert.ok(SHELLS.length >= 1, 'at least one of pwsh, powershell, bash must run here, or this branch silently skips');
+  if (INTACT_BASH === null && shellWorks('bash')) {
+    // A bash that runs but alters a quoted script (WSL's launcher first on PATH) is refused, never run.
+    const refused = run(t, [{ name: 'sh', shell: 'bash', script: QUOTED_BASH, parser: 'none' }]);
+    assert.equal(refused.line, `UNKNOWN sh COULD-NOT-START (BASH-ARGV-ALTERED) — log: ${refused.logPath}`, 'a bash that alters the script must not run it');
+    assert.equal(refused.code, 2);
+    assert.doesNotMatch(refused.log, /said/);
+  }
   for (const shell of SHELLS) {
     const bash = shell === 'bash';
-    const quoted = bash ? lines("x='said \"quoted\" words'", 'echo "$x"', 'exit 7') : lines('$x = "said ""quoted"" words"', 'Write-Output $x', 'exit 7');
+    const quoted = bash ? QUOTED_BASH : lines('$x = "said ""quoted"" words"', 'Write-Output $x', 'exit 7');
     const red = run(t, [{ name: 'sh', shell, script: quoted, parser: 'none' }]);
     assert.equal(red.code, 1, shell);
     assert.equal(red.line, `FAIL sh exit 7 — log: ${red.logPath}`, shell);
@@ -617,6 +642,37 @@ test('shell steps run the script as one argument and propagate its exit code', t
       assert.doesNotMatch(seen.log, /\[Environment\]::CommandLine/, shell);
     }
   }
+});
+
+test('on Windows a bash that alters a quoted script is skipped for a later intact one, and refused when none follows', t => {
+  if (process.platform !== 'win32') { t.skip('Windows only: elsewhere argv reaches bash intact by construction'); return; }
+  const dir = tmp(t), standIn = path.join(dir, 'launcher'), spec = writeSpec(dir, [{ name: 'sh', shell: 'bash', script: QUOTED_BASH, parser: 'none' }]);
+  fs.mkdirSync(standIn);
+  // node.exe named bash.exe: a bash-named program that does not run the script as given.
+  try { fs.linkSync(NODE, path.join(standIn, 'bash.exe')); } catch { fs.copyFileSync(NODE, path.join(standIn, 'bash.exe')); }
+  // Live control: the real WSL launcher wherever it is installed.
+  const wsl = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'bash.exe');
+  const alterers = [standIn, ...(fs.existsSync(wsl) ? [path.dirname(wsl)] : [])];
+  const gitBash = path.join(spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim(), '..', '..', '..', 'usr', 'bin', 'bash.exe');
+  assert.ok(bashIntact(gitBash), 'Git for Windows ships an intact bash at ' + gitBash + ', or the skip-to-next branch goes unexercised');
+  for (const [i, alterer] of alterers.entries()) {
+    const log = path.join(dir, `refused-${i}.log`);
+    const refused = cli(['--spec', spec, '--log', log], { env: withPath(alterer) });
+    assert.equal(refused.line, `UNKNOWN sh COULD-NOT-START (BASH-ARGV-ALTERED) — log: ${log}`, alterer);
+    assert.equal(refused.code, 2, alterer);
+    const text = fs.readFileSync(log, 'utf8');
+    assert.ok(text.includes(`${path.join(alterer, 'bash.exe')} does not receive a quoted script intact`), text);
+    assert.doesNotMatch(text, /said/, alterer);
+    const skipLog = path.join(dir, `skipped-${i}.log`);
+    const skipped = cli(['--spec', spec, '--log', skipLog], { env: withPath([alterer, path.dirname(gitBash)].join(';')) });
+    assert.equal(skipped.line, `FAIL sh exit 7 — log: ${skipLog}`, alterer);
+    const skipText = fs.readFileSync(skipLog, 'utf8');
+    assert.ok(skipText.includes(`${path.join(alterer, 'bash.exe')} does not receive a quoted script intact`), skipText);
+    assert.ok(skipText.includes(`bash is ${path.resolve(gitBash)}`), skipText);
+    assert.match(skipText, /said "quoted" words/);
+  }
+  const none = path.join(dir, 'none.log'), missing = cli(['--spec', spec, '--log', none], { env: withPath(path.join(dir, 'empty')) });
+  assert.equal(missing.line, `UNKNOWN sh COULD-NOT-START (ENOENT) — log: ${none}`);
 });
 
 test('a shell step outliving its timeout ends with its grandchildren killed', t => {
