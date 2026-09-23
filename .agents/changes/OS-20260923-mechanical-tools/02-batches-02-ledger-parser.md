@@ -147,12 +147,12 @@ parser, per build rule 3.
 
 ## Checklist
 
-- [ ] `orchestrate/tools/ledger-parse.mjs` exporting the seven parsers, moved unchanged from `check-fence.mjs`, plus `skillPin`
-- [ ] `orchestrate/tools/check-fence.mjs` imports them; `tests/check-fence.test.cjs` green unchanged; `--help` bytes unchanged
-- [ ] `orchestrate/tools/check-ledger.mjs parse --dir` with the three check groups, one-line output, exit 0/1/2
-- [ ] `orchestrate/tools/check-ledger.mjs skill` hash and `--contract` pin check, with the exact line form above
-- [ ] `tests/check-ledger.test.cjs`: OK fixture from the real templates, one case per check, fence parity, live corpus control, one-parser domain property with a live control, hash properties
-- [ ] `tests/protocol-contract.test.cjs`: register both new tools in `NON_MARKDOWN`; length pin 8
+- [x] `orchestrate/tools/ledger-parse.mjs` exporting the seven parsers, moved unchanged from `check-fence.mjs`, plus `skillPin`
+- [x] `orchestrate/tools/check-fence.mjs` imports them; `tests/check-fence.test.cjs` green unchanged; `--help` bytes unchanged
+- [x] `orchestrate/tools/check-ledger.mjs parse --dir` with the three check groups, one-line output, exit 0/1/2
+- [x] `orchestrate/tools/check-ledger.mjs skill` hash and `--contract` pin check, with the exact line form above
+- [x] `tests/check-ledger.test.cjs`: OK fixture from the real templates, one case per check, fence parity, live corpus control, one-parser domain property with a live control, hash properties
+- [x] `tests/protocol-contract.test.cjs`: register both new tools in `NON_MARKDOWN`; length pin 8
 
 ## Acceptance criteria
 
