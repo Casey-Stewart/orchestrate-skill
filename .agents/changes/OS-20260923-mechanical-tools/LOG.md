@@ -344,3 +344,11 @@ F5. ASK — :91 + scaffolding.md:184-185: self-fulfilling canary — the test fi
 F6. ASK — :137, :386: SKILL_TOKENS is a hand list of three spellings (N14 `node <skill>/tools/check-ledger.mjs skill --contract` in scaffolding.md:106 green; `<SKILL_DIR>` red); REPO_RELATIVE matches forward slashes only (N21 `node orchestrate\tools\check-ledger.mjs` in SKILL.md green). Fix: subject = every `tools[/\]<name>.mjs` occurrence, names bound to readdir(orchestrate/tools).
 F7. ASK — :279-284: the scaffold test writes validate.json by hand. N22 (Fill: per-line steps instead of ONE shell step whose script is the block's text) and N23 (setup.json condition flipped to "is n/a") stay green. Fix: pin both clauses.
 F8. ASK — :336-383: N15 (Baking rule: a ledger may be "left as a pointer into this skill's reference docs where a rule is long") and N15k ("A ledger may also link to this skill's references/protocol.md" in the contract) stay green. Fix: an affirmative-pointer pattern over all docs, plus a pin on the Baking rule's "never left as a pointer" sentence.
+
+Polish @`b7b8454` (A1, F1–F8; `tests/tool-wiring.test.cjs` + batch-file polish lines only; boot step 3, the validation paragraph with the user's rule, protocol step 1, the Fill clauses, the Baking rule and two registry rows pinned by exact collapsed-text equality; the UNDO sweep checks negation at every match start; tool paths bound to readdir; 31 + 26 mutations red in both shells). Mechanical close: fence PASS (integration `bd4f9c3`, batch `b7b8454`), polish touched only the test file and the batch file; real-PowerShell recipe 443/443, 9m59s. Dry run clean (tree `9eec39c`), merged `--no-ff` as `3d3b264`; tip validation from real PowerShell 443/443, diff-check clean, 10m04s; live parse PARSE OK 5 batches → B03 🟢.
+
+Residuals for the close-out: `orchestrate/references/smoke-page.md:85` and `:93` run `node tools/build-smoke-page.mjs …` (resolves only from inside the skill directory; exempted in the tool-path test, the exemption may only shrink); `execution-models.md:136` still says "(quiet form)" (in no fence). `subagent-prompts.md:50` is carried into B04's prompt.
+
+### W4 open
+
+Wave base `3d3b264`; B04 (L) on `feat/prompt-renderer`, worktree `wt-os923/b04`; implementer default tier, reviewer strong tier.
