@@ -684,7 +684,12 @@ test('the bash probe catches each launcher alteration through a part of its own'
     assert.notEqual(altered, BASH_PROBE, what + ': the probe must hold the part this alteration touches');
     assert.equal(bashProbeIntact(through(altered)), false, what);
   }
-  assert.equal(bashProbeIntact({ ...intact, status: 1 }), false, 'the right output with a non-zero exit');
+  // A substitution that keeps the output's length: only a byte comparison rejects it.
+  const swapped = through(BASH_PROBE.replace('$c', 'xy'));
+  assert.ok(swapped.stdout !== intact.stdout && swapped.stdout.length === intact.stdout.length, 'an equal-length alteration: ' + JSON.stringify(swapped.stdout));
+  assert.equal(bashProbeIntact(swapped), false, 'an equal-length substitution');
+  // The right output with any exit but 0: a failure, another code, a probe killed by its timeout.
+  for (const status of [1, 2, null]) assert.equal(bashProbeIntact({ ...intact, status }), false, 'the right output with exit status ' + status);
 });
 
 test('on Windows a bash that alters a quoted script is skipped for a later intact one, and refused when none follows', async t => {
@@ -700,29 +705,47 @@ test('on Windows a bash that alters a quoted script is skipped for a later intac
   const cmdExe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
   // Stand-ins failing the probe on different grounds, proved rather than assumed: node.exe
   // named bash.exe exits non-zero; cmd.exe named bash.exe exits 0 with the wrong output.
-  const alterers = [place('node', 'bash.exe', NODE), place('cmd', 'bash.exe', cmdExe)];
-  const [viaNode, viaCmd] = alterers.map(d => spawnSync(path.join(d, 'bash.exe'), ['-o', 'pipefail', '-c', BASH_PROBE], { encoding: 'utf8', timeout: 30000, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }));
+  const [nodeDir, cmdDir] = [place('node', 'bash.exe', NODE), place('cmd', 'bash.exe', cmdExe)];
+  const [viaNode, viaCmd] = [nodeDir, cmdDir].map(d => spawnSync(path.join(d, 'bash.exe'), ['-o', 'pipefail', '-c', BASH_PROBE], { encoding: 'utf8', timeout: 30000, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }));
   assert.ok(viaNode.status !== 0 && viaNode.status !== null, 'the node stand-in exits non-zero: ' + viaNode.status);
   assert.ok(viaCmd.status === 0 && viaCmd.stdout !== '' && !viaCmd.stdout.includes('q "b"'), 'the cmd stand-in exits 0 printing something else: ' + JSON.stringify(viaCmd));
-  // Live control: WSL's launcher, wherever installed, must RUN the marked script and alter it.
-  const wsl = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'bash.exe');
-  if (fs.existsSync(wsl)) {
-    const ctl = path.join(dir, 'wsl-control');
-    fs.mkdirSync(ctl);
-    const r = spawnSync(wsl, ['-o', 'pipefail', '-c', MARKED_BASH], { cwd: ctl, encoding: 'utf8', timeout: 60000, windowsHide: true });
-    assert.equal(r.status, 7, `${wsl} exists but does not run a script (no distribution?), so it is no live control: ${JSON.stringify(r.stdout)}`);
-    assert.match(r.stdout, /ran-anyway/);
-    assert.ok(fs.existsSync(path.join(ctl, 'ran-anyway.txt')), 'the marker file is how a refused bash that ran anyway shows');
-    assert.doesNotMatch(r.stdout, /said "quoted" words/, 'it alters the quoted script');
-    alterers.push(path.dirname(wsl));
-  }
   assert.ok(bashIntact(GIT_BASH), `Git for Windows ships an intact bash at ${GIT_BASH}, or the skip-to-next branch goes unexercised`);
   const gitDir = path.dirname(GIT_BASH), rejectedNote = file => `==> step sh: ${file} does not receive a quoted script intact (a launcher such as WSL's); not used`;
-  for (const [i, alterer] of alterers.entries()) {
+  // A stand-in that RUNS scripts yet fails the probe: Git's bash with BASH_ENV overriding printf.
+  // It arms the "a refused bash never runs the script" marker on every Windows machine with Git.
+  const bashEnvFile = path.join(dir, 'alter-printf.sh');
+  fs.writeFileSync(bashEnvFile, "printf() { builtin printf '%s' altered; }\n");
+  const altering = { BASH_ENV: slashes(bashEnvFile) }, envCtl = path.join(dir, 'bash-env-control');
+  fs.mkdirSync(envCtl);
+  const envProbe = spawnSync(GIT_BASH, ['-o', 'pipefail', '-c', BASH_PROBE], { env: cleanEnv(altering), encoding: 'utf8', timeout: 30000, windowsHide: true });
+  assert.ok(envProbe.status === 0 && envProbe.stdout === 'alteredaltered', 'the BASH_ENV stand-in exits 0 with the wrong probe output: ' + JSON.stringify(envProbe.stdout));
+  const envRun = spawnSync(GIT_BASH, ['-o', 'pipefail', '-c', MARKED_BASH], { env: cleanEnv(altering), cwd: envCtl, encoding: 'utf8', timeout: 30000, windowsHide: true });
+  assert.ok(envRun.status === 7 && fs.existsSync(path.join(envCtl, 'ran-anyway.txt')), 'the BASH_ENV stand-in runs a script and writes the marker: ' + envRun.status);
+  const alterers = [{ dir: nodeDir }, { dir: cmdDir }, { dir: gitDir, env: altering, alone: true }];
+  // WSL's launcher, wherever installed, is an alterer too; where it runs scripts it is a live
+  // control of the real alteration. Its absence or a missing distribution is reported, never red.
+  const wsl = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'bash.exe');
+  if (!fs.existsSync(wsl)) t.diagnostic(`no WSL launcher at ${wsl}: a real launcher's own alteration is not exercised end to end here`);
+  else {
+    if (spawnSync(wsl, ['-c', 'exit 7'], { timeout: 60000, windowsHide: true, stdio: 'ignore' }).status !== 7) {
+      t.diagnostic(`${wsl} cannot run a script (no usable distribution?): kept as an alterer, its live alteration control skipped`);
+    } else {
+      const ctl = path.join(dir, 'wsl-control');
+      fs.mkdirSync(ctl);
+      const r = spawnSync(wsl, ['-o', 'pipefail', '-c', MARKED_BASH], { cwd: ctl, encoding: 'utf8', timeout: 60000, windowsHide: true });
+      assert.equal(r.status, 7, `${wsl} runs a script: ${JSON.stringify(r.stdout)}`);
+      assert.match(r.stdout, /ran-anyway/);
+      assert.ok(fs.existsSync(path.join(ctl, 'ran-anyway.txt')), 'the marker file is how a refused bash that ran anyway shows');
+      assert.doesNotMatch(r.stdout, /said "quoted" words/, 'it alters the quoted script');
+    }
+    alterers.push({ dir: path.dirname(wsl) });
+  }
+  for (const [i, { dir: alterer, env: extra = {}, alone }] of alterers.entries()) {
     const cwd = path.join(dir, `refused-${i}`), log = path.join(dir, `refused-${i}.log`);
     fs.mkdirSync(cwd);
-    const text = assertRefused(cli(['--spec', spec, '--log', log], { env: withPath(alterer), cwd }), log, cwd, alterer);
+    const text = assertRefused(cli(['--spec', spec, '--log', log], { env: { ...withPath(alterer), ...extra }, cwd }), log, cwd, alterer);
     assert.ok(text.includes(rejectedNote(path.join(alterer, 'bash.exe'))), text);
+    if (alone) continue; // Git's bash altered by BASH_ENV cannot be followed by Git's bash unaltered.
     const skipCwd = path.join(dir, `skipped-${i}`), skipLog = path.join(dir, `skipped-${i}.log`);
     fs.mkdirSync(skipCwd);
     const skipped = cli(['--spec', spec, '--log', skipLog], { env: withPath([alterer, gitDir].join(';')), cwd: skipCwd });
