@@ -1,6 +1,7 @@
 # READ BEFORE ANY BATCH — orchestration & recovery
 
 **Change**: {{CHANGE_ID}}
+**Skill**: `{{SKILL_DIR}}` · sha256 `{{SKILL_SHA256}}`
 **You are** either the ORCHESTRATOR (the main session the user told to "continue") or an
 IMPLEMENTER/REVIEWER/GATE sub-agent given one batch. Neither of you has the planning
 session's context. This file is the contract. Everything needed to drive this change lives
@@ -24,8 +25,16 @@ sessions.
    that `git worktree list` already shows; if its directory is gone, `git worktree prune`
    first — never two worktrees on one branch. Run {{WORKTREE_SETUP}} in a newly created
    integration worktree before validating in it.
-3. **Reconcile** (§Recovery below) before believing any PROGRESS row.
-4. **Resume-time validation**: run the validation commands (quiet form) on the integration
+3. **Skill pin**, before anything is reconciled: from the integration worktree root run
+   `node "{{SKILL_DIR}}/tools/check-ledger.mjs" skill --contract {{LEDGER_DIR}}/00-READBEFORE.md`.
+   `SKILL MATCH` → continue. Anything but `SKILL MATCH` (including `SKILL MISMATCH`,
+   `UNKNOWN` and a tool that does not run) → STOP and ask; continue only on the user's explicit words, recorded verbatim in the session log — an upgrade (the
+   `**Skill**` line above rewritten to the new directory and hash in the commit that
+   records those words) or
+   this contract's manual procedures (the recipe under §Validation commands, the prompt
+   list in §Session algorithm step 5, the manual fence fallback) for the rest of the change.
+4. **Reconcile** (§Recovery below) before believing any PROGRESS row.
+5. **Resume-time validation**: run the validation wrapper (§Validation commands) on the integration
    tip. Red → the first job is a repair mini-batch (§Session algorithm step 2), whatever
    PROGRESS says — unless Notes record a capped tip repair awaiting the user's verdict,
    in which case ask, never re-spawn. Green → follow §Session algorithm.
@@ -247,10 +256,24 @@ extensions ∪ the batch's own file — never the implementer's Files line alone
 
 {{VALIDATION_COMMANDS}}
 
-All must pass before a batch may integrate (`🟢`). Orchestrator runs use the QUIET form
-above (a totals line plus failing test NAMES, so failing sets compare by name against any
-allowlist); full output is read only on a non-zero exit. If the block above says `none`,
-the checkpoint smoke tests carry ALL verification — state that explicitly when handing
+All must pass before a batch may integrate (`🟢`). Every run goes through the validation
+wrapper, from the worktree root:
+
+```text
+node "{{SKILL_DIR}}/tools/validate.mjs" --spec {{LEDGER_DIR}}/validate.json --log "<session scratchpad>/<label>.log"
+```
+
+`validate.json` is the machine form of the block above, written at scaffold time. The
+wrapper's one line (`PASS …`, `FAIL … — log: <path>` or `UNKNOWN …`) is the result and its
+exit code (0/1/2) is the real one; the log is read only when the line is not PASS, and
+failing test NAMES are taken from it so failing sets compare by name against any
+allowlist. Never pipe or tail it; when it may outlast the runtime's command timeout, run it
+as a background task whose completion reports the one line and the exit code, and never
+read the log before it exits. The block above stays the human-readable
+recipe and is the manual procedure when the wrapper is unavailable, run in its QUIET form
+(a totals line plus failing test NAMES; full output only on a non-zero exit). If the
+block above says `none`, there is no `validate.json` and the checkpoint smoke tests
+carry ALL verification — state that explicitly when handing
 over. Mutation runner (optional, scoped to a batch's changed files): {{MUTATION_RUNNER}}.
 
 ## Version + changelog rule (orchestrator-only)
@@ -617,7 +640,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    message, each pinned to its worktree, on the tier the batch's weight calls for).
    Every prompt must be SELF-CONTAINED: the spec text + codebase facts from the batch
    file, the exact file fence, acceptance criteria, the applicable guardrails, the
-   validation commands (quiet form), the conventions + prohibitions blocks above, the
+   validation commands (the wrapper command and its recipe), the conventions +
+   prohibitions blocks above, the
    report shape, and "tick your checklist items in the batch file as you complete them;
    run `git diff --name-status -M` against the integration branch before committing and
    revert anything outside your fence; commit on your batch branch (one commit per

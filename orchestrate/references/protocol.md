@@ -28,8 +28,12 @@ checkpoint artifacts created later rather than at scaffold time:
 A scaffolded ledger is a **closed system**: every repo-specific fact (validation
 commands, version files, merge policy, wave map, checkpoint placement, smoke procedure,
 gate agents, runners, tiers) is baked into its READBEFORE and plan at scaffold time. A
-session without this skill can drive the change by reading the ledger alone — that
-property is the point; never generate a ledger that references this skill. Closed
+ledger references ONLY its pinned skill directory, by absolute path and hash, and every
+step a tool performs also has a baked manual procedure (the recipe block for validation,
+the pasted-prompt list for spawning, the fence's manual fallback), so a session without
+this skill — or with a changed one — can drive the change by reading the ledger alone;
+that property is the point. A changed skill stops the ledger at its next boot and asks,
+and never silently changes how it runs. Closed
 ledgers may be parked in a sibling `.agents/archive/` directory; discovery never globs it.
 
 ## Roles, gates, tiers
@@ -519,8 +523,21 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
 
 ## §Session algorithm ("continue")
 
-1. Boot + reconcile + resume-time validation (validation commands, quiet form, on the
-   integration tip; red → step 2 first).
+1. Boot + reconcile + resume-time validation (validation commands on the
+   integration tip; red → step 2 first). A contract carrying a `**Skill**` pin line
+   verifies it FIRST, before reconcile: `node "<skill-dir>/tools/check-ledger.mjs" skill
+   --contract <ledger-dir>/00-READBEFORE.md` from the integration worktree root —
+   `SKILL MATCH` continues; anything but `SKILL MATCH` (including a tool that does not run)
+   STOPs and asks, continuing only
+   on the user's explicit words recorded verbatim in the session log (an upgrade: the pin
+   line rewritten in the commit that records them; or the contract's manual procedures). Such a
+   contract runs every validation — resume-time and tip validation alike — through
+   `node "<skill-dir>/tools/validate.mjs" --spec <ledger-dir>/validate.json --log <file>`:
+   its one line is the result, its exit code the real one, and the log is read only when
+   the line is not PASS. Never pipe or tail it; when it may outlast the runtime's command
+   timeout, run it as a background task whose completion reports the one line and the exit
+   code, and never read the log before it exits. Without a pin line, or when the wrapper is
+   unavailable, the manual procedure is the validation commands in their quiet form.
 2. Repairs first, as mini-batches (Git model).
    - **Checkpoint failure** (`❌`): ONE fix-up implementer on the branch the verdict
      intake recorded in Notes as `fix-up pending: fix/<batch>-c<n>-followup[-<k>]` (suffix

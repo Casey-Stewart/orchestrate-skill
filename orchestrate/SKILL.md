@@ -11,8 +11,11 @@ Multi-batch changes run from a **ledger**: a committed directory
 locked plan with a wave map and smoke checkpoints, one file per batch, a binding
 contract (`00-READBEFORE.md`), a live `PROGRESS.md` where statuses are claims and
 **git is truth**, and an append-only `LOG.md` for narrative. Ledgers are CLOSED SYSTEMS:
-every repo fact is baked in at scaffold time, so any session — with or without this
-skill — can drive one by reading the ledger alone. Full spec:
+every repo fact is baked in at scaffold time, a ledger references ONLY its pinned skill
+directory, by absolute path and hash, and every step a tool performs also has a baked
+manual procedure, so any session — with or without this skill, or with a changed one —
+can drive one by reading the ledger alone. A changed skill stops the ledger at its next
+boot and asks, and never silently changes how it runs. Full spec:
 [references/protocol.md](references/protocol.md).
 
 **Arguments**: `$ARGUMENTS`
@@ -32,7 +35,8 @@ First word of the arguments:
 
 ## Discovery (every mode starts here)
 
-Use `node orchestrate/tools/git-evidence.mjs discovery --repo <repo>` for the
+Use `node "<skill-dir>/tools/git-evidence.mjs" discovery --repo <repo>` — `<skill-dir>` is
+the directory holding this `SKILL.md`, the base directory the skill loader reports — for the
 repeatable read-only inventory and provenance probes; helper recipes and manual
 fallback are in protocol.md. Inspect completeness/diagnostics; unknown never means
 absent. The rules below still decide ownership, targets and ledger state. Existing
@@ -184,11 +188,15 @@ plan PRE-FLIGHT (a fresh read-only sub-agent; blocking findings fixed before the
 sees the plan) → front-load user gates (design/UX approvals resolved at planning time
 via mockups, or scheduled as wave 1 — never mid-run) → user approves plan + wave map +
 checkpoints + weights + fold-ins in one pass → fill the templates into
-`.agents/changes/<CHANGE_ID>/` (incl. `LOG.md`) → self-check (grep the new directory
+`.agents/changes/<CHANGE_ID>/` (incl. `LOG.md`; the fill bakes the `**Skill**` pin line and
+writes `validate.json`, plus `setup.json` when there is a setup step) → self-check
+(grep the new directory
 for `{{` and `<!--`, and its `*.md` for `<title>` — zero hits outside fenced and inline
 code spans. A hit inside a code span is not an unfilled slot, since a ledger documenting
 templating work quotes those tokens legitimately; `**State**: ACTIVE` present;
-every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`) → scaffold commit on
+every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`; `check-ledger.mjs`
+prints `PARSE OK` for the directory and `SKILL MATCH` for its contract, per
+scaffolding.md) → scaffold commit on
 `chore/<slug>-ledger` (which becomes the integration branch) → STOP and report.
 
 ## Mode: continue
@@ -196,7 +204,8 @@ every `#` cell of the plan's and PROGRESS's batch tables reads `Bnn`) → scaffo
 1. Discovery → exactly one ACTIVE ledger (else ask).
 2. Read the ledger's OWN contract (`00-READBEFORE.md`; legacy names per protocol.md;
    contract absent → protocol.md fills the gaps, ask before acting on ambiguity).
-3. Boot + reconcile + resume-time validation per the contract, then run its §Session
+3. Boot (a pinned contract verifies its skill pin first) + reconcile + resume-time
+   validation per the contract, then run its §Session
    algorithm: repairs (❌ / red tip) first as mini-batches → unanswered 🧪 checkpoint →
    open the next wave (cut branches + worktrees, spawn ALL of the wave's implementers
    concurrently) → per batch as each lands: fence check → failing-on-base → reviewer +
