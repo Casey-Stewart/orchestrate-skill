@@ -79,8 +79,11 @@ finished? — and resumes from the real state rather than the claimed one.
 
 - **Ledgers are closed systems.** Every repo-specific fact (validation commands, version
   files, merge policy, smoke procedure, gate agents, runners, tiers) is baked into the
-  ledger at scaffold time. A ledger never references this skill, so it stays drivable
-  without it.
+  ledger at scaffold time. A ledger references ONLY its pinned skill directory, by
+  absolute path and hash, and every step a tool performs also has a baked manual
+  procedure (the validation recipe, the pasted-prompt list, the fence's manual fallback),
+  so it stays drivable without the skill — or with a changed one: a changed skill stops
+  the ledger at its next boot and asks, and never silently changes how it runs.
 - **Statuses are claims; git is truth.** The wave-open PROGRESS commit on the
   integration branch — not any status flip — is the crash marker recovery keys on. The
   orchestrator never switches your checkout: it reads branches with `git show` and
@@ -98,9 +101,12 @@ finished? — and resumes from the real state rather than the claimed one.
 - **Conservative by default.** No pushing, no `--no-verify`, no force-push, no history
   rewriting, never a commit on the default branch, and nothing merges toward the default
   branch — unless you say so, in words that get recorded in the ledger.
-- **Rollout boundary.** A ledger's own contract outranks the skill, so a new skill
-  version changes nothing about ledgers already scaffolded; it reaches a repo through
-  the next `/orchestrate new`.
+- **Rollout boundary.** A ledger's own contract outranks the skill. It references ONLY
+  its pinned skill directory, by absolute path and hash, and stays drivable without it
+  through its baked manual procedures, so a new skill version never rewrites a ledger already
+  scaffolded: a changed skill stops the ledger at its next boot and asks, and never
+  silently changes how it runs. A new version reaches a repo through the next
+  `/orchestrate new`, or through an upgrade of a ledger's pin that you approve.
 
 ## Install
 
@@ -157,7 +163,9 @@ Whatever branch the clone has checked out is what runs — stay on `main`. If yo
 a plain copy, `cp -r orchestrate-skill/orchestrate ~/.claude/skills/` works, and
 `diff -r ~/.claude/skills/orchestrate orchestrate-skill/orchestrate` tells you when it
 has drifted. For one project only, use `<project>/.claude/skills/` instead. Restart
-Claude Code and it will pick the skill up.
+Claude Code and it will pick the skill up. Update an installed copy (a `git pull` in the
+clone counts) only between ledgers: a ledger's contract pins the skill's hash, and an
+updated copy stops that ledger's next session and asks.
 
 ## Usage
 
@@ -202,6 +210,9 @@ orchestrate/
     ├── git-evidence.mjs            read-only discovery, provenance and shipment facts
     ├── check-fence.mjs             read-only mechanical gate before independent review
     ├── smoke-inputs.mjs            input declarations, retained history and raw-file checks
+    ├── validate.mjs                runs a ledger's validation spec in the foreground: one result line, the real exit code, a full log
+    ├── ledger-parse.mjs            the one parser for plan, PROGRESS and batch tables and the contract's skill pin
+    ├── check-ledger.mjs            scaffold-time ledger parse check and the skill-pin hash check
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 

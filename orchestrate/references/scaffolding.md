@@ -81,6 +81,17 @@
    `02-batches-{{BATCH_NUM}}-{{BATCH_SLUG}}.md` per batch. Replace every `{{...}}`
    placeholder with its value and every `<!-- ... -->` instruction comment with real
    content. `evidence/` is created at the first checkpoint, not now.
+   Also write `validate.json` into the ledger directory, the spec `validate.mjs --help`
+   describes: one step per confirmed validation command; a multi-line recipe block becomes
+   ONE `shell` step whose `script` is the block's text (a PowerShell block uses `pwsh`,
+   never `powershell`, whose stderr carries CLIXML even on success); `parser` names the
+   runner the command invokes (`node`, `jest`, `pytest` — without `-q`, whose summary it
+   cannot read — `cargo`, else `none`). Run it once at the base through the contract's
+   validation wrapper and record its line in LOG.md as the ledger's validation baseline.
+   When the validation commands are `none`, write no `validate.json` (an empty `steps`
+   array is invalid) and say so in LOG.md. When `{{WORKTREE_SETUP}}` is not `n/a`, also
+   write `setup.json`, a `validate.mjs` spec holding the setup command(s), so a disposable
+   checkout can be set up exactly like a worktree.
    Keep the generated delivery contract runtime-neutral: use the committed smoke HTML
    and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
 9. **Self-check** — grep the new ledger directory for `{{` and `<!--`, and its `*.md`
@@ -91,6 +102,12 @@
    plan; every `#` cell of the batch tables in BOTH the plan and PROGRESS reads `Bnn`.
    Any hit outside a code span is an unfilled slot; fix before committing. Discount
    the ones inside a span in the commit message rather than editing them away.
+   Then `node "<SKILL_DIR>/tools/check-ledger.mjs" parse --dir <the new ledger directory>`
+   must print `PARSE OK`, and `node "<SKILL_DIR>/tools/check-ledger.mjs" skill --contract
+   <the new ledger directory>/00-READBEFORE.md` must print `SKILL MATCH`: the pin line's
+   placeholders sit in code spans, which the grep exempts, so an unfilled pin fails only
+   here. Both run at scaffold time only — a recorded fence extension later makes a Files
+   line differ from the plan, which `parse` reports.
 10. **Scaffold commit** — batch 00 = the ledger itself (plus the ids written onto
     accepted fold-ins in the backlog file), committed on `chore/{{CHANGE_SLUG}}-ledger`,
     which becomes the INTEGRATION BRANCH every wave stacks onto. Never on the default
@@ -106,6 +123,10 @@ FENCE_TOOL paths plus the full manual fallback, three outcomes, captured-ref aut
 and supported grammar into new contracts. Never silently adopt changed gates for an
 existing ledger. Use exact Branch and Files lines in batch files and exact backtick
 paths in plan tables; unsupported shapes use manual checks, not inferred authority.
+Bake `{{SKILL_DIR}}` and `{{SKILL_SHA256}}` too: `validate.mjs`, `check-ledger.mjs` and
+every later skill tool a contract names run as `node "{{SKILL_DIR}}/tools/<tool>.mjs"`,
+located by the pin rather than by a resolved path. EVIDENCE_TOOL and FENCE_TOOL keep the
+resolved-path rule above until they move under the pinned directory.
 
 At hand-over preserve generated files and independent validation reports under
 evidence/Cn/inputs/issue-NNN; use raw-byte copies and validate the delivered checkout.
@@ -159,6 +180,8 @@ appear in the templates — check both directions when editing either.
 | `{{AGENT_RUNNERS}}` | template (READBEFORE) | interview #3 — which runners an agent may use in THIS environment (`none` / CLI / HTTP / browser / screenshot), the disposable data environment if any, and the prohibitions that apply (e.g. "never launch the headed app") |
 | `{{EVIDENCE_TOOL}}` | template (READBEFORE) | resolved path to git-evidence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
 | `{{FENCE_TOOL}}` | template (READBEFORE) | resolved path to check-fence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
+| `{{SKILL_DIR}}` | template (READBEFORE) | the absolute path of the directory holding the skill's `SKILL.md` (the base directory the skill loader reports), forward slashes, stored RAW between the pin line's backticks — never quoted there; every command that uses it quotes it. Never relative or `~`: the pin check reads it from the working directory |
+| `{{SKILL_SHA256}}` | template (READBEFORE) | the hex field of `node "<SKILL_DIR>/tools/check-ledger.mjs" skill --dir "<SKILL_DIR>"`, run at fill time |
 | `{{WORKTREE_SETUP}}` | template (READBEFORE) | detected install/build step (`npm install`, `cargo fetch`, …) or `n/a` |
 | `{{REPO_CONVENTIONS}}` | template (READBEFORE) | distilled from the project CLAUDE.md/docs — the BINDING subset, ≤25 lines, plus a pointer to the source doc; never a wholesale copy |
 | `{{EXTRA_PROHIBITIONS}}` | template (READBEFORE) | interview #7 / CLAUDE.md — repo-specific never-touch items; `(none beyond the above)` if empty |
@@ -298,8 +321,13 @@ Fold-in picks are NOT interview questions — they ride plan approval (procedure
 
 ## Baking rule
 
-Interview answers are written INTO the generated `00-READBEFORE.md` — never referenced
-back to this skill. The skill's references exist for the skill's benefit; each ledger
-must be drivable by a session that has never seen this skill: State line, LOG.md,
+Interview answers are written INTO the generated `00-READBEFORE.md` — never left as a
+pointer into this skill's reference docs. A ledger references ONLY its pinned skill
+directory, by absolute path and hash, and every step a tool performs also has a baked
+manual procedure (the recipe block for validation, the pasted-prompt list for spawning,
+the fence's manual fallback); a changed skill stops the ledger at its next boot and asks,
+and never silently changes how it runs. The skill's references exist for the skill's
+benefit; each ledger must be drivable by a session that has never seen this skill — or
+has a changed one: State line, LOG.md,
 `NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are all explained
 inside the ledger's own files.

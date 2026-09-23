@@ -172,13 +172,13 @@ counts — reference, don't restate.
 
 ## Checklist
 
-- [ ] Template: pin line under `**Change**`, boot step verifying it before reconcile, validation section routed through `validate.mjs` with the recipe kept as the manual procedure; every `{{SKILL_DIR}}` command quoted
-- [ ] Scaffolding: registry rows for `{{SKILL_DIR}}` (raw) and `{{SKILL_SHA256}}`, baking rule scoped to the new tools, `validate.json` (none for a `none` recipe) and `setup.json` written at fill with a recorded baseline, parse and pin checks in the self-check
-- [ ] Protocol: canonical pin check and wrapper, no new `node orchestrate/tools/` line, mirror and pinned tables untouched
-- [ ] SKILL.md: discovery command resolves from the skill's own directory; Mode new/continue mention the pin, `validate.json`, `setup.json` and the checks
-- [ ] README.md: tools tree and the install-update sentence
-- [ ] The five closed-system passages rewritten to the pinned-skill rule
-- [ ] `tests/tool-wiring.test.cjs` with the pins and live controls listed above
+- [x] Template: pin line under `**Change**`, boot step verifying it before reconcile, validation section routed through `validate.mjs` with the recipe kept as the manual procedure; every `{{SKILL_DIR}}` command quoted
+- [x] Scaffolding: registry rows for `{{SKILL_DIR}}` (raw) and `{{SKILL_SHA256}}`, baking rule scoped to the new tools, `validate.json` (none for a `none` recipe) and `setup.json` written at fill with a recorded baseline, parse and pin checks in the self-check
+- [x] Protocol: canonical pin check and wrapper, no new `node orchestrate/tools/` line, mirror and pinned tables untouched
+- [x] SKILL.md: discovery command resolves from the skill's own directory; Mode new/continue mention the pin, `validate.json`, `setup.json` and the checks
+- [x] README.md: tools tree and the install-update sentence
+- [x] The five closed-system passages rewritten to the pinned-skill rule
+- [x] `tests/tool-wiring.test.cjs` with the pins and live controls listed above
 
 ## Acceptance criteria
 
