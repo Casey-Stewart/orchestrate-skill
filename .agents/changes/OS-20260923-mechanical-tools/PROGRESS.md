@@ -31,7 +31,7 @@ before believing any row (§Recovery in the contract).
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Validation wrapper `validate.mjs` | `feat/validate-wrapper` | 1 | — | 🔄 | 2026-09-23 | fence PASS @fbe839e; R1 FIX FIRST @fbe839e (2 P1: reviewer timeout upper bound, hunter ineffective grace kill; 5 ASKs — LOG "2026-09-23 — continue" §B01); R2 SHIP @a70582d asks=4; polish @0310056 fence PASS, merged @437c42a (--no-ff); tip RED 353/354 twice — `shell steps run the script…` bash branch: under PowerShell `bash` resolves to WSL System32 bash.exe (LOG §B01 tip); tip repair pending: fix/B01-tip @437c42a; repair R1 FIX FIRST @56b8e1c |
+| B01 | Validation wrapper `validate.mjs` | `feat/validate-wrapper` | 1 | — | 🔄 | 2026-09-23 | fence PASS @fbe839e; R1 FIX FIRST @fbe839e (2 P1: reviewer timeout upper bound, hunter ineffective grace kill; 5 ASKs — LOG "2026-09-23 — continue" §B01); R2 SHIP @a70582d asks=4; polish @0310056 fence PASS, merged @437c42a (--no-ff); tip RED 353/354 twice — `shell steps run the script…` bash branch: under PowerShell `bash` resolves to WSL System32 bash.exe (LOG §B01 tip); tip repair pending: fix/B01-tip @437c42a; repair R1 FIX FIRST @56b8e1c; repair R2 SHIP @6f5bfc3 asks=4 |
 | B02 | Shared ledger parser and `check-ledger.mjs` | `feat/ledger-parser` | 2 | — | ⬜ | 2026-09-23 | — |
 | B03 | Wire the skill pin, validation wrapper and parse check into the contract | `feat/contract-tool-wiring` | 3 | — | ⬜ | 2026-09-23 | — |
 | B04 | Rendered prompts and file-based findings: `prompt.mjs` | `feat/prompt-renderer` | 4 | — | ⬜ | 2026-09-23 | — |
