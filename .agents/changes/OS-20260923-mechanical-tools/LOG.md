@@ -112,3 +112,44 @@ checklist items removed (13).
 so the ~8.5-minute run time is this machine's, not the scan's, which the contract's baseline note
 suggests. It sits close to the Bash tool's 10-minute cap: every validation run needs the maximum
 tool timeout, and B01's smoke step 1 carries `--timeout 570` for the same reason.
+
+## 2026-09-23 — continue
+
+### Boot
+
+`git-evidence.mjs discovery`: one ACTIVE ledger (this one, on `chore/mechanical-tools-ledger`
+and its `int` worktree); the three COMPLETE copies on `origin/fix/backlog-table-rendering` stay
+superseded as recorded at scaffold. Reconcile: every row ⬜, no batch branch exists — correct
+state. Resume-time validation on `2238eac`: 318/318, `git diff --check` clean, 8m40s. W1 opened
+at wave base `2238eac` (open commit `5a89fc1`).
+
+Prompts were rendered into scratch files (batch file + contract excerpts cut by heading
+anchors, a nonce at the END) and spawned with a short pointer, as at pre-flight; every report so
+far carried its nonce on line 2.
+
+### B01
+
+Implementer (default tier): DONE @`fbe839e`, 353/353 (318 + 35), 5/5 ticked. Deviation:
+`-OutputFormat Text` before `-EncodedCommand` (pwsh 7 otherwise writes stderr as CLIXML).
+Concerns carried forward: Windows PowerShell 5.1 (`powershell`) writes CLIXML to stderr even on
+success, so B03's scaffold should write `pwsh` steps (C1's I-02 already names `pwsh`); the batch
+file's stated reason for `-EncodedCommand` (5.1 stripping quotes from `-Command`) did not
+reproduce under Node 22's quoting — kept as specified; the POSIX process-group kill is not
+executable on this machine.
+
+Fence check (installed `check-fence.mjs`): PASS, integration `5a89fc1`, batch `fbe839e`,
+merge-base `2238eac`, no violations, no unknowns.
+
+R1 — reviewer (default tier) FIX FIRST, test-hunter FINDINGS 5. Findings verbatim:
+
+R1 reviewer (FIX FIRST @fbe839e):
+1. P1 — orchestrate/tools/validate.mjs:279 (and runSpec :236, used at :202): `--timeout` accepts values whose ms exceed setTimeout's 2^31-1 cap. `--timeout 2147484` → Node TimeoutOverflowWarning, timer set to 1 ms, step killed, `FAIL s TIMEOUT after 2147484s`, exit 1. Same for runSpec({timeoutMs: 3e9}). Fix: reject `Number(flags.timeout)*1000 > 2147483647` as `UNKNOWN usage: …` in the CLI and apply the same bound to `timeoutMs` in runSpec.
+2. ASK — tests/validate.test.cjs:697-710: timeout flag boundary pinned below only. Add `--timeout 2147484` → exit 2 `UNKNOWN usage:` and `--timeout 2147483` → accepted.
+Reviewer notes (non-blocking): Windows grace path validate.mjs:197 runs taskkill on an already-exited pid (no effect, tiny pid-reuse risk; consider skipping on win32); `pytest -q` summary lacks `=` borders → NO SUMMARY/CRASHED (fail-closed; scaffold must not generate -q); POSIX detached steps do not get Ctrl-C.
+
+R1 test-hunter (FINDINGS 5, each mutation RAN in a scratch copy; control 35/35 green):
+1. P1 — orchestrate/tools/validate.mjs:197 grace-path `killTree(child.pid)` is ineffective: by then the parent pid is dead, so `taskkill /T` finds no tree; a probe against the unmutated tool shows the orphan still alive after the run. The covering test tests/validate.test.cjs:579-593 kills the orphan itself in t.after and never asserts the tool killed it (mutation M15, deleting the call, stays green). Fix: make the kill effective (e.g. kill the tree while the parent is still alive / track descendants) and assert the orphan is dead after the run — or delete the call and say so. Production change.
+2. ASK — load-failure fallback SCRIPT_FILE (validate.mjs:19, used :65) tested only with `.cjs` (M01 `/\.cjs$/` stays green). Add location-less entries named .js, .mjs, .ts, .tsx each expected in loadFailures, plus a non-script name like x.test.json that must NOT be.
+3. ASK — token alternations/optional groups without an owning case: jest `todo|pending` (:73, M08); pytest tokens errors/xfailed/xpassed/singular warning/rerun (:98, M09) and xfailed/xpassed in the total (:104, M10 — silently changes p/t); cargo optional `; finished in …` (:120, M12); TAP `# SKIP` (:54, M21). Add one case per alternation member with each summary total pinned.
+4. ASK — one-line guard samples its separator set: tests/validate.test.cjs:298-305 loops only \n, \r, U+2028, U+0085 (M13 dropping 0x2029 at :226 and M31 moving DEL out of the stripped range at :227 stay green); the cli() helper at :31 counts lines with /^[^\r\n]+\n$/ so U+2028/2029/0085 leaking elsewhere would pass. Loop over every breaker production strips and make cli() reject all of them.
+5. ASK — unreached branches: TAP `...` break (:57, M05), seconds form `m?s` (:45, M07), lone-CR arm of `\r\n?` (:21, M14 — CRLF/LF test covers CRLF only), log writer line-start string arm (:173, M18), pytest `m[1] === 'ERROR'` guard (:111). Add a case for each, or delete the code (deleting is a production change).
