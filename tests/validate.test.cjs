@@ -32,7 +32,7 @@ function cli(args, { env = cleanEnv(), cwd } = {}) {
   const started = Date.now();
   const r = spawnSync(NODE, [TOOL, ...args], { encoding: 'utf8', env, cwd, timeout: 120000 });
   assert.equal(r.error, undefined, 'the CLI itself must run');
-  assert.ok(r.stdout.endsWith('\n') && !leaksBreaker(r.stdout.slice(0, -1)), 'stdout must be exactly one line: ' + JSON.stringify(r.stdout));
+  assert.ok(r.stdout.length > 1 && r.stdout.endsWith('\n') && !leaksBreaker(r.stdout.slice(0, -1)), 'stdout must be exactly one line: ' + JSON.stringify(r.stdout));
   return { code: r.status, line: r.stdout.split('\n')[0], ms: Date.now() - started };
 }
 function fake(dir, file, transcript, code = 0) {
@@ -143,8 +143,9 @@ const NODE_TAP_FAIL = lines(
   "  failureType: 'testTimeoutFailure'",
   '  ...',
   'not ok 7 - tap skip directive # SKIP',
-  '1..7',
-  nodeSummary('#', { tests: 7, suites: 1, pass: 1, fail: 3, cancelled: 1, skipped: 1, todo: 1 }));
+  'not ok 8 - tap lowercase directive # skip',
+  '1..8',
+  nodeSummary('#', { tests: 8, suites: 1, pass: 1, fail: 3, cancelled: 1, skipped: 2, todo: 1 }));
 const NODE_TAP_LOAD = lines(
   'TAP version 13',
   'not ok 1 - C:\\\\work\\\\tests\\\\broken.test.cjs',
@@ -255,7 +256,7 @@ const CASES = [
   { parser: 'node', label: 'spec load failure', text: NODE_SPEC_LOAD, expect: { summary: true, passed: 0, failed: 2, total: 2, names: ['C:\\work\\tests\\broken.test.cjs', 'parses x.test.cjs'], loadFailures: ['C:\\work\\tests\\broken.test.cjs'] } },
   { parser: 'node', label: 'spec inline only', text: NODE_SPEC_INLINE, expect: { summary: true, passed: 1, failed: 3, total: 4, names: ['tests/broken.test.cjs', 'inline only failure', 'nested inline failure'], loadFailures: ['tests/broken.test.cjs'] } },
   { parser: 'node', label: 'tap pass', text: NODE_TAP_PASS, expect: ok(1, 1) },
-  { parser: 'node', label: 'tap fail', text: NODE_TAP_FAIL, expect: { summary: true, passed: 1, failed: 4, total: 7, names: ['tap nested failure', 'tap # hashed failure', 'tap cancelled'], loadFailures: [] } },
+  { parser: 'node', label: 'tap fail', text: NODE_TAP_FAIL, expect: { summary: true, passed: 1, failed: 4, total: 8, names: ['tap nested failure', 'tap # hashed failure', 'tap cancelled'], loadFailures: [] } },
   { parser: 'node', label: 'spec script-named entries without location', text: NODE_SPEC_SCRIPTS, expect: { summary: true, passed: 0, failed: 11, total: 11, names: [...SCRIPT_NAMES, 'nine.test.json', 'ten.js.map'], loadFailures: SCRIPT_NAMES } },
   { parser: 'node', label: 'tap load failure', text: NODE_TAP_LOAD, expect: { summary: true, passed: 0, failed: 2, total: 2, names: ['C:\\work\\tests\\broken.test.cjs', 'parses broken.test.cjs'], loadFailures: ['C:\\work\\tests\\broken.test.cjs'] } },
   { parser: 'jest', label: 'pass', text: JEST_PASS, expect: ok(2, 2) },
@@ -335,6 +336,27 @@ test('the one line survives every control character and line separator in anythi
     assert.equal(viaCli.code, 2, code);
     assert.match(viaCli.line, /^UNKNOWN cannot read spec .*a b\.json/, code);
   }
+});
+
+test('the PASS/FAIL line is guarded too: failing names and the log path never break it', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), logPath = path.join(dir, 'names.log');
+  const tap = name => lines('TAP version 13', `not ok 1 - ${name}`, '1..1', nodeSummary('#', { tests: 1, pass: 0, fail: 1 }));
+  // \n and \r end the reporter's own line before the tool sees a name, so they cannot reach it.
+  const inName = BREAKERS.filter(b => b !== '\n' && b !== '\r');
+  assert.equal(inName.length, 65);
+  for (const breaker of inName) {
+    const code = breaker.charCodeAt(0).toString(16);
+    const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, 'n.js', tap(`a${breaker}b`), 1), parser: 'node' }] }, { cwd: dir, logPath });
+    assert.equal(r.steps[0].names.length, 1, code);
+    assert.ok(r.steps[0].names[0].includes(breaker), code + ': the raw name must really carry the breaker');
+    assert.equal(leaksBreaker(r.line), false, code);
+    assert.equal(r.line, `FAIL tests 1 of 1 failed: a b — log: ${logPath}`, code);
+  }
+  const sep = String.fromCharCode(0x2028), oddLog = path.join(dir, `x${sep}y.log`);
+  const r = await runSpec({ steps: [{ name: 'red', argv: fake(dir, 'r.js', 'x\n', 1), parser: 'none' }] }, { cwd: dir, logPath: oddLog });
+  assert.ok(fs.existsSync(oddLog), 'the log must really open under the separator-bearing name');
+  assert.equal(r.line, `FAIL red exit 1 — log: ${oddLog.split(sep).join(' ')}`);
 });
 
 test('a log path that cannot be opened is UNKNOWN before anything runs', t => {
@@ -526,6 +548,8 @@ test('the log holds every step\'s full output, stdout and stderr, under a header
   const h1 = at(`==> step first: argv ${JSON.stringify(steps[0].argv)}`), h2 = at(`==> step second: argv ${JSON.stringify(steps[1].argv)}`);
   assert.ok(h1 < at('FIRST-7c1 out') && h1 < at('FIRST-7c1 err') && at('FIRST-7c1 out') < h2 && at('FIRST-7c1 err') < h2);
   assert.ok(h2 < at('SECOND-9d4 out') && h2 < at('SECOND-9d4 err'));
+  // The other side: after newline-terminated output a header gains no blank line either.
+  assert.ok(!/\n\r?\n==> step/.test(text), 'no blank line before a header');
   assert.ok(text.includes(`BARE-END-2e8\n==> step last: argv`), 'a header always starts its own line');
 });
 
