@@ -179,6 +179,15 @@ counts — reference, don't restate.
 - [x] README.md: tools tree and the install-update sentence
 - [x] The five closed-system passages rewritten to the pinned-skill rule
 - [x] `tests/tool-wiring.test.cjs` with the pins and live controls listed above
+- [x] polish: A1 — UNDO negation checked at every position a directive could start, with "Never skip the reconcile step, and skip the pin check when the skill was only updated." as a must-catch control
+- [x] polish: F1 — boot step 3 pinned by collapsed-text equality; either-order continue and after-reconcile patterns with N2/N3/N4/N5/N16/N18 as must-catch specimens
+- [x] polish: F2 — GOVERNS narrowed (no `not only`, `why not`, double negation or bare `no`); N1/N2 must-catch, a far-side control reported and near-side controls exempt
+- [x] polish: F3 — the template's validation paragraph pinned by equality; the recipe-instead pattern widened to use/run and "rather than"
+- [x] polish: F4 — protocol.md §Session algorithm step 1 pinned by equality
+- [x] polish: F5 — the `{{SKILL_DIR}}`/`{{SKILL_SHA256}}` registry rows pinned; the fill's hash derived from the registry row's own command
+- [x] polish: F6 — every `node` tool command bound to readdir(orchestrate/tools), both slash directions, quoted placeholder directory required
+- [x] polish: F7 — the Fill step's validate.json/setup.json clauses pinned by equality
+- [x] polish: F8 — an affirmative pointer-into-the-skill pattern over all docs, and the Baking rule pinned by equality
 
 ## Acceptance criteria
 

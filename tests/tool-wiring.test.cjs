@@ -54,12 +54,20 @@ function fixture(t) {
 const LEDGER_ID = 'TW-20260923-wiring', LEDGER_DIR = '.agents/changes/' + LEDGER_ID;
 const fill = (text, values) => text.replace(/\{\{([A-Z0-9_]+)\}\}/g, (token, key) => key in values ? values[key] : 'example');
 
-function skillHex(skillDir, cwd) {
-  const r = spawnSync(process.execPath, [path.join(skillDir, 'tools', 'check-ledger.mjs'), 'skill', '--dir', slash(skillDir)],
-    { cwd, encoding: 'utf8', windowsHide: true, timeout: 60000 });
-  assert.ifError(r.error); assert.equal(r.status, 0, r.stdout + r.stderr);
+// The fill's hash comes from the command the placeholder registry itself publishes for
+// {{SKILL_SHA256}}, run as published — not from an invocation this test composes.
+function registryRow(key) {
+  const rows = read('orchestrate/references/scaffolding.md').split('\n').filter(l => l.startsWith('| `{{' + key + '}}` |'));
+  assert.equal(rows.length, 1, 'exactly one registry row for {{' + key + '}}');
+  return rows[0];
+}
+function skillHex(skillDir, cwd, env) {
+  const commands = [...registryRow('SKILL_SHA256').matchAll(/`(node [^`]+)`/g)].map(m => m[1]);
+  assert.equal(commands.length, 1, 'the {{SKILL_SHA256}} row publishes exactly one command');
+  const r = runCommand(commands[0].replaceAll('<SKILL_DIR>', slash(skillDir)), cwd, env);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
   const m = /^SKILL ([0-9a-f]{64}) \d+ files\n$/.exec(r.stdout);
-  assert.ok(m, 'check-ledger.mjs skill --dir must print its hash line: ' + JSON.stringify(r.stdout));
+  assert.ok(m, 'the registry command must print the hash line whose hex field fills the pin: ' + JSON.stringify(r.stdout));
   return m[1];
 }
 function section(text, from, to) {
@@ -84,7 +92,7 @@ test('a filled pin line round-trips through the real check-ledger.mjs, from a di
   assert.deepEqual(pinLines(template), ['**Skill**: `{{SKILL_DIR}}` · sha256 `{{SKILL_SHA256}}`']);
   assert.equal(lines[lines.findIndex(l => l.startsWith('**Skill**')) - 1], '**Change**: {{CHANGE_ID}}');
 
-  const hex = skillHex(skillDir, repo.cwd);
+  const hex = skillHex(skillDir, repo.cwd, env);
   const contractPath = path.join(repo.cwd, ...LEDGER_DIR.split('/'), '00-READBEFORE.md');
   const filled = fill(template, { SKILL_DIR, SKILL_SHA256: hex, LEDGER_DIR, CHANGE_ID: LEDGER_ID });
   fs.mkdirSync(path.dirname(contractPath), { recursive: true }); fs.writeFileSync(contractPath, filled);
@@ -245,7 +253,7 @@ function withRows(text, keys, rows) {
   return [...lines.slice(0, head + 2), ...rows.map(r => '| ' + header.map(k => r[k] ?? '—').join(' | ') + ' |'), ...lines.slice(head + 2)].join('\n');
 }
 function scaffold(fx) {
-  const hex = skillHex(fx.skillDir, fx.repo.cwd);
+  const hex = skillHex(fx.skillDir, fx.repo.cwd, fx.env);
   const values = { SKILL_DIR: fx.SKILL_DIR, SKILL_SHA256: hex, LEDGER_DIR, CHANGE_ID: LEDGER_ID, BATCH_NUM: '01', BATCH_TITLE: 'One',
     BATCH_BRANCH: 'feat/one', BATCH_FILES: '`tests/ok.test.cjs`', BATCH_TYPE: 'feature', BATCH_VERSION: '—' };
   const strip = text => text.replace(/<!--[\s\S]*?-->/g, '');
@@ -383,16 +391,55 @@ test('the five closed-system passages state the pinned-skill rule, and no docume
 });
 
 // ===== No repo-relative tool path outside the mirrored evidence section ===============
-const REPO_RELATIVE = /\bnode\s+["']?(?:\.\/)?orchestrate\/tools\//g;
+const REPO_RELATIVE = /\bnode\s+["']?(?:\.[\/\\])?orchestrate[\/\\]tools[\/\\]/g;
 const MIRRORED = /### Read-only evidence tools\n[\s\S]*?(?=\n## )/;
 const outsideMirror = text => text.replace(MIRRORED, '');
+// Structural: every occurrence of `tools/<name>` or `tools\<name>`, for every tool the skill
+// ships (bound to the directory listing, not a hand list of spellings), must be the tail of a
+// quoted placeholder directory — `"{{X}}/tools/<name>"` or `"<x>/tools/<name>"` — closing
+// right after the name.
+const toolNames = () => fs.readdirSync(path.join(ROOT, 'orchestrate/tools')).filter(n => n.endsWith('.mjs'));
+function toolPathFaults(text, names) {
+  const escaped = names.map(n => n.replace(/\./g, '\\.')).join('|');
+  const faults = [];
+  for (const m of text.matchAll(new RegExp('tools[\\\\/](?:' + escaped + ')', 'g'))) {
+    const before = text.slice(Math.max(0, m.index - 80), m.index), after = text[m.index + m[0].length];
+    const quotedDir = /"(?:\{\{[A-Z_]+\}\}|<[A-Za-z_ -]+>)\/$/.test(before);
+    if (!quotedDir || after !== '"') faults.push(text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 10));
+  }
+  return faults;
+}
+// smoke-page.md (outside this batch's fence) runs `node tools/build-smoke-page.mjs …`,
+// relative to the skill directory. Declared, bounded, and allowed only to shrink.
+const KNOWN_TOOL_PATH_FAULTS = { 'orchestrate/references/smoke-page.md': 2 };
+test('every shipped command naming a skill tool quotes a placeholder directory, both slash directions', () => {
+  const names = toolNames();
+  assert.ok(names.includes('check-ledger.mjs') && names.includes('validate.mjs') && names.length >= 7, 'bound to the real tools listing');
+  // Controls: each broken shape is caught, the accepted shapes are not.
+  for (const bad of ['`node <skill>/tools/check-ledger.mjs skill --contract x`', '`node orchestrate\\tools\\check-ledger.mjs`',
+    '`node "orchestrate/tools/validate.mjs"`', '`node "<SKILL_DIR>/tools/check-ledger.mjs skill --dir "<SKILL_DIR>"`',
+    '`node tools/build-smoke-page.mjs a b`']) {
+    assert.equal(toolPathFaults(bad, names).length, 1, 'must be caught: ' + bad);
+  }
+  assert.deepEqual(toolPathFaults('`node "{{SKILL_DIR}}/tools/validate.mjs" --spec x` `node "<skill-dir>/tools/git-evidence.mjs" discovery`', names), []);
+  assert.ok(Object.values(KNOWN_TOOL_PATH_FAULTS).reduce((a, b) => a + b, 0) <= 2, 'a known fault may be retired, never added');
+  let seen = 0;
+  for (const file of documents().filter(f => f.endsWith('.md'))) {
+    const text = outsideMirror(read(file));
+    seen += [...text.matchAll(/tools[\\/][a-z-]+\.mjs/g)].length;
+    const faults = toolPathFaults(text, names);
+    assert.ok(faults.length <= (KNOWN_TOOL_PATH_FAULTS[file] || 0), file + ': a tool command without a quoted placeholder directory — ' + faults.join(' || '));
+  }
+  assert.ok(seen >= 6, 'the sweep must see the published tool commands');
+});
 test('no shipped Markdown runs node orchestrate/tools/ outside the mirrored evidence section', () => {
   const protocol = read('orchestrate/references/protocol.md');
   const exempt = (MIRRORED.exec(protocol) || [''])[0];
   assert.ok((exempt.match(REPO_RELATIVE) || []).length > 0, 'the exemption must cover live recipes, or it exempts nothing');
-  // Planted controls: one outside the section is caught, one inside it is exempt.
+  // Planted controls: one outside the section is caught (either slash direction), one inside it is exempt.
   const skillMd = read('orchestrate/SKILL.md');
   assert.ok((outsideMirror(skillMd + '\nRun `node orchestrate/tools/check-ledger.mjs parse`.\n').match(REPO_RELATIVE) || []).length === 1);
+  assert.ok((outsideMirror(skillMd + '\nRun `node orchestrate\\tools\\check-ledger.mjs parse`.\n').match(REPO_RELATIVE) || []).length === 1);
   const planted = protocol.replace('### Read-only evidence tools\n', '### Read-only evidence tools\nnode orchestrate/tools/x.mjs\n');
   assert.notEqual(planted, protocol);
   assert.equal((outsideMirror(planted).match(REPO_RELATIVE) || []).length, 0);
@@ -405,28 +452,56 @@ test('no shipped Markdown runs node orchestrate/tools/ outside the mirrored evid
 
 // ===== Directives that would undo the rules ============================================
 // Clause-level: a pattern match is a directive unless a negation GOVERNS it — a negator
-// directly before the matched words (one word may intervene). A negation elsewhere in the
-// clause ("when the full log is not needed") exempts nothing. Each pattern owns an
-// affirmative specimen it must catch; the negated controls must pass. A background TASK whose
-// completion reports the line and exit code is the user-approved rule (2026-09-23), so only a
-// shell `&`, a job the harness does not report on, piping, tailing, or reading the log early are caught.
+// directly before the matched words (one word, or "under any circumstance", may intervene;
+// "not only", "why not" and a double negation do not govern). The negation is checked at
+// EVERY position a directive could start, so a negated verb early in a clause cannot carry a
+// later, un-negated one. A negation elsewhere in the clause exempts nothing. Each pattern owns
+// an affirmative specimen; the controls below pin both sides of the negation rule. A background
+// TASK whose completion reports the line and exit code is the user-approved rule (2026-09-23),
+// so only a shell `&`, not waiting for the line, piping, tailing, or reading the log early are caught.
+// The load-bearing passages themselves are pinned by equality in the next test; this sweep
+// is for the rest of the documents.
 const UNDO = [
   ['pipe the validation output', /\bpip(?:e|es|ed|ing)\b[^.;:]*\b(?:validat\w*|wrapper|validate\.mjs)\b/i, 'Pipe the validation output through Select-Object to shorten it'],
   ['pipe into tail', /\b(?:validat\w*|wrapper|validate\.mjs)\b[^.;:]*\|\s*(?:tail|head|Select-Object|more|tee)\b/i, 'Run validate.mjs | tail -20 to see the end'],
   ['tail the validation output', /\btail\w*\s+(?:the|its)\s+(?:validation|wrapper|log)\b/i, 'Tail the validation output while it runs'],
   ['detach with a shell job', /\b(?:validat\w*|wrapper|validate\.mjs)\b[^.;:]*(?:\s&(?=\s|`|$)|\bStart-Job\b|\bnohup\b)/i, 'Start the wrapper with a trailing & and keep working'],
+  ['move on without the line', /\bwithout waiting for\b[^.;:]*\b(?:line|exit code|result|completion|wrapper|validation)\b/i, 'Start the wrapper in the background and move on without waiting for its line'],
   ['read the log before it exits', /\bread\w*\s+(?:the\s+)?(?:validation\s+|wrapper's\s+)?log\b[^.;:]*\b(?:while|before|during)\b/i, 'Read the log while the wrapper runs to catch failures early'],
-  ['run the recipe instead of the wrapper', /\brun\b[^.;:]*\b(?:block above|recipe|validation commands)\b[^.;:]*\b(?:directly|instead)\b/i, 'When the suite is slow, run the block above directly instead'],
+  ['read the log on every run', /\b(?:always\s+read\w*\s+(?:the\s+)?(?:full\s+|whole\s+)?log\b|read\w*\s+(?:the\s+)?(?:full\s+|whole\s+)log\b[^.;:]*\b(?:every|each|always)\b)/i, 'Read the full log after every run'],
+  ['run the recipe instead of the wrapper', /\b(?:run|use)s?\b[^.;:]*\b(?:block above|recipe|validation commands)\b[^.;:]*\b(?:directly|instead|rather than)\b/i, 'When the suite is slow, run the block above directly instead'],
   ['skip the pin check', /\b(?:skip|bypass|ignore|omit)\w*\b[^.;:]*\b(?:pin check|skill pin|pin line|SKILL MISMATCH)\b/i, 'Skip the pin check when the skill was only updated'],
   ['continue on a mismatch or unknown', /(?:SKILL MISMATCH|\bUNKNOWN\b)[^.;:]*\b(?:[Cc]ontinue|[Pp]roceed)s?\b/, 'On a SKILL MISMATCH, continue with the new skill'],
+  ['continue despite a later mismatch', /\b(?:[Cc]ontinu|[Pp]roceed)\w*\b[^.;:]*(?:SKILL MISMATCH|\bUNKNOWN\b)/, 'Continue with Reconcile on a `SKILL MISMATCH` from a moved directory'],
+  ['only a mismatch stops', /\b[Oo]nly\s+(?:an?\s+)?`?(?:SKILL MISMATCH|UNKNOWN)`?[^.;:]*\bstop/, 'Only a `SKILL MISMATCH` stops the session'],
+  ['the pin check made conditional', /\b(?:pin check|skill pin)\b[^.;:]*\b(?:only (?:if|when)|optional|unless)\b/i, 'Run the pin check only if the skill directory moved'],
   ['reconcile before the pin check', /\b[Rr]econcile\b[^.;:]*\b(?:first|before)\b[^.;:]*\bpin\b/, 'Reconcile first, then run the pin check'],
-  ['pin check after reconcile', /\bpin check\b[^.;:]*\bafter\b[^.;:]*\breconcil/i, 'Run the pin check after reconcile'],
+  ['pin check after reconcile', /\b(?:pin check|skill pin|pin)\b[^.;:]*\b(?:after|once)\b[^.;:]*\breconcil/i, 'Run the pin check after reconcile'],
   ['pin check at scaffold time only', /\b(?:both|pin check|skill check|skill --contract)\b[^.;:]*\bscaffold[- ]time only\b/i, 'Both run at scaffold time only'],
+  ['a pointer into the skill', /\b(?:left as a pointer|links?|refers?|point)\s+(?:in)?to\s+(?:this|the)\s+skill's\s+(?:reference|references\/)/i, "Interview answers may be left as a pointer into this skill's reference docs where a rule is long"],
 ];
-const GOVERNS = /(?:\b(?:never|not|no|nor|cannot)|n't)\s+(?:[\w`'-]+\s+)?$/i;
+const NEGATOR = /(?:^|[^\w'’])(never|not|cannot|nor|\w+n['’]t)\s+(?:((?!(?:only|just|merely|simply)\s)[\w`'’-]+)\s+|under any circumstances?\s+)?$/i;
+const IS_NEGATOR = /^(?:never|not|cannot|nor|\w+n['’]t)$/i;
+function governed(prefix) {
+  const m = NEGATOR.exec(prefix);
+  if (!m) return false;
+  if (m[2] && IS_NEGATOR.test(m[2])) return false; // "cannot not skip": a double negation
+
+  const before = prefix.slice(0, m.index + m[0].indexOf(m[1]));
+  // "why not …" is a suggestion and "cannot not …" a double negation: neither forbids.
+  return !/(?:\bwhy|\bnever|\bnot|\bcannot|n['’]t)\s+$/i.test(before);
+}
 const clauses = text => collapse(text).split(/(?<=[.;:])\s+/);
-const fires = (pattern, clause) => [...clause.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))]
-  .some(m => !GOVERNS.test(clause.slice(0, m.index)));
+function fires(pattern, clause) {
+  if (!pattern.test(clause)) return false;
+  const sticky = new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, '') + 'y');
+  for (let i = 0; i < clause.length; i++) {
+    if (i > 0 && /\w/.test(clause[i - 1]) && /\w/.test(clause[i])) continue;
+    sticky.lastIndex = i;
+    if (sticky.test(clause) && !governed(clause.slice(0, i))) return true;
+  }
+  return false;
+}
 const undoing = text => clauses(text).flatMap(c => UNDO.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
 test('no shipped passage tells a reader to pipe, tail or detach validation, or to skip or postpone the pin check', () => {
   assert.equal(new Set(UNDO.map(u => u[0])).size, UNDO.length);
@@ -436,16 +511,71 @@ test('no shipped passage tells a reader to pipe, tail or detach validation, or t
     assert.deepEqual(UNDO.filter(([, p]) => p.test(specimen)).map(u => u[0]), [name], name + ': its specimen must be caught by it alone');
     assert.equal(undoing(specimen + '.').length, 1, name + ': the clause reader must report the specimen');
   }
-  // Tight controls: an unrelated negation elsewhere in the clause must not exempt it.
+  // Must be reported: an unrelated negation after the match, a negated verb earlier in the
+  // clause carrying a later directive, a negation too far from the verb, a suggestion, a
+  // double negation, and every contradiction the round-2 hunt planted.
   for (const planted of ['Pipe the validation output through tail when the full log is not needed.',
     'Skip the pin check when the skill directory has not changed since the last session.',
     'A SKILL MISMATCH does not stop the session, so continue with the updated skill.',
-    'An `UNKNOWN` from a moved skill directory → continue with Reconcile.']) {
-    assert.equal(undoing(planted).length, 1, 'must be reported despite its unrelated negation: ' + planted);
+    'An `UNKNOWN` from a moved skill directory → continue with Reconcile.',
+    'Never skip the reconcile step, and skip the pin check when the skill was only updated.',
+    'Never pipe the recipe block by hand, but pipe the validation output through Select-Object.',
+    'Do not only pipe the validation output, tail it too.',
+    'Why not pipe the validation output through tail when the suite is slow?',
+    'If the check prints no SKILL MISMATCH, continue with Reconcile.',
+    'You cannot not skip the pin check.',
+    'Do not hesitate to skip the pin check.',
+    'The pin check is optional when the skill directory is unchanged.',
+    'Verify the skill pin after reconcile.',
+    'Verify the skill pin once reconcile is done.',
+    'Implementers run the recipe rather than the wrapper.',
+    'Use the block above instead of the wrapper when it is faster.',
+    'Tip validation uses the recipe directly.',
+    "A ledger may also link to this skill's references/protocol.md for the long rules."]) {
+    assert.ok(undoing(planted).length >= 1, 'must be reported: ' + planted);
   }
+  // Must pass: a negation governing the verb, adjacent or across one word or the stock
+  // phrase, and the approved rules themselves.
   assert.deepEqual(undoing('Never pipe or tail it. Never skip the pin check. Don\'t pipe the validation output. '
+    + 'Do not ever skip the pin check. Do not under any circumstance skip the pin check. '
+    + "Interview answers are written INTO the generated `00-READBEFORE.md` — never left as a pointer into this skill's reference docs. "
     + BACKGROUND_RULE), [], 'a negated rule — and the approved background task — is the rule itself, not a contradiction');
   const files = documents();
   assert.ok(files.includes(TEMPLATE) && files.includes('orchestrate/references/protocol.md'));
   for (const file of files) assert.deepEqual(undoing(read(file)), [], file + ': a directive undoes the validation or pin rule');
+});
+
+// ===== The load-bearing passages, pinned by equality ===================================
+// Two rounds of regex sweeps each left a contradicting sentence green, so the passages that
+// carry this batch's rules are pinned as whole text (whitespace collapsed): ANY appended,
+// narrowed or reworded sentence inside them goes red. Rewording one on purpose means
+// updating its constant here — that is the intent, as with the pinned implementer paragraph.
+const PINNED = [
+  [TEMPLATE, '3. **Skill pin**', '\n4. **Reconcile**',
+    "3. **Skill pin**, before anything is reconciled: from the integration worktree root run `node \"{{SKILL_DIR}}/tools/check-ledger.mjs\" skill --contract {{LEDGER_DIR}}/00-READBEFORE.md`. `SKILL MATCH` → continue. Anything but `SKILL MATCH` (including `SKILL MISMATCH`, `UNKNOWN` and a tool that does not run) → STOP and ask; continue only on the user's explicit words, recorded verbatim in the session log — an upgrade (the `**Skill**` line above rewritten to the new directory and hash in the commit that records those words) or this contract's manual procedures (the recipe under §Validation commands, the prompt list in §Session algorithm step 5, the manual fence fallback) for the rest of the change."],
+  [TEMPLATE, 'All must pass before a batch may integrate', '\n## Version + changelog',
+    "All must pass before a batch may integrate (`🟢`). Every run goes through the validation wrapper, from the worktree root: ```text node \"{{SKILL_DIR}}/tools/validate.mjs\" --spec {{LEDGER_DIR}}/validate.json --log \"<session scratchpad>/<label>.log\" ``` `validate.json` is the machine form of the block above, written at scaffold time. The wrapper's one line (`PASS …`, `FAIL … — log: <path>` or `UNKNOWN …`) is the result and its exit code (0/1/2) is the real one; the log is read only when the line is not PASS, and failing test NAMES are taken from it so failing sets compare by name against any allowlist. Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task whose completion reports the one line and the exit code, and never read the log before it exits. The block above stays the human-readable recipe and is the manual procedure when the wrapper is unavailable, run in its QUIET form (a totals line plus failing test NAMES; full output only on a non-zero exit). If the block above says `none`, there is no `validate.json` and the checkpoint smoke tests carry ALL verification — state that explicitly when handing over. Mutation runner (optional, scoped to a batch's changed files): {{MUTATION_RUNNER}}."],
+  ['orchestrate/references/protocol.md', '1. Boot + reconcile', '\n2. Repairs first',
+    "1. Boot + reconcile + resume-time validation (validation commands on the integration tip; red → step 2 first). A contract carrying a `**Skill**` pin line verifies it FIRST, before reconcile: `node \"<skill-dir>/tools/check-ledger.mjs\" skill --contract <ledger-dir>/00-READBEFORE.md` from the integration worktree root — `SKILL MATCH` continues; anything but `SKILL MATCH` (including a tool that does not run) STOPs and asks, continuing only on the user's explicit words recorded verbatim in the session log (an upgrade: the pin line rewritten in the commit that records them; or the contract's manual procedures). Such a contract runs every validation — resume-time and tip validation alike — through `node \"<skill-dir>/tools/validate.mjs\" --spec <ledger-dir>/validate.json --log <file>`: its one line is the result, its exit code the real one, and the log is read only when the line is not PASS. Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task whose completion reports the one line and the exit code, and never read the log before it exits. Without a pin line, or when the wrapper is unavailable, the manual procedure is the validation commands in their quiet form."],
+  ['orchestrate/references/scaffolding.md', 'Also write `validate.json`', '\n   Keep the generated',
+    "Also write `validate.json` into the ledger directory, the spec `validate.mjs --help` describes: one step per confirmed validation command; a multi-line recipe block becomes ONE `shell` step whose `script` is the block's text (a PowerShell block: prefer `pwsh`; use `powershell` only where `pwsh` is absent — its log carries CLIXML noise); `parser` names the runner the command invokes (`node`, `jest`, `pytest` — without `-q`, whose summary it cannot read — `cargo`, else `none`). Run it once at the base through the contract's validation wrapper and record its line in LOG.md as the ledger's validation baseline. When the validation commands are `none`, write no `validate.json` (an empty `steps` array is invalid) and say so in LOG.md. When `{{WORKTREE_SETUP}}` is not `n/a`, also write `setup.json`, a `validate.mjs` spec holding the setup command(s), so a disposable checkout can be set up exactly like a worktree."],
+  ['orchestrate/references/scaffolding.md', '## Baking rule', undefined,
+    "## Baking rule Interview answers are written INTO the generated `00-READBEFORE.md` — never left as a pointer into this skill's reference docs. A ledger references ONLY its pinned skill directory, by absolute path and hash, and every step a tool performs also has a baked manual procedure (the recipe block for validation, the pasted-prompt list for spawning, the fence's manual fallback); a changed skill stops the ledger at its next boot and asks, and never silently changes how it runs. The skill's references exist for the skill's benefit; each ledger must be drivable by a session that has never seen this skill — or has a changed one: State line, LOG.md, `NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are all explained inside the ledger's own files."],
+];
+const PINNED_ROWS = {
+  SKILL_DIR: "| `{{SKILL_DIR}}` | template (READBEFORE) | the absolute path of the directory holding the skill's `SKILL.md` (the base directory the skill loader reports), forward slashes, stored RAW between the pin line's backticks — never quoted there; every command that uses it quotes it. Never relative or `~`: the pin check reads it from the working directory |",
+  SKILL_SHA256: "| `{{SKILL_SHA256}}` | template (READBEFORE) | the hex field of `node \"<SKILL_DIR>/tools/check-ledger.mjs\" skill --dir \"<SKILL_DIR>\"`, run at fill time |",
+};
+test('the load-bearing passages and registry rows match their pinned text exactly', () => {
+  const pinned = (text, from, to) => collapse(section(text, from, to)).trim();
+  for (const [file, from, to, expected] of PINNED) {
+    const text = read(file);
+    assert.equal(text.split(from).length - 1, 1, file + ': the passage anchor "' + from + '" must occur exactly once');
+    assert.equal(pinned(text, from, to), expected, file + ' (' + from + '): the pinned passage changed; update PINNED only on purpose');
+    // Live control: one appended sentence inside the passage reddens it.
+    const planted = text.replace(from, from + ' Skip it when in a hurry.');
+    assert.notEqual(pinned(planted, from, to), expected);
+  }
+  assert.equal(PINNED.length, 5, 'five passages are pinned; the list may not shrink to a sample');
+  for (const [key, row] of Object.entries(PINNED_ROWS)) assert.equal(registryRow(key), row, '{{' + key + '}} registry row changed');
 });
