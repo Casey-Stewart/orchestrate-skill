@@ -232,3 +232,29 @@ Apparatus: (1) every sub-agent gate ran the recipe from Git Bash, where `bash` i
 ### W2 open
 
 Wave base `955f549`; B02 on `feat/ledger-parser`, worktree `wt-os923/b02`.
+
+### B02
+
+Implementer (default tier): DONE @`7516682`, 384/384 under an emulated PowerShell PATH (420 s), 6/6 ticked, 29 mutants killed. Fence check (installed tool): PASS — integration `3dfbf82`, batch `7516682`, merge-base `955f549`.
+
+Real-PowerShell recipe on `7516682` (run concurrently with the reviewer's and hunter's suites; 21m16s): 383/384 — `tests/build-smoke-page.test.cjs:847` "CLI reissue refuses to overwrite the existing HTML declared as an issued input": stderr was `…smoke-c1.json: output must not overwrite an input or the previous sidecar` where `/output must not overwrite an issued input artifact/` was expected. Not reproduced: that file alone 2/2 green on the B02 branch and 2/2 on the tip. Outside every fence of this change.
+
+Diagnosis (BL-015's family): `build-smoke-page.mjs:318-323` `sameFile()` compares `statSync().ino` as a Number; on this machine NTFS file ids reach past 2^53 (a sample of 400 fresh temp files: one lost precision), so two distinct files can compare equal and the `:347` check fires first. This fits BL-015 (same file, an overwrite-refusal test, intermittent, unreproducible standalone). Fix shape: `statSync(p, { bigint: true })`. For the close-out: BL-015 returns to Open with this output and diagnosis attached (its own close condition), outside this ledger's scope.
+
+R1 — reviewer (default tier) FIX FIRST, test-hunter FINDINGS 6 (same P1 found independently). Verbatim:
+
+R1 reviewer (FIX FIRST @7516682): move byte-identical (--help SHA unchanged, check-fence tests untouched); 8-export sweep, checkBatch line checks (legitimate — rules inline in checkFence/validateBatchEdit, parity cases hold them), literal · and —, strict skillPin candidates, and parse failing after a Files-line extension are all judged correct. Recipe under a PowerShell-equivalent PATH: 384/384 (21 min, concurrent load).
+1. P1 — orchestrate/tools/check-ledger.mjs:89-91: parse is LOOSER than the fence. A ledger whose B01 PROGRESS Notes carry `fence +.agents/changes/FIXTURE/02-batches-01-one.md (item, reason, 2026-09-23)` (also in the session log) → `PARSE OK 2 batches`, exit 0; the real checkFence on the same committed ledger → UNKNOWN ["authority:Redundant or ambiguous extension"]. parse copies only the first half of check-fence.mjs:98 (`fence.includes(p)`) and omits `|| p === batchFile`. Fix: pass path.basename(dir) into checkLedger and reject an extension equal to `.agents/changes/<basename>/<own batch file>` (resolve the own batch file before the PROGRESS loop); add the variant to CASES with fence: 'authority'; the CASES.length domain pin → 18.
+2. (orchestrator-owned, NOT for the implementer) ASK — smoke step 3 prose expects `PARSE OK 5 batches` on this ledger, which becomes false for a legitimate reason if a later batch records a fence extension. The orchestrator annotates this at C1.
+Reviewer observations (spec-level, unclassified — the orchestrator directs them into this round, see the resume message):
+3. A Branch cell holding an impossible ref name (`feat/one x`, no backticks, a space) consistently in plan, PROGRESS and batch file → PARSE OK, but the fence can never gate it (validFullRef rejects it at usage). Tightening means importing validFullRef from git-evidence.mjs.
+4. Symlinked authority files: parse reads through statSync (check-ledger.mjs:23, follows links); the fence requires ordinary blobs (check-fence.mjs:90, :108-110) — a symlinked plan or batch file passes parse but is UNKNOWN to the fence. lstatSync would close it.
+
+R1 test-hunter (FINDINGS 6; every mutation RAN under Git Bash AND a PowerShell-equivalent PATH, control 27/27 both):
+5. P1 — same as reviewer #1, reproduced independently (tests/check-ledger.test.cjs:92-126 CASES; check-ledger.mjs:91 vs check-fence.mjs:98). Aside outside the fence: deleting `|| p === batchFile` also leaves tests/check-fence.test.cjs green (93 tests).
+6. ASK — boundary pinned one side: duplicate Branch line and duplicate `## Checklist` tested only at zero. `branchAt.length !== 1` → `< 1` (check-ledger.mjs:49) and `checklist.length !== 1` → `< 1` (:59) stay green (doubled line → PARSE OK; fence says batch-linkage / batch-structure). Add parity CASES "duplicate Branch line" (batch-linkage), "duplicate Checklist" (batch-structure), each naming file and line.
+7. ASK — unreached checkBatch clauses: delete the "later ## heading" clause (:59) green (Checklist as last heading → PARSE OK; fence batch-structure); compare Files sorted (:55) green (reordered Files → PARSE OK; fence batch-linkage; spec says "in order"); title regex `^# ${id}` only (:47) green (`# B01: ...` → PARSE OK; fence batch-linkage). Add three parity CASES.
+8. ASK — swallowed branch-cell errors: `catch (e) { if (0) add(PLAN` (:75) and the PROGRESS catch (:88) stay green; a plan Branch cell `` `feat/one`x `` → PARSE OK; fence `authority: Malformed branch cell`. Add two parity CASES (plan and PROGRESS) expecting `B01 Branch: Malformed branch cell`.
+   ROOT CAUSE of 5–8: :140-141 pins CASES.length === 17 and the set of fence CODES, but one code covers many throw sites — one sample per code. Bind the domain to the fence's rejection sites (every `throw new Error('…')` message in ledger-parse.mjs plus each clause of check-fence.mjs:96,98,117,120 and validateBatchEdit :13) and assert each site is reached by a case no other case catches.
+9. ASK (low) — `!m` orphan branch unreached: `if (m && !planIds.has(` (:105) green; `02-batches-x-foo.md` is silently ignored (spec: no batch file without a plan row). Add a parse-only shape expecting `no plan row claims this batch file`.
+10. ASK (low) — non-regular-file branch (:139) unreached. Add a POSIX-only FIFO fixture (skipped on win32) expecting `UNKNOWN not a regular file or directory: …`.
