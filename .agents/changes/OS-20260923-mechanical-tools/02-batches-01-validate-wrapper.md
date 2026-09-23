@@ -182,11 +182,15 @@ exit with a chosen code; specs point at them via `argv: [process.execPath, scrip
 
 ## Checklist
 
-- [ ] `orchestrate/tools/validate.mjs`: spec loader with strict validation, foreground runner (argv steps; shell steps via `-EncodedCommand` / `bash -o pipefail -c`), `NODE_TEST_CONTEXT` dropped, log file, per-step timeout that kills the process tree, single-line output, exit 0/1/2
-- [ ] Parsers for node (spec + TAP), jest, pytest and cargo, with ANSI stripping, de-duplication, summed summaries and `loadFailures`
-- [ ] Exported async `runSpec` and `parseRunnerOutput` with the documented shapes
-- [ ] `tests/validate.test.cjs` covering every classification row, every parser (own-case rule), the live Node controls, CRLF/LF, ANSI, the log, the one-line contract, spec and flag errors
-- [ ] `tests/protocol-contract.test.cjs`: register `orchestrate/tools/validate.mjs` in `NON_MARKDOWN` and pin its length at 6
+- [x] `orchestrate/tools/validate.mjs`: spec loader with strict validation, foreground runner (argv steps; shell steps via `-EncodedCommand` / `bash -o pipefail -c`), `NODE_TEST_CONTEXT` dropped, log file, per-step timeout that kills the process tree, single-line output, exit 0/1/2
+- [x] Parsers for node (spec + TAP), jest, pytest and cargo, with ANSI stripping, de-duplication, summed summaries and `loadFailures`
+- [x] Exported async `runSpec` and `parseRunnerOutput` with the documented shapes
+- [x] `tests/validate.test.cjs` covering every classification row, every parser (own-case rule), the live Node controls, CRLF/LF, ANSI, the log, the one-line contract, spec and flag errors
+- [x] `tests/protocol-contract.test.cjs`: register `orchestrate/tools/validate.mjs` in `NON_MARKDOWN` and pin its length at 6
+- [x] polish: cli() helper rejects an empty stdout line (stdout longer than the newline alone)
+- [x] polish: one-line guard covers the PASS/FAIL line via TAP names carrying each breaker and a breaker in the log path
+- [x] polish: log test pins no blank line before a header that follows newline-terminated output
+- [x] polish: corpus pins the case-insensitive TAP directive with a lowercase skip entry
 
 ## Acceptance criteria
 
