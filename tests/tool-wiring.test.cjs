@@ -132,13 +132,14 @@ test('an unfilled pin passes the code-span-exempt grep, so the pin check is what
 });
 
 // Every occurrence of a skill-directory token, in every shipped document and the README,
-// is either a quoted command prefix ("TOKEN/...) or a code span naming the token alone.
+// is either a quoted argument ("TOKEN" or "TOKEN/path", closed before any whitespace) or a
+// code span naming the token alone.
 const SKILL_TOKENS = /\{\{SKILL_DIR\}\}|<SKILL_DIR>|<skill-dir>/g;
 function unquotedSkillDirs(text) {
   const bad = [];
   for (const m of text.matchAll(SKILL_TOKENS)) {
     const before = text[m.index - 1], after = text[m.index + m[0].length];
-    const quoted = before === '"' && (after === '/' || after === '"');
+    const quoted = before === '"' && /^(?:\/[^"\s]*)?"/.test(text.slice(m.index + m[0].length));
     const named = before === '`' && after === '`';
     if (!quoted && !named) bad.push(text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 20));
   }
@@ -150,6 +151,9 @@ test('every command that uses the skill directory quotes it', () => {
   assert.equal(unquotedSkillDirs('`skill --dir <SKILL_DIR>`').length, 1);
   assert.equal(unquotedSkillDirs('`node "<skill-dir>/tools/x.mjs"`, `--dir "<SKILL_DIR>"` and `{{SKILL_DIR}}`').length, 0);
   assert.equal(unquotedSkillDirs('`--dir "<SKILL_DIR> x` `--dir <SKILL_DIR>"`').length, 2, 'a quote on one side only is not quoting');
+  // A quote that closes only after whitespace leaves the tool path and its arguments as one argument.
+  assert.equal(unquotedSkillDirs('`node "<SKILL_DIR>/tools/check-ledger.mjs skill --dir "<SKILL_DIR>"`').length, 1,
+    'a quoted run must close before any whitespace');
   let occurrences = 0;
   // Markdown is where commands are published; a tool's usage synopsis (`--dir <skill-dir>`) is not one.
   const markdown = documents().filter(f => f.endsWith('.md'));
@@ -174,33 +178,43 @@ test('the boot sequence verifies the pin before reconcile, and a mismatch stops 
   const order = text => {
     const steps = stepsOf(text);
     const at = needle => steps.findIndex(s => s.text.includes(needle));
-    return { steps, pin: at('/tools/check-ledger.mjs" skill --contract'), reconcile: at('**Reconcile**'), validation: at('**Resume-time validation**') };
+    return { steps, pin: at('/tools/check-ledger.mjs" skill --contract'), reconcile: at('**Reconcile**'),
+      validation: at('**Resume-time validation**'), worktree: at('git worktree list') };
   };
-  const { steps, pin, reconcile, validation } = order(template);
+  const { steps, pin, reconcile, validation, worktree } = order(template);
   assert.deepEqual(steps.map(s => s.n), steps.map((_, i) => i + 1), 'boot steps are numbered consecutively');
-  assert.ok(pin !== -1 && reconcile !== -1 && validation !== -1);
+  assert.ok(pin !== -1 && reconcile !== -1 && validation !== -1 && worktree !== -1);
+  assert.ok(worktree < pin, 'the pin check runs from the integration worktree, so after the step that establishes it');
   assert.ok(pin < reconcile && reconcile < validation, 'the pin check runs before reconcile and before validation');
+  assert.ok(steps[validation].text.includes('run the validation wrapper'), 'resume-time validation runs the wrapper');
   // Control: the same reader on a template with the pin step moved after reconcile.
   const swapped = template.replace(/(\n3\. \*\*Skill pin\*\*[\s\S]*?)(\n4\. \*\*Reconcile\*\*[^\n]*)/, '$2$1');
   assert.notEqual(swapped, template, 'the control must move the pin step');
   const moved = order(swapped); assert.ok(moved.pin > moved.reconcile, 'the order reader must see a moved pin step');
   const step = steps[pin].text;
-  for (const needed of ['`SKILL MATCH` → continue', '`SKILL MISMATCH` or `UNKNOWN` → STOP and ask',
+  for (const needed of ['`SKILL MATCH` → continue',
+    'Anything but `SKILL MATCH` (including `SKILL MISMATCH`, `UNKNOWN` and a tool that does not run) → STOP and ask',
     "continue only on the user's explicit words, recorded verbatim in the session log", 'from the integration worktree root']) {
     assert.ok(step.includes(needed), 'the pin step must say: ' + needed);
   }
   const protocolStep = collapse(section(read('orchestrate/references/protocol.md'), '## §Session algorithm', '\n2. '));
   assert.match(protocolStep, /verifies it FIRST, before reconcile: `node "<skill-dir>\/tools\/check-ledger\.mjs" skill --contract /);
-  assert.match(protocolStep, /`SKILL MISMATCH` or `UNKNOWN` STOPs and asks/);
+  assert.match(protocolStep, /`SKILL MATCH` continues; anything but `SKILL MATCH` \(including a tool that does not run\) STOPs and asks/);
+  // Ordering in protocol.md by position, not by inclusion: nothing may place reconcile ahead of the pin check.
+  assert.ok(protocolStep.indexOf('verifies it FIRST, before reconcile') < protocolStep.indexOf('SKILL MATCH'));
+  // Mode continue in SKILL.md names the pin check at boot.
+  assert.ok(collapse(read('orchestrate/SKILL.md')).includes('3. Boot (a pinned contract verifies its skill pin first) + reconcile'));
 });
 
-test('the validation section routes every run through validate.mjs in the foreground, the recipe kept as manual procedure', () => {
+const BACKGROUND_RULE = "Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task "
+  + 'whose completion reports the one line and the exit code, and never read the log before it exits.';
+test('the validation section routes every run through validate.mjs, the recipe kept as manual procedure', () => {
   const validation = section(template, '## Validation commands', '## Version + changelog');
   assert.ok(validation.includes('{{VALIDATION_COMMANDS}}'), 'the human-readable recipe stays');
   const commands = validation.split('\n').filter(l => l.includes('/tools/validate.mjs'));
   assert.deepEqual(commands, ['node "{{SKILL_DIR}}/tools/validate.mjs" --spec {{LEDGER_DIR}}/validate.json --log "<session scratchpad>/<label>.log"']);
   const prose = collapse(validation);
-  for (const needed of ['Every run goes through the validation wrapper, in the FOREGROUND', 'Never pipe, tail or background it',
+  for (const needed of ['Every run goes through the validation wrapper, from the worktree root', BACKGROUND_RULE,
     'the log is read only when the line is not PASS', 'is the manual procedure when the wrapper is unavailable']) {
     assert.ok(prose.includes(needed), 'the validation section must say: ' + needed);
   }
@@ -208,7 +222,17 @@ test('the validation section routes every run through validate.mjs in the foregr
   const help = spawnSync(process.execPath, [path.join(ROOT, 'orchestrate/tools/validate.mjs'), '--help'], { encoding: 'utf8', windowsHide: true });
   assert.equal(help.status, 0); assert.match(help.stdout, /^validate\.mjs --spec <file\.json> --log <file>/);
   const protocolStep = collapse(section(read('orchestrate/references/protocol.md'), '## §Session algorithm', '\n2. '));
-  assert.match(protocolStep, /`node "<skill-dir>\/tools\/validate\.mjs" --spec <ledger-dir>\/validate\.json --log <file>` in the FOREGROUND/);
+  assert.ok(protocolStep.includes('through `node "<skill-dir>/tools/validate.mjs" --spec <ledger-dir>/validate.json --log <file>`:'));
+  assert.ok(protocolStep.includes(BACKGROUND_RULE), 'protocol.md states the user-approved background-task rule verbatim');
+  // Every clause of the template and protocol.md naming the quiet form is the one manual-procedure clause.
+  for (const file of [TEMPLATE, 'orchestrate/references/protocol.md']) {
+    const quiet = clauses(read(file)).filter(c => /\bquiet[- ]form\b/i.test(c));
+    assert.equal(quiet.length, 1, file + ': exactly one clause may name the quiet form — ' + quiet.join(' || '));
+    assert.match(quiet[0], /\bmanual procedure\b/, file + ': the quiet form is only the manual procedure');
+  }
+  // The spawn-prompt list hands implementers the wrapper, not a bare quiet-form run.
+  const spawn = collapse(section(template, '\n5. Spawn ALL', '\n6. Gate PER BATCH'));
+  assert.ok(spawn.includes('validation commands (the wrapper command and its recipe)'));
 });
 
 // ===== A ledger filled from the real templates =====================================
@@ -256,6 +280,22 @@ test('scaffolding self-check names the parse and pin checks, and a filled ledger
   for (const needed of ['write `validate.json` into the ledger directory', 'write no `validate.json`', 'write `setup.json`', 'validation baseline']) {
     assert.ok(fill8.includes(needed), 'the Fill step must say: ' + needed);
   }
+  // validate.mjs accepts both PowerShells; `pwsh` is preferred, `powershell` stays allowed where it is the only one.
+  assert.ok(fill8.includes('prefer `pwsh`; use `powershell` only where `pwsh` is absent'));
+  // Only parse is scaffold-time; the pin check also runs at every boot.
+  assert.ok(selfCheck.includes('The parse check runs at scaffold time only'));
+  assert.ok(selfCheck.includes('the pin check also runs at every boot'));
+  assert.ok(collapse(read('orchestrate/SKILL.md')).includes('the fill bakes the `**Skill**` pin line and writes `validate.json`, plus `setup.json` when there is a setup step'));
+  const baking = section(selfCheckOf('orchestrate/references/scaffolding.md'), '## Evidence and input baking', '## Naming');
+  assert.ok(baking.includes('Bake `{{SKILL_DIR}}` and `{{SKILL_SHA256}}` too: `validate.mjs`, `check-ledger.mjs` and every later skill tool'));
+  assert.ok(baking.includes('run as `node "{{SKILL_DIR}}/tools/<tool>.mjs"`'));
+  const readme = read('README.md');
+  assert.ok(collapse(readme).includes("Update an installed copy (a `git pull` in the clone counts) only between ledgers: a ledger's contract pins the skill's hash, and an updated copy stops that ledger's next session and asks."));
+  // The README's tools tree lists every file the skill ships under tools/ — the listing is the domain.
+  const tree = section(readme, "## What's in here", '```\n\n');
+  const listed = [...tree.matchAll(/^ {4}[├└]── (\S+) {2,}\S/gm)].map(m => m[1]).sort();
+  assert.deepEqual(listed, fs.readdirSync(path.join(ROOT, 'orchestrate/tools')).sort(), 'the README tools tree must describe every shipped tool');
+  assert.deepEqual([...'    ├── x.mjs   y\n    └── z.mjs   w\n'.matchAll(/^ {4}[├└]── (\S+) {2,}\S/gm)].map(m => m[1]), ['x.mjs', 'z.mjs']);
 
   const fx = fixture(t);
   const { hex } = scaffold(fx);
@@ -305,9 +345,23 @@ const RULE = [
   'changed skill stops the ledger at its next boot and asks, and never silently changes how it runs',
 ];
 const OLD_CLAIMS = [
-  [/\bnever\s+references?\s+(?:this|the)\s+skill\b/i, 'A ledger never references this skill, so it stays drivable without it.'],
-  [/\bnever\s+generate\s+a\s+ledger\s+that\s+references\s+(?:this|the)\s+skill\b/i, 'never generate a ledger that references this skill'],
-  [/\b(?:must not|does not|doesn't|cannot)\s+reference\s+(?:this|the)\s+skill\b/i, 'A ledger must not reference this skill.'],
+  /\bnever\s+references?\s+(?:this|the)\s+skill\b/i,
+  /\bnever\s+generate\s+a\s+ledger\s+that\s+references\s+(?:this|the)\s+skill\b/i,
+  /\b(?:must not|does not|doesn't|cannot)\s+reference\s+(?:this|the)\s+skill\b/i,
+  /\bnever\s+referenced\b[^.]*\bskill\b/i,
+  /\bchanges nothing about (?:ledgers|a ledger) already scaffolded\b/i,
+  /\bwith or without this skill\s*—/i,
+];
+// The five passages' own wording before the pinned-skill rule (commit 5c24ece), verbatim with
+// whitespace collapsed, plus one invented variant — every one must be caught, and every
+// pattern must catch at least one, so no pattern is padding and no old passage slips through.
+const OLD_SPECIMENS = [
+  'A ledger never references this skill, so it stays drivable without it.',
+  "A ledger's own contract outranks the skill, so a new skill version changes nothing about ledgers already scaffolded; it reaches a repo through the next `/orchestrate new`.",
+  'Ledgers are CLOSED SYSTEMS: every repo fact is baked in at scaffold time, so any session — with or without this skill — can drive one by reading the ledger alone.',
+  'A session without this skill can drive the change by reading the ledger alone — that property is the point; never generate a ledger that references this skill.',
+  'Interview answers are written INTO the generated `00-READBEFORE.md` — never referenced back to this skill.',
+  'A ledger must not reference this skill.',
 ];
 test('the five closed-system passages state the pinned-skill rule, and no document keeps the old claim', () => {
   assert.equal(PASSAGES.length, 5);
@@ -318,12 +372,13 @@ test('the five closed-system passages state the pinned-skill rule, and no docume
     assert.match(passage, /\bbaked manual procedures?\b/, file + ' (' + from + '): must name the baked manual procedures');
     assert.match(passage, /\bdriv(?:e|able)\b/, file + ' (' + from + '): must say the ledger stays drivable');
   }
-  for (const [pattern, specimen] of OLD_CLAIMS) assert.match(specimen, pattern, 'the old-claim pattern must fire on its specimen');
+  for (const specimen of OLD_SPECIMENS) assert.ok(OLD_CLAIMS.some(p => p.test(specimen)), 'no old-claim pattern catches: ' + specimen);
+  for (const pattern of OLD_CLAIMS) assert.ok(OLD_SPECIMENS.some(s => pattern.test(s)), 'old-claim pattern catches no specimen: ' + pattern);
   const files = documents();
   assert.ok(files.length > 10 && files.includes('orchestrate/templates/00-READBEFORE.md'));
   for (const file of files) {
     const text = collapse(read(file));
-    for (const [pattern] of OLD_CLAIMS) assert.doesNotMatch(text, pattern, file + ': still claims a ledger never references the skill');
+    for (const pattern of OLD_CLAIMS) assert.doesNotMatch(text, pattern, file + ': still carries a pre-pin closed-system claim');
   }
 });
 
@@ -349,21 +404,31 @@ test('no shipped Markdown runs node orchestrate/tools/ outside the mirrored evid
 });
 
 // ===== Directives that would undo the rules ============================================
-// Clause-level: a clause matching a pattern with no negation in it is a directive. Each
-// pattern owns an affirmative specimen it must catch; the negated control must pass.
+// Clause-level: a pattern match is a directive unless a negation GOVERNS it — a negator
+// directly before the matched words (one word may intervene). A negation elsewhere in the
+// clause ("when the full log is not needed") exempts nothing. Each pattern owns an
+// affirmative specimen it must catch; the negated controls must pass. A background TASK whose
+// completion reports the line and exit code is the user-approved rule (2026-09-23), so only a
+// shell `&`, a job the harness does not report on, piping, tailing, or reading the log early are caught.
 const UNDO = [
   ['pipe the validation output', /\bpip(?:e|es|ed|ing)\b[^.;:]*\b(?:validat\w*|wrapper|validate\.mjs)\b/i, 'Pipe the validation output through Select-Object to shorten it'],
   ['pipe into tail', /\b(?:validat\w*|wrapper|validate\.mjs)\b[^.;:]*\|\s*(?:tail|head|Select-Object|more|tee)\b/i, 'Run validate.mjs | tail -20 to see the end'],
-  ['tail the validation output', /\btail\w*\s+(?:the|its)\s+(?:validation|wrapper)\b/i, 'Tail the validation output while it runs'],
-  ['run validation in the background', /\b(?:validat\w*|wrapper|validate\.mjs)\b[^.;:]*\bin the background\b/i, 'Run validation in the background and check back later'],
-  ['background the wrapper', /\bbackground\w*\s+(?:the\s+)?(?:validation|wrapper|validate\.mjs)\b/i, 'Background the wrapper when the suite is slow'],
+  ['tail the validation output', /\btail\w*\s+(?:the|its)\s+(?:validation|wrapper|log)\b/i, 'Tail the validation output while it runs'],
+  ['detach with a shell job', /\b(?:validat\w*|wrapper|validate\.mjs)\b[^.;:]*(?:\s&(?=\s|`|$)|\bStart-Job\b|\bnohup\b)/i, 'Start the wrapper with a trailing & and keep working'],
+  ['read the log before it exits', /\bread\w*\s+(?:the\s+)?(?:validation\s+|wrapper's\s+)?log\b[^.;:]*\b(?:while|before|during)\b/i, 'Read the log while the wrapper runs to catch failures early'],
+  ['run the recipe instead of the wrapper', /\brun\b[^.;:]*\b(?:block above|recipe|validation commands)\b[^.;:]*\b(?:directly|instead)\b/i, 'When the suite is slow, run the block above directly instead'],
   ['skip the pin check', /\b(?:skip|bypass|ignore|omit)\w*\b[^.;:]*\b(?:pin check|skill pin|pin line|SKILL MISMATCH)\b/i, 'Skip the pin check when the skill was only updated'],
-  ['continue on a mismatch', /\b(?:on|after|despite)\s+(?:a\s+)?`?SKILL MISMATCH`?[^.;:]*\b(?:continue|proceed)\b/i, 'On a SKILL MISMATCH, continue with the new skill'],
+  ['continue on a mismatch or unknown', /(?:SKILL MISMATCH|\bUNKNOWN\b)[^.;:]*\b(?:[Cc]ontinue|[Pp]roceed)s?\b/, 'On a SKILL MISMATCH, continue with the new skill'],
+  ['reconcile before the pin check', /\b[Rr]econcile\b[^.;:]*\b(?:first|before)\b[^.;:]*\bpin\b/, 'Reconcile first, then run the pin check'],
+  ['pin check after reconcile', /\bpin check\b[^.;:]*\bafter\b[^.;:]*\breconcil/i, 'Run the pin check after reconcile'],
+  ['pin check at scaffold time only', /\b(?:both|pin check|skill check|skill --contract)\b[^.;:]*\bscaffold[- ]time only\b/i, 'Both run at scaffold time only'],
 ];
-const NEGATED = /\b(?:never|not|no|nor)\b|n't\b/i;
+const GOVERNS = /(?:\b(?:never|not|no|nor|cannot)|n't)\s+(?:[\w`'-]+\s+)?$/i;
 const clauses = text => collapse(text).split(/(?<=[.;:])\s+/);
-const undoing = text => clauses(text).flatMap(c => NEGATED.test(c) ? [] : UNDO.filter(([, p]) => p.test(c)).map(([name]) => name + ' — ' + c));
-test('no shipped passage tells a reader to pipe, tail or background validation, or to skip the pin check', () => {
+const fires = (pattern, clause) => [...clause.matchAll(new RegExp(pattern.source, pattern.flags + 'g'))]
+  .some(m => !GOVERNS.test(clause.slice(0, m.index)));
+const undoing = text => clauses(text).flatMap(c => UNDO.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
+test('no shipped passage tells a reader to pipe, tail or detach validation, or to skip or postpone the pin check', () => {
   assert.equal(new Set(UNDO.map(u => u[0])).size, UNDO.length);
   for (const [name, pattern, specimen] of UNDO) {
     assert.match(specimen, pattern, name + ': the pattern must fire on its specimen');
@@ -371,8 +436,15 @@ test('no shipped passage tells a reader to pipe, tail or background validation, 
     assert.deepEqual(UNDO.filter(([, p]) => p.test(specimen)).map(u => u[0]), [name], name + ': its specimen must be caught by it alone');
     assert.equal(undoing(specimen + '.').length, 1, name + ': the clause reader must report the specimen');
   }
-  assert.deepEqual(undoing('Never pipe, tail or background the validation wrapper. Never skip the pin check.'), [],
-    'a negated rule is the rule itself, not a contradiction');
+  // Tight controls: an unrelated negation elsewhere in the clause must not exempt it.
+  for (const planted of ['Pipe the validation output through tail when the full log is not needed.',
+    'Skip the pin check when the skill directory has not changed since the last session.',
+    'A SKILL MISMATCH does not stop the session, so continue with the updated skill.',
+    'An `UNKNOWN` from a moved skill directory → continue with Reconcile.']) {
+    assert.equal(undoing(planted).length, 1, 'must be reported despite its unrelated negation: ' + planted);
+  }
+  assert.deepEqual(undoing('Never pipe or tail it. Never skip the pin check. Don\'t pipe the validation output. '
+    + BACKGROUND_RULE), [], 'a negated rule — and the approved background task — is the rule itself, not a contradiction');
   const files = documents();
   assert.ok(files.includes(TEMPLATE) && files.includes('orchestrate/references/protocol.md'));
   for (const file of files) assert.deepEqual(undoing(read(file)), [], file + ': a directive undoes the validation or pin rule');

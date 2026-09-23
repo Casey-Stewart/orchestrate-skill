@@ -27,8 +27,8 @@ sessions.
    integration worktree before validating in it.
 3. **Skill pin**, before anything is reconciled: from the integration worktree root run
    `node "{{SKILL_DIR}}/tools/check-ledger.mjs" skill --contract {{LEDGER_DIR}}/00-READBEFORE.md`.
-   `SKILL MATCH` → continue. `SKILL MISMATCH` or `UNKNOWN` → STOP and ask; continue only on
-   the user's explicit words, recorded verbatim in the session log — an upgrade (the
+   `SKILL MATCH` → continue. Anything but `SKILL MATCH` (including `SKILL MISMATCH`,
+   `UNKNOWN` and a tool that does not run) → STOP and ask; continue only on the user's explicit words, recorded verbatim in the session log — an upgrade (the
    `**Skill**` line above rewritten to the new directory and hash in the commit that
    records those words) or
    this contract's manual procedures (the recipe under §Validation commands, the prompt
@@ -257,7 +257,7 @@ extensions ∪ the batch's own file — never the implementer's Files line alone
 {{VALIDATION_COMMANDS}}
 
 All must pass before a batch may integrate (`🟢`). Every run goes through the validation
-wrapper, in the FOREGROUND, from the worktree root:
+wrapper, from the worktree root:
 
 ```text
 node "{{SKILL_DIR}}/tools/validate.mjs" --spec {{LEDGER_DIR}}/validate.json --log "<session scratchpad>/<label>.log"
@@ -267,7 +267,9 @@ node "{{SKILL_DIR}}/tools/validate.mjs" --spec {{LEDGER_DIR}}/validate.json --lo
 wrapper's one line (`PASS …`, `FAIL … — log: <path>` or `UNKNOWN …`) is the result and its
 exit code (0/1/2) is the real one; the log is read only when the line is not PASS, and
 failing test NAMES are taken from it so failing sets compare by name against any
-allowlist. Never pipe, tail or background it. The block above stays the human-readable
+allowlist. Never pipe or tail it; when it may outlast the runtime's command timeout, run it
+as a background task whose completion reports the one line and the exit code, and never
+read the log before it exits. The block above stays the human-readable
 recipe and is the manual procedure when the wrapper is unavailable, run in its QUIET form
 (a totals line plus failing test NAMES; full output only on a non-zero exit). If the
 block above says `none`, there is no `validate.json` and the checkpoint smoke tests

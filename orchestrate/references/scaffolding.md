@@ -83,8 +83,8 @@
    content. `evidence/` is created at the first checkpoint, not now.
    Also write `validate.json` into the ledger directory, the spec `validate.mjs --help`
    describes: one step per confirmed validation command; a multi-line recipe block becomes
-   ONE `shell` step whose `script` is the block's text (a PowerShell block uses `pwsh`,
-   never `powershell`, whose stderr carries CLIXML even on success); `parser` names the
+   ONE `shell` step whose `script` is the block's text (a PowerShell block: prefer `pwsh`;
+   use `powershell` only where `pwsh` is absent — its log carries CLIXML noise); `parser` names the
    runner the command invokes (`node`, `jest`, `pytest` — without `-q`, whose summary it
    cannot read — `cargo`, else `none`). Run it once at the base through the contract's
    validation wrapper and record its line in LOG.md as the ledger's validation baseline.
@@ -106,8 +106,9 @@
    must print `PARSE OK`, and `node "<SKILL_DIR>/tools/check-ledger.mjs" skill --contract
    <the new ledger directory>/00-READBEFORE.md` must print `SKILL MATCH`: the pin line's
    placeholders sit in code spans, which the grep exempts, so an unfilled pin fails only
-   here. Both run at scaffold time only — a recorded fence extension later makes a Files
-   line differ from the plan, which `parse` reports.
+   here. The parse check runs at scaffold time only — a recorded fence extension later
+   makes a Files line differ from the plan, which `parse` reports; the pin check also runs
+   at every boot.
 10. **Scaffold commit** — batch 00 = the ledger itself (plus the ids written onto
     accepted fold-ins in the backlog file), committed on `chore/{{CHANGE_SLUG}}-ledger`,
     which becomes the INTEGRATION BRANCH every wave stacks onto. Never on the default
