@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { decode, parseFlags } from './git-evidence.mjs';
+import { decode, parseFlags, validFullRef } from './git-evidence.mjs';
 import { linesOf, exactPaths, table, oneRow, branchCell, extensions, skillPin } from './ledger-parse.mjs';
 
 const PLAN = '01-plan.md', PROGRESS = 'PROGRESS.md';
@@ -18,9 +18,14 @@ const HELP = 'check-ledger.mjs parse --dir <ledger-dir> | skill [--dir <skill-di
 
 class Unknown extends Error {}
 
-function readText(file) {
-  let bytes;
-  try { if (!fs.statSync(file).isFile()) throw new Error(); bytes = fs.readFileSync(file); } catch { throw new Unknown(`cannot read ${file}`); }
+// Ledger files are read without following links: the fence accepts only ordinary committed
+// files, so a link, however readable, is never a ledger file here either.
+function readText(file, ordinary = false) {
+  let stat, bytes;
+  try { stat = (ordinary ? fs.lstatSync : fs.statSync)(file); } catch { throw new Unknown(`cannot read ${file}`); }
+  if (stat.isSymbolicLink()) throw new Unknown(`a link, not an ordinary file: ${file}`);
+  if (!stat.isFile()) throw new Unknown(ordinary ? `not an ordinary file: ${file}` : `cannot read ${file}`);
+  try { bytes = fs.readFileSync(file); } catch { throw new Unknown(`cannot read ${file}`); }
   try { return decode(bytes); } catch { throw new Unknown(`not UTF-8: ${file}`); }
 }
 
@@ -61,8 +66,9 @@ function checkBatch(name, text, id, branch, fence, add) {
   }
 }
 
-// Pure core: the plan and PROGRESS texts, and a Map of batch file name to text.
-export function checkLedger(plan, progress, batches) {
+// Pure core: the plan and PROGRESS texts, a Map of batch file name to text, and the ledger id
+// (the directory name the fence finds it under, `.agents/changes/<ledger>`).
+export function checkLedger(plan, progress, batches, ledger) {
   const problems = [], add = (file, line, message) => problems.push({ file, line, message });
   const planRows = rowsOf(plan, PLAN, PLAN_KEYS, add);
   const progressRows = rowsOf(progress, PROGRESS, PROGRESS_KEYS, add);
@@ -73,7 +79,15 @@ export function checkLedger(plan, progress, batches) {
     let fence = null, branch = null;
     try { fence = exactPaths(row['Files (fence)']); } catch (e) { add(PLAN, row.line, `${row['#']} Files (fence): ${e.message}`); }
     try { branch = branchCell(row.Branch); } catch (e) { add(PLAN, row.line, `${row['#']} Branch: ${e.message}`); }
+    // The fence can gate only a branch whose full ref it accepts.
+    if (branch !== null && !validFullRef(`refs/heads/${branch}`)) add(PLAN, row.line, `${row['#']} Branch: ${branch} is not a valid branch name`);
     planned.set(row['#'], { row, fence, branch });
+  }
+  // Each batch's own file, where exactly one exists: an extension may not name it.
+  const names = [...batches.keys()];
+  for (const [id, entry] of planned) {
+    entry.own = names.filter(n => n.startsWith(`02-batches-${id.slice(1)}-`));
+    entry.ownPath = entry.own.length === 1 ? `.agents/changes/${ledger}/${entry.own[0]}` : null;
   }
   if (progressRows && planRows) {
     const seen = new Set();
@@ -89,15 +103,15 @@ export function checkLedger(plan, progress, batches) {
       try {
         const extra = extensions(progress, row, id);
         if (entry.fence && extra.some(p => entry.fence.includes(p))) add(PROGRESS, row.line, `${id} Notes: extension repeats a fence path`);
+        if (extra.some(p => p === entry.ownPath)) add(PROGRESS, row.line, `${id} Notes: extension names the batch's own file`);
       } catch (e) { add(PROGRESS, row.line, `${id} Notes: ${e.message}`); }
     }
     for (const [id, entry] of planned) if (!seen.has(id)) add(PLAN, entry.row.line, `${id}: no PROGRESS row`);
   }
   if (planRows) {
-    const names = [...batches.keys()];
     for (const [id, entry] of planned) {
-      const prefix = `02-batches-${id.slice(1)}-`, own = names.filter(n => n.startsWith(prefix));
-      if (own.length !== 1) { add(PLAN, entry.row.line, `${id}: ${own.length} batch files ${prefix}*.md, expected exactly one`); continue; }
+      const { own } = entry;
+      if (own.length !== 1) { add(PLAN, entry.row.line, `${id}: ${own.length} batch files 02-batches-${id.slice(1)}-*.md, expected exactly one`); continue; }
       checkBatch(own[0], batches.get(own[0]), id, entry.branch, entry.fence, add);
     }
     for (const name of names) {
@@ -111,9 +125,9 @@ export function checkLedger(plan, progress, batches) {
 export function parseLedger(dir) {
   let names;
   try { if (!fs.statSync(dir).isDirectory()) throw new Error(); names = fs.readdirSync(dir); } catch { throw new Unknown(`cannot read ledger directory ${dir}`); }
-  const plan = readText(path.join(dir, PLAN)), progress = readText(path.join(dir, PROGRESS));
-  const batches = new Map(names.filter(n => BATCH_FILE.test(n)).sort().map(n => [n, readText(path.join(dir, n))]));
-  return checkLedger(plan, progress, batches);
+  const plan = readText(path.join(dir, PLAN), true), progress = readText(path.join(dir, PROGRESS), true);
+  const batches = new Map(names.filter(n => BATCH_FILE.test(n)).sort().map(n => [n, readText(path.join(dir, n), true)]));
+  return checkLedger(plan, progress, batches, path.basename(path.resolve(dir)));
 }
 
 function lf(bytes) {
