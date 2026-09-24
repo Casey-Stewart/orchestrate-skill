@@ -404,3 +404,15 @@ H5. ASK — commit-type mapping pinned one side: prompt.test.cjs:228-233 with fe
 H6. ASK — fact validation samples its domains (all RAN green): removing testingGuidePath or repoPath from STRING_FACTS (prompt.mjs:75) — only findingsFile has a refusal test (:290-291); deleting the C1/DEL range or the U+2028/2029 check from `hidden` (:79) — only \n is tested; round1Sha {7,64} → {1,64} (:137). Add a loop over every string fact, one hidden character per class, and 6-hex/65-hex sha cases.
 H7. ASK — the guardrails section's stop at a HIGHER-level heading is untested (fixture prompt.test.cjs:66-67 has only a same-level ## after it); a mutation at prompt.mjs:161 stopping only at a same-level heading stays green. Add a # heading right after the section.
 Hunter note: the test-hunter and reviewer skeletons still open "Use only Read/Grep/Glob and read-only git", contradicting the Write grant a few lines later; tool-wiring:800 treats that sentence as an allowed specimen.
+
+## 2026-09-24 — continue
+
+### Boot
+
+`git-evidence.mjs discovery` (repository copy, read-only): one ACTIVE ledger (this one, on `chore/mechanical-tools-ledger`, its `int` worktree and every batch branch); the three COMPLETE copies on `origin/fix/backlog-table-rendering` stay superseded (archived on `main`). Reconcile: B01–B03 branches are ancestors of the integration tip (🟢 correct); B04 ⛔ awaiting its verdict (branch `a73d220`, two commits ahead, `b04` worktree clean); B05 ⬜ with no `feat/mutation-harness` branch (correct). The tip moved only in ledger files since the last green (`3d3b264`). Resume-time validation on `2198d7a` from a real PowerShell session (background task, exit codes captured, never piped): 443/443, 0 skipped, `git diff --check` clean, 9m38s.
+
+### B04 — third round (fix again)
+
+The user's verdict, given with the session's `continue`, is recorded verbatim in the verdict log: fix again. Consumed here: row → 🔄, `verdict 2026-09-24 fix again spent → third round on feat/prompt-renderer @a73d220`. Fresh implementer on the strong tier (opus), in the existing clean `wt-os923/b04` worktree, given the implementer skeleton filled from this ledger (batch file from the batch branch, contract sections cut by heading, fence = plan cell + the recorded extension), both rounds' findings verbatim from this LOG (§B04, §B04 — round 2 and the cap), the two B04 verdict-log decisions, and the diff command; told to close every round-2 finding (R1 = H1 P1, R2, H2–H7, the hunter note; R3 is out of fence) and to prove the P1 fix by a test that executes the published recovery bytes. Prompt rendered into a scratch file with the nonce last, spawned with a short pointer, as before.
+
+Apparatus: the session's PowerShell PATH was captured to a scratch file and a Git Bash helper runs the contract's recipe through `pwsh` under that PATH; a live control showed `bash` resolving to `C:\Windows\system32\bash.exe` (the WSL launcher) there, as in a real PowerShell session. Every sub-agent's full-suite evidence this round runs through that helper; the orchestrator still re-runs the recipe from a real PowerShell session before any gate verdict is acted on.
