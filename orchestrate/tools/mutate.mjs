@@ -175,7 +175,8 @@ function anchor(dir, realDir, m, originals) {
 // One mutation run against the control. CRASHED means the run proved nothing about the tests: a
 // test step with no parsed summary; a test file that failed to load (node reports one as a failing
 // test named after the file, WITH a summary, so it would otherwise read as KILLED); a test count
-// unlike the control's. KILLED needs every failing step to be a test step naming its failures.
+// unlike the control's. KILLED needs every failing step to count failed tests and name them, which
+// a parser-none step never does: it counts nothing.
 export function classifyRun(control, run, parsers) {
   const steps = run.steps;
   if (steps.length !== parsers.length) return { kind: 'CRASHED', reason: 'the run did not reach its steps' };
@@ -187,8 +188,8 @@ export function classifyRun(control, run, parsers) {
     if (s.total !== control.steps[i].total) return { kind: 'CRASHED', reason: `step ${s.name} ran ${s.total} tests, the control ${control.steps[i].total}` };
   }
   if (run.status === 'PASS') return { kind: 'SURVIVED' };
-  const failing = steps.map((s, i) => ({ s, parser: parsers[i] })).filter(({ s }) => s.result !== 'PASS');
-  if (failing.every(({ s, parser }) => parser !== 'none' && s.failed > 0 && s.names.length > 0)) return { kind: 'KILLED', names: [...new Set(failing.flatMap(({ s }) => s.names))] };
+  const failing = steps.filter(s => s.result !== 'PASS');
+  if (failing.every(s => s.failed > 0 && s.names.length > 0)) return { kind: 'KILLED', names: [...new Set(failing.flatMap(s => s.names))] };
   return { kind: 'CRASHED', reason: 'a step failed without a named failing test' };
 }
 export function verdictLine(id, verdict, runLine) {

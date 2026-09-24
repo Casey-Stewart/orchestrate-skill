@@ -45,6 +45,9 @@ const M = {
   m3: { id: 'm3', file: 'math.cjs', find: '(a, b) => a + b;', replace: '(a, b) => a +;' },
   m4: { id: 'm4', file: 'extra.test.cjs', find: "test('extra two runs', () => {});\n", replace: '' },
   c1: { id: 'c1', file: 'crlf.txt', find: 'alpha\nbeta', replace: 'alpha\ngamma' },
+  // Both sides of "a CRLF file": one bare LF makes a file not CRLF, and so does having no line break.
+  x1: { id: 'x1', file: 'mixed.txt', find: 'two\nthree', replace: 'two\nTHREE' },
+  x2: { id: 'x2', file: 'flat.txt', find: 'flat', replace: 'flat\nline' },
   h1: { id: 'h1', file: 'math.cjs', find: 'a + b', replace: '(() => { for (;;); })()' },
 };
 
@@ -52,7 +55,8 @@ function fixture(t) {
   const repo = makeRepo(t);
   const work = path.join(repo.root, 'work');
   fs.mkdirSync(work);
-  const files = { 'math.cjs': MATH, 'math.test.cjs': MATH_TEST, 'crlf.txt': CRLF_TXT, 'crlf.test.cjs': CRLF_TEST, 'sub/keep.txt': 'kept\n', 'overlap.txt': 'aaa\n' };
+  const files = { 'math.cjs': MATH, 'math.test.cjs': MATH_TEST, 'crlf.txt': CRLF_TXT, 'crlf.test.cjs': CRLF_TEST, 'sub/keep.txt': 'kept\n', 'overlap.txt': 'aaa\n',
+    'mixed.txt': 'one\r\ntwo\nthree\n', 'flat.txt': 'flat' };
   for (const [file, text] of Object.entries(files)) repo.write(file, text);
   repo.write('extra.test.cjs', extraTest(true));
   const red = repo.commit('red: extra two fails');
@@ -175,21 +179,26 @@ test('a mutation that stops a test file loading, or changes how many tests run, 
   assert.ok(log.includes('==> mutate: m4: CRASHED — step tests ran 4 tests, the control 5'), log);
 });
 
-test('a CRLF file: the anchor matches, the mutation keeps CRLF, the restore is the CRLF bytes, and all killed exits 0', async t => {
+test('a CRLF file: the anchor matches, the mutation keeps CRLF, the restore is the CRLF bytes; a mixed or line-less file stays LF', async t => {
   const fx = fixture(t);
   const committed = fs.readFileSync(path.join(fx.repo.cwd, 'crlf.txt'));
   assert.ok(committed.equals(Buffer.from(CRLF_TXT)), 'the fixture commits crlf.txt with CRLF bytes');
   assert.ok(!M.c1.find.includes('\r') && M.c1.find.includes('\n'), 'the spec spells its line break LF, so only conversion can match');
   const w = writer();
-  const r = await core(fx, { mutations: [M.c1, M.m1], writeFile: w.writeFile });
+  const r = await core(fx, { mutations: [M.c1, M.m1, M.x1, M.x2], writeFile: w.writeFile });
   assert.match(r.lines[0], CONTROL_5);
   // Only the content test fails: the mutated file kept CRLF, or the line-ending test would fail too.
-  assert.deepEqual(r.lines.slice(1), ['KILLED c1: crlf.txt says alpha then beta', 'KILLED m1: add sums two numbers', 'MUTATE 2 killed, 0 survived, 0 other']);
-  assert.equal(r.code, 0);
-  assert.deepEqual(w.calls.map(c => c.file), ['crlf.txt', 'crlf.txt', 'math.cjs', 'math.cjs']);
+  assert.deepEqual(r.lines.slice(1), ['KILLED c1: crlf.txt says alpha then beta', 'KILLED m1: add sums two numbers', 'SURVIVED x1', 'SURVIVED x2',
+    'MUTATE 2 killed, 2 survived, 0 other']);
+  assert.equal(r.code, 1);
+  assert.deepEqual(w.calls.map(c => c.file), ['crlf.txt', 'crlf.txt', 'math.cjs', 'math.cjs', 'mixed.txt', 'mixed.txt', 'flat.txt', 'flat.txt']);
   assert.ok(w.calls[0].bytes.equals(Buffer.from('alpha\r\ngamma\r\n')), 'the mutation is written with CRLF: ' + JSON.stringify(w.calls[0].bytes.toString('latin1')));
   assert.ok(w.calls[1].bytes.equals(committed), 'the restore writes back the CRLF bytes as committed');
   // m1 ran with crlf.txt restored: had the restore lost CRLF, m1 would have named the line-ending test too.
+  // One bare LF makes a file not CRLF: the spec's LF matches as LF and is written as LF.
+  assert.ok(w.calls[4].bytes.equals(Buffer.from('one\r\ntwo\nTHREE\n')), JSON.stringify(w.calls[4].bytes.toString('latin1')));
+  // No line break at all is not CRLF either: the replacement's LF stays LF.
+  assert.ok(w.calls[6].bytes.equals(Buffer.from('flat\nline')), JSON.stringify(w.calls[6].bytes.toString('latin1')));
   assert.deepEqual(leftUnder(r.tmp), []);
 });
 
@@ -307,6 +316,26 @@ test('a ref that names no commit, a checkout that fails and a temp root that can
   for (const run of [noRef, dash, broken]) assert.deepEqual(leftUnder(run.tmp), []);
 });
 
+test('the checkout runs no hook the user configured', t => {
+  const fx = fixture(t);
+  const hooks = path.join(fx.repo.root, 'user-hooks'), marker = path.join(fx.repo.root, 'hook-ran.txt'), slash = p => p.split(path.sep).join('/');
+  fs.mkdirSync(hooks);
+  fs.writeFileSync(path.join(hooks, 'post-checkout'), '#!/bin/sh\necho ran > "' + slash(marker) + '"\n', { mode: 0o755 });
+  const config = path.join(fx.repo.root, 'hooks.gitconfig');
+  fs.writeFileSync(config, '[core]\n\thooksPath = ' + slash(hooks) + '\n');
+  // Live control: under that configuration a plain clone and checkout do run the hook.
+  const control = path.join(fx.repo.root, 'control-clone');
+  for (const [cwd, args] of [[fx.repo.root, ['clone', '--quiet', '--no-checkout', '--', fx.repo.cwd, control]], [control, ['checkout', '--quiet', '--detach', 'HEAD']]]) {
+    const r = spawnSync('git', args, { cwd, env: { ...fx.env, GIT_CONFIG_GLOBAL: config }, encoding: 'utf8', windowsHide: true });
+    assert.equal(r.status, 0, r.stderr);
+  }
+  assert.ok(fs.existsSync(marker), 'the configured hook runs where nothing stops it');
+  fs.rmSync(marker);
+  const r = cli(fx, 'mutate', mutateArgs(fx, fx.muts({ id: 'a1', file: 'math.cjs', find: 'a * b', replace: 'a / b' }), 'hooks.log'), { env: { GIT_CONFIG_GLOBAL: config } });
+  assert.deepEqual(r.lines, ['ANCHOR-MISSING a1'], 'the checkout happened and the run stopped at its anchor');
+  assert.equal(fs.existsSync(marker), false, "the tool's checkout ran no hook");
+});
+
 // ===== The abort paths no repository reaches, through the core ======================================
 test('a mutation write that does not land is NOT-APPLIED: restored, counted as other, and the run goes on', async t => {
   const fx = fixture(t);
@@ -396,23 +425,27 @@ test('classification: TIMEOUT first, then CRASHED on no summary, a load failure 
   const step = over => ({ name: 'tests', result: 'PASS', passed: 5, failed: 0, total: 5, names: [], loadFailures: [], exit: 0, ...over });
   const lint = over => ({ name: 'lint', result: 'PASS', passed: null, failed: null, total: null, names: [], loadFailures: [], exit: 0, ...over });
   const control = { status: 'PASS', steps: [step(), lint()] }, parsers = ['node', 'none'];
-  const run = (status, ...steps) => classifyRun(control, { status, steps }, parsers).kind;
+  // Kind and the reason the log records, so each check is told apart from the ones after it: a
+  // run with no summary also has a total unlike the control's, and only the reason says which rule fired.
+  const run = (status, ...steps) => { const v = classifyRun(control, { status, steps }, parsers); return [v.kind, v.reason]; };
   const failed = step({ result: 'FAIL', passed: 4, failed: 1, names: ['a test'], exit: 1 });
+  const UNNAMED = 'a step failed without a named failing test';
   const rows = [
-    ['PASS, same total', run('PASS', step(), lint()), 'SURVIVED'],
-    ['a named failure', run('FAIL', failed, lint()), 'KILLED'],
-    ['a step that timed out, which also has no summary', run('FAIL', step({ result: 'TIMEOUT', passed: null, failed: null, total: null, exit: 1 }), lint()), 'TIMEOUT'],
-    ['no parsed summary', run('FAIL', step({ result: 'CRASHED', passed: null, failed: null, total: null, exit: 1 }), lint()), 'CRASHED'],
-    ['a load failure beside a named failure', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, names: ['x.test.cjs'], loadFailures: ['x.test.cjs'], exit: 1 }), lint()), 'CRASHED'],
-    ['a changed total, passing', run('PASS', step({ passed: 4, total: 4 }), lint()), 'CRASHED'],
-    ['a changed total, failing by name', run('FAIL', step({ result: 'FAIL', passed: 5, failed: 1, total: 6, names: ['a test'], exit: 1 }), lint()), 'CRASHED'],
-    ['failures counted without names', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, exit: 1 }), lint()), 'CRASHED'],
-    ['a non-zero exit with no failure counted', run('FAIL', step({ result: 'FAIL', exit: 3 }), lint()), 'CRASHED'],
-    ['a parser-none step failing alone', run('FAIL', step(), lint({ result: 'FAIL', exit: 1 })), 'CRASHED'],
-    ['a parser-none step failing beside a named failure', run('FAIL', failed, lint({ result: 'FAIL', exit: 1 })), 'CRASHED'],
-    ['a run that never reached its steps', classifyRun(control, { status: 'UNKNOWN', steps: [] }, parsers).kind, 'CRASHED'],
+    ['PASS, same total', run('PASS', step(), lint()), ['SURVIVED', undefined]],
+    ['a named failure', run('FAIL', failed, lint()), ['KILLED', undefined]],
+    ['a step that timed out, which also has no summary', run('FAIL', step({ result: 'TIMEOUT', passed: null, failed: null, total: null, exit: 1 }), lint()), ['TIMEOUT', 'a step outlived --timeout']],
+    ['no parsed summary', run('FAIL', step({ result: 'CRASHED', passed: null, failed: null, total: null, exit: 1 }), lint()), ['CRASHED', 'step tests printed no parsed summary']],
+    ['a load failure beside a named failure', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, names: ['x.test.cjs'], loadFailures: ['x.test.cjs'], exit: 1 }), lint()),
+      ['CRASHED', 'step tests: a test file failed to load (x.test.cjs)']],
+    ['a changed total, passing', run('PASS', step({ passed: 4, total: 4 }), lint()), ['CRASHED', 'step tests ran 4 tests, the control 5']],
+    ['a changed total, failing by name', run('FAIL', step({ result: 'FAIL', passed: 5, failed: 1, total: 6, names: ['a test'], exit: 1 }), lint()), ['CRASHED', 'step tests ran 6 tests, the control 5']],
+    ['failures counted without names', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, exit: 1 }), lint()), ['CRASHED', UNNAMED]],
+    ['a non-zero exit with no failure counted', run('FAIL', step({ result: 'FAIL', exit: 3 }), lint()), ['CRASHED', UNNAMED]],
+    ['a parser-none step failing alone', run('FAIL', step(), lint({ result: 'FAIL', exit: 1 })), ['CRASHED', UNNAMED]],
+    ['a parser-none step failing beside a named failure', run('FAIL', failed, lint({ result: 'FAIL', exit: 1 })), ['CRASHED', UNNAMED]],
+    ['a run that never reached its steps', run('UNKNOWN'), ['CRASHED', 'the run did not reach its steps']],
   ];
-  for (const [label, got, want] of rows) assert.equal(got, want, label);
+  for (const [label, got, want] of rows) assert.deepEqual(got, want, label);
   assert.deepEqual(classifyRun(control, { status: 'FAIL', steps: [failed, lint()] }, parsers).names, ['a test']);
   // The names cap, both sides of it, and the other line forms.
   const names = n => Array.from({ length: n }, (_, i) => 't' + (i + 1));
