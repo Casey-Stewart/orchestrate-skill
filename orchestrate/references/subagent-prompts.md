@@ -248,7 +248,14 @@ command timeout). Run
 `node "[SKILL_DIR]/tools/mutate.mjs" --repo "[WORKTREE_PATH]" --ref HEAD --mutations "<mutations file>" --validate "<scoped spec>" --log "[SCRATCHPAD_PATH]/<label>.log"`,
 adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists (a
 repository with a setup step fails its control without it). Its `CONTROL PASS` line must
-count the tests you scoped: a runner may skip a named test file that does not exist. Cite
+count the tests you scoped: a runner may skip a named test file that does not exist.
+The count has one blind spot: node counts a test file that registers no tests as one
+passing test named after the file, so a mutation that empties such a file does not change
+the count and reads `SURVIVED` — confirm that the mutated file still registers its tests
+before you cite it. A run costs the scoped suite once for the control and once per
+mutation; when that may outlast the runtime's command timeout, run it as a background task
+whose completion reports its lines and exit code, or pass `--timeout` and split the
+mutations across runs — a run the command timeout kills never cleans up its clone. Cite
 its lines: `SURVIVED <id>` proves a finding and `KILLED <id>: <tests>` refutes it;
 `ANCHOR-MISSING`, `ANCHOR-AMBIGUOUS`,
 `CONTROL FAILED`, `NOT-APPLIED`, `CRASHED`, `TIMEOUT`, `RESTORE-FAILED` or `UNKNOWN` means

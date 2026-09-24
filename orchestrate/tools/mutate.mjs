@@ -77,12 +77,40 @@ export function inside(top, file) {
   return !(rel === '..' || rel.startsWith('..' + path.sep) || path.isAbsolute(rel));
 }
 
+// ===== Git's environment =======================================================================
+// The variables that tie git to one repository — its directory, work tree, index, objects and
+// injected config — as git itself lists them (`git rev-parse --local-env-vars`), never a copy of
+// that list. One inherited by the clone's checkout, or by a validate step inside the clone, acts
+// on the caller's repository instead: a GIT_DIR detaches its HEAD, a GIT_INDEX_FILE stages into
+// its index. Git is asked with no GIT_* variable set, so none of them can bend its answer.
+let localVars = null;
+export function localGitVars() {
+  if (localVars) return localVars;
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
+  const r = spawnSync('git', ['rev-parse', '--local-env-vars'], { env, encoding: 'utf8', shell: false, windowsHide: true, timeout: 15000 });
+  const names = !r.error && r.status === 0 ? r.stdout.split(/\r?\n/).filter(Boolean) : [];
+  if (!names.length || names.some(name => !/^GIT_[A-Z0-9_]+$/.test(name))) throw new Unknown('git did not list the variables that tie it to a repository (git rev-parse --local-env-vars)');
+  return (localVars = names);
+}
+// Names compare case-folded: Windows reads its environment without regard to case.
+export function withoutLocalGitEnv(env) {
+  const drop = new Set(localGitVars());
+  return Object.fromEntries(Object.entries(env).filter(([key]) => !drop.has(key.toUpperCase())));
+}
+// A CLI owns its process: it drops them from process.env before anything reads it — the ref
+// lookup, the clone and every validate step.
+export function scrubLocalGitEnv(env = process.env) {
+  const drop = new Set(localGitVars());
+  for (const key of Object.keys(env)) if (drop.has(key.toUpperCase())) delete env[key];
+}
+
 // ===== The disposable checkout =================================================================
 export const removeTree = dir => fs.rmSync(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 });
 // Clone and checkout write only inside the disposable directory; hooks point at an empty
-// directory there, so no hook the user configured runs. Git's stderr goes to the log only.
+// directory there, so no hook the user configured runs, and git's repository variables are
+// dropped, so neither acts on the caller's repository. Git's stderr goes to the log only.
 function gitIn(cwd, args, log, what) {
-  const r = spawnSync('git', args, { cwd, env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }, shell: false, windowsHide: true, timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
+  const r = spawnSync('git', args, { cwd, env: { ...withoutLocalGitEnv(process.env), GIT_TERMINAL_PROMPT: '0' }, shell: false, windowsHide: true, timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
   if (!r.error && r.status === 0) return;
   const how = r.error ? r.error.code || r.error.name : `exit ${r.status ?? r.signal}`;
   log.note(`git ${what} failed (${how})`);
@@ -228,17 +256,30 @@ export async function mutate({ repo, ref, mutations, validate, setup = null, log
       say(`CONTROL PASS ${control.line}`);
       const tally = { KILLED: 0, SURVIVED: 0, other: 0 };
       for (const { m, file, original, mutated } of plans) {
+        // A replace that differs from find only in its line breaks is find's own bytes once a
+        // CRLF file's breaks are applied: nothing would change, and the run would read SURVIVED.
+        if (mutated.equals(original)) {
+          log.note(`${m.id}: NOT-APPLIED — the mutation leaves the file's bytes unchanged; nothing was written or run`);
+          say(`NOT-APPLIED ${m.id}`); tally.other++;
+          continue;
+        }
+        let line, kind;
         if (!wrote(file, mutated)) {
           log.note(`${m.id}: NOT-APPLIED — the file did not read back as the mutated bytes`);
-          say(`NOT-APPLIED ${m.id}`); tally.other++;
+          line = `NOT-APPLIED ${m.id}`; kind = 'other';
         } else {
           const result = await run(`mutation ${m.id} (${m.file})`, validate), verdict = classifyRun(control, result, parsers);
           if (verdict.reason) log.note(`${m.id}: ${verdict.kind} — ${verdict.reason}`);
-          say(verdictLine(m.id, verdict, result.line));
-          if (RESULTS.includes(verdict.kind)) tally[verdict.kind]++; else tally.other++;
+          line = verdictLine(m.id, verdict, result.line); kind = RESULTS.includes(verdict.kind) ? verdict.kind : 'other';
         }
-        // A checkout left mutated would taint every later run: stop, with no summary.
-        if (!wrote(file, original)) { log.note(`${m.id}: RESTORE-FAILED — the file did not read back as its saved bytes`); say(`RESTORE-FAILED ${m.id}`); return 2; }
+        // The line is printed only once the restore holds. A checkout left mutated would taint
+        // every later run, and a write that just failed cannot vouch for the run before it: stop,
+        // with RESTORE-FAILED alone and no summary; the unprinted line goes to the log.
+        if (!wrote(file, original)) {
+          log.note(`${m.id}: RESTORE-FAILED — the file did not read back as its saved bytes; not printed: ${line}`);
+          say(`RESTORE-FAILED ${m.id}`); return 2;
+        }
+        say(line); tally[kind]++;
       }
       say(`MUTATE ${tally.KILLED} killed, ${tally.SURVIVED} survived, ${tally.other} other`);
       return tally.other ? 2 : tally.SURVIVED ? 1 : 0;
@@ -261,6 +302,9 @@ then MUTATE <k> killed, <s> survived, <u> other. An abort prints only its own li
   ANCHOR-MISSING <id> | ANCHOR-AMBIGUOUS <id> (<n> matches) | CONTROL FAILED <validate line> | UNKNOWN <reason>
 Exit 0 every mutation killed; 1 at least one survived and nothing else went wrong; 2 anything else.
 CRASHED: a test step with no parsed summary, a test file that failed to load, or a test count unlike the control's.
+NOT-APPLIED: the mutated bytes did not read back, or equal the file's own (in a CRLF file, a replace that differs
+from find only in its line breaks). A mutation's line is printed only once its restore holds; RESTORE-FAILED
+replaces it. Git's repository variables (git rev-parse --local-env-vars) are dropped from the environment first.
 Mutations (JSON; any other key is rejected):
   { "mutations": [ { "id": "m1", "file": "src/sum.js", "find": "a + b", "replace": "a - b" } ] }
 id: unique, [A-Za-z0-9._-]+. file: repository-relative with forward slashes, a regular file. find: occurs
@@ -277,6 +321,7 @@ export async function mutateCli(args, emit = () => {}) {
   try { flags = parseFlags(args, ['repo', 'ref', 'mutations', 'validate', 'log', 'setup', 'timeout'], ['repo', 'ref', 'mutations', 'validate', 'log']); }
   catch { return refuse('usage: unknown, missing or duplicate flag; use --help'); }
   try {
+    scrubLocalGitEnv();
     const timeoutMs = timeoutOf(flags.timeout);
     const doc = readJson(flags.mutations, '--mutations'), problem = checkMutations(doc);
     if (problem) throw new Unknown(`--mutations: ${problem}`);

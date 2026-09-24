@@ -7,7 +7,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseFlags } from './git-evidence.mjs';
 import { oneLine } from './check-ledger.mjs';
-import { Unknown, CleanupFailed, withDisposableCheckout, openLog, runLogged, readJson, checkedSpec, topLevel, inside, timeoutOf } from './mutate.mjs';
+import { Unknown, CleanupFailed, withDisposableCheckout, openLog, runLogged, readJson, checkedSpec, topLevel, inside, timeoutOf, scrubLocalGitEnv } from './mutate.mjs';
 
 const CODES = { PASS: 0, FAIL: 1, UNKNOWN: 2 };
 
@@ -38,7 +38,8 @@ under the temp directory, removed afterwards; the repository itself is never wri
 Prints ONE line, AT <short sha> <validate.mjs line>, and exits with validate.mjs's code: 0 PASS, 1 FAIL,
 2 UNKNOWN. A setup that does not pass is AT <short sha> UNKNOWN setup <validate.mjs line>; anything that
 stops the checkout is UNKNOWN <reason>. --log is written fresh by each invocation, both runs appending to it,
-and must lie outside the repository. --timeout (whole seconds) applies per step.`;
+and must lie outside the repository. --timeout (whole seconds) applies per step. Git's repository variables
+(git rev-parse --local-env-vars) are dropped from the environment first.`;
 
 export async function runAtRefCli(args) {
   if (args.length === 1 && args[0] === '--help') return { code: 0, line: HELP };
@@ -46,6 +47,7 @@ export async function runAtRefCli(args) {
   try { flags = parseFlags(args, ['repo', 'ref', 'validate', 'log', 'setup', 'timeout'], ['repo', 'ref', 'validate', 'log']); }
   catch { return { code: 2, line: 'UNKNOWN usage: unknown, missing or duplicate flag; use --help' }; }
   try {
+    scrubLocalGitEnv();
     const timeoutMs = timeoutOf(flags.timeout);
     const validate = await checkedSpec(readJson(flags.validate, '--validate'), '--validate');
     const setup = flags.setup === undefined ? null : await checkedSpec(readJson(flags.setup, '--setup'), '--setup');

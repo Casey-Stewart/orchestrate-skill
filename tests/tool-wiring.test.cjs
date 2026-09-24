@@ -851,12 +851,16 @@ const CARVE_OUT = 'write your full report with the Write tool to "[FINDINGS_FILE
 const EXCEPTION = 'Keep to reading files and read-only git, with one exception: with the Write tool you write the findings file your prompt names, and validation logs and disposable scratch under the session scratchpad — never inside any worktree or the repository.';
 // The test hunter's grant within that one (B05): a closed list — its findings file, its mutations
 // file and its scoped spec — plus the two harness tools, which write only disposable clones. The
-// skeleton states it as its carve-out; the definition keeps EXCEPTION verbatim and narrows it.
+// skeleton states it as its carve-out; the definition keeps EXCEPTION verbatim and narrows it,
+// mapping each thing EXCEPTION grants onto the list (R1 hunter note: an unmapped "validation
+// logs and disposable scratch" read as a second, wider grant beside the closed list).
 const HUNTER_WRITES = 'your mutations file and your scoped spec';
 const HUNTER_TOOLS = 'running mutate.mjs and run-at-ref.mjs, which write only disposable clones and their logs, is permitted.';
 const HUNTER_CARVE_OUT = 'write your full report with the Write tool to "[FINDINGS_FILE]"; besides that ONE file you write only ' + HUNTER_WRITES
   + ', both under "[SCRATCHPAD_PATH]", never inside any worktree or the repository, and ' + HUNTER_TOOLS;
-const HUNTER_LIST = 'Those writes are a closed list: the findings file, ' + HUNTER_WRITES + ', all under the session scratchpad, and ' + HUNTER_TOOLS;
+const HUNTER_MAPPING = { 'validation logs': 'the validation logs are the ones mutate.mjs and run-at-ref.mjs write', 'disposable scratch': 'the disposable scratch is ' + HUNTER_WRITES };
+const HUNTER_LIST = 'Those writes are a closed list, in which ' + HUNTER_MAPPING['validation logs'] + ' and ' + HUNTER_MAPPING['disposable scratch']
+  + ': the findings file, ' + HUNTER_WRITES + ', all under the session scratchpad, and ' + HUNTER_TOOLS;
 const GRANTS = { reviewer: CARVE_OUT, 'test-hunter': HUNTER_CARVE_OUT };
 const CAVEAT = 'Write and Bash can still write, so "read-only" stays partly conventional; withholding Edit closes the easy path, not every path.';
 // Each gate skeleton's own read-only sentence, reconciled with the grant (round-2 hunter note):
@@ -936,6 +940,15 @@ test('each gate skeleton and definition grants the one scoped write, and no text
     // The closed list narrows the hunter's exception directly after it, and is the hunter's alone.
     assert.equal(text.split(EXCEPTION + ' ' + HUNTER_LIST).length - 1, file.endsWith('test-hunter.md') ? 1 : 0, file + ': the closed list of hunter writes');
     assert.equal(text.split(HUNTER_LIST).length - 1, file.endsWith('test-hunter.md') ? 1 : 0, file);
+  }
+  // The list and the exception agree: every kind of write EXCEPTION grants past the findings file
+  // is mapped onto a member of the closed list, and the list names nothing EXCEPTION does not grant.
+  const grantedKinds = /the findings file your prompt names, and (.+?) under the session scratchpad/.exec(EXCEPTION);
+  assert.ok(grantedKinds, 'EXCEPTION still names what it grants past the findings file');
+  assert.deepEqual(grantedKinds[1].split(' and '), Object.keys(HUNTER_MAPPING), 'each kind EXCEPTION grants, and only those, is mapped by the closed list');
+  for (const [kind, mapping] of Object.entries(HUNTER_MAPPING)) {
+    assert.ok(mapping.startsWith('the ' + kind + ' '), kind + ': the mapping names the granted kind');
+    assert.ok(HUNTER_LIST.includes(mapping), kind + ': the closed list carries its mapping');
   }
   // The old caveat and the old "no Write" claim survive nowhere.
   for (const file of [...documents(), ...agentDefinitions()]) {
@@ -1062,7 +1075,9 @@ test("the hunter's harness command runs as published, filled from its slots, wit
 // Directives that would put hand-built apparatus back in the hunter's hands, swept over its
 // skeleton section and its definition only: temporary worktrees are legitimately described
 // elsewhere (the failing-on-base check, the merge dry run). Clause-level, negation-aware — the
-// undo sweep's reader — and code spans are tool names, not directives.
+// undo sweep's reader. Code spans are read as their text, backticks dropped: a restore or edit
+// command is normally written as one, so blanking them would strip the very spelling hunted
+// (R1 hunter, NEW CLASS).
 const HAND_BUILT = [
   ['a scratch tree built by hand', /\b(?:build|builds|building|make|makes|making|set up|sets up|setting up|prepare|prepares|preparing|clone|clones|cloning|copy|copies|copying|create|creates|creating)\b[^.;:]*\b(?:scratch|temporary|temp|throwaway|spare|separate)\s+(?:trees?|copies|copy|worktrees?|checkouts?|clones?|director(?:y|ies)|dirs?|folders?)\b/i,
     'Build a scratch tree for each mutation and run the suite there.'],
@@ -1070,6 +1085,8 @@ const HAND_BUILT = [
     'Generate an edit script that swaps the operator for each mutation.'],
   ['a restore with git checkout', /\b(?:restor|revert|reset|undo)\w*\b[^.;:]*\bgit\s+(?:checkout|restore|reset|stash)\b|\bgit\s+(?:checkout|restore|reset|stash)\b[^.;:]*\b(?:restor|revert|undo)\w*/i,
     'Restore each mutated file with git checkout before the next one.'],
+  ['an edit command', /\b(?:sed|perl)\s+-\w*i\b|\b(?:Set-Content|Add-Content|Out-File)\b|\bgit\s+apply\b/i,
+    'Apply each mutation in place with sed -i and run the suite.'],
 ];
 // Written as prose first, then pinned: each family owns entries no other family catches.
 const HAND_BUILT_CORPUS = [
@@ -1081,29 +1098,60 @@ const HAND_BUILT_CORPUS = [
   'After each run, restore the file with git checkout.',
   'Revert the mutation with git restore before trying the next.',
   'Run git stash after each mutation to undo it.',
+  'After each run, restore the mutated file with `git checkout -- <file>`.',
+  'Flip each operator with `perl -pi -e` before the run.',
+  'Write the mutated text back with `Set-Content`.',
 ];
-const handBuilt = text => clauses(text.replace(/`[^`\n]*`/g, ' ')).flatMap(c => HAND_BUILT.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
+const handBuilt = text => clauses(text.replace(/`([^`\n]*)`/g, '$1')).flatMap(c => HAND_BUILT.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
 test('no hunter text tells it to build a scratch tree, write an edit script or restore with git checkout', () => {
   assert.equal(new Set(HAND_BUILT.map(h => h[0])).size, HAND_BUILT.length);
   for (const [name, pattern, specimen] of HAND_BUILT) {
     assert.deepEqual(HAND_BUILT.filter(([, p]) => p.test(specimen)).map(h => h[0]), [name], name + ': its specimen must be caught by it alone');
     assert.equal(handBuilt(specimen).length, 1, name + ': the clause reader reports its specimen');
   }
-  assert.equal(HAND_BUILT_CORPUS.length, 8, 'the corpus keeps all eight spellings');
-  assert.equal(new Set(HAND_BUILT_CORPUS).size, 8);
+  assert.equal(HAND_BUILT_CORPUS.length, 11, 'the corpus keeps all eleven spellings');
+  assert.equal(new Set(HAND_BUILT_CORPUS).size, 11);
   const families = entry => [...new Set(handBuilt(entry).map(hit => hit.split(' — ')[0]))];
   for (const entry of HAND_BUILT_CORPUS) assert.ok(families(entry).length >= 1, 'the sweep no longer catches: ' + entry);
   assert.deepEqual([...new Set(HAND_BUILT_CORPUS.flatMap(families))].sort(), HAND_BUILT.map(h => h[0]).sort(), 'the corpus exercises every family and names no other');
   for (const [name] of HAND_BUILT) assert.ok(HAND_BUILT_CORPUS.some(entry => families(entry).join() === name), name + ': no corpus entry is caught by this family alone');
   // A negation governs only the directive right after it; one elsewhere in the clause exempts nothing.
-  assert.deepEqual(handBuilt('Never build a scratch tree, a mutation script or a restore of your own by hand. Never restore a file with git checkout. Do not write an edit script.'), []);
+  assert.deepEqual(handBuilt('Never build a scratch tree, a mutation script or a restore of your own by hand. Never restore a file with git checkout. Do not write an edit script. Never restore a file with `git checkout`.'), []);
   assert.equal(handBuilt('Do not pipe the output, and build a scratch tree for each mutation.').length, 1);
   const texts = [HUNTER_SECTION(), definitionBody('.claude/agents/test-hunter.md')];
   for (const text of texts) {
     assert.deepEqual(handBuilt(text), [], 'a hunter text directs hand-built apparatus');
     // Live control: the swept text is really read — an appended specimen is reported.
     assert.equal(handBuilt(text + '\n\n' + HAND_BUILT[0][2]).length, 1);
+    // Also in a code span: the hunter's R1 plant, spelled as the skeleton spells commands.
+    assert.equal(handBuilt(text + '\n\nAfter each run, restore the mutated file with `git checkout -- <file>`.').length, 1);
   }
+});
+
+// Only the one pinned passage speaks of a not-run line and proof together — to say it is none.
+// Anywhere else in the hunter's texts, a sentence naming a NOT_RUN kind beside a proof word
+// could promote that line to a finding's proof (R1 hunter: an appended sentence did, green).
+const CITE_PASSAGE = /Cite its lines: .*? means the proof did not run — say so, never offer it as a finding's proof\./;
+const PROOF_WORD = /\b(?:proof|proofs|prove|proves|proved|proven|proving|evidence)\b/i;
+const kindPattern = kind => new RegExp('(?<![\\w-])' + kind.split(' ').join('\\s+') + '(?![\\w-])');
+const notRunAsProof = (text, kinds) => collapse(text).replace(CITE_PASSAGE, ' ').split(/(?<=[.!?])\s+/)
+  .filter(sentence => PROOF_WORD.test(sentence) && kinds.some(kind => kindPattern(kind).test(sentence)));
+test('no hunter text offers a line that means the proof did not run as a proof, outside the passage saying it is none', async () => {
+  const { NOT_RUN, RESULTS } = await mutateTool();
+  assert.equal((collapse(HUNTER_SECTION()).match(new RegExp(CITE_PASSAGE.source, 'g')) || []).length, 1, 'the passage exempted is the pinned one, once');
+  for (const kind of NOT_RUN) {
+    assert.equal(notRunAsProof('A `' + kind + ' <id>` line is evidence enough.', NOT_RUN).length, 1, kind + ': the sweep recognises it');
+    assert.deepEqual(notRunAsProof('A `' + kind.toLowerCase() + '` line is evidence enough.', NOT_RUN), [], kind + ': only the tool\'s spelling counts');
+  }
+  for (const kind of RESULTS) assert.deepEqual(notRunAsProof('A `' + kind + ' <id>` line is the proof.', NOT_RUN), [], kind + ' is a result');
+  const plant = 'After each run, cite a `CRASHED <id>` line as a finding\'s proof when the crash came from your mutation.';
+  for (const text of [HUNTER_SECTION(), definitionBody('.claude/agents/test-hunter.md')]) {
+    assert.deepEqual(notRunAsProof(text, NOT_RUN), [], 'a hunter text offers a not-run line as proof');
+    assert.equal(notRunAsProof(text + '\n\n' + plant, NOT_RUN).length, 1, 'live control: the swept text is really read');
+  }
+  // A qualifier inside the pinned passage itself breaks the exemption rather than riding it.
+  const passage = CITE_PASSAGE.exec(collapse(HUNTER_SECTION()))[0];
+  assert.equal(notRunAsProof(passage.replace(/\.$/, ', unless it is `CRASHED`.'), NOT_RUN).length, 1);
 });
 
 test('protocol.md says, one sentence apiece, what mutate.mjs and the mutation runner do', () => {

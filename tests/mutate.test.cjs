@@ -202,6 +202,26 @@ test('a CRLF file: the anchor matches, the mutation keeps CRLF, the restore is t
   assert.deepEqual(leftUnder(r.tmp), []);
 });
 
+test('in a CRLF file, a mutation that differs from its anchor only in line breaks changes nothing: NOT-APPLIED, never run, exit 2', async t => {
+  const fx = fixture(t);
+  // Each spec passes the "replace differs from find" check, and CRLF conversion maps its replace
+  // back onto the file's own bytes. Run as written it would read SURVIVED — a working test (the
+  // line-ending one, which LF bytes turn red) reported as vacuous.
+  const e1 = { id: 'e1', file: 'crlf.txt', find: 'alpha\r\nbeta', replace: 'alpha\nbeta' };
+  const e2 = { id: 'e2', file: 'crlf.txt', find: 'alpha\nbeta', replace: 'alpha\r\nbeta' };
+  const w = writer();
+  const r = await core(fx, { mutations: [e1, e2, M.m1], writeFile: w.writeFile });
+  assert.match(r.lines[0], CONTROL_5);
+  assert.deepEqual(r.lines.slice(1), ['NOT-APPLIED e1', 'NOT-APPLIED e2', 'KILLED m1: add sums two numbers', 'MUTATE 1 killed, 0 survived, 2 other']);
+  assert.equal(r.code, 2);
+  assert.deepEqual(w.calls.map(c => c.file), ['math.cjs', 'math.cjs'], 'crlf.txt is never written');
+  for (const id of ['e1', 'e2']) {
+    assert.ok(r.log.includes(`==> mutate: ${id}: NOT-APPLIED — the mutation leaves the file's bytes unchanged; nothing was written or run`), r.log);
+    assert.ok(!r.log.includes(`==> mutate: mutation ${id} `), id + ' is never run');
+  }
+  assert.deepEqual(leftUnder(r.tmp), []);
+});
+
 // ===== Aborts before anything runs ===================================================================
 test('anchors are all checked first: missing, ambiguous and absent-file anchors each abort with their own line and nothing run', t => {
   const fx = fixture(t);
@@ -318,22 +338,26 @@ test('a ref that names no commit, a checkout that fails and a temp root that can
 
 test('the checkout runs no hook the user configured', t => {
   const fx = fixture(t);
-  const hooks = path.join(fx.repo.root, 'user-hooks'), marker = path.join(fx.repo.root, 'hook-ran.txt'), slash = p => p.split(path.sep).join('/');
+  const hooks = path.join(fx.repo.root, 'user-hooks'), slash = p => p.split(path.sep).join('/');
   fs.mkdirSync(hooks);
-  fs.writeFileSync(path.join(hooks, 'post-checkout'), '#!/bin/sh\necho ran > "' + slash(marker) + '"\n', { mode: 0o755 });
+  // One hook per leg: a --no-checkout clone fires reference-transaction and never post-checkout,
+  // which only the checkout fires.
+  const markers = { 'reference-transaction': path.join(fx.repo.root, 'ref-hook-ran.txt'), 'post-checkout': path.join(fx.repo.root, 'checkout-hook-ran.txt') };
+  for (const [hook, marker] of Object.entries(markers)) fs.writeFileSync(path.join(hooks, hook), '#!/bin/sh\ncat > /dev/null\necho ran >> "' + slash(marker) + '"\n', { mode: 0o755 });
   const config = path.join(fx.repo.root, 'hooks.gitconfig');
   fs.writeFileSync(config, '[core]\n\thooksPath = ' + slash(hooks) + '\n');
-  // Live control: under that configuration a plain clone and checkout do run the hook.
+  const ran = () => Object.entries(markers).filter(([, marker]) => fs.existsSync(marker)).map(([hook]) => hook);
+  // Live control: under that configuration a plain clone runs the one hook and its checkout the other.
   const control = path.join(fx.repo.root, 'control-clone');
-  for (const [cwd, args] of [[fx.repo.root, ['clone', '--quiet', '--no-checkout', '--', fx.repo.cwd, control]], [control, ['checkout', '--quiet', '--detach', 'HEAD']]]) {
-    const r = spawnSync('git', args, { cwd, env: { ...fx.env, GIT_CONFIG_GLOBAL: config }, encoding: 'utf8', windowsHide: true });
-    assert.equal(r.status, 0, r.stderr);
-  }
-  assert.ok(fs.existsSync(marker), 'the configured hook runs where nothing stops it');
-  fs.rmSync(marker);
+  const plain = (cwd, args) => { const r = spawnSync('git', args, { cwd, env: { ...fx.env, GIT_CONFIG_GLOBAL: config }, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', windowsHide: true }); assert.equal(r.status, 0, r.stderr); };
+  plain(fx.repo.root, ['clone', '--quiet', '--no-checkout', '--', fx.repo.cwd, control]);
+  assert.deepEqual(ran(), ['reference-transaction'], 'the clone leg runs the configured hook where nothing stops it');
+  plain(control, ['checkout', '--quiet', '--detach', 'HEAD']);
+  assert.deepEqual(ran(), ['reference-transaction', 'post-checkout'], 'the checkout leg runs its configured hook too');
+  for (const marker of Object.values(markers)) fs.rmSync(marker);
   const r = cli(fx, 'mutate', mutateArgs(fx, fx.muts({ id: 'a1', file: 'math.cjs', find: 'a * b', replace: 'a / b' }), 'hooks.log'), { env: { GIT_CONFIG_GLOBAL: config } });
   assert.deepEqual(r.lines, ['ANCHOR-MISSING a1'], 'the checkout happened and the run stopped at its anchor');
-  assert.equal(fs.existsSync(marker), false, "the tool's checkout ran no hook");
+  assert.deepEqual(ran(), [], "neither leg of the tool's checkout ran a hook");
 });
 
 // ===== The abort paths no repository reaches, through the core ======================================
@@ -349,12 +373,14 @@ test('a mutation write that does not land is NOT-APPLIED: restored, counted as o
   assert.deepEqual(leftUnder(r.tmp), []);
 });
 
-test('a restore that does not hold is RESTORE-FAILED and stops the run: no later mutation, no summary', async t => {
+test('a restore that does not hold is RESTORE-FAILED alone and stops the run: no verdict, no later mutation, no summary', async t => {
   const fx = fixture(t);
   const w = writer(i => i !== 1);
   const r = await core(fx, { mutations: [M.m1, M.m2], writeFile: w.writeFile });
   assert.match(r.lines[0], CONTROL_5);
-  assert.deepEqual(r.lines.slice(1), ['KILLED m1: add sums two numbers', 'RESTORE-FAILED m1']);
+  // The run's verdict is never printed: only a restore that holds lets a mutation's line stand.
+  assert.deepEqual(r.lines.slice(1), ['RESTORE-FAILED m1']);
+  assert.ok(r.log.includes('==> mutate: m1: RESTORE-FAILED — the file did not read back as its saved bytes; not printed: KILLED m1: add sums two numbers'), r.log);
   assert.equal(r.code, 2);
   assert.equal(w.calls.length, 2, 'm2 is never written');
   assert.ok(!r.log.includes('==> mutate: mutation m2'));
@@ -368,9 +394,15 @@ test('a writer that throws is NOT-APPLIED on apply and RESTORE-FAILED on restore
   assert.deepEqual(apply.lines.slice(1), ['NOT-APPLIED m2', 'MUTATE 0 killed, 0 survived, 1 other']);
   assert.equal(apply.code, 2);
   const restore = await core(fx, { mutations: [M.m2], writeFile: throwing(1) });
-  assert.deepEqual(restore.lines.slice(1), ['SURVIVED m2', 'RESTORE-FAILED m2']);
+  assert.deepEqual(restore.lines.slice(1), ['RESTORE-FAILED m2']);
+  assert.ok(restore.log.includes('not printed: SURVIVED m2'), restore.log);
   assert.equal(restore.code, 2);
-  for (const run of [apply, restore]) assert.deepEqual(leftUnder(run.tmp), []);
+  // Both writes refused: the NOT-APPLIED line gives way to RESTORE-FAILED too.
+  const both = await core(fx, { mutations: [M.m2], writeFile: () => { throw Object.assign(new Error('denied'), { code: 'EPERM' }); } });
+  assert.deepEqual(both.lines.slice(1), ['RESTORE-FAILED m2']);
+  assert.ok(both.log.includes('not printed: NOT-APPLIED m2'), both.log);
+  assert.equal(both.code, 2);
+  for (const run of [apply, restore, both]) assert.deepEqual(leftUnder(run.tmp), []);
 });
 
 test('a checkout that cannot be removed is reported after the result and exits 2, for both tools', async t => {
@@ -417,6 +449,70 @@ test('withDisposableCheckout, the helper both tools share: the committed tree at
   assert.ok(left && left.startsWith('mut-'));
   removeTree(path.join(tmp, left));
   assert.deepEqual(state(fx.repo), before, 'the repository, uncommitted edit included, is as it was');
+});
+
+// A fresh clone gives a ref its own meaning: a branch HEAD is not on does not exist there, and its
+// origin/main is the repository's own main. Only resolving in the repository first reaches the
+// commit asked for; both refs here name the older, red commit while main is green.
+test('a ref is resolved in the repository first: a branch HEAD is not on, and a remote-tracking ref that a clone would read otherwise', async t => {
+  const fx = fixture(t), { withDisposableCheckout } = await api();
+  fx.repo.git('update-ref', 'refs/heads/side', fx.red);
+  fx.repo.git('update-ref', 'refs/remotes/origin/main', fx.red);
+  const tmp = fs.mkdtempSync(path.join(fx.repo.root, 'tmp-')), before = state(fx.repo);
+  for (const ref of ['side', 'origin/main']) {
+    const seen = await isolated(fx, () => withDisposableCheckout(fx.repo.cwd, ref, ({ dir, sha }) => ({ sha, extra: fs.readFileSync(path.join(dir, 'extra.test.cjs'), 'utf8') }), { tmpRoot: tmp }));
+    assert.deepEqual(seen, { sha: fx.red, extra: extraTest(true) }, ref + ': the commit the repository names, and its tree');
+    const at = cli(fx, 'run-at-ref', ['--repo', fx.repo.cwd, '--ref', ref, '--validate', fx.validate, '--log', path.join(fx.work, 'at-' + ref.replace('/', '-') + '.log')]);
+    assert.deepEqual(at.lines, [`AT ${fx.short(fx.red)} FAIL tests 1 of 5 failed: extra two runs — log: ${at.log}`], ref);
+    assert.equal(at.code, 1, ref);
+  }
+  assert.deepEqual(leftUnder(tmp), []);
+  assert.deepEqual(state(fx.repo), before);
+});
+
+// Git's repository variables in the caller's environment — exported to every hook, and set by a
+// user who works that way — must reach neither the clone nor a validate step inside it.
+test("git's repository variables are git's own list, each dropped whatever its case, and nothing else is", async () => {
+  const { localGitVars, withoutLocalGitEnv } = await api();
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
+  const listed = spawnSync('git', ['rev-parse', '--local-env-vars'], { env, encoding: 'utf8', windowsHide: true });
+  assert.equal(listed.status, 0, listed.stderr);
+  const names = listed.stdout.split(/\r?\n/).filter(Boolean);
+  assert.ok(names.includes('GIT_DIR') && names.includes('GIT_INDEX_FILE') && names.length >= 10, 'git really listed them: ' + names.join(' '));
+  assert.deepEqual(localGitVars(), names, 'the list is the one git prints, never a copy');
+  const keep = { PATH: 'p', GIT_TERMINAL_PROMPT: '0', GIT_CONFIG_GLOBAL: 'g', GIT_CONFIG_NOSYSTEM: '1', GIT_CEILING_DIRECTORIES: 'c', GIT_DIRECTORY: 'not git_dir' };
+  const planted = { ...keep };
+  for (const name of names) { planted[name] = 'x'; planted[name.toLowerCase()] = 'x'; }
+  assert.deepEqual(withoutLocalGitEnv(planted), keep);
+});
+
+test('a GIT_DIR or GIT_INDEX_FILE in the caller\'s environment never reaches the repository, the clone or a validate step, for both tools', async t => {
+  const fx = fixture(t);
+  // The user has a change staged: an index a stray checkout would rewrite.
+  fx.repo.write('sub/keep.txt', 'staged\n');
+  fx.repo.git('add', 'sub/keep.txt');
+  // A step that passes only where git finds the clone's own repository.
+  const where = { name: 'where', argv: [NODE, '-e', "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);"], parser: 'none' };
+  const spec = fx.json('where.json', { steps: [...specOf().steps, where] });
+  const gitDir = path.join(fx.repo.cwd, '.git');
+  for (const [name, value] of [['GIT_DIR', gitDir], ['GIT_INDEX_FILE', path.join(gitDir, 'index')]]) {
+    const env = { [name]: value };
+    // cli() holds every run to an untouched repository: status, HEAD, refs, index and files.
+    const r = cli(fx, 'mutate', mutateArgs(fx, fx.muts(M.m1), 'env-' + name + '.log').map(a => a === fx.validate ? spec : a), { env });
+    assert.match(r.lines[0], /^CONTROL PASS PASS tests 5\/5; where ok \(\d+s\)$/, name + ': ' + r.lines.join(' | '));
+    assert.deepEqual(r.lines.slice(1), ['KILLED m1: add sums two numbers', 'MUTATE 1 killed, 0 survived, 0 other'], name);
+    assert.equal(r.code, 0, name);
+    const at = cli(fx, 'run-at-ref', ['--repo', fx.repo.cwd, '--ref', 'HEAD~1', '--validate', spec, '--log', path.join(fx.work, 'at-env-' + name + '.log')], { env });
+    assert.deepEqual(at.lines, [`AT ${fx.short(fx.red)} FAIL tests 1 of 5 failed: extra two runs; where ok — log: ${at.log}`], name);
+    assert.equal(at.code, 1, name);
+    // In process, past the CLIs' own scrub: the clone and its checkout drop the variable themselves.
+    const { withDisposableCheckout } = await api();
+    const tmp = fs.mkdtempSync(path.join(fx.repo.root, 'tmp-')), before = state(fx.repo);
+    const seen = await isolated(fx, () => withEnv(env, () => withDisposableCheckout(fx.repo.cwd, 'HEAD~1', ({ dir, sha }) => ({ sha, extra: fs.readFileSync(path.join(dir, 'extra.test.cjs'), 'utf8') }), { tmpRoot: tmp })));
+    assert.deepEqual(seen, { sha: fx.red, extra: extraTest(true) }, name);
+    assert.deepEqual(state(fx.repo), before, name + ': the repository is untouched in process too');
+    assert.deepEqual(leftUnder(tmp), []);
+  }
 });
 
 // ===== The classification rows, each fed directly ===================================================
@@ -584,6 +680,21 @@ test('run-at-ref runs the suite at another ref: one AT line, validate.mjs\'s exi
   const noRef = at('no-such-ref', 'no-ref.log');
   assert.deepEqual(noRef.lines, [`UNKNOWN ref no-such-ref names no commit in ${fx.repo.cwd}`]);
   assert.equal(noRef.code, 2);
+});
+
+test("run-at-ref passes on validate.mjs's UNKNOWN as exit 2 and its --timeout as a TIMEOUT line, exit 1", t => {
+  const fx = fixture(t);
+  const run = (spec, log, extra = []) => cli(fx, 'run-at-ref', ['--repo', fx.repo.cwd, '--ref', 'HEAD', '--validate', spec, '--log', path.join(fx.work, log), ...extra]);
+  // A step whose command cannot start: validate.mjs's UNKNOWN, never "the suite failed".
+  const absent = run(fx.json('absent-command.json', { steps: [{ name: 'tests', argv: ['no-such-command-for-run-at-ref', '--test'], parser: 'node' }] }), 'absent.log');
+  assert.deepEqual(absent.lines, [`AT ${fx.short(fx.green)} UNKNOWN tests COULD-NOT-START (ENOENT) — log: ${absent.log}`]);
+  assert.equal(absent.code, 2);
+  // A step that would run a minute, stopped by --timeout 2.
+  const slow = fx.json('slow.json', { steps: [{ name: 'tests', argv: [NODE, '-e', 'setTimeout(() => {}, 60000)'], parser: 'node' }] });
+  const late = run(slow, 'slow.log', ['--timeout', '2']);
+  assert.deepEqual(late.lines, [`AT ${fx.short(fx.green)} FAIL tests TIMEOUT after 2s — log: ${late.log}`]);
+  assert.equal(late.code, 1);
+  assert.ok(late.ms < 40000, 'the step was stopped, not waited out: ' + late.ms + 'ms');
 });
 
 test('run-at-ref refuses an invalid invocation with one UNKNOWN line and exit 2', async t => {
