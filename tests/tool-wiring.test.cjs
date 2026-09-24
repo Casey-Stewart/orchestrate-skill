@@ -1013,6 +1013,10 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
     SETUP_CLAUSE + ' (a repository with a setup step fails its control without it).',
     // node --test skips a named file that does not exist and still passes: only the count shows it.
     'Its `CONTROL PASS` line must count the tests you scoped: a runner may skip a named test file that does not exist.',
+    // Node counts a test file that registers no tests as one passing test: the count cannot see it emptied.
+    'The count has one blind spot: node counts a test file that registers no tests as one passing test named after the file, so a mutation that empties such a file does not change the count and reads `SURVIVED` — confirm that the mutated file still registers its tests before you cite it.',
+    // (1 + mutations) runs of the scoped suite can outlast the shell's cap, and a killed run skips the tool's cleanup.
+    "A run costs the scoped suite once for the control and once per mutation; when that may outlast the runtime's command timeout, run it as a background task whose completion reports its lines and exit code, or pass `--timeout` and split the mutations across runs — a run the command timeout kills never cleans up its clone.",
     "means the proof did not run — say so, never offer it as a finding's proof.",
     'For a suite at another ref, `node "[SKILL_DIR]/tools/run-at-ref.mjs"` takes the same flags less `--mutations` and prints one line, `AT <short sha> <validate.mjs line>`.',
     'Beyond those, run only the two harness tools PROOF below names, which work on disposable clones.']) {
