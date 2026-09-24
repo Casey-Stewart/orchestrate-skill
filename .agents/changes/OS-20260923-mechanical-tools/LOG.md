@@ -457,3 +457,11 @@ S6. ASK — same file :1167 (the `>>…LOG.md` filter), a branch no input reache
 Reviewer note (A1 coverage): the new parenthetical is verified by its run, not by the suite — the round trip only ever commits LF blobs; a case with a CRLF blob committed under `core.autocrlf=false` would pin it.
 
 A scoped re-review's SHIP completes the close (contract step 6); S1–S6 and the A1-coverage note are test-only residuals for BACKLOG.md at close-out, with A1's two directives, T1's production note and R2's R3 (`.claude/agents/qa-runner.md:11`).
+
+Integration: dry run clean (tree `561e8f9`), merged `--no-ff` as `e8a9ca0` (same tree); tip validation from real PowerShell 466/466, 0 skipped, diff-check clean, 13m46s; `git diff --check` over the merge clean → B04 🟢. The `b04` worktree directory is removed; `.git/worktrees/b04` is undeletable (Permission denied, the OneDrive-synced main checkout) and git no longer lists it. Metrics: gate = 40 findings (R1 8 + 8, R2 3 + 7, R3 2 + 6, R4 6), 5 of them needing a production change (R1 #1–#3, R2 R1 and H1).
+
+Live `check-ledger.mjs parse --dir` on this ledger now prints `PARSE FAIL 1 problem(s): 02-batches-04-prompt-renderer.md:8 Files line differs from the plan fence`, exit 1. By design: the shipped scaffolding.md says the parse check runs at scaffold time only because a recorded fence extension later makes a Files line differ from the plan, and B04's recorded extension (`tests/agent-definitions.test.cjs`) reached this branch's copy of the batch file with the merge. But B02's smoke step 3 expects `PARSE OK 5 batches` from this ledger; C1's close-out corrects that step (bumping its revision) before the page is issued.
+
+### W5 open
+
+Wave base `e8a9ca0`; B05 (L) on `feat/mutation-harness`, worktree `wt-os923/b05`; implementer default tier, reviewer strong tier. The B05 batch file predates B04's merge (it quotes the gate agents' old read-only sentence and assumes a findings-file-only carve-out); the spawn prompt names that drift and the user's scoped-Write decision as binding.
