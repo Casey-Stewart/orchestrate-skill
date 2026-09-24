@@ -250,9 +250,10 @@ adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists
 repository with a setup step fails its control without it). Its `CONTROL PASS` line must
 count the tests you scoped: a runner may skip a named test file that does not exist.
 The count has one blind spot: node counts a test file that registers no tests as one
-passing test named after the file, so a mutation that empties such a file does not change
-the count and reads `SURVIVED` — confirm that the mutated file still registers its tests
-before you cite it. A run costs the scoped suite once for the control and once per
+passing test named after the file, so a mutation after which a one-test file registers
+nothing does not change the count and reads `SURVIVED` — before you cite a `SURVIVED`
+line, check its run in the log for a scoped test file reported under its own file name.
+A run costs the scoped suite once for the control and once per
 mutation; when that may outlast the runtime's command timeout, run it as a background task
 whose completion reports its lines and exit code, or pass `--timeout` and split the
 mutations across runs — a run the command timeout kills never cleans up its clone. Cite

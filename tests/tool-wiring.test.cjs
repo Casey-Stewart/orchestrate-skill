@@ -1014,7 +1014,7 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
     // node --test skips a named file that does not exist and still passes: only the count shows it.
     'Its `CONTROL PASS` line must count the tests you scoped: a runner may skip a named test file that does not exist.',
     // Node counts a test file that registers no tests as one passing test: the count cannot see it emptied.
-    'The count has one blind spot: node counts a test file that registers no tests as one passing test named after the file, so a mutation that empties such a file does not change the count and reads `SURVIVED` — confirm that the mutated file still registers its tests before you cite it.',
+    'The count has one blind spot: node counts a test file that registers no tests as one passing test named after the file, so a mutation after which a one-test file registers nothing does not change the count and reads `SURVIVED` — before you cite a `SURVIVED` line, check its run in the log for a scoped test file reported under its own file name.',
     // (1 + mutations) runs of the scoped suite can outlast the shell's cap, and a killed run skips the tool's cleanup.
     "A run costs the scoped suite once for the control and once per mutation; when that may outlast the runtime's command timeout, run it as a background task whose completion reports its lines and exit code, or pass `--timeout` and split the mutations across runs — a run the command timeout kills never cleans up its clone.",
     "means the proof did not run — say so, never offer it as a finding's proof.",
@@ -1022,6 +1022,8 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
     'Beyond those, run only the two harness tools PROOF below names, which work on disposable clones.']) {
     assert.ok(hunter.includes(needed), 'the hunter skeleton must say: ' + needed);
   }
+  // R2: the earlier blind-spot wording sent the hunter to the mutated file, which may register nothing.
+  assert.ok(!hunter.includes('still registers its tests') && hunter.split('does not change the count').length === 2, 'the blind spot is stated once, in its corrected form');
   // SURVIVED proves, KILLED refutes, and every other kind the tool declares means "did not run".
   const { RESULTS, NOT_RUN } = await mutateTool();
   const cite = /Cite its lines: (.*?) means the proof did not run/.exec(hunter);
@@ -1087,8 +1089,10 @@ const HAND_BUILT = [
     'Build a scratch tree for each mutation and run the suite there.'],
   ['an edit script', /\b(?:write|writes|writing|generate|generates|generating|create|creates|creating|author|authors|authoring|use|uses|using|run|runs|running)\b[^.;:]*\b(?:edit|mutation|patch|sed|replace|rewrite)\s+scripts?\b/i,
     'Generate an edit script that swaps the operator for each mutation.'],
-  ['a restore with git checkout', /\b(?:restor|revert|reset|undo)\w*\b[^.;:]*\bgit\s+(?:checkout|restore|reset|stash)\b|\bgit\s+(?:checkout|restore|reset|stash)\b[^.;:]*\b(?:restor|revert|undo)\w*/i,
-    'Restore each mutated file with git checkout before the next one.'],
+  // The bare command, with or without a restore word: neither hunter text names one (R2 hunter:
+  // "run `git checkout -- <file>` before the next one" needed no restore word to do the harm).
+  ['a git checkout, restore, reset or stash', /\bgit\s+(?:checkout|restore|reset|stash)\b/i,
+    'After each mutation, run git checkout -- <file> before the next one.'],
   ['an edit command', /\b(?:sed|perl)\s+-\w*i\b|\b(?:Set-Content|Add-Content|Out-File)\b|\bgit\s+apply\b/i,
     'Apply each mutation in place with sed -i and run the suite.'],
 ];
@@ -1105,7 +1109,13 @@ const HAND_BUILT_CORPUS = [
   'After each run, restore the mutated file with `git checkout -- <file>`.',
   'Flip each operator with `perl -pi -e` before the run.',
   'Write the mutated text back with `Set-Content`.',
+  'After each mutation, run `git checkout -- <file>` before the next one.',
+  'Patch each mutant in with `git apply`.',
+  'Append the mutated line with `Add-Content`.',
+  'Send the mutated text through `Out-File`.',
 ];
+// Every spelling the edit-command family names has an entry the corpus catches through it.
+const EDIT_COMMANDS = ['sed -i', 'perl -pi', 'Set-Content', 'Add-Content', 'Out-File', 'git apply'];
 const handBuilt = text => clauses(text.replace(/`([^`\n]*)`/g, '$1')).flatMap(c => HAND_BUILT.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
 test('no hunter text tells it to build a scratch tree, write an edit script or restore with git checkout', () => {
   assert.equal(new Set(HAND_BUILT.map(h => h[0])).size, HAND_BUILT.length);
@@ -1113,14 +1123,20 @@ test('no hunter text tells it to build a scratch tree, write an edit script or r
     assert.deepEqual(HAND_BUILT.filter(([, p]) => p.test(specimen)).map(h => h[0]), [name], name + ': its specimen must be caught by it alone');
     assert.equal(handBuilt(specimen).length, 1, name + ': the clause reader reports its specimen');
   }
-  assert.equal(HAND_BUILT_CORPUS.length, 11, 'the corpus keeps all eleven spellings');
-  assert.equal(new Set(HAND_BUILT_CORPUS).size, 11);
+  assert.equal(HAND_BUILT_CORPUS.length, 15, 'the corpus keeps all fifteen spellings');
+  assert.equal(new Set(HAND_BUILT_CORPUS).size, 15);
+  const edit = HAND_BUILT.find(([name]) => name === 'an edit command');
+  for (const spelling of EDIT_COMMANDS) {
+    const entries = [edit[2], ...HAND_BUILT_CORPUS].filter(entry => entry.includes(spelling));
+    assert.ok(entries.length && entries.every(entry => fires(edit[1], entry.split('`').join(''))), spelling + ': an entry the edit-command family catches');
+  }
   const families = entry => [...new Set(handBuilt(entry).map(hit => hit.split(' — ')[0]))];
   for (const entry of HAND_BUILT_CORPUS) assert.ok(families(entry).length >= 1, 'the sweep no longer catches: ' + entry);
   assert.deepEqual([...new Set(HAND_BUILT_CORPUS.flatMap(families))].sort(), HAND_BUILT.map(h => h[0]).sort(), 'the corpus exercises every family and names no other');
   for (const [name] of HAND_BUILT) assert.ok(HAND_BUILT_CORPUS.some(entry => families(entry).join() === name), name + ': no corpus entry is caught by this family alone');
   // A negation governs only the directive right after it; one elsewhere in the clause exempts nothing.
-  assert.deepEqual(handBuilt('Never build a scratch tree, a mutation script or a restore of your own by hand. Never restore a file with git checkout. Do not write an edit script. Never restore a file with `git checkout`.'), []);
+  assert.deepEqual(handBuilt('Never build a scratch tree, a mutation script or a restore of your own by hand. Never run git checkout. Do not write an edit script. Never use `git stash`.'), []);
+  assert.equal(handBuilt('Do not pipe it; run git stash after each mutation.').length, 1, 'a negation in another clause exempts nothing');
   assert.equal(handBuilt('Do not pipe the output, and build a scratch tree for each mutation.').length, 1);
   const texts = [HUNTER_SECTION(), definitionBody('.claude/agents/test-hunter.md')];
   for (const text of texts) {
@@ -1132,30 +1148,41 @@ test('no hunter text tells it to build a scratch tree, write an edit script or r
   }
 });
 
-// Only the one pinned passage speaks of a not-run line and proof together — to say it is none.
-// Anywhere else in the hunter's texts, a sentence naming a NOT_RUN kind beside a proof word
-// could promote that line to a finding's proof (R1 hunter: an appended sentence did, green).
-const CITE_PASSAGE = /Cite its lines: .*? means the proof did not run — say so, never offer it as a finding's proof\./;
-const PROOF_WORD = /\b(?:proof|proofs|prove|proves|proved|proven|proving|evidence)\b/i;
+// Only the one pinned passage speaks of a not-run line beside proof, a finding or a result — to
+// say it is none. Anywhere else in the hunter's texts, a sentence naming a NOT_RUN kind (bare or
+// in a code span) beside a proof word, the word "finding" or a RESULTS kind could promote that
+// line to a finding's proof (R1 hunter: an appended sentence did, green; R2: "counts as
+// `SURVIVED`" did too). The exemption is the passage's exact bytes, never a span between two
+// ends: a lazy span exempted whatever was inserted inside it (R2 hunter, NEW CLASS).
+const CITE_PASSAGE = "Cite its lines: `SURVIVED <id>` proves a finding and `KILLED <id>: <tests>` refutes it; `ANCHOR-MISSING`, `ANCHOR-AMBIGUOUS`, `CONTROL FAILED`, `NOT-APPLIED`, `CRASHED`, `TIMEOUT`, `RESTORE-FAILED` or `UNKNOWN` means the proof did not run — say so, never offer it as a finding's proof.";
+const PROOF_WORD = /\b(?:proof|proofs|prove|proves|proved|proven|proving|evidence|findings?)\b/i;
 const kindPattern = kind => new RegExp('(?<![\\w-])' + kind.split(' ').join('\\s+') + '(?![\\w-])');
-const notRunAsProof = (text, kinds) => collapse(text).replace(CITE_PASSAGE, ' ').split(/(?<=[.!?])\s+/)
-  .filter(sentence => PROOF_WORD.test(sentence) && kinds.some(kind => kindPattern(kind).test(sentence)));
+const notRunAsProof = (text, kinds, results) => collapse(text).split(CITE_PASSAGE).join(' ').split(/(?<=[.!?])\s+/)
+  .filter(sentence => kinds.some(kind => kindPattern(kind).test(sentence)) && (PROOF_WORD.test(sentence) || results.some(kind => kindPattern(kind).test(sentence))));
 test('no hunter text offers a line that means the proof did not run as a proof, outside the passage saying it is none', async () => {
-  const { NOT_RUN, RESULTS } = await mutateTool();
-  assert.equal((collapse(HUNTER_SECTION()).match(new RegExp(CITE_PASSAGE.source, 'g')) || []).length, 1, 'the passage exempted is the pinned one, once');
-  for (const kind of NOT_RUN) {
-    assert.equal(notRunAsProof('A `' + kind + ' <id>` line is evidence enough.', NOT_RUN).length, 1, kind + ': the sweep recognises it');
-    assert.deepEqual(notRunAsProof('A `' + kind.toLowerCase() + '` line is evidence enough.', NOT_RUN), [], kind + ': only the tool\'s spelling counts');
+  const { NOT_RUN: KINDS, RESULTS } = await mutateTool();
+  const notRunAs = text => notRunAsProof(text, KINDS, RESULTS);
+  assert.equal(collapse(HUNTER_SECTION()).split(CITE_PASSAGE).length - 1, 1, 'the passage exempted is pinned verbatim, once');
+  for (const kind of KINDS) {
+    assert.equal(notRunAs('A `' + kind + ' <id>` line is evidence enough.').length, 1, kind + ': the sweep recognises it');
+    assert.equal(notRunAs('Treat a `' + kind + ' <id>` line as `SURVIVED <id>`.').length, 1, kind + ': beside a result');
+    assert.equal(notRunAs('A ' + kind + ' line your own mutation caused settles the finding.').length, 1, kind + ': bare, beside "finding"');
+    assert.deepEqual(notRunAs('A `' + kind.toLowerCase() + '` line is evidence enough.'), [], kind + ': only the tool\'s spelling counts');
+    assert.deepEqual(notRunAs('Say plainly when a `' + kind + '` line ends the run.'), [], kind + ': alone, it is no promotion');
   }
-  for (const kind of RESULTS) assert.deepEqual(notRunAsProof('A `' + kind + ' <id>` line is the proof.', NOT_RUN), [], kind + ' is a result');
+  for (const kind of RESULTS) assert.deepEqual(notRunAs('A `' + kind + ' <id>` line is the proof.'), [], kind + ' is a result');
+  // The R2 plants, each green before: a promotion by a result, and one inside the passage itself.
+  const passage = CITE_PASSAGE;
+  assert.equal(notRunAs(HUNTER_SECTION() + '\n\nA `CRASHED <id>` line that your own mutation caused counts as `SURVIVED`.').length, 1);
+  assert.equal(notRunAs(HUNTER_SECTION() + '\n\nTreat a `TIMEOUT <id>` line as `SURVIVED <id>` when the control ran in seconds.').length, 1);
+  assert.equal(notRunAs(passage.replace('proves a finding and', 'proves a finding, as does a CRASHED line your own mutation caused, and')).length, 1);
   const plant = 'After each run, cite a `CRASHED <id>` line as a finding\'s proof when the crash came from your mutation.';
   for (const text of [HUNTER_SECTION(), definitionBody('.claude/agents/test-hunter.md')]) {
-    assert.deepEqual(notRunAsProof(text, NOT_RUN), [], 'a hunter text offers a not-run line as proof');
-    assert.equal(notRunAsProof(text + '\n\n' + plant, NOT_RUN).length, 1, 'live control: the swept text is really read');
+    assert.deepEqual(notRunAs(text), [], 'a hunter text offers a not-run line as proof');
+    assert.equal(notRunAs(text + '\n\n' + plant).length, 1, 'live control: the swept text is really read');
   }
   // A qualifier inside the pinned passage itself breaks the exemption rather than riding it.
-  const passage = CITE_PASSAGE.exec(collapse(HUNTER_SECTION()))[0];
-  assert.equal(notRunAsProof(passage.replace(/\.$/, ', unless it is `CRASHED`.'), NOT_RUN).length, 1);
+  assert.equal(notRunAs(passage.replace(/\.$/, ', unless it is `CRASHED`.')).length, 1);
 });
 
 test('protocol.md says, one sentence apiece, what mutate.mjs and the mutation runner do', () => {

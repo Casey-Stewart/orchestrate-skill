@@ -161,6 +161,13 @@ Spawn the tools directly with `spawnSync(process.execPath, […])` — the fixtu
 - [x] The closed carve-out list in the skeleton and in `.claude/agents/test-hunter.md`, pinned sentence intact
 - [x] Template and protocol: one sentence each separating the repo mutation runner from `mutate.mjs`; README tools tree gains both tools
 - [x] `tests/mutate.test.cjs` covering every outcome and abort, CRLF, live log paths and the untouched user repository; `tests/tool-wiring.test.cjs` pins scoped to the hunter; `NON_MARKDOWN` length 11
+- [x] polish: (R2 A) the hunter's blind-spot sentence says what is true — only a one-test file keeps the count — and tells it to check the run's log for a scoped test file reported under its own name; pin updated
+- [x] polish: (R2 B) pin `scrubLocalGitEnv` both ways — every listed name dropped whatever its case, and nothing else (GIT_CONFIG_GLOBAL, GIT_CONFIG_NOSYSTEM, GIT_CEILING_DIRECTORIES kept)
+- [x] polish: (R2 C) the not-run-as-proof sweep also fires when a not-run kind shares a sentence with a result kind
+- [x] polish: (R2 H2-1) a validate step asserts its environment holds none of git's local variables in any case, and a direct `scrubLocalGitEnv` unit call
+- [x] polish: (R2 H2-2) the exempted cite passage pinned verbatim, and a sentence naming a not-run kind (bare or in a code span) beside `SURVIVED`/`KILLED` or "finding" is flagged
+- [x] polish: (R2 H2-3) a negation-aware family on a bare `git checkout|restore|reset|stash` command, and specimens for the edit-command family's `git apply`, `Add-Content`, `Out-File`
+- [x] polish: (R2 H2-4) a CLI run with a fake `git` first on PATH listing nothing, and one listing a non-`GIT_` name: `UNKNOWN git did not list …`, exit 2, repository untouched
 
 ## Acceptance criteria
 

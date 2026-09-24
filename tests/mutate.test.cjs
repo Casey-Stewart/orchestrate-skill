@@ -472,31 +472,69 @@ test('a ref is resolved in the repository first: a branch HEAD is not on, and a 
 
 // Git's repository variables in the caller's environment — exported to every hook, and set by a
 // user who works that way — must reach neither the clone nor a validate step inside it.
-test("git's repository variables are git's own list, each dropped whatever its case, and nothing else is", async () => {
-  const { localGitVars, withoutLocalGitEnv } = await api();
+// Git's own list, asked with no GIT_* variable set: the domain every check below is bound to.
+function gitListed() {
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
   const listed = spawnSync('git', ['rev-parse', '--local-env-vars'], { env, encoding: 'utf8', windowsHide: true });
   assert.equal(listed.status, 0, listed.stderr);
-  const names = listed.stdout.split(/\r?\n/).filter(Boolean);
+  return listed.stdout.split(/\r?\n/).filter(Boolean);
+}
+test("git's repository variables are git's own list, each dropped whatever its case, and nothing else is", async () => {
+  const { localGitVars, withoutLocalGitEnv, scrubLocalGitEnv } = await api();
+  const names = gitListed();
   assert.ok(names.includes('GIT_DIR') && names.includes('GIT_INDEX_FILE') && names.length >= 10, 'git really listed them: ' + names.join(' '));
   assert.deepEqual(localGitVars(), names, 'the list is the one git prints, never a copy');
   const keep = { PATH: 'p', GIT_TERMINAL_PROMPT: '0', GIT_CONFIG_GLOBAL: 'g', GIT_CONFIG_NOSYSTEM: '1', GIT_CEILING_DIRECTORIES: 'c', GIT_DIRECTORY: 'not git_dir' };
   const planted = { ...keep };
   for (const name of names) { planted[name] = 'x'; planted[name.toLowerCase()] = 'x'; }
   assert.deepEqual(withoutLocalGitEnv(planted), keep);
+  // The CLIs' in-place scrub, which sets every validate step's environment: the same both ways.
+  const copy = { ...planted };
+  scrubLocalGitEnv(copy);
+  assert.deepEqual(copy, keep);
 });
 
-test('a GIT_DIR or GIT_INDEX_FILE in the caller\'s environment never reaches the repository, the clone or a validate step, for both tools', async t => {
+// A git whose answer cannot be trusted stops the run: an empty list would scrub nothing, silently.
+// The fake is node under git's name (a link, or a copy where links need privileges), answering
+// through a --require hook that acts only in a process started as git.
+test('a git that lists no repository variable, or a name that is not one, is UNKNOWN before anything runs, for both tools', t => {
+  const fx = fixture(t);
+  const bin = path.join(fx.repo.root, 'fake-bin'), fake = path.join(bin, process.platform === 'win32' ? 'git.exe' : 'git');
+  fs.mkdirSync(bin);
+  try { fs.symlinkSync(NODE, fake); } catch { fs.copyFileSync(NODE, fake); }
+  const hook = path.join(fx.repo.root, 'fake-git.cjs');
+  fs.writeFileSync(hook, "if (require('path').basename(process.argv0).replace(/[.]exe$/i, '') === 'git') { process.stdout.write(process.env.FAKE_GIT_OUT); process.exit(0); }\n");
+  const pathKey = Object.keys(fx.env).find(key => key.toUpperCase() === 'PATH');
+  const env = out => ({ [pathKey]: bin + path.delimiter + fx.env[pathKey], NODE_OPTIONS: '--require "' + hook.split(path.sep).join('/') + '"', FAKE_GIT_OUT: out });
+  const LINE = 'UNKNOWN git did not list the variables that tie it to a repository (git rev-parse --local-env-vars)';
+  for (const [label, out] of [['a list of nothing', ''], ['a name that is not a git variable', 'GIT_DIR\nPATH\n']]) {
+    // Live control: a PATH lookup finds the fake, and it answers as told.
+    const probe = spawnSync('git', ['rev-parse', '--local-env-vars'], { env: { ...fx.env, ...env(out) }, encoding: 'utf8', windowsHide: true });
+    assert.deepEqual([probe.status, probe.stdout], [0, out], label + ': the fake answers ' + probe.stderr);
+    const m = cli(fx, 'mutate', mutateArgs(fx, fx.muts(M.m1), 'fake-git.log'), { env: env(out) });
+    assert.deepEqual([m.lines, m.code], [[LINE], 2], label);
+    const at = cli(fx, 'run-at-ref', ['--repo', fx.repo.cwd, '--ref', 'HEAD', '--validate', fx.validate, '--log', path.join(fx.work, 'fake-git-at.log')], { env: env(out) });
+    assert.deepEqual([at.lines, at.code], [[LINE], 2], label);
+  }
+});
+
+test("git's repository variables in the caller's environment — a GIT_DIR, a GIT_INDEX_FILE, every one git lists — never reach the repository, the clone or a validate step, for both tools", async t => {
   const fx = fixture(t);
   // The user has a change staged: an index a stray checkout would rewrite.
   fx.repo.write('sub/keep.txt', 'staged\n');
   fx.repo.git('add', 'sub/keep.txt');
-  // A step that passes only where git finds the clone's own repository.
-  const where = { name: 'where', argv: [NODE, '-e', "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);"], parser: 'none' };
+  // A step that passes only where its environment holds none of git's variables, in any case,
+  // and git finds the clone's own repository.
+  const names = gitListed();
+  const where = { name: 'where', argv: [NODE, '-e', "const names = new Set(JSON.parse(process.argv[1])); if (Object.keys(process.env).some(key => names.has(key.toUpperCase()))) process.exit(2); "
+    + "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);", JSON.stringify(names)], parser: 'none' };
   const spec = fx.json('where.json', { steps: [...specOf().steps, where] });
   const gitDir = path.join(fx.repo.cwd, '.git');
-  for (const [name, value] of [['GIT_DIR', gitDir], ['GIT_INDEX_FILE', path.join(gitDir, 'index')]]) {
-    const env = { [name]: value };
+  // Every name git lists, planted at once through the CLIs: each must be scrubbed, or the step sees it.
+  const every = Object.fromEntries(names.map(name => [name, 'planted']));
+  Object.assign(every, { GIT_DIR: gitDir, GIT_INDEX_FILE: path.join(gitDir, 'index'), GIT_WORK_TREE: fx.repo.cwd, GIT_COMMON_DIR: gitDir, GIT_OBJECT_DIRECTORY: path.join(gitDir, 'objects') });
+  for (const [name, value] of [['GIT_DIR', gitDir], ['GIT_INDEX_FILE', path.join(gitDir, 'index')], ['every listed name', every]]) {
+    const env = typeof value === 'string' ? { [name]: value } : value;
     // cli() holds every run to an untouched repository: status, HEAD, refs, index and files.
     const r = cli(fx, 'mutate', mutateArgs(fx, fx.muts(M.m1), 'env-' + name + '.log').map(a => a === fx.validate ? spec : a), { env });
     assert.match(r.lines[0], /^CONTROL PASS PASS tests 5\/5; where ok \(\d+s\)$/, name + ': ' + r.lines.join(' | '));
@@ -506,6 +544,7 @@ test('a GIT_DIR or GIT_INDEX_FILE in the caller\'s environment never reaches the
     assert.deepEqual(at.lines, [`AT ${fx.short(fx.red)} FAIL tests 1 of 5 failed: extra two runs; where ok — log: ${at.log}`], name);
     assert.equal(at.code, 1, name);
     // In process, past the CLIs' own scrub: the clone and its checkout drop the variable themselves.
+    if (typeof value !== 'string') continue;
     const { withDisposableCheckout } = await api();
     const tmp = fs.mkdtempSync(path.join(fx.repo.root, 'tmp-')), before = state(fx.repo);
     const seen = await isolated(fx, () => withEnv(env, () => withDisposableCheckout(fx.repo.cwd, 'HEAD~1', ({ dir, sha }) => ({ sha, extra: fs.readFileSync(path.join(dir, 'extra.test.cjs'), 'utf8') }), { tmpRoot: tmp })));
