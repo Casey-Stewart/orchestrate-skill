@@ -218,8 +218,11 @@ smoke-input inventory).
 1. **Do**: From the integration worktree root, run `node orchestrate/tools/validate.mjs
    --spec <I-02>/spec.json --log <scratch>/c1-validate-repo.log --timeout 570`, with the
    shell tool's own timeout at its 10-minute maximum.
-   **Pass**: exactly one output line beginning `PASS tests `, whose passed count equals its
-   total; exit code 0; the log file exists and ends with the reporter's summary.
+   **Pass**: exactly one output line beginning `PASS tests `; exit code 0; the log file exists
+   and ends with the reporter's summary, whose `ℹ fail` is 0 and whose `ℹ skipped` equals the
+   line's total minus its passed count (0 on Windows; on Linux 2, the Windows-only pair in
+   `tests/validate.test.cjs`). *(Revision 2, corrected at C1 close-out: revision 1 required
+   passed = total, which the line cannot show on Linux — its total counts skipped tests.)*
    **Runner**: agent (CLI — Node and PowerShell on this machine).
 2. **Do**: Run `node orchestrate/tools/validate.mjs --spec <I-01>/spec.json --cwd <I-01>
    --log <scratch>/c1-validate-fail.log`.

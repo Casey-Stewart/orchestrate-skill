@@ -625,3 +625,23 @@ Mechanical close: fence PASS (integration `7c1a1fa`, batch `4276a8a`, no violati
 Integration: dry run clean (tree `42cd40e`), merged `--no-ff` as `2137e7d` (same tree); tip validation (pwsh) 499 / 497 / 0 fail / 2 skipped (the Windows-only pair), `git diff --check HEAD^1 HEAD` clean → B05 🟢. Worktree `b05` removed. Metrics: gate = 16 findings (R1 5 + 4, R2 3 + 4), 3 needing a production change (R1 1–3); the hunter's R1 H5 note was closed in the fix round and is not counted.
 
 Wave 5 closed; C1 (final, the only checkpoint) close-out follows.
+
+## 2026-09-24 — C1 close-out
+
+### Inputs
+
+Generated at `382426b` by the committed `evidence/C1/inputs/generate-c1-inputs.mjs` into `issue-001/` (it refuses an existing directory), independently checked by `evidence/C1/inputs/validate-c1-inputs.mjs` into `validation-001/` — 24/24 PASS, by routes that avoid the tools under test (`node --test` run directly; the skill hash recomputed from git's own blobs of `orchestrate/`; byte diffs against the tip copy; `git bundle verify` inside a fresh clone). A deliberately corrupted copy fails 3 checks (I-06 made equal to I-05; m3's anchor made present at both commits). A second generation is byte-identical, the bundle included. Committed as `450d7e9`; every committed blob equals the bytes on disk (`git hash-object --no-filters`), and in a fresh `core.autocrlf=true` clone all 30 registry digests hold while an unprotected file (`README.md`) takes CRLF — the live conversion control. Two generator defects were caught before issue and fixed in the generator, never in the issued files: the bundle carried `main` but no `HEAD` (a clone checked nothing out, so step 11's `--ref HEAD` could not have run), and stripping template comments left blank lines at EOF in five I-05 files (`git diff --check` refused the commit).
+
+Pin form: I-04 and I-05 pin the RELATIVE directory `orchestrate`, which check-ledger resolves from the working directory, so the inputs work on any machine from the worktree root.
+
+### Pre-smoke
+
+QA runner (default tier, `qa-runner`, user-level definition byte-identical to the base; nonce verified) on `450d7e9`: step 00 (input identities) PASS; steps 2–13 PASS; step 1 FAIL at revision 1 — `PASS tests 497/499 (21s)`, exit 0, `ℹ fail 0`, but its Pass required passed = total, which the line cannot show on Linux: `validate.mjs`'s total counts the two skipped Windows-only tests. A defect in the step's wording under the user's Linux substitution, not in the tool — corrected in B01's batch file to revision 2 (fail 0, skipped = total − passed) and re-run by the same runner: PASS, the two skipped named as the Windows-only pair. Revision-1 evidence kept as `evidence/C1/step-01-r1.md`. Step 3 corrected to revision 2 in B02's batch file, as recorded at B04 (live parse reports B04's extended Files line by design). Residual for BACKLOG at close-out: the wrapper's one line counts skipped tests in its total without saying so.
+
+Step 14 is added as the one `Runner: human` step: the user's own words at this session's start ("the Windows PowerShell + Git Bash recipe runs once on my laptop at C1"). It needs the build on the laptop, and `origin` holds `chore/mechanical-tools-ledger` only at `f3a8e0c`; pushing needs the user's word.
+
+### Page
+
+`smoke-c1.json` written by a scratch script from the registry, the batch files' steps (commands spelled out with concrete input paths and a `../c1-scratch` directory, so they run in bash and PowerShell alike, no backslashes) and the evidence files; `smoke-c1.html` built by the ledger base's `build-smoke-page.mjs` with the base `smoke-page-template.html` (both `fceab31`). Build SHA `450d7e970e935bdd7b93b3acc4516b996fca59e8`; storage key `os923-c1`; 6 sections, 14 steps, 13 pre-verified.
+
+Artifact proof (`evidence/C1/artifact-proof.md`): the rendered-DOM pass could not run — no browser binary on this machine and the only connected browser is on the Windows laptop. As a labelled substitute, every `<pre><code>` block was decoded from what the renderer receives (gate HTML; `SECTIONS` JSON entity-decoded) — 22 blocks, none with a backslash or control character — and each of the 17 step blocks for steps 1–13 was run with `bash` from the worktree root in a fresh `../c1-scratch`: every output and exit code as the step's Pass describes.
