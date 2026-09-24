@@ -71,8 +71,10 @@ document.
   batch's OWN artifacts (its new tests' strength, smoke-step prose, comments, a doc sweep
   it owns), no production behavior change (non-blocking; closes as a polish pass).
 - **Gate agents** (read-only, run by the ORCHESTRATOR at the reviewer gate, in parallel
-  with the reviewer): {{GATE_AGENTS}}. Each writes its full report to the ONE findings file
-  its prompt names — its only write — and returns four lines: its verdict, `NONCE <nonce>`,
+  with the reviewer): {{GATE_AGENTS}}. Each writes its full report with the Write tool to
+  the findings file its prompt names — its only other writes are validation logs and
+  disposable scratch under the session scratchpad, never inside a worktree or the
+  repository — and returns four lines: its verdict, `NONCE <nonce>`,
   `FINDINGS <n>`, the file's path. Implementers NEVER spawn a gate agent themselves —
   a self-spawned one stalls the implementer uncommitted.
 - **QA runner** — one sub-agent that executes the agent-runnable smoke steps at a
@@ -696,7 +698,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      heading: every findings file reaches LOG.md first — from the integration worktree
      root, `cat -- "<findings file>" >> {{LEDGER_DIR}}/LOG.md` in Git Bash or an equivalent
      byte copy, never re-typed through the orchestrator's context, committed with the
-     PROGRESS update — and only then is its path forwarded). `SHIP` with ASKs → polish
+     PROGRESS update — and only then is its path forwarded; a copy lost with the scratchpad
+     is taken back out of the committed LOG.md, never re-typed). `SHIP` with ASKs → polish
      pass: resume the implementer with the pointer to its rendered `polish` prompt (the
      findings file by path); it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
      closes mechanically (6a + validations on the polished tip; polish commits touch only

@@ -141,7 +141,7 @@ function validateFacts(facts, allowed, role) {
       if (value === 'none') continue;
       const keys = value && typeof value === 'object' && !Array.isArray(value) ? Object.keys(value).sort() : [];
       if (keys.join() !== 'file,heading' || !validPath(value.file) || typeof value.heading !== 'string' || !/^#{1,6} \S/.test(value.heading) || hidden(value.heading)) {
-        bad('expected "none" or { "file": "<repo-relative path>", "heading": "<exact heading line>" }');
+        bad('expected "none" or { "file": "<worktree-relative path>", "heading": "<exact heading line>" }');
       }
     }
   }
@@ -176,6 +176,8 @@ function oneMatch(text, pattern, what) {
   return found[0][1];
 }
 const collapse = text => text.replace(/\s+/g, ' ');
+// A batch's type word (fix / feature / chore) becomes its conventional-commit type.
+export const COMMIT_TYPES = { feature: 'feat' };
 
 // Every ledger-derived value, read through ledger-parse.mjs and exact headings. Pure: texts in.
 export function ledgerValues({ contract, plan, batchName, batchText, batch }) {
@@ -203,8 +205,9 @@ export function ledgerValues({ contract, plan, batchName, batchText, batch }) {
   v.fence = row['Files (fence)'];
   const first = batchText.split(/\r?\n/, 1)[0];
   if (!new RegExp(`^# ${batch} (?:—|-) `).test(first)) throw new Unknown(`${batchName}: title must open "# ${batch} — "`);
-  v.type = (/\(([a-z][a-z-]*), [^()]*\)[ \t]*$/.exec(first) || [])[1];
-  if (!v.type) throw new Unknown(`${batchName}: title must end "(<type>, <version>)"`);
+  const type = (/\(([a-z][a-z-]*), [^()]*\)[ \t]*$/.exec(first) || [])[1];
+  if (!type) throw new Unknown(`${batchName}: title must end "(<type>, <version>)"`);
+  v.type = Object.hasOwn(COMMIT_TYPES, type) ? COMMIT_TYPES[type] : type;
   const applicable = batchText.split(/\r?\n/).filter(l => l.startsWith('**Applicable guardrails**: '));
   if (applicable.length !== 1 || !applicable[0].slice(27).trim()) throw new Unknown(`${batchName}: needs exactly one non-empty "**Applicable guardrails**: " line`);
   v.applicable = applicable[0].slice(27).trim();

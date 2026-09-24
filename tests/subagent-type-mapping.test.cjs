@@ -13,8 +13,8 @@ const prompts = read('orchestrate/references/subagent-prompts.md');
 const protocol = read('orchestrate/references/protocol.md');
 // Markdown wraps prose, so "verbatim" is judged on whitespace-collapsed text.
 const flow = text => text.replace(/\s+/g, ' ');
-const CAVEAT = 'Bash can still write, so "read-only" stays partly conventional; '
-  + 'removing Write/Edit closes the easy path, not every path.';
+const CAVEAT = 'Write and Bash can still write, so "read-only" stays partly conventional; '
+  + 'withholding Edit closes the easy path, not every path.';
 
 // Heading → the type its spawn line must name, plus the opening of the prompt block
 // that line governs, in document order. Enumerated rather than counted, so a skeleton

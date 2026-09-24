@@ -156,8 +156,8 @@ types fails outright (`Agent type 'implementer' not found`), so the orchestrator
 substitutes the general-purpose agent itself on every spawn and the read-only
 rules stay prose-enforced — see `orchestrate/references/protocol.md`
 §Degraded environments. And with them, the guarantee is stronger but not
-absolute — Bash can still write, so "read-only" stays partly conventional; removing
-Write/Edit closes the easy path, not every path.
+absolute — Write and Bash can still write, so "read-only" stays partly conventional;
+withholding Edit closes the easy path, not every path.
 
 Whatever branch the clone has checked out is what runs — stay on `main`. If you prefer
 a plain copy, `cp -r orchestrate-skill/orchestrate ~/.claude/skills/` works, and

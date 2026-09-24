@@ -5,7 +5,7 @@ Cut from the integration tip when the wave opens.
 **Wave**: 4 · **Weight**: L
 **Depends on**: B02, B03
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files**: `orchestrate/tools/prompt.mjs`, `tests/prompt.test.cjs`, `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `orchestrate/templates/00-READBEFORE.md`, `orchestrate/SKILL.md`, `.claude/agents/reviewer.md`, `.claude/agents/test-hunter.md`, `README.md`, `tests/subagent-type-mapping.test.cjs`, `tests/tool-wiring.test.cjs`, `tests/protocol-contract.test.cjs`
+**Files**: `orchestrate/tools/prompt.mjs`, `tests/prompt.test.cjs`, `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `orchestrate/templates/00-READBEFORE.md`, `orchestrate/SKILL.md`, `.claude/agents/reviewer.md`, `.claude/agents/test-hunter.md`, `README.md`, `tests/subagent-type-mapping.test.cjs`, `tests/tool-wiring.test.cjs`, `tests/protocol-contract.test.cjs`, `tests/agent-definitions.test.cjs`
 The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: a guard that SAMPLES its domain (bind the slot registry to the live skeleton blocks in both directions) · a test that pins the defect (re-aim the "paste, don't point" pins, never delete them) · positive-only assertions on prose (pin the new rule AND sweep for surviving paste directives) · a sweep blind to an edit that narrows a rule's scope (the read-only carve-out must be exactly one file) · the apparatus corrupts the work (no literal control bytes; write rendered files as the exact bytes rendered)
 **Spec**: [01-plan.md](01-plan.md) §B04 · **Gate**: fence check → reviewer + test-hunter

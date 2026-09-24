@@ -637,7 +637,7 @@ const pointerOf = text => {
 test('§Spawning rules renders with prompt.mjs and points with ONE fixed message that holds no nonce', async () => {
   const { ROLES } = await promptTool(), doc = read(PROMPTS);
   const rules = collapse(section(doc, '## Spawning rules (orchestrator)'));
-  const command = '`node "<skill-dir>/tools/prompt.mjs" --ledger <ledger-dir> --role <role> --batch <Bnn> --facts <facts.json> --out <scratchpad>/prompts`';
+  const command = '`node "<skill-dir>/tools/prompt.mjs" --ledger <ledger-dir> --role <role> --batch <Bnn> --facts <facts.json> --out "<scratchpad>/prompts"`';
   assert.ok(rules.includes(command), 'the rendering command');
   assert.ok(rules.includes('(roles ' + Object.keys(ROLES).map(r => '`' + r + '`').join(', ') + ';'), 'every role the renderer knows, and no other');
   const pointer = pointerOf(rules);
@@ -675,13 +675,20 @@ test('template step 5 renders, then points, and keeps its self-contained list as
 });
 
 // Every findings file reaches LOG.md, byte for byte, BEFORE its path is forwarded: in each
-// paragraph or list item about findings, every "forward" comes after the append command.
+// paragraph or list item, every handing-on comes after the append command. Two spellings:
+// "forward" in a block about findings (the rule's own verb; the block filter keeps "forward
+// slashes" out), and hand / pass / send / give with a report, findings, ASK or path as its
+// object anywhere.
 const APPEND = 'cat -- "<findings file>" >>';
+const FORWARD = /\bforward(?:s|ed|ing)?\b(?!\s+slash)/gi;
+// "pass" is a noun here as often as a verb (a polish pass, a `pass` verdict), so it counts
+// only with an object after it.
+const HAND_ON = /(?:\b(?:hand|send|give)(?:s|ed|ing)?\b(?!-)|\bpass(?:es|ed|ing)?\s+(?:the|its|a|an|that|this|on)\b)(?=[^.;:]*\b(?:reports?|findings|ASKs?|path)\b(?!['’]))/gi;
 function forwardFaults(text) {
   const faults = [];
   for (const block of text.split(/\n[ \t]*\n|\n(?=[ \t]*(?:[-*]|\d+\.) )/).map(collapse)) {
-    if (!/findings/i.test(block)) continue;
-    for (const m of block.matchAll(/\bforward(?:s|ed|ing)?\b/gi)) {
+    const hits = [...(/findings/i.test(block) ? block.matchAll(FORWARD) : []), ...block.matchAll(HAND_ON)];
+    for (const m of hits) {
       const at = block.indexOf(APPEND);
       if (at === -1 || at > m.index) faults.push(block.slice(Math.max(0, m.index - 60), m.index + 40));
     }
@@ -694,6 +701,17 @@ test('the LOG append precedes forwarding wherever forwarding is stated', () => {
   assert.deepEqual(forwardFaults('Forward the findings path, then run `' + APPEND + ' LOG.md`.').length, 1);
   assert.deepEqual(forwardFaults('Run `' + APPEND + ' LOG.md`, then forward the findings path.'), []);
   assert.deepEqual(forwardFaults('- Run `' + APPEND + ' LOG.md` for the findings.\n- Forward the findings path.').length, 1, 'an append in another list item does not count');
+  // The other verbs, written as prose an author would use, not read off the pattern.
+  for (const handing of ["Hand the reviewer's report path to the implementer, then append it to LOG.md.",
+    'Pass the findings file to the fix round.', 'Send the ASK list to the implementer.', 'Give the implementer the round-1 report.',
+    'The orchestrator hands the report on to the implementer.']) {
+    assert.equal(forwardFaults(handing).length, 1, 'must be reported: ' + handing);
+    assert.deepEqual(forwardFaults('Run `' + APPEND + ' LOG.md` first. ' + handing), [], 'after the append it is allowed: ' + handing);
+  }
+  assert.deepEqual(forwardFaults('Every test must pass before the batch integrates. Use forward slashes in a path. '
+    + 'A polish pass (ASK list in LOG.md) closes it. Verdicts: **pass** · **fail** with the findings. At hand-over preserve the report path. Its last line gives your report\'s exact line 2.'), [],
+    'passing tests, a polish pass, a hand-over and forward slashes are not handing findings on');
+  assert.equal(forwardFaults('Pass on the findings path to the fix round.').length, 1);
   let forwards = 0;
   for (const file of [...documents(), ...agentDefinitions()]) {
     const text = read(file);
@@ -710,8 +728,13 @@ test('the LOG append precedes forwarding wherever forwarding is stated', () => {
 
 // Directives that would reinstate pasting for a rendered role, or give a gate agent a second
 // write. Clause-level, negation-aware (the same reader as the undo sweep above).
+// The first family replaced the old `paste, don't point` pattern and is its superset: the
+// old specimen is still its specimen.
+const RENDERED_ROLE = String.raw`\b(?:implementer|reviewer|test[- ]hunter|polish|fix[- ]round|round[- ]2)\b`;
 const REINSTATE = [
-  ["paste, don't point", /\bpaste,? don['’]t point\b/i, "Paste, don't point: the batch text goes into the prompt."],
+  ['pointing forbidden', /\b(?:never|don['’]t|do not)\s+point\b/i, "Paste, don't point: the batch text goes into the prompt."],
+  ["a rendered role's skeleton pasted", new RegExp(RENDERED_ROLE + String.raw`[^.;:]*\bpast(?:e|es|ed|ing)\b|\bpast(?:e|es|ed|ing)\b[^.;:]*` + RENDERED_ROLE, 'i'),
+    'Fill the reviewer skeleton from the ledger and paste it into the Agent call'],
   ['findings handed over verbatim', /\b(?:findings|ASK list|ASKs)\b[^.;:]{0,30}\bverbatim\b/i, 'Resume the SAME implementer with the findings verbatim'],
   ['a rendered prompt or findings pasted', /\bpast(?:e|es|ed|ing)\b[^.;:]*\b(?:rendered|prompt file|batch text|contract excerpts|findings|ASK list)\b/i, 'Paste the rendered prompt into the spawn call'],
   ['findings relayed through the context', /\b(?:relay|re-?typ|restat)\w*\b[^.;:]*\bfindings\b/i, "Relay the reviewer's findings to the implementer"],
@@ -728,10 +751,12 @@ test('no shipped text reinstates pasting for a rendered role or a second write f
   // Written as prose, not read off the patterns.
   for (const planted of ['Polish pass: resume the implementer with the ASK list verbatim.', 'Paste the batch text and contract excerpts into the prompt.',
     'Paste the findings into the fix-round message.', 'Relay the round-1 findings to the fresh reviewer.', 'The reviewer can write its notes into the worktree.',
-    'Gate agents may also create a summary file.', 'The test hunter keeps another file for surviving mutants.']) {
+    'Gate agents may also create a summary file.', 'The test hunter keeps another file for surviving mutants.',
+    'Fill the reviewer skeleton from the ledger and paste it into the Agent call; never point an agent at a file.',
+    'Paste the polish prompt into SendMessage.', 'The implementer skeleton is pasted in full.', 'Do not point the test hunter at a file.']) {
     assert.ok(reinstating(planted).length >= 1, 'must be reported: ' + planted);
   }
-  assert.deepEqual(reinstating('Writing that ONE file, outside every worktree, is the only write you make. Findings travel by path, never re-typed through its own context. '
+  assert.deepEqual(reinstating(CARVE_OUT + ' Findings travel by path, never re-typed through its own context. '
     + 'When the renderer is unavailable or refuses, the manual procedure is the skeleton filled by hand and pasted without its nonce line. '
     + 'The QA runner, artifact proofer, pre-flight, convergence and fix-up skeletons are always filled and pasted and carry NO nonce.'), [],
   'the rules themselves are not reinstatements');
@@ -740,29 +765,80 @@ test('no shipped text reinstates pasting for a rendered role or a second write f
   for (const file of files) assert.deepEqual(reinstating(read(file)), [], file);
 });
 
-const CARVE_OUT = 'writing that ONE file, outside every worktree, is the only write you make';
-const EXCEPTION = 'Keep to reading files and read-only git, with one exception: the ONE findings file your prompt names, which is the only file you write.';
-test('each gate skeleton and definition grants exactly one write: the findings file its prompt names', () => {
+// The user's decision (2026-09-23): the gate pair gets the Write tool, scoped to the findings
+// file plus validation logs and disposable scratch under the session scratchpad, never a
+// worktree or the repository. Stated once per gate skeleton and once per definition.
+const CARVE_OUT = 'write your full report with the Write tool to "[FINDINGS_FILE]"; besides that ONE file you write only validation logs and disposable scratch under "[SCRATCHPAD_PATH]", never inside any worktree or the repository.';
+const EXCEPTION = 'Keep to reading files and read-only git, with one exception: with the Write tool you write the findings file your prompt names, and validation logs and disposable scratch under the session scratchpad — never inside any worktree or the repository.';
+const CAVEAT = 'Write and Bash can still write, so "read-only" stays partly conventional; withholding Edit closes the easy path, not every path.';
+// Subject-free: any write verb in a gate text, outside the carve-out and the caveat, is a
+// further licence. "<verb> nothing" is a prohibition, and code spans name tools, not acts.
+const WRITE_VERB = /\b(?:write|writes|writing|save|saves|saving|keep|keeps|keeping|store|stores|storing|create|creates|creating|copy|copies|copying|edit|edits|editing|modify|modifies|modifying|record|records|recording|dump|dumps|dumping)\b(?!\s+nothing\b)/i;
+const sentences = text => collapse(text.replace(/`[^`\n]*`/g, ' ')).split(/(?<=[.!?])\s+/);
+const writeLicences = text => sentences(text).filter(s => !s.includes(CARVE_OUT) && !s.includes(EXCEPTION) && !s.includes(CAVEAT))
+  .filter(s => clauses(s).some(c => fires(WRITE_VERB, c)));
+const gateBlocks = () => fencedBlocks(read(PROMPTS)).filter(b => ['prompt:reviewer', 'prompt:round-2', 'prompt:test-hunter'].includes(b.info)).map(b => b.lines.join('\n'));
+const definitionBody = file => read(file).replace(/^---\n[\s\S]*?\n---\n/, '');
+test('each gate skeleton and definition grants the one scoped write, and no text grants another', () => {
   const doc = collapse(read(PROMPTS));
   assert.equal(doc.split(CARVE_OUT).length - 1, 2, 'the carve-out is stated twice in the skeletons, once per gate skeleton');
   for (const [from, to, heading] of [['## Reviewer (the gate', '## Test hunter', 'reviewer'], ['## Test hunter (optional', '## QA runner', 'test-hunter']]) {
     const skeleton = collapse(section(read(PROMPTS), from, to));
     assert.equal(skeleton.split(CARVE_OUT).length - 1, 1, from + ': the carve-out exactly once');
-    assert.ok(skeleton.includes('write your full report to [FINDINGS_FILE]') && skeleton.includes('`### B[NN] R[ROUND] ' + heading + ' findings`'),
-      from + ': the one file is the named findings file, headed for LOG.md');
+    assert.ok(skeleton.includes('`### B[NN] R[ROUND] ' + heading + ' findings`'), from + ': the findings file is headed for LOG.md');
+    assert.doesNotMatch(skeleton, /heredoc|<<'?EOF/i, from + ': findings are written with the Write tool, never a heredoc');
   }
-  // The gate texts address the agent as "you", which the subject-keyed sweep above cannot see.
-  const SECOND_PERSON = /\byou\b[^.;:]*\b(?:may|can|should|also)\s+(?:write|edit|create|modify|keep|save)\b/i;
-  const licences = text => clauses(text).filter(c => fires(SECOND_PERSON, c));
-  assert.equal(licences('You may also write a scratch file for each mutant.').length, 1);
-  assert.equal(licences('You can save your notes in the worktree.').length, 1);
-  assert.deepEqual(licences('You edit nothing. ' + CARVE_OUT + '. ' + EXCEPTION), []);
-  const gateTexts = [section(read(PROMPTS), '## Reviewer (the gate', '## Test hunter'), section(read(PROMPTS), '## Test hunter (optional', '## QA runner')];
   for (const file of ['.claude/agents/reviewer.md', '.claude/agents/test-hunter.md']) {
     const text = collapse(read(file));
     assert.equal(text.split(EXCEPTION).length - 1, 1, file + ': the one exception, verbatim, once');
     assert.equal(text.split('exception').length - 1, 1, file + ': no second exception');
-    gateTexts.push(text);
+    assert.ok(text.includes(CAVEAT), file + ': the caveat for a Write-granted role');
   }
-  for (const text of gateTexts) assert.deepEqual(licences(text), [], 'a gate text licenses a further write');
+  // The old caveat and the old "no Write" claim survive nowhere.
+  for (const file of [...documents(), ...agentDefinitions()]) {
+    assert.doesNotMatch(collapse(read(file)), /removing Write\/Edit|read-only by construction/, file + ': the pre-grant wording');
+  }
+  // The write-verb sweep, armed: the round-1 plants are caught; the carve-out, the caveat,
+  // the exception and the pinned prohibitions are not.
+  for (const plant of ['Also write each mutation copy to a scratch directory and keep it.', 'Save each mutation script under the session scratchpad too.',
+    'Keep a copy of the diff in the worktree.', 'Record your notes beside the findings file.']) {
+    assert.equal(writeLicences(plant).length, 1, 'must be reported: ' + plant);
+  }
+  assert.deepEqual(writeLicences('OUTPUT: ' + CARVE_OUT + ' ' + EXCEPTION + ' ' + CAVEAT
+    + ' Use only Read/Grep/Glob and read-only git; edit nothing. You did not write this code. You never edit a file. The tool list withholds `Edit`.'), []);
+  const gateTexts = [...gateBlocks(), ...['.claude/agents/reviewer.md', '.claude/agents/test-hunter.md'].map(definitionBody)];
+  assert.equal(gateTexts.length, 5, 'three gate blocks and two definitions');
+  for (const text of gateTexts) assert.deepEqual(writeLicences(text), [], 'a gate text licenses a further write');
+  // Second person with a modal, over the whole gate sections (prose included).
+  const SECOND_PERSON = /\byou\b[^.;:]*\b(?:may|can|should|also)\s+(?:write|edit|create|modify|keep|save)\b/i;
+  const licences = text => clauses(text).filter(c => fires(SECOND_PERSON, c));
+  assert.equal(licences('You may also write a scratch file for each mutant.').length, 1);
+  assert.equal(licences('You can save your notes in the worktree.').length, 1);
+  assert.deepEqual(licences('You edit nothing. ' + CARVE_OUT + ' ' + EXCEPTION), []);
+  for (const text of [section(read(PROMPTS), '## Reviewer (the gate', '## Test hunter'), section(read(PROMPTS), '## Test hunter (optional', '## QA runner'),
+    ...['.claude/agents/reviewer.md', '.claude/agents/test-hunter.md'].map(read)]) {
+    assert.deepEqual(licences(text), [], 'a gate text licenses a further write');
+  }
+});
+
+// The rendered-prompt life cycle around a crash, a respawn and the rounds after the first.
+test('recovery, respawn and later rounds work from rendered files and LOG.md, never from re-typed text', () => {
+  const rules = collapse(section(read(PROMPTS), '## Spawning rules (orchestrator)'));
+  const prompts = collapse(read(PROMPTS));
+  // A findings file lost with the scratchpad comes back out of the committed LOG.md as bytes.
+  assert.ok(rules.includes("a findings file lost with the scratchpad is copied back out of the committed LOG.md, from its heading line to the next heading, never re-typed — "
+    + "`git show <integration-branch>:./<ledger-dir>/LOG.md | awk -v h='### B<NN> R<k> <role> findings' '$0 == h {p = 1; print; next} /^##?#? / {p = 0} p' > \"<findings file>\"`"));
+  for (const file of [TEMPLATE, 'orchestrate/references/protocol.md']) {
+    assert.ok(collapse(read(file)).includes('a copy lost with the scratchpad is taken back out of the committed LOG.md, never re-typed'), file);
+  }
+  // A crashed implementer is respawned with its implementer prompt before the resume pointer.
+  assert.ok(rules.includes('an implementer with its rendered implementer prompt first, then the `polish` or `fix-round` pointer it was owed'));
+  // The third round: two pointers, two nonces, the round number rendered, nothing told outside the pointer.
+  assert.ok(prompts.includes('resumed with the pointer to a `fix-round` prompt rendered with `round` 3 and both rounds\' findings files joined into its findings file; each of the two reports carries its own nonce'));
+  assert.doesNotMatch(prompts, /you own this batch now/, 'nothing can be told outside the fixed pointer');
+  assert.ok(prompts.includes('("fix: batch [NN] round [ROUND] — <summary>")') && !/round 1 — <summary>/.test(prompts), 'the fix-round commit carries its own round');
+  // The main-checkout variant cannot be rendered.
+  assert.ok(prompts.includes('A rendered file takes no such edit, so this variant is always the manual procedure (§Spawning rules).'));
+  // Who creates the gates directory, and a respawned gate agent never reuses a findings path.
+  assert.ok(rules.includes('the orchestrator creates `<scratchpad>/gates/` before the spawn (the renderer creates its `--out`), and a gate agent respawned after a wrong nonce gets a new `findingsFile`'));
 });

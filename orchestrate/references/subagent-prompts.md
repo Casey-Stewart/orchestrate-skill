@@ -81,7 +81,8 @@ Line 2, directly under line 1: NONCE [NONCE]
 
 Main-checkout variant (degraded environments, or a width-1 wave run directly in the
 repo): replace the worktree paragraph with "Work on the CURRENT branch
-([BATCH_BRANCH]) — do not create or switch branches, never push."
+([BATCH_BRANCH]) — do not create or switch branches, never push." A rendered file takes
+no such edit, so this variant is always the manual procedure (§Spawning rules).
 
 **Polish pass** (after a `SHIP` that carries ASKs): resume the SAME implementer
 (SendMessage) with the pointer to this block, rendered as role `polish`:
@@ -103,7 +104,7 @@ this block, rendered as role `fix-round`:
 ```prompt:fix-round
 Your batch reviewed FIX FIRST; the findings file [FINDINGS_FILE] lists what to fix.
 Fix each, tick nothing new, run the validation commands, commit
-("fix: batch [NN] round 1 — <summary>").
+("fix: batch [NN] round [ROUND] — <summary>").
 RULES: read a file before you edit it. Chain a command and its check with `&&` (in bash,
 after `set -o pipefail`), never `;`. Run the validation from the worktree root as
 `node "[SKILL_DIR]/tools/validate.mjs" --spec [LEDGER_DIR]/validate.json --log "[SCRATCHPAD_PATH]/<label>.log"`:
@@ -115,10 +116,11 @@ Line 2, directly under line 1: NONCE [NONCE]
 ```
 
 **Authorized third round** (the user chose "fix again" after `⛔`): a FRESH
-implementer on the strong tier, given its rendered implementer prompt, then the fix-round
-prompt rendered with both rounds' findings files joined into one, told "you own this
-batch now" (`git diff [INTEGRATION_BRANCH]...HEAD` is the diff it inherits), then a
-fresh re-review.
+implementer on the strong tier, spawned with the pointer to its rendered implementer
+prompt — which already makes the batch its own — and, once that report's nonce checks,
+resumed with the pointer to a `fix-round` prompt rendered with `round` 3 and both rounds'
+findings files joined into its findings file; each of the two reports carries its own
+nonce. Then a fresh re-review.
 
 ## Reviewer (the gate — read-only)
 
@@ -127,7 +129,7 @@ fresh re-review.
 ```prompt:reviewer
 You are the INDEPENDENT REVIEWER for batch B[NN] of change [CHANGE_ID] in [REPO_PATH].
 You did not write this code. Use only Read/Grep/Glob and read-only git (diff, log,
-show, status). You edit nothing. Work in the batch's worktree at [WORKTREE_PATH]
+show, status). You never edit a file. Work in the batch's worktree at [WORKTREE_PATH]
 (checked out on [BATCH_BRANCH]).
 
 THE BATCH (scope + acceptance criteria):
@@ -145,8 +147,8 @@ DUTIES, in order:
    batch's own file.
 2. Verify each acceptance criterion against the actual diff, not the implementer's
    claims.
-3. Run the validation commands: [VALIDATION COMMANDS]. Report the totals line and
-   failing names.
+3. Run the validation commands, their logs under "[SCRATCHPAD_PATH]":
+   [VALIDATION COMMANDS]. Report the totals line and failing names.
 4. Check the diff against the project guardrails: [GUARDRAILS SECTION TEXT]
    and the batch's applicable guardrails: [APPLICABLE GUARDRAILS FROM THE BATCH FILE].
 5. Confirm the orchestrator's failing-on-base result ([FAILING_ON_BASE_RESULT]) is
@@ -156,10 +158,10 @@ DUTIES, in order:
 6. Confirm every doc/comment sweep the batch file names happened in the same commit.
 [ROUND 2 BLOCK]
 
-OUTPUT (fixed shape): write your full report to [FINDINGS_FILE] with Bash (a quoted
-heredoc, `<<'EOF'`, expands nothing); writing that ONE file, outside every worktree, is
-the only write you make. Its first line is exactly `### B[NN] R[ROUND] reviewer findings`,
-then:
+OUTPUT (fixed shape): write your full report with the Write tool to "[FINDINGS_FILE]";
+besides that ONE file you write only validation logs and disposable scratch under
+"[SCRATCHPAD_PATH]", never inside any worktree or the repository. Its first line is
+exactly `### B[NN] R[ROUND] reviewer findings`, then:
 Line 1, exactly one of: SHIP | FIX FIRST | NEEDS A CLOSER LOOK
 Then findings, each: file:line, the criterion or guardrail it violates, a one-line
 CONCRETE failure scenario (inputs → wrong outcome), a minimal suggested fix, and a class:
@@ -234,9 +236,10 @@ whose mutation stays green. No hunches. Look especially for fixtures handed stra
 the code under test where production should FETCH them, and guards never fed the input
 shape their real channel delivers. Flag any shape not in the catalog as NEW CLASS.
 
-OUTPUT: write your full report to [FINDINGS_FILE] with Bash (a quoted heredoc, `<<'EOF'`,
-expands nothing); writing that ONE file, outside every worktree, is the only write you
-make. Its first line is exactly `### B[NN] R[ROUND] test-hunter findings`, then:
+OUTPUT: write your full report with the Write tool to "[FINDINGS_FILE]"; besides that
+ONE file you write only validation logs and disposable scratch under "[SCRATCHPAD_PATH]",
+never inside any worktree or the repository. Its first line is exactly
+`### B[NN] R[ROUND] test-hunter findings`, then:
 line 1 exactly `CLEAN` or `FINDINGS <n>`; then per finding — test file:line,
 catalog class or NEW CLASS, the exact mutation that
 stays green, the positive assertion to add, and whether closing it needs a PRODUCTION
@@ -462,14 +465,16 @@ unmerged and the session STOPs with the three verdicts.
   combined reviewer+gate agent (reviewer only when the contract names no gate agents).
 - Resume vs fresh: polish passes and the first fix round RESUME the same implementer
   (SendMessage, with the pointer to the rendered `polish` or `fix-round` prompt); a
-  user-authorized third round is a FRESH implementer on the strong tier; reviewers are fresh every round; any agent lost to a crash is respawned
-  fresh at the first unticked item.
+  user-authorized third round is a FRESH implementer on the strong tier; reviewers are
+  fresh every round; any agent lost to a crash is respawned fresh at the first unticked
+  item — an implementer with its rendered implementer prompt first, then the `polish` or
+  `fix-round` pointer it was owed.
 - Tiers: the reviewer never runs on a less capable model than the implementer; L-weight
   reviews and the fresh implementer of an authorized third round on the most capable
   model available (the strong tier); record
   the tier in the row's Notes. Reconcile, status and discovery are never delegated.
 - Render, then point: `node "<skill-dir>/tools/prompt.mjs" --ledger <ledger-dir> --role
-  <role> --batch <Bnn> --facts <facts.json> --out <scratchpad>/prompts` renders one of the
+  <role> --batch <Bnn> --facts <facts.json> --out "<scratchpad>/prompts"` renders one of the
   six per-batch prompts (roles `implementer`, `polish`, `fix-round`, `reviewer`,
   `reviewer-round2`, `test-hunter`; its `--help` lists each role's facts), with the batch
   text and contract excerpts in it verbatim, and prints `PROMPT <path> NONCE <nonce>`.
@@ -479,11 +484,14 @@ unmerged and the session STOPs with the three verdicts.
   The nonce stays with the orchestrator and never enters the pointer. A report whose line
   2 is not `NONCE <the nonce>` is treated as no report: the agent did not read its
   instructions to the end. A gate agent's `findingsFile` is
-  `<scratchpad>/gates/<change-id>-B<NN>-R<k>-<role>.md`. When the renderer is unavailable
+  `<scratchpad>/gates/<change-id>-B<NN>-R<k>-<role>.md`; the orchestrator creates
+  `<scratchpad>/gates/` before the spawn (the renderer creates its `--out`), and a gate
+  agent respawned after a wrong nonce gets a new `findingsFile` (`-2`, `-3`… before
+  `.md`), so a discarded agent's file never reaches LOG.md. When the renderer is unavailable
   or refuses (`UNKNOWN …`), the manual procedure is the skeleton filled by hand and pasted
   without its nonce line, and no nonce is checked. The QA runner, artifact proofer,
   pre-flight, convergence and fix-up skeletons are always filled and pasted and carry NO
-  nonce — the fix-up's "same fixed shape as the implementer" is that shape without the
+  nonce. The fix-up's "same fixed shape as the implementer" is that shape without the
   nonce line.
 - Findings travel by path, and reach LOG.md first: the orchestrator appends each findings
   file to the ledger's LOG.md byte-for-byte on the integration worktree —
@@ -491,13 +499,17 @@ unmerged and the session STOPs with the three verdicts.
   copy, never re-typed through its own context — commits it with the PROGRESS update, and
   only then forwards the path, as the `findingsFile` of a polish or fix-round prompt or the
   `previousFindingsFile` of a round-2 review. The scratchpad does not survive the session;
-  LOG.md is what §Recovery resumes a crashed polish or fix round from. When the reviewer
+  LOG.md is what §Recovery resumes a crashed polish or fix round from: a findings file lost
+  with the scratchpad is copied back out of the committed LOG.md, from its heading line to
+  the next heading, never re-typed —
+  `git show <integration-branch>:./<ledger-dir>/LOG.md | awk -v h='### B<NN> R<k> <role> findings' '$0 == h {p = 1; print; next} /^##?#? / {p = 0} p' > "<findings file>"`
+  from Git Bash at the repository root — and that path is forwarded. When the reviewer
   and a gate agent both reported, their appended files are joined byte-for-byte into one
   (`cat -- "<reviewer file>" "<gate file>" > "<joined file>"`) and that path is forwarded.
 - Pass the named type: spawn each skeleton with the `subagent_type` that skeleton names,
-  never a wildcard-tool agent standing in for a read-only role. Bash can still write, so
-  "read-only" stays partly conventional; removing Write/Edit closes the easy path, not
-  every path. Where those types are not defined, see `protocol.md` §Degraded
+  never a wildcard-tool agent standing in for a read-only role. Write and Bash can still
+  write, so "read-only" stays partly conventional; withholding Edit closes the easy path,
+  not every path. Where those types are not defined, see `protocol.md` §Degraded
   environments — the spawn errors, it does not quietly downgrade.
 - Every report is capped (~40 lines + findings); anything longer belongs in a commit
   message or under the session scratchpad, never in the orchestrator's context and never

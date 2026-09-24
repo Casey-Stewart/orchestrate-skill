@@ -64,8 +64,9 @@ ledgers may be parked in a sibling `.agents/archive/` directory; discovery never
 - **Gate agents** — optional read-only agents the contract names (e.g. a test hunter
   asking "what production mutation keeps this test green?"), run by the ORCHESTRATOR in
   parallel with the reviewer over the batch's new/changed tests. Each writes its full
-  report to the ONE findings file its prompt names — its only write — and returns four
-  lines: its verdict, `NONCE <nonce>`, `FINDINGS <n>`, the file's path. Implementers never
+  report with the Write tool to the findings file its prompt names — its only other
+  writes are validation logs and disposable scratch under the session scratchpad, never
+  inside a worktree or the repository — and returns four lines: its verdict, `NONCE <nonce>`, `FINDINGS <n>`, the file's path. Implementers never
   spawn them. A gate finding needing a production change is a P1; test-only → ASK.
 - **QA runner** — one sub-agent executing the agent-runnable smoke steps at a checkpoint
   close-out, writing `evidence/C<n>/`.
@@ -640,7 +641,9 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    first — from the integration worktree root, `cat -- "<findings file>" >>
    <ledger-dir>/LOG.md` in Git Bash or an equivalent byte copy, never re-typed through the
    orchestrator's context, committed with the PROGRESS update — and only then is its path
-   forwarded to the polish, fix-round or round-2 prompt). After the second
+   forwarded to the polish, fix-round or round-2 prompt; a copy lost with the scratchpad is
+   taken back out of the committed LOG.md, never re-typed — `subagent-prompts.md`
+   §Spawning rules). After the second
    `FIX FIRST` → ⛔ (defective / green-residual), left out of integration, dependents
    blocked, STOP with the three verdicts.
 7. Integrate serially per the integration procedure (dry run → merge → tip validation →
