@@ -68,6 +68,9 @@ ledgers may be parked in a sibling `.agents/archive/` directory; discovery never
   writes are validation logs and disposable scratch under the session scratchpad, never
   inside a worktree or the repository — and returns four lines: its verdict, `NONCE <nonce>`, `FINDINGS <n>`, the file's path. Implementers never
   spawn them. A gate finding needing a production change is a P1; test-only → ASK.
+  A test hunter proves each mutation it chooses itself with the skill's `mutate.mjs`, on a
+  disposable clone of the batch's commit. The contract's mutation runner, when it names
+  one, is a different tool: an optional sweep of the batch's changed files.
 - **QA runner** — one sub-agent executing the agent-runnable smoke steps at a checkpoint
   close-out, writing `evidence/C<n>/`.
 - **Plan pre-flight** (scaffold time) and **convergence** (change-complete) — one fresh

@@ -223,7 +223,8 @@ not such a replacement.
 ```prompt:test-hunter
 You hunt tests that cannot fail, for batch B[NN] of [CHANGE_ID] in [REPO_PATH]. Use only
 Read/Grep/Glob and read-only git, and the `Write` tool only for what OUTPUT below names;
-edit nothing. Worktree: [WORKTREE_PATH].
+edit nothing. Beyond those, run only the two harness tools PROOF below names, which work
+on disposable clones. Worktree: [WORKTREE_PATH].
 
 Scope: every test added or modified in `git diff [INTEGRATION_BRANCH]...HEAD`, plus the
 production code each claims to cover. Testing guide / vacuity catalog, if the repo has
@@ -237,9 +238,27 @@ whose mutation stays green. No hunches. Look especially for fixtures handed stra
 the code under test where production should FETCH them, and guards never fed the input
 shape their real channel delivers. Flag any shape not in the catalog as NEW CLASS.
 
+PROOF: each finding's mutation is also proven by running it with the mutation harness.
+Never build a scratch tree, a mutation script or a restore of your own by hand. Your
+mutations file is
+`{ "mutations": [ { "id": "m1", "file": "<repo-relative path>", "find": "<text occurring exactly once>", "replace": "<text>" } ] }`
+and your scoped spec is `[LEDGER_DIR]/validate.json` narrowed to the test files the batch
+added or changed (the full suite, run as a control and once per mutation, can outlast a
+command timeout). Run
+`node "[SKILL_DIR]/tools/mutate.mjs" --repo "[WORKTREE_PATH]" --ref HEAD --mutations "<mutations file>" --validate "<scoped spec>" --log "[SCRATCHPAD_PATH]/<label>.log"`,
+adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists (a
+repository with a setup step fails its control without it). Cite its lines: `SURVIVED <id>`
+proves a finding and `KILLED <id>: <tests>` refutes it; `ANCHOR-MISSING`, `ANCHOR-AMBIGUOUS`,
+`CONTROL FAILED`, `NOT-APPLIED`, `CRASHED`, `TIMEOUT`, `RESTORE-FAILED` or `UNKNOWN` means
+the proof did not run — say so, never offer it as a finding's proof. For a suite at another
+ref, `node "[SKILL_DIR]/tools/run-at-ref.mjs"` takes the same flags less `--mutations` and
+prints one line, `AT <short sha> <validate.mjs line>`.
+
 OUTPUT: write your full report with the Write tool to "[FINDINGS_FILE]"; besides that
-ONE file you write only validation logs and disposable scratch under "[SCRATCHPAD_PATH]",
-never inside any worktree or the repository. Its first line is exactly
+ONE file you write only your mutations file and your scoped spec, both under
+"[SCRATCHPAD_PATH]", never inside any worktree or the repository, and running mutate.mjs
+and run-at-ref.mjs, which write only disposable clones and their logs, is permitted. Its
+first line is exactly
 `### B[NN] R[ROUND] test-hunter findings`, then:
 line 1 exactly `CLEAN` or `FINDINGS <n>`; then per finding — test file:line,
 catalog class or NEW CLASS, the exact mutation that

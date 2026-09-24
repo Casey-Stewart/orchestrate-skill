@@ -154,13 +154,13 @@ Spawn the tools directly with `spawnSync(process.execPath, […])` — the fixtu
 
 ## Checklist
 
-- [ ] Shared disposable checkout via `git clone --shared --no-checkout`, removed in `finally`
-- [ ] `orchestrate/tools/mutate.mjs`: strict spec, `--log` outside the checkout, anchors-first abort, control first, apply check, per-mutation classify with `runSpec` (CRASHED on no summary, load failures or a changed total), byte restore and verify, exit 0/1/2
-- [ ] `orchestrate/tools/run-at-ref.mjs`: `--log`, one line `AT <sha> <validate line>`, validate's exit code
-- [ ] Test-hunter skeleton: prove each mutation with `mutate.mjs` on a scoped spec (with `--setup` when `setup.json` exists), outcomes that mean "proof did not run"; `run-at-ref.mjs` named
-- [ ] The closed carve-out list in the skeleton and in `.claude/agents/test-hunter.md`, pinned sentence intact
-- [ ] Template and protocol: one sentence each separating the repo mutation runner from `mutate.mjs`; README tools tree gains both tools
-- [ ] `tests/mutate.test.cjs` covering every outcome and abort, CRLF, live log paths and the untouched user repository; `tests/tool-wiring.test.cjs` pins scoped to the hunter; `NON_MARKDOWN` length 11
+- [x] Shared disposable checkout via `git clone --shared --no-checkout`, removed in `finally`
+- [x] `orchestrate/tools/mutate.mjs`: strict spec, `--log` outside the checkout, anchors-first abort, control first, apply check, per-mutation classify with `runSpec` (CRASHED on no summary, load failures or a changed total), byte restore and verify, exit 0/1/2
+- [x] `orchestrate/tools/run-at-ref.mjs`: `--log`, one line `AT <sha> <validate line>`, validate's exit code
+- [x] Test-hunter skeleton: prove each mutation with `mutate.mjs` on a scoped spec (with `--setup` when `setup.json` exists), outcomes that mean "proof did not run"; `run-at-ref.mjs` named
+- [x] The closed carve-out list in the skeleton and in `.claude/agents/test-hunter.md`, pinned sentence intact
+- [x] Template and protocol: one sentence each separating the repo mutation runner from `mutate.mjs`; README tools tree gains both tools
+- [x] `tests/mutate.test.cjs` covering every outcome and abort, CRLF, live log paths and the untouched user repository; `tests/tool-wiring.test.cjs` pins scoped to the hunter; `NON_MARKDOWN` length 11
 
 ## Acceptance criteria
 
