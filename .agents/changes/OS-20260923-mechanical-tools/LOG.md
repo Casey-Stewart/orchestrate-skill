@@ -518,3 +518,50 @@ H4. **ASK** `tests/tool-wiring.test.cjs:1085`/`:1086` (hand-built sweep) and `:9
 H5. (hunter note, not a vacuity finding) `.claude/agents/test-hunter.md` keeps the verbatim exception sentence allowing "validation logs and disposable scratch", while the next sentence calls the writes a closed list that omits them; `tool-wiring.test.cjs` pins both verbatim, freezing the contradiction.
 
 Orchestrator check of the blocking claims against `358d45d`: `eolOf(m.replace, crlf)` can equal `eolOf(m.find, crlf)` when the two differ only in line endings (`mutate.mjs:159`, `:173`), and nothing compares `mutated` with `original`; `gitIn` spreads `process.env` (`:85`); `say(verdictLine(...))` at `:237` precedes the `wrote(file, original)` check at `:241`. All three hold. Fix round: a fresh implementer (default tier) with the full skeleton, both reports and these findings; ASKs 4-5 and H1-H5 folded into the same round.
+
+### B05 — fix round
+
+Fresh implementer (default tier), prompt rendered to a file with a nonce; report verbatim (nonce line removed):
+
+DONE
+
+EVIDENCE
+- Validation: `pwsh -NoProfile -File …/scratchpad/validate.ps1 > …/gate-b05/impl/validate.log 2>&1` gave EXIT=0 at 8d5c1cd. Totals: `ℹ tests 498`, `ℹ pass 496`, `ℹ fail 0`, `ℹ skipped 2` (the two Windows-only `tests/validate.test.cjs` cases). `git diff --check` is clean and the worktree is clean. The baseline was 492; this round adds 6 tests.
+- Commits on feat/mutation-harness: `3dfc1ce` (fixes, tests, prose) and `8d5c1cd` (pins for the two new hunter sentences). Nothing pushed.
+- Mutation proof: I ran the worktree's own `mutate.mjs` against HEAD. Every mutation was applied inside the tool's disposable `--shared` clone, with TMPDIR under `…/gate-b05/impl/`, and those temp directories are empty afterwards. Result: 17 mutations, all KILLED after a passing control, split into two runs because of the shell cap (`MUTATE 11 killed, 0 survived, 0 other` and `MUTATE 6 killed, 0 survived, 0 other`).
+- 1 (P0) fixed: a mutation whose bytes equal the file's own now prints `NOT-APPLIED`, is never written or run, and exits 2. Test: "in a CRLF file, a mutation that differs from its anchor only in line breaks changes nothing: NOT-APPLIED, never run, exit 2". Saw it go red when the check was removed.
+- 2 (P1) fixed: the list of variables comes from git itself (`git rev-parse --local-env-vars`, queried with no `GIT_*` set), not a hand-written copy. The variables are dropped case-insensitively from `gitIn`'s environment, and both CLI entries also drop them from `process.env`, so the ref lookup and every validate step see the clone. Tests:
+  - "git's repository variables are git's own list, each dropped whatever its case, and nothing else is"
+  - "a GIT_DIR or GIT_INDEX_FILE in the caller's environment never reaches the repository, the clone or a validate step, for both tools" (with a staged file, and a `where` step checking `--absolute-git-dir`)
+
+  Saw red for five separate mutations: `gitIn` unscrubbed, each of the two CLI scrubs removed, a hand-written sample list, and dropping without case-folding.
+- 3 (P1) fixed: a mutation's line is printed only after its restore holds. `RESTORE-FAILED <id>` is printed alone and the unprinted line goes to the log as `not printed: …`. Tests: "a restore that does not hold is RESTORE-FAILED alone…" and "a writer that throws…" (which adds a both-writes-refused case). Saw red when the verdict was printed before the restore.
+- 4 (ASK) closed: the hunter skeleton now says a run costs the scoped suite once for the control and once per mutation; to run it as a background task, or use `--timeout` and split the mutations; and that a killed run leaves its clone behind. Pinned in "the test hunter proves each mutation…"; saw red.
+- 5 (ASK) closed, prose only: the skeleton names the blind spot — Node counts a test file with no tests as one passing test, so a mutation that empties such a file reads `SURVIVED`. Pinned in the same test; saw red. The real fix is in `validate.mjs`, outside the fence, and is not done.
+- H1 closed: withDisposableCheckout and run-at-ref are tested at a `side` branch that HEAD is not on, and at a `refs/remotes/origin/main` pointing at the older commit. Test: "a ref is resolved in the repository first…". Saw red when checkout used `ref` instead of `sha`.
+- H2 closed: the hooks test now plants a `reference-transaction` hook too, with a live control showing a plain clone fires it. Test: "the checkout runs no hook the user configured". Saw red when `-c core.hooksPath` was dropped from the clone.
+- H3 closed: new test "run-at-ref passes on validate.mjs's UNKNOWN as exit 2 and its --timeout as a TIMEOUT line, exit 1". Saw red for both `UNKNOWN: 1` and the dropped `timeoutMs`.
+- H4 closed:
+  - (a) The hand-built sweep now reads code spans as text instead of blanking them. It has a new "an edit command" family (`sed`/`perl -…i`, `Set-Content`/`Add-Content`/`Out-File`, `git apply`), and the corpus grows from 8 to 11 entries, including code-span spellings. Live control: the hunter's own plant written as a code span.
+  - (b) New test "no hunter text offers a line that means the proof did not run as a proof, outside the passage saying it is none". It runs across the hunter section and the definition, with a specimen for each kind and a control for a qualifier inside the exempted passage.
+
+  Saw red for three mutations: the old blanking, the plant with `git checkout`, and the plant citing `CRASHED` as proof. Each plant was killed only by its own test.
+- H5 closed: `.claude/agents/test-hunter.md` now maps what B04's exception grants onto the closed list ("the validation logs are the ones mutate.mjs and run-at-ref.mjs write and the disposable scratch is your mutations file and your scoped spec"). Saw red when the mapping was removed from the definition.
+  - **Pin changed:** only `HUNTER_LIST` in `tests/tool-wiring.test.cjs`, which is this batch's own pin, not B04's. It is still verbatim, once, directly after the exception, and only in test-hunter.md. It is now stricter: a new assertion parses what the exception grants beyond the findings file and requires each of those, and only those, to be mapped by the closed list.
+  - B04's exception sentence, its "no second exception" count, the caveat and the size cap are unchanged (the definition is now 1521 bytes against the 4096 cap).
+
+What changed and why
+- `orchestrate/tools/mutate.mjs`:
+  - New exports `localGitVars`, `withoutLocalGitEnv` and `scrubLocalGitEnv`.
+  - The loop checks for a no-op mutation before writing, and prints each line only after the restore.
+  - `--help` documents the NOT-APPLIED meanings, the print-after-restore rule and the dropped variables.
+- `orchestrate/tools/run-at-ref.mjs`: the CLI calls `scrubLocalGitEnv()`, and `--help` mentions it.
+- `orchestrate/references/subagent-prompts.md`: two sentences added to the PROOF paragraph, with no reflow of the surrounding text.
+- `.claude/agents/test-hunter.md`: only the closed-list sentence, which B05 itself added, was rewrapped.
+
+Out of fence (notes only)
+- `validate.mjs` parser: a test file that registers no tests is counted as one passing test named after the file. This is reviewer 5's real fix and should go to BACKLOG.
+- `runSpec` builds its child environment from `process.env`. Only the two CLIs scrub git's repository variables, so a caller using the `mutate()`/`runAtRef()` API directly with `GIT_DIR` set still passes it to validate steps. The clone itself is safe either way.
+- `git-evidence.mjs`'s `git()` also inherits `process.env`. Other tools (check-fence, reconcile) could be misdirected the same way by an inherited `GIT_DIR` or `GIT_INDEX_FILE`.
+
+Fence check PASS (integration `a7f577f`, batch `8d5c1cd`, merge base `e8a9ca0`, 11 paths, no violations, no unknowns). Fix diff `358d45d..8d5c1cd`: 6 files, +254/-35. R2: a fresh reviewer (strong tier, Opus) told to mark each R1 finding FIX VERIFIED / NOT FIXED and re-scan `git diff 358d45d..HEAD`, and a fresh test-hunter scoped to the tests that diff adds or changes.
