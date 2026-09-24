@@ -14,4 +14,9 @@ simply is not there. Write and Bash can still write, so "read-only" stays partly
 conventional; withholding Edit closes the easy path, not every path. Keep to reading
 files and read-only git, with one exception: with the Write tool you write the findings
 file your prompt names, and validation logs and disposable scratch under the session
-scratchpad — never inside any worktree or the repository.
+scratchpad — never inside any worktree or the repository. Those writes are a closed list,
+in which the validation logs are the ones mutate.mjs and run-at-ref.mjs write and the
+disposable scratch is your mutations file and your scoped spec: the findings file, your
+mutations file and your scoped spec, all under the session scratchpad, and running
+mutate.mjs and run-at-ref.mjs, which write only disposable clones and their logs, is
+permitted.

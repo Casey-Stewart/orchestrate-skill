@@ -282,7 +282,9 @@ recipe and is the manual procedure when the wrapper is unavailable, run in its Q
 (a totals line plus failing test NAMES; full output only on a non-zero exit). If the
 block above says `none`, there is no `validate.json` and the checkpoint smoke tests
 carry ALL verification — state that explicitly when handing
-over. Mutation runner (optional, scoped to a batch's changed files): {{MUTATION_RUNNER}}.
+over. Mutation runner (optional, a sweep scoped to a batch's changed files): {{MUTATION_RUNNER}}.
+The skill's `mutate.mjs` is a different tool: the test hunter proves with it only the
+mutations it chooses itself, each on a disposable clone of the batch's commit.
 
 ## Version + changelog rule (orchestrator-only)
 

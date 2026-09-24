@@ -216,6 +216,8 @@ orchestrate/
     ├── ledger-parse.mjs            the one parser for plan, PROGRESS and batch tables and the contract's skill pin
     ├── check-ledger.mjs            scaffold-time ledger parse check and the skill-pin hash check
     ├── prompt.mjs                  renders one per-batch sub-agent prompt from the ledger and a facts file, ending in the nonce its report echoes
+    ├── mutate.mjs                  proves chosen mutations on a disposable clone: control first, then KILLED or SURVIVED each, restored byte for byte
+    ├── run-at-ref.mjs              runs a validation spec on a disposable clone of any ref: one AT line, validate.mjs's exit code
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 
