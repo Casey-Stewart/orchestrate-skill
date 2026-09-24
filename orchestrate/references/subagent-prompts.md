@@ -247,8 +247,10 @@ added or changed (the full suite, run as a control and once per mutation, can ou
 command timeout). Run
 `node "[SKILL_DIR]/tools/mutate.mjs" --repo "[WORKTREE_PATH]" --ref HEAD --mutations "<mutations file>" --validate "<scoped spec>" --log "[SCRATCHPAD_PATH]/<label>.log"`,
 adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists (a
-repository with a setup step fails its control without it). Cite its lines: `SURVIVED <id>`
-proves a finding and `KILLED <id>: <tests>` refutes it; `ANCHOR-MISSING`, `ANCHOR-AMBIGUOUS`,
+repository with a setup step fails its control without it). Its `CONTROL PASS` line must
+count the tests you scoped: a runner may skip a named test file that does not exist. Cite
+its lines: `SURVIVED <id>` proves a finding and `KILLED <id>: <tests>` refutes it;
+`ANCHOR-MISSING`, `ANCHOR-AMBIGUOUS`,
 `CONTROL FAILED`, `NOT-APPLIED`, `CRASHED`, `TIMEOUT`, `RESTORE-FAILED` or `UNKNOWN` means
 the proof did not run — say so, never offer it as a finding's proof. For a suite at another
 ref, `node "[SKILL_DIR]/tools/run-at-ref.mjs"` takes the same flags less `--mutations` and

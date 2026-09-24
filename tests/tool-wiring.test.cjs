@@ -998,6 +998,8 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
     'Your mutations file is `{ "mutations": [ { "id": "m1", "file": "<repo-relative path>", "find": "<text occurring exactly once>", "replace": "<text>" } ] }`',
     'your scoped spec is `[LEDGER_DIR]/validate.json` narrowed to the test files the batch added or changed',
     SETUP_CLAUSE + ' (a repository with a setup step fails its control without it).',
+    // node --test skips a named file that does not exist and still passes: only the count shows it.
+    'Its `CONTROL PASS` line must count the tests you scoped: a runner may skip a named test file that does not exist.',
     "means the proof did not run — say so, never offer it as a finding's proof.",
     'For a suite at another ref, `node "[SKILL_DIR]/tools/run-at-ref.mjs"` takes the same flags less `--mutations` and prints one line, `AT <short sha> <validate.mjs line>`.',
     'Beyond those, run only the two harness tools PROOF below names, which work on disposable clones.']) {
