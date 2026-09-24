@@ -14,13 +14,15 @@ const readText = file => fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
 const read = p => readText(path.join(ROOT, p));
 const TOOLS = {
   'implementer': 'Read, Write, Edit, Glob, Grep, Bash',
-  'reviewer': 'Read, Glob, Grep, Bash',
-  'test-hunter': 'Read, Glob, Grep, Bash',
+  'reviewer': 'Read, Write, Glob, Grep, Bash',
+  'test-hunter': 'Read, Write, Glob, Grep, Bash',
   'qa-runner': 'Read, Write, Edit, Glob, Grep, Bash, mcp__Claude_Browser__*',
 };
+// The gate pair: read-only toward the repository, with Write for the findings file and
+// scratchpad scratch their prompts name (user decision 2026-09-23) and never Edit.
 const READ_ONLY = ['reviewer', 'test-hunter'];
-const CAVEAT = 'Bash can still write, so "read-only" stays partly conventional; '
-  + 'removing Write/Edit closes the easy path, not every path.';
+const CAVEAT = 'Write and Bash can still write, so "read-only" stays partly conventional; '
+  + 'withholding Edit closes the easy path, not every path.';
 // Markdown wraps the caveat, so "verbatim" is judged on whitespace-collapsed prose.
 const flow = text => text.replace(/\s+/g, ' ');
 // Frontmatter fields are single-line by contract; a parser, not a substring search, so
@@ -567,13 +569,17 @@ test('each tools: line is exactly the agreed list', () => {
   }
 });
 
-test('the read-only pair grants no write capability through a listed tool', () => {
+test('the read-only pair lists Write for its scoped writes and never Edit', () => {
   for (const name of READ_ONLY) {
     const { file, tools, body } = definition(name);
-    for (const forbidden of ['Write', 'Edit']) {
-      assert.ok(!tools.includes(forbidden), file + ' must not list ' + forbidden);
-    }
+    // Exactly the one grant: Write in, Edit out, and nothing else that writes.
+    assert.deepEqual(tools.filter(t => ['Write', 'Edit', 'NotebookEdit', 'MultiEdit'].includes(t)), ['Write'],
+      file + ' must list Write and no editing tool');
+    assert.ok(!tools.includes('Edit'), file + ' must not list Edit');
     assert.ok(flow(body).includes(CAVEAT), file + ' body must carry the Bash caveat verbatim');
+    // The grant is bounded in the body: the findings file and scratchpad scratch, never a worktree.
+    assert.match(flow(body), /with the Write tool you write the findings file your prompt names, and validation logs and disposable scratch under the session scratchpad — never inside any worktree or the repository\./,
+      file + ' body must bound the Write grant');
   }
 });
 
@@ -616,4 +622,8 @@ test('README documents the separate agent install', () => {
   assert.match(readme, /do \*\*not\*\* arrive with the skill install/);
   assert.match(readme, /restart Claude Code/i);
   assert.ok(flow(readme).includes(CAVEAT), 'README must carry the Bash caveat verbatim');
+  // Installed copies go stale with a skill update, and a stale gate pair has no Write tool.
+  assert.ok(flow(readme).includes('Copy them again whenever you update the skill: the definitions change with it, and an older '
+    + '`reviewer` or `test-hunter` lacks the `Write` tool its rendered prompt needs for the findings file.'),
+  'README must tell a reader to re-copy the definitions after a skill update');
 });

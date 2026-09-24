@@ -5,7 +5,7 @@ Cut from the integration tip when the wave opens.
 **Wave**: 4 · **Weight**: L
 **Depends on**: B02, B03
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files**: `orchestrate/tools/prompt.mjs`, `tests/prompt.test.cjs`, `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `orchestrate/templates/00-READBEFORE.md`, `orchestrate/SKILL.md`, `.claude/agents/reviewer.md`, `.claude/agents/test-hunter.md`, `README.md`, `tests/subagent-type-mapping.test.cjs`, `tests/tool-wiring.test.cjs`, `tests/protocol-contract.test.cjs`
+**Files**: `orchestrate/tools/prompt.mjs`, `tests/prompt.test.cjs`, `orchestrate/references/subagent-prompts.md`, `orchestrate/references/protocol.md`, `orchestrate/templates/00-READBEFORE.md`, `orchestrate/SKILL.md`, `.claude/agents/reviewer.md`, `.claude/agents/test-hunter.md`, `README.md`, `tests/subagent-type-mapping.test.cjs`, `tests/tool-wiring.test.cjs`, `tests/protocol-contract.test.cjs`, `tests/agent-definitions.test.cjs`
 The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: a guard that SAMPLES its domain (bind the slot registry to the live skeleton blocks in both directions) · a test that pins the defect (re-aim the "paste, don't point" pins, never delete them) · positive-only assertions on prose (pin the new rule AND sweep for surviving paste directives) · a sweep blind to an edit that narrows a rule's scope (the read-only carve-out must be exactly one file) · the apparatus corrupts the work (no literal control bytes; write rendered files as the exact bytes rendered)
 **Spec**: [01-plan.md](01-plan.md) §B04 · **Gate**: fence check → reviewer + test-hunter
@@ -175,13 +175,21 @@ the same skill copy the contract's pin covers). Roles: `implementer`, `polish`,
 
 ## Checklist
 
-- [ ] `orchestrate/tools/prompt.mjs`: six roles, ledger- and fact-derived slots (guardrails from a fact), one-pass substitution, nonce last in the body and nowhere else, independent file id, one-line output, fail closed on any unfilled skeleton slot, `--help` listing each role's facts
-- [ ] Irregular slots in the in-scope skeletons normalised to regular slots with stated defaults
-- [ ] `subagent-prompts.md`: render-then-point preamble and spawning rule with the fixed pointer text, nonce on report line 2 for rendered roles only, findings by file for gate agents (LOG heading first) and by path for resumes, fenced fix-round block, #12's three rules
-- [ ] `.claude/agents/reviewer.md` and `test-hunter.md`: the single findings-file exception
-- [ ] Template and protocol: Roles report shapes, spawn step with the self-contained list kept as the manual procedure, gate report check, byte-for-byte LOG append before forwarding by path — pinned paragraph and pinned line breaks untouched
-- [ ] SKILL.md Mode: continue renders prompts with `prompt.mjs`; README tools tree gains `prompt.mjs`
-- [ ] Tests: `tests/prompt.test.cjs`, `tests/tool-wiring.test.cjs` additions, re-aimed `tests/subagent-type-mapping.test.cjs` pins, `NON_MARKDOWN` length 9
+- [x] `orchestrate/tools/prompt.mjs`: six roles, ledger- and fact-derived slots (guardrails from a fact), one-pass substitution, nonce last in the body and nowhere else, independent file id, one-line output, fail closed on any unfilled skeleton slot, `--help` listing each role's facts
+- [x] Irregular slots in the in-scope skeletons normalised to regular slots with stated defaults
+- [x] `subagent-prompts.md`: render-then-point preamble and spawning rule with the fixed pointer text, nonce on report line 2 for rendered roles only, findings by file for gate agents (LOG heading first) and by path for resumes, fenced fix-round block, #12's three rules
+- [x] `.claude/agents/reviewer.md` and `test-hunter.md`: the single findings-file exception
+- [x] Template and protocol: Roles report shapes, spawn step with the self-contained list kept as the manual procedure, gate report check, byte-for-byte LOG append before forwarding by path — pinned paragraph and pinned line breaks untouched
+- [x] SKILL.md Mode: continue renders prompts with `prompt.mjs`; README tools tree gains `prompt.mjs`
+- [x] Tests: `tests/prompt.test.cjs`, `tests/tool-wiring.test.cjs` additions, re-aimed `tests/subagent-type-mapping.test.cjs` pins, `NON_MARKDOWN` length 9
+- [x] polish: A1 — say the recovery restores lines, not bytes (a CRLF line comes back LF under Git for Windows' awk)
+- [x] polish: A2 — the write-licence sweep gains a location family (worktree, repository, branch)
+- [x] polish: T1 — the LOG.md round trip covers a missing input and a pre-filled target
+- [x] polish: T2 — every LOG.md command span in the shipped docs equals the published one, counted per file
+- [x] polish: T3 — the hand-on sweep reads order words, clause-level negation and point-to, provide, share, supply
+- [x] polish: T4 — a negator does not govern across a negative verb
+- [x] polish: T5 — every "use only" tool line in a gate block carries the Write carve-out
+- [x] polish: T6 — U+00A0 pinned as the accepted neighbour of the C1 range
 
 ## Acceptance criteria
 

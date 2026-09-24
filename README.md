@@ -156,8 +156,10 @@ types fails outright (`Agent type 'implementer' not found`), so the orchestrator
 substitutes the general-purpose agent itself on every spawn and the read-only
 rules stay prose-enforced — see `orchestrate/references/protocol.md`
 §Degraded environments. And with them, the guarantee is stronger but not
-absolute — Bash can still write, so "read-only" stays partly conventional; removing
-Write/Edit closes the easy path, not every path.
+absolute — Write and Bash can still write, so "read-only" stays partly conventional;
+withholding Edit closes the easy path, not every path. Copy them again whenever you update
+the skill: the definitions change with it, and an older `reviewer` or `test-hunter` lacks
+the `Write` tool its rendered prompt needs for the findings file.
 
 Whatever branch the clone has checked out is what runs — stay on `main`. If you prefer
 a plain copy, `cp -r orchestrate-skill/orchestrate ~/.claude/skills/` works, and
@@ -213,6 +215,7 @@ orchestrate/
     ├── validate.mjs                runs a ledger's validation spec in the foreground: one result line, the real exit code, a full log
     ├── ledger-parse.mjs            the one parser for plan, PROGRESS and batch tables and the contract's skill pin
     ├── check-ledger.mjs            scaffold-time ledger parse check and the skill-pin hash check
+    ├── prompt.mjs                  renders one per-batch sub-agent prompt from the ledger and a facts file, ending in the nonce its report echoes
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 
