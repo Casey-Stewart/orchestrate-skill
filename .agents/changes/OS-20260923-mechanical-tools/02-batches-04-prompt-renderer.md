@@ -182,6 +182,14 @@ the same skill copy the contract's pin covers). Roles: `implementer`, `polish`,
 - [x] Template and protocol: Roles report shapes, spawn step with the self-contained list kept as the manual procedure, gate report check, byte-for-byte LOG append before forwarding by path — pinned paragraph and pinned line breaks untouched
 - [x] SKILL.md Mode: continue renders prompts with `prompt.mjs`; README tools tree gains `prompt.mjs`
 - [x] Tests: `tests/prompt.test.cjs`, `tests/tool-wiring.test.cjs` additions, re-aimed `tests/subagent-type-mapping.test.cjs` pins, `NON_MARKDOWN` length 9
+- [x] polish: A1 — say the recovery restores lines, not bytes (a CRLF line comes back LF under Git for Windows' awk)
+- [x] polish: A2 — the write-licence sweep gains a location family (worktree, repository, branch)
+- [x] polish: T1 — the LOG.md round trip covers a missing input and a pre-filled target
+- [x] polish: T2 — every LOG.md command span in the shipped docs equals the published one, counted per file
+- [x] polish: T3 — the hand-on sweep reads order words, clause-level negation and point-to, provide, share, supply
+- [x] polish: T4 — a negator does not govern across a negative verb
+- [x] polish: T5 — every "use only" tool line in a gate block carries the Write carve-out
+- [x] polish: T6 — U+00A0 pinned as the accepted neighbour of the C1 range
 
 ## Acceptance criteria
 

@@ -363,7 +363,8 @@ test('every string fact, every hidden-character class and both commit-id bounds 
     }
   }
   // One character from each hidden class — C0 at both ends and a tab, DEL, C1 at both ends, both
-  // separators — is refused; the visible neighbour of each range is not.
+  // separators — is refused; the code point just outside each range is not (U+00A0, the no-break
+  // space, is the C1 range's upper neighbour: outside the renderer's hidden classes).
   const named = code => 'gates/a' + String.fromCharCode(code) + 'b.md';
   for (const code of [0x00, 0x09, 0x1f, 0x7f, 0x85, 0x9f, 0x2028, 0x2029]) {
     assert.deepEqual(cli('polish', { findingsFile: named(code) }), ONE_LINE('findingsFile'), 'U+' + code.toString(16) + ' is hidden');
@@ -371,9 +372,9 @@ test('every string fact, every hidden-character class and both commit-id bounds 
   const heading = cli('reviewer', { ...pick(fx.facts, ROLE_FACTS.reviewer), guardrails: { file: 'CLAUDE.md', heading: '## Bug-class' + String.fromCharCode(0x2028) + 'guardrails' } });
   assert.deepEqual(heading, { code: 2, line: 'UNKNOWN ' + GUARDRAILS_SHAPE }, 'a hidden character in the guardrails heading');
   assert.deepEqual(listing(fx.out), [], 'no refusal wrote a file');
-  for (const code of [0x20, 0x7e, 0xa1, 0x2027]) {
+  for (const code of [0x20, 0x7e, 0xa0, 0x2027]) {
     const out = cli('polish', { findingsFile: named(code) });
-    assert.equal(out.code, 0, 'U+' + code.toString(16) + ' is visible and accepted: ' + out.line);
+    assert.equal(out.code, 0, 'U+' + code.toString(16) + ' lies outside the hidden classes and is accepted: ' + out.line);
   }
   // round1Sha: seven to sixty-four lowercase hex digits, each bound pinned from both sides.
   for (const [sha, ok] of [['abc123', false], ['abc1234', true], ['a'.repeat(64), true], ['a'.repeat(65), false]]) {

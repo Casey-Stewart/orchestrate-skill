@@ -506,7 +506,8 @@ unmerged and the session STOPs with the three verdicts.
   with the scratchpad is copied back out of the committed LOG.md, from its heading line up
   to its marker line, never re-typed —
   `git show <integration-branch>:./<ledger-dir>/LOG.md | F="<findings file>" awk -v h='### B<NN> R<k> <role> findings' -v m='=== end of B<NN> R<k> <role> findings ===' '$0 == h {n++; p = 1} $0 == m {e++; d += p; p = 0; next} p {o = o s $0; s = ORS} END {if (n != 1 || e != 1 || d != 1) exit 1; printf "%s", o > ENVIRON["F"]}'`
-  from Git Bash at the repository root, which restores the file's bytes as committed and
+  from Git Bash at the repository root, which restores those lines as committed (a CRLF
+  line comes back LF under Git for Windows' awk) and
   exits non-zero, writing nothing, unless the heading and its marker line each occur
   exactly once — and only after a zero exit is that path forwarded. When the reviewer
   and a gate agent both reported, their files are joined byte-for-byte, a newline between
