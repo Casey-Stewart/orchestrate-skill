@@ -584,3 +584,44 @@ H2-4. ASK `orchestrate/tools/mutate.mjs:92` — `localGitVars`'s fail-closed thr
 Out of fence, for BACKLOG at close-out (reviewer and implementer agree): `validate.mjs` counts a test file with no tests as one passing test (root of A); `git-evidence.mjs`'s `git()` inherits `process.env`, so check-fence and reconcile read whatever repository an inherited GIT_DIR names (sibling of R1 finding 2); direct callers of `withDisposableCheckout`/`runSpec` get an unscrubbed ref lookup and validate steps (today only run-at-ref, which scrubs first).
 
 Polish pass: the fix-round implementer resumed with the seven ASKs (A, B, C, H2-1..H2-4) and the polish rules.
+
+### B05 — polish and integration
+
+Polish @`4276a8a` (resumed fix-round implementer; nonce verified). Report verbatim (nonce line removed):
+
+DONE
+
+EVIDENCE
+- Validation: the same pwsh recipe, log at `…/scratchpad/gate-b05/impl/validate.log`, gave EXIT=0. Totals: `ℹ tests 499`, `ℹ pass 497`, `ℹ fail 0`, `ℹ skipped 2` (the two Windows-only `tests/validate.test.cjs` cases). One test was added since 8d5c1cd.
+- `git diff --check 8d5c1cd..HEAD` is clean and the worktree is clean.
+- Commit: `4276a8a` on feat/mutation-harness. It touches only `tests/mutate.test.cjs`, `tests/tool-wiring.test.cjs`, `orchestrate/references/subagent-prompts.md` and the batch file (7 `polish:` lines appended and ticked). Nothing pushed; no production file changed.
+- Red on mutation: I ran the worktree's `mutate.mjs` against HEAD, with its disposable clones under `…/gate-b05/impl/tmp*`, which are empty afterwards. Both runs had a passing control: `MUTATE 9 killed, 0 survived, 0 other` for the tool-wiring and prose mutations, and `MUTATE 5 killed, 0 survived, 0 other` for the `mutate.mjs` mutations.
+- **A** closed: the blind-spot sentence now reads "…so a mutation after which a one-test file registers nothing does not change the count and reads `SURVIVED` — before you cite a `SURVIVED` line, check its run in the log for a scoped test file reported under its own file name."
+  - I kept the reviewer's meaning but avoided "leaves" and "keeps", because the write-licence sweep counts both as write verbs.
+  - The pin in "the test hunter proves each mutation…" is updated, plus a sweep that the old wording is gone and the sentence appears once.
+  - Red for two mutations: the old sentence restored, and the old sentence appended.
+- **B and H2-1** overlap; one change closes B and H2-1's second survivor:
+  - A direct `scrubLocalGitEnv(copy)` call in "git's repository variables are git's own list…" checks both ways: every listed name is dropped in any case, and `GIT_CONFIG_GLOBAL`, `GIT_CONFIG_NOSYSTEM` and `GIT_CEILING_DIRECTORIES` are kept.
+  - H2-1 also gets a `where` validate step that exits non-zero if its environment holds any of git's names in any case. The CLI test adds a third run that plants every listed name at once. It was renamed "git's repository variables in the caller's environment — a GIT_DIR, a GIT_INDEX_FILE, every one git lists — never reach…".
+  - Red for three mutations: the reviewer's mA (case-folding dropped) and mC (every `GIT_*` key deleted) were killed by the unit call; the hunter's one-name scrub was killed by both tests. mA is caught by the unit call only: the CLI runs deliberately plant no lowercase duplicates, because Windows environments are case-insensitive.
+- **C and H2-2** overlap; one change to "no hunter text offers a line that means the proof did not run as a proof…" closes both:
+  - The exempted passage is now its exact text, pinned verbatim once, instead of a lazy span between two ends.
+  - The sweep now fires when a not-run kind, bare or in a code span, shares a sentence with a proof word, the word "finding", or a result kind.
+  - Red for the reviewer's `TIMEOUT`→`SURVIVED` plant, the hunter's plant A ("counts as `SURVIVED`") and the hunter's plant B (a bare `CRASHED` inserted inside the passage).
+- **H2-3** closed: the git-restore family now matches a bare `git checkout|restore|reset|stash` command, with or without a restore word, still clause-level and negation-aware.
+  - The corpus grows from 11 to 15 entries: the hunter's plant, plus `git apply`, `Add-Content` and `Out-File`.
+  - A loop now requires every edit-command spelling to have an entry the family catches.
+  - One test input changed: my own control sentence "Never restore a file with git checkout." became "Never run git checkout." The bare-command family flags the old form because the negation no longer sits right before the match. Neither hunter text names a bare git command.
+  - Red for four mutations: the plant, and each of `git apply`, `Add-Content` and `Out-File` removed from the family.
+- **H2-4** closed with no production change. New test: "a git that lists no repository variable, or a name that is not one, is UNKNOWN before anything runs, for both tools".
+  - The fake `git` is node under git's name: a symlink, or a copy where symlinks need privileges (Windows `git.exe`). It answers through a `NODE_OPTIONS=--require` hook that acts only in a process started as git.
+  - A live control confirms a PATH lookup finds the fake. Both tools print `UNKNOWN git did not list the variables that tie it to a repository (git rev-parse --local-env-vars)`, exit 2, and leave the repository untouched.
+  - Red for `if (false) throw` and for the name-shape check dropped.
+
+Out-of-fence notes: nothing new beyond the three BACKLOG items already listed in your ASK file.
+
+Mechanical close: fence PASS (integration `7c1a1fa`, batch `4276a8a`, no violations, no unknowns); polish paths = the batch file, `orchestrate/references/subagent-prompts.md`, `tests/mutate.test.cjs`, `tests/tool-wiring.test.cjs` — no production file, so no scoped re-review; 7 `polish:` lines appended and ticked, no unticked item; `git diff --check chore/mechanical-tools-ledger...feat/mutation-harness` clean; orchestrator recipe run (pwsh) on `4276a8a`: 499 tests, 497 pass, 0 fail, 2 skipped, 21s.
+
+Integration: dry run clean (tree `42cd40e`), merged `--no-ff` as `2137e7d` (same tree); tip validation (pwsh) 499 / 497 / 0 fail / 2 skipped (the Windows-only pair), `git diff --check HEAD^1 HEAD` clean → B05 🟢. Worktree `b05` removed. Metrics: gate = 16 findings (R1 5 + 4, R2 3 + 4), 3 needing a production change (R1 1–3); the hunter's R1 H5 note was closed in the fix round and is not counted.
+
+Wave 5 closed; C1 (final, the only checkpoint) close-out follows.
