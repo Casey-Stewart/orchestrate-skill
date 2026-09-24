@@ -480,3 +480,19 @@ On the user's words (verdict log, verbatim) `chore/mechanical-tools-ledger` and 
 - Windows-specific facts baked into this contract: the evidence helpers by absolute path under `C:/Users/fatbo/.claude/skills/orchestrate/tools/` (chosen because that copy is byte-identical to the ledger base `fceab31`'s `orchestrate/tools/` — the same bytes are `git archive fceab31 orchestrate/tools`; never the integration tip's copies, which B02 changed); the PowerShell validation recipe (needs `pwsh` there); the worktree root `C:/Users/fatbo/AppData/Local/Temp/claude/wt-os923/` (a Windows MAX_PATH measure); and the WSL-`bash` trap and the PowerShell-PATH helper, both Windows-only. Substituting any of them is a deviation for the user's words, recorded in PROGRESS.
 - Nothing in this session's scratchpad transfers (rendered prompts, gate renderers, the recipe helpers, logs); every fact needed is in this ledger.
 - Pending at C1 close-out: B02's smoke step 3 expects `PARSE OK 5 batches` from this ledger, which now reports B04's extended Files line by design (§B04); the step is corrected, with its revision bumped, before the page is issued. B04's residuals are listed in its row's Notes.
+
+## 2026-09-24 — continue (Linux)
+
+### Boot
+
+Driven from a session whose working directory is the Shipping App checkout; this repository at `/home/timetotilt/projects/orchestrate-skill`, main checkout on `main` (`fceab31`), dirty only in `BACKLOG.md` (the user's uncommitted BL-028, carried to close-out on the user's words). The user's five substitutions are recorded verbatim in the verdict log. Verified before use: the helper directory `/home/timetotilt/.local/share/orchestrate-fceab31/orchestrate/tools/` equals `git archive fceab31 orchestrate/tools` (`diff -r` clean, no symlinks in the path); Node v24.20.0; `pwsh` 7.6.5. Discovery (that helper): one ledger, `OS-20260923-mechanical-tools`, on `refs/heads/chore/mechanical-tools-ledger` = `refs/remotes/origin/chore/mechanical-tools-ledger` = `f3a8e0c`. Worktrees: `int` and `b05` under `/home/timetotilt/worktrees/os923/`.
+
+Reconcile: B01–B04 🟢 by merge SHA (their batch refs exist only on the Windows laptop): `437c42a`, `224a84c`, `5c24ece`, `3d3b264`, `e8a9ca0` are each ancestors of the tip, second parents `0310056`, `c1babae`, `50e669c`, `b7b8454`, `0d6fcef` — the batch tips their Notes name. B05 🔄: `feat/mutation-harness` = origin = `358d45d`, merge base `e8a9ca0`, three commits ahead, checklist 7/7 → gate. Shipment: `git ls-remote origin refs/heads/main` = `fceab31`; the tip is not contained.
+
+Resume-time validation on `f3a8e0c` (the contract's recipe verbatim in a `.ps1`, run with `pwsh -NoProfile -File` from the worktree root): tests 466, pass 464, fail 0, skipped 2 — `tests/validate.test.cjs`'s two `process.platform !== 'win32'` skips, expected per the user — `git diff --check` clean, 18 s.
+
+### B05 — gate
+
+Fence check (Linux helper copy): PASS — integration `f3a8e0c`, batch `358d45d`, merge base `e8a9ca0`, 11 changed paths all in the allowed set, no violations, no unknowns, `b05` worktree clean. 6b n/a (feat batch).
+
+Gate agents: the session's `reviewer` type resolves to the Shipping App's project definition (its body points at that repository's ARCHITECTURE.md/TESTING-GUIDE.md), because a project-level agent outranks the user-level one and the session runs from that checkout; it was used anyway — read-only tools, max effort, Opus as the strong tier — with the prompt telling it to ignore those references. `test-hunter` resolves to the user-level definition, byte-identical to `fceab31`'s `.claude/agents/test-hunter.md`. Prompts were rendered to files under the session scratchpad with a nonce on the last line, as in the Windows sessions; both name B04's scoped-Write wording as the binding form of the pinned sentence the batch file predates.
