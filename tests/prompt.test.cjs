@@ -63,8 +63,13 @@ const values = () => ({
 });
 const fillWith = (text, v) => text.replace(/\{\{([A-Z0-9_]+)\}\}/g, (token, key) => key in v ? v[key] : 'example-' + key.toLowerCase());
 const strip = text => text.replace(/<!--[\s\S]*?-->/g, '');
+// The conventional-commit type each batch type renders, written here: of the registry's
+// `fix`, `feature` and `chore`, only `feature` changes.
+const COMMIT_TYPE = { fix: 'fix', feature: 'feat', chore: 'chore' };
+// `## Next section` is followed straight away by a HIGHER-level heading, where it must stop.
 const guardrailsMd = () => ['# Project', '', '## Bug-class guardrails', '', 'Guardrail marker one.', '', '### A subsection', '',
-  'Subsection marker: ' + QUOTING, '', '```bash', '## not a heading inside a fence', '```', '', '## Next section', '', 'Outside marker.', ''].join('\n');
+  'Subsection marker: ' + QUOTING, '', '```bash', '## not a heading inside a fence', '```', '', '## Next section', '', 'Next marker.', '',
+  '# Appendix', '', 'Outside marker.', '', '## After the appendix', '', 'After marker.', ''].join('\n');
 const guardrailsBody = md => md.slice(md.indexOf('Guardrail marker one.'), md.indexOf('\n\n## Next section'));
 
 function batchFile(v, eol) {
@@ -75,10 +80,10 @@ function batchFile(v, eol) {
   assert.ok(text.includes(quoting), 'the fixture batch file must carry the quoting line');
   return text.replace(/\n/g, eol);
 }
-function withRow(text) {
+function withRow(text, type) {
   const lines = text.split('\n'), head = lines.findIndex(l => l.startsWith('| # | Batch |'));
   assert.notEqual(head, -1);
-  const row = '| B01 | Render me | feature | M | `feat/render-me` | 1 | `src/a.js`, `tests/a.test.cjs` | C1 | — |';
+  const row = '| B01 | Render me | ' + type + ' | M | `feat/render-me` | 1 | `src/a.js`, `tests/a.test.cjs` | C1 | — |';
   return [...lines.slice(0, head + 2), row, ...lines.slice(head + 2)].join('\n');
 }
 // A contract section as the template lays it out: its heading's body up to the next heading.
@@ -92,9 +97,11 @@ function contractBody(contract, heading) {
   }
   return lines.slice(0, end).join('\n').trim();
 }
-function fixture(t, { eol = '\n' } = {}) {
+function fixture(t, { eol = '\n', crlf = false, type = 'feature' } = {}) {
   assert.ok(QUOTING, 'the quoting text is built from the renderer\'s registry before any fixture');
-  const v = values();
+  const v = { ...values(), BATCH_TYPE: type };
+  // A CRLF checkout, as this machine's: every file the renderer takes a section from is CRLF.
+  const EOL = text => crlf ? text.replace(/\n/g, '\r\n') : text;
   const temp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'prompt render '));
   t.after(() => fs.rmSync(temp, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 }));
   const ledger = path.join(temp, 'repo', ...LEDGER_DIR.split('/')), worktree = path.join(temp, 'worktree');
@@ -103,12 +110,13 @@ function fixture(t, { eol = '\n' } = {}) {
   assert.deepEqual(templates, ['00-READBEFORE.md', '00-request.md', '01-plan.md', '02-batch.md', 'LOG.md', 'PROGRESS.md'],
     'every shipped template is instantiated below; a new one must join it');
   const tpl = name => fillWith(read('orchestrate/templates/' + name), v);
-  const batch = batchFile(v, eol), contract = tpl('00-READBEFORE.md');
-  const files = { '00-READBEFORE.md': contract, '00-request.md': strip(tpl('00-request.md')), '01-plan.md': withRow(strip(tpl('01-plan.md'))),
-    'PROGRESS.md': strip(tpl('PROGRESS.md')), 'LOG.md': strip(tpl('LOG.md')), '02-batches-01-render-me.md': batch };
-  for (const [name, text] of Object.entries(files)) fs.writeFileSync(path.join(ledger, name), text);
+  const batch = batchFile(v, crlf ? '\r\n' : eol), contract = tpl('00-READBEFORE.md');
+  const files = { '00-READBEFORE.md': contract, '00-request.md': strip(tpl('00-request.md')), '01-plan.md': withRow(strip(tpl('01-plan.md')), type),
+    'PROGRESS.md': strip(tpl('PROGRESS.md')), 'LOG.md': strip(tpl('LOG.md')) };
+  for (const [name, text] of Object.entries(files)) fs.writeFileSync(path.join(ledger, name), EOL(text));
+  fs.writeFileSync(path.join(ledger, '02-batches-01-render-me.md'), batch);
   const md = guardrailsMd();
-  fs.writeFileSync(path.join(worktree, 'CLAUDE.md'), md);
+  fs.writeFileSync(path.join(worktree, 'CLAUDE.md'), EOL(md));
   const slash = p => p.split(path.sep).join('/');
   const facts = {
     repoPath: 'C:/repo path', worktreePath: slash(worktree), scratchpadPath: slash(path.join(temp, 'scratch')),
@@ -122,15 +130,16 @@ function fixture(t, { eol = '\n' } = {}) {
   const expected = {
     '[NN]': '01', '[CHANGE_ID]': CHANGE_ID, '[LEDGER_DIR]': LEDGER_DIR, '[SKILL_DIR]': v.SKILL_DIR,
     '[INTEGRATION_BRANCH]': v.INTEGRATION_BRANCH, '[WORKTREE_SETUP]': v.WORKTREE_SETUP, '[BATCH_BRANCH]': v.BATCH_BRANCH,
-    '[FENCE FILES]': v.BATCH_FILES, '[BATCH FILENAME]': '02-batches-01-render-me.md', '[TYPE]': 'feat',
+    '[FENCE FILES]': v.BATCH_FILES, '[BATCH FILENAME]': '02-batches-01-render-me.md', '[TYPE]': COMMIT_TYPE[type],
     '[FULL TEXT OF THE BATCH FILE]': batch, '[APPLICABLE GUARDRAILS FROM THE BATCH FILE]': BATCH_GUARDRAILS,
-    '[REPO CONVENTIONS BLOCK FROM THE READBEFORE]': conventions,
-    '[HARD PROHIBITIONS BLOCK FROM THE READBEFORE]': contractBody(contract, '## Hard prohibitions'),
-    '[VALIDATION COMMANDS]': contractBody(contract, '## Validation commands'),
+    // Sections come through as their bytes were read: CRLF inside when the checkout is CRLF.
+    '[REPO CONVENTIONS BLOCK FROM THE READBEFORE]': EOL(conventions),
+    '[HARD PROHIBITIONS BLOCK FROM THE READBEFORE]': EOL(contractBody(contract, '## Hard prohibitions')),
+    '[VALIDATION COMMANDS]': EOL(contractBody(contract, '## Validation commands')),
     '[REPO_PATH]': facts.repoPath, '[WORKTREE_PATH]': facts.worktreePath, '[SCRATCHPAD_PATH]': facts.scratchpadPath,
     '[FINDINGS_FILE]': facts.findingsFile, '[PREVIOUS_FINDINGS_FILE]': facts.previousFindingsFile, '[ROUND1_SHA]': facts.round1Sha,
     '[ROUND]': '2', '[FAILING_ON_BASE_RESULT]': facts.failingOnBase, '[TESTING_GUIDE_PATH]': facts.testingGuidePath,
-    '[NO GATE AGENT DUTY]': DUTY_DEFAULT, '[GUARDRAILS SECTION TEXT]': guardrailsBody(md), '[ROUND 2 BLOCK]': '',
+    '[NO GATE AGENT DUTY]': DUTY_DEFAULT, '[GUARDRAILS SECTION TEXT]': EOL(guardrailsBody(md)), '[ROUND 2 BLOCK]': '',
   };
   return { temp, ledger, worktree, out: path.join(temp, 'scratch', 'prompts'), facts, batch, contract, expected };
 }
@@ -225,11 +234,37 @@ test('every role renders exactly the oracle: each slot its own value, each role 
   assert.equal(listing(fx.out).length, ROLES.length);
 });
 
-test('the batch type becomes a conventional-commit type: feature renders feat', async t => {
-  const fx = fixture(t), { COMMIT_TYPES } = await api();
+test('the batch type becomes a conventional-commit type: feature renders feat, fix and chore pass through', async t => {
+  const { COMMIT_TYPES } = await api();
   assert.deepEqual(COMMIT_TYPES, { feature: 'feat' });
-  const { text } = renderedMatches(fx, 'implementer', pick(fx.facts, ROLE_FACTS.implementer), fx.expected);
-  assert.ok(text.includes('("feat: <summary> (batch 01)")') && !text.includes('feature: <summary>'));
+  // The domain is the placeholder registry's list of batch types, read from the checkout.
+  const rows = read('orchestrate/references/scaffolding.md').split('\n').filter(l => l.startsWith('| `{{BATCH_TYPE}}` |'));
+  assert.equal(rows.length, 1, 'one {{BATCH_TYPE}} registry row');
+  const types = [...rows[0].split('|')[3].matchAll(/`([a-z]+)`/g)].map(m => m[1]);
+  assert.deepEqual(types.slice().sort(), Object.keys(COMMIT_TYPE).sort(), 'every registry batch type has its commit type pinned here');
+  for (const type of types) {
+    const fx = fixture(t, { type });
+    const { text } = renderedMatches(fx, 'implementer', pick(fx.facts, ROLE_FACTS.implementer), fx.expected);
+    assert.ok(text.includes('("' + COMMIT_TYPE[type] + ': <summary> (batch 01)")'), type + ' must render ' + COMMIT_TYPE[type]);
+  }
+});
+
+test('a CRLF ledger and a CRLF guardrails file render the oracle, each section as its bytes were read', t => {
+  const fx = fixture(t, { crlf: true });
+  assert.ok(fs.readFileSync(path.join(fx.ledger, '00-READBEFORE.md'), 'utf8').includes('\r\n## Repo conventions (binding)\r\n'), 'the contract is CRLF');
+  assert.ok(fs.readFileSync(path.join(fx.worktree, 'CLAUDE.md'), 'utf8').includes('\r\n## Bug-class guardrails\r\n'), 'the guardrails file is CRLF');
+  for (const slot of ['[REPO CONVENTIONS BLOCK FROM THE READBEFORE]', '[HARD PROHIBITIONS BLOCK FROM THE READBEFORE]', '[VALIDATION COMMANDS]',
+    '[GUARDRAILS SECTION TEXT]', '[FULL TEXT OF THE BATCH FILE]']) {
+    assert.ok(fx.expected[slot].includes('\r\n'), slot + ' spans lines, so the CRLF checkout reaches it');
+  }
+  for (const role of ['implementer', 'reviewer']) renderedMatches(fx, role, pick(fx.facts, ROLE_FACTS[role]), fx.expected);
+});
+
+test('a guardrails section stops at the next heading of the same or a HIGHER level', t => {
+  const fx = fixture(t);
+  // `## Next section` runs straight into `# Appendix`; a stop only at the same level would run on to `## After the appendix`.
+  renderedMatches(fx, 'reviewer', { ...pick(fx.facts, ROLE_FACTS.reviewer), guardrails: { file: 'CLAUDE.md', heading: '## Next section' } },
+    { ...fx.expected, '[GUARDRAILS SECTION TEXT]': 'Next marker.' });
 });
 
 test('ledger text in a CRLF batch file comes through byte-for-byte and is not refused', t => {
@@ -310,6 +345,43 @@ test('unknown, foreign and ill-typed facts, and bad invocations, are UNKNOWN wit
     assert.equal(r.stdout.split('\n').length, 2, 'one line');
   }
   assert.deepEqual(listing(fx.out), []);
+});
+
+test('every string fact, every hidden-character class and both commit-id bounds are checked', async t => {
+  const fx = fixture(t), { promptCli } = await api();
+  const cli = (role, facts) => promptCli(['--ledger', fx.ledger, '--role', role, '--batch', 'B01', '--facts', writeFacts(fx, role, facts), '--out', fx.out]);
+  // The string facts are every fact but the four typed ones, derived from the pinned role table.
+  const TYPED = ['gateAgentsRun', 'guardrails', 'round', 'round1Sha'];
+  const strings = [...new Set(Object.values(ROLE_FACTS).flat())].filter(key => !TYPED.includes(key)).sort();
+  assert.deepEqual(strings, ['failingOnBase', 'findingsFile', 'previousFindingsFile', 'repoPath', 'scratchpadPath', 'testingGuidePath', 'worktreePath']);
+  const roleOf = key => ROLES.find(role => ROLE_FACTS[role].includes(key));
+  const ONE_LINE = key => ({ code: 2, line: 'UNKNOWN fact ' + key + ': expected a non-empty one-line string' });
+  for (const key of strings) {
+    for (const value of ['', '   ', 'two' + String.fromCharCode(10) + 'lines', 42, null, ['x'], { x: 1 }]) {
+      const role = roleOf(key);
+      assert.deepEqual(cli(role, { ...pick(fx.facts, ROLE_FACTS[role]), [key]: value }), ONE_LINE(key), role + ': ' + key + ' = ' + JSON.stringify(value));
+    }
+  }
+  // One character from each hidden class — C0 at both ends and a tab, DEL, C1 at both ends, both
+  // separators — is refused; the visible neighbour of each range is not.
+  const named = code => 'gates/a' + String.fromCharCode(code) + 'b.md';
+  for (const code of [0x00, 0x09, 0x1f, 0x7f, 0x85, 0x9f, 0x2028, 0x2029]) {
+    assert.deepEqual(cli('polish', { findingsFile: named(code) }), ONE_LINE('findingsFile'), 'U+' + code.toString(16) + ' is hidden');
+  }
+  const heading = cli('reviewer', { ...pick(fx.facts, ROLE_FACTS.reviewer), guardrails: { file: 'CLAUDE.md', heading: '## Bug-class' + String.fromCharCode(0x2028) + 'guardrails' } });
+  assert.deepEqual(heading, { code: 2, line: 'UNKNOWN ' + GUARDRAILS_SHAPE }, 'a hidden character in the guardrails heading');
+  assert.deepEqual(listing(fx.out), [], 'no refusal wrote a file');
+  for (const code of [0x20, 0x7e, 0xa1, 0x2027]) {
+    const out = cli('polish', { findingsFile: named(code) });
+    assert.equal(out.code, 0, 'U+' + code.toString(16) + ' is visible and accepted: ' + out.line);
+  }
+  // round1Sha: seven to sixty-four lowercase hex digits, each bound pinned from both sides.
+  for (const [sha, ok] of [['abc123', false], ['abc1234', true], ['a'.repeat(64), true], ['a'.repeat(65), false]]) {
+    const out = cli('reviewer-round2', { ...pick(fx.facts, ROLE_FACTS['reviewer-round2']), round1Sha: sha });
+    if (ok) assert.equal(out.code, 0, sha.length + ' hex digits are a commit id: ' + out.line);
+    else assert.deepEqual(out, { code: 2, line: 'UNKNOWN fact round1Sha: expected a lowercase hex commit id' }, sha.length + ' hex digits are not');
+  }
+  assert.equal(listing(fx.out).length, 6, 'the six accepted renders, and nothing else, wrote a file');
 });
 
 test('two renders draw two nonces and two files', t => {

@@ -622,4 +622,8 @@ test('README documents the separate agent install', () => {
   assert.match(readme, /do \*\*not\*\* arrive with the skill install/);
   assert.match(readme, /restart Claude Code/i);
   assert.ok(flow(readme).includes(CAVEAT), 'README must carry the Bash caveat verbatim');
+  // Installed copies go stale with a skill update, and a stale gate pair has no Write tool.
+  assert.ok(flow(readme).includes('Copy them again whenever you update the skill: the definitions change with it, and an older '
+    + '`reviewer` or `test-hunter` lacks the `Write` tool its rendered prompt needs for the findings file.'),
+  'README must tell a reader to re-copy the definitions after a skill update');
 });

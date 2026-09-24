@@ -129,8 +129,8 @@ nonce. Then a fresh re-review.
 ```prompt:reviewer
 You are the INDEPENDENT REVIEWER for batch B[NN] of change [CHANGE_ID] in [REPO_PATH].
 You did not write this code. Use only Read/Grep/Glob and read-only git (diff, log,
-show, status). You never edit a file. Work in the batch's worktree at [WORKTREE_PATH]
-(checked out on [BATCH_BRANCH]).
+show, status), and the `Write` tool only for what OUTPUT below names. You never edit
+a file. Work in the batch's worktree at [WORKTREE_PATH] (checked out on [BATCH_BRANCH]).
 
 THE BATCH (scope + acceptance criteria):
 [FULL TEXT OF THE BATCH FILE]
@@ -222,7 +222,8 @@ not such a replacement.
 
 ```prompt:test-hunter
 You hunt tests that cannot fail, for batch B[NN] of [CHANGE_ID] in [REPO_PATH]. Use only
-Read/Grep/Glob and read-only git; edit nothing. Worktree: [WORKTREE_PATH].
+Read/Grep/Glob and read-only git, and the `Write` tool only for what OUTPUT below names;
+edit nothing. Worktree: [WORKTREE_PATH].
 
 Scope: every test added or modified in `git diff [INTEGRATION_BRANCH]...HEAD`, plus the
 production code each claims to cover. Testing guide / vacuity catalog, if the repo has
@@ -494,18 +495,23 @@ unmerged and the session STOPs with the three verdicts.
   nonce. The fix-up's "same fixed shape as the implementer" is that shape without the
   nonce line.
 - Findings travel by path, and reach LOG.md first: the orchestrator appends each findings
-  file to the ledger's LOG.md byte-for-byte on the integration worktree —
-  `cat -- "<findings file>" >> <ledger-dir>/LOG.md` from Git Bash, or an equivalent byte
+  file to the ledger's LOG.md byte-for-byte on the integration worktree, then a newline and
+  a closing marker line —
+  `(cat -- "<findings file>" && echo && echo '=== end of B<NN> R<k> <role> findings ===') >> <ledger-dir>/LOG.md`
+  from Git Bash, or an equivalent byte
   copy, never re-typed through its own context — commits it with the PROGRESS update, and
   only then forwards the path, as the `findingsFile` of a polish or fix-round prompt or the
   `previousFindingsFile` of a round-2 review. The scratchpad does not survive the session;
   LOG.md is what §Recovery resumes a crashed polish or fix round from: a findings file lost
-  with the scratchpad is copied back out of the committed LOG.md, from its heading line to
-  the next heading, never re-typed —
-  `git show <integration-branch>:./<ledger-dir>/LOG.md | awk -v h='### B<NN> R<k> <role> findings' '$0 == h {p = 1; print; next} /^##?#? / {p = 0} p' > "<findings file>"`
-  from Git Bash at the repository root — and that path is forwarded. When the reviewer
-  and a gate agent both reported, their appended files are joined byte-for-byte into one
-  (`cat -- "<reviewer file>" "<gate file>" > "<joined file>"`) and that path is forwarded.
+  with the scratchpad is copied back out of the committed LOG.md, from its heading line up
+  to its marker line, never re-typed —
+  `git show <integration-branch>:./<ledger-dir>/LOG.md | F="<findings file>" awk -v h='### B<NN> R<k> <role> findings' -v m='=== end of B<NN> R<k> <role> findings ===' '$0 == h {n++; p = 1} $0 == m {e++; d += p; p = 0; next} p {o = o s $0; s = ORS} END {if (n != 1 || e != 1 || d != 1) exit 1; printf "%s", o > ENVIRON["F"]}'`
+  from Git Bash at the repository root, which restores the file's bytes as committed and
+  exits non-zero, writing nothing, unless the heading and its marker line each occur
+  exactly once — and only after a zero exit is that path forwarded. When the reviewer
+  and a gate agent both reported, their files are joined byte-for-byte, a newline between
+  them, into one (`(cat -- "<reviewer file>" && echo && cat -- "<gate file>") > "<joined file>"`)
+  and that path is forwarded.
 - Pass the named type: spawn each skeleton with the `subagent_type` that skeleton names,
   never a wildcard-tool agent standing in for a read-only role. Write and Bash can still
   write, so "read-only" stays partly conventional; withholding Edit closes the easy path,

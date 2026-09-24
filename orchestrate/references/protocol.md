@@ -638,8 +638,9 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    pass); verdict handling per §Severity and round accounting, each verdict recorded in
    the row's Notes as `R<k> <verdict> @<sha>` (`asks=<n>` appended when a `SHIP` carries
    ASKs; findings in LOG.md under the row's heading: every findings file reaches LOG.md
-   first — from the integration worktree root, `cat -- "<findings file>" >>
-   <ledger-dir>/LOG.md` in Git Bash or an equivalent byte copy, never re-typed through the
+   first, closed by a newline and a marker line — from the integration worktree root,
+   `(cat -- "<findings file>" && echo && echo '=== end of B<NN> R<k> <role> findings ===') >> <ledger-dir>/LOG.md`
+   in Git Bash or an equivalent byte copy, never re-typed through the
    orchestrator's context, committed with the PROGRESS update — and only then is its path
    forwarded to the polish, fix-round or round-2 prompt; a copy lost with the scratchpad is
    taken back out of the committed LOG.md, never re-typed — `subagent-prompts.md`

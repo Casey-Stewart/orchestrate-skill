@@ -695,11 +695,17 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      a test-only finding is an ASK. S-weight batches: one combined reviewer+gate pass.
    - **Verdicts** (each recorded in the row's Notes as `R<k> <verdict> @<sha>`, `asks=<n>`
      appended when a `SHIP` carries ASKs; the findings go to LOG.md under the row's
-     heading: every findings file reaches LOG.md first — from the integration worktree
-     root, `cat -- "<findings file>" >> {{LEDGER_DIR}}/LOG.md` in Git Bash or an equivalent
+     heading: every findings file reaches LOG.md first, closed by a newline and a marker
+     line — from the integration worktree root,
+     `(cat -- "<findings file>" && echo && echo '=== end of B<NN> R<k> <role> findings ===') >> {{LEDGER_DIR}}/LOG.md`
+     in Git Bash or an equivalent
      byte copy, never re-typed through the orchestrator's context, committed with the
      PROGRESS update — and only then is its path forwarded; a copy lost with the scratchpad
-     is taken back out of the committed LOG.md, never re-typed). `SHIP` with ASKs → polish
+     is taken back out of the committed LOG.md, never re-typed — from the repository root
+     in Git Bash,
+     `git show {{INTEGRATION_BRANCH}}:./{{LEDGER_DIR}}/LOG.md | F="<findings file>" awk -v h='### B<NN> R<k> <role> findings' -v m='=== end of B<NN> R<k> <role> findings ===' '$0 == h {n++; p = 1} $0 == m {e++; d += p; p = 0; next} p {o = o s $0; s = ORS} END {if (n != 1 || e != 1 || d != 1) exit 1; printf "%s", o > ENVIRON["F"]}'`
+     exits non-zero, writing nothing, unless its heading and marker line each occur
+     exactly once, and only after a zero exit is that file forwarded). `SHIP` with ASKs → polish
      pass: resume the implementer with the pointer to its rendered `polish` prompt (the
      findings file by path); it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
      closes mechanically (6a + validations on the polished tip; polish commits touch only

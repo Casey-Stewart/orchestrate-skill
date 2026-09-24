@@ -157,7 +157,9 @@ substitutes the general-purpose agent itself on every spawn and the read-only
 rules stay prose-enforced — see `orchestrate/references/protocol.md`
 §Degraded environments. And with them, the guarantee is stronger but not
 absolute — Write and Bash can still write, so "read-only" stays partly conventional;
-withholding Edit closes the easy path, not every path.
+withholding Edit closes the easy path, not every path. Copy them again whenever you update
+the skill: the definitions change with it, and an older `reviewer` or `test-hunter` lacks
+the `Write` tool its rendered prompt needs for the findings file.
 
 Whatever branch the clone has checked out is what runs — stay on `main`. If you prefer
 a plain copy, `cp -r orchestrate-skill/orchestrate ~/.claude/skills/` works, and

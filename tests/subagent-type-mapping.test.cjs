@@ -218,12 +218,15 @@ test('§Degraded environments documents the undefined-agent-types fallback', () 
 });
 
 // Without the definitions these three lines are the ONLY thing holding a read-only role
-// to read-only, so the capability boundary never licenses deleting them.
+// to read-only, so the capability boundary never licenses deleting them. The two gate lines
+// name the Write tool the user granted (2026-09-23) only as their OUTPUT carve-out scopes it,
+// so the rule and the grant a few lines below it no longer contradict each other.
 const PROSE = new Map([
   ['## Reviewer (the gate — read-only)',
-    'You did not write this code. Use only Read/Grep/Glob and read-only git'],
+    'You did not write this code. Use only Read/Grep/Glob and read-only git (diff, log, show, status), '
+      + 'and the `Write` tool only for what OUTPUT below names. You never edit a file.'],
   ['## Test hunter (optional gate agent — read-only)',
-    'Use only Read/Grep/Glob and read-only git; edit nothing.'],
+    'Use only Read/Grep/Glob and read-only git, and the `Write` tool only for what OUTPUT below names; edit nothing.'],
   ['## Plan pre-flight (scaffold time — read-only)',
     'Use only Read/Grep/Glob; edit nothing.'],
 ]);

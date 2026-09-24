@@ -674,43 +674,87 @@ test('template step 5 renders, then points, and keeps its self-contained list as
   assert.ok(collapse(section(protocol, '\n6. Gate per batch', '6a fence check')).includes('or with the wrong nonce'));
 });
 
-// Every findings file reaches LOG.md, byte for byte, BEFORE its path is forwarded: in each
-// paragraph or list item, every handing-on comes after the append command. Two spellings:
-// "forward" in a block about findings (the rule's own verb; the block filter keeps "forward
-// slashes" out), and hand / pass / send / give with a report, findings, ASK or path as its
-// object anywhere.
-const APPEND = 'cat -- "<findings file>" >>';
+// Every findings file reaches LOG.md, byte for byte, BEFORE its path is handed on: in each
+// paragraph or list item, every hand-on comes after an AFFIRMATIVE statement of the append
+// §Spawning rules publishes — its whole text, LOG.md target included, the template's
+// scaffold-time placeholders read as the reference's run-time ones. "Never run `…`" states the
+// command and forbids it, so it is no append. Four spellings of a hand-on: "forward" in a block
+// about findings (the rule's own verb; the block filter keeps "forward slashes" out); hand /
+// pass / send / give with a report, findings, ASK or path as its object anywhere; and the
+// skill's own verbs, resume an agent WITH findings and point it AT them. Findings read back
+// FROM LOG.md were appended already, which is the rule itself.
+const LOG_PLACEHOLDERS = text => text.replaceAll('{{LEDGER_DIR}}', '<ledger-dir>').replaceAll('{{INTEGRATION_BRANCH}}', '<integration-branch>');
+// The LOG.md commands a document publishes, each a code span on ONE line, never re-typed here.
+function logCommands(file) {
+  const spans = [...read(file).matchAll(/`([^`\n]+)`/g)].map(m => LOG_PLACEHOLDERS(m[1]));
+  const one = (what, test) => {
+    const found = spans.filter(test);
+    assert.ok(found.length <= 1, file + ': publishes more than one ' + what + ' command');
+    return found[0];
+  };
+  return { append: one('append', s => s.startsWith('(cat -- "<findings file>"')),
+    recover: one('recovery', s => s.startsWith('git show ') && s.includes('/LOG.md |')),
+    join: one('join', s => s.startsWith('(cat -- "<reviewer file>"')) };
+}
+const publishedAppend = () => {
+  const { append } = logCommands(PROMPTS);
+  assert.ok(append && append.endsWith(' >> <ledger-dir>/LOG.md'), 'subagent-prompts.md publishes one append command, onto LOG.md: ' + append);
+  return append;
+};
 const FORWARD = /\bforward(?:s|ed|ing)?\b(?!\s+slash)/gi;
 // "pass" is a noun here as often as a verb (a polish pass, a `pass` verdict), so it counts
 // only with an object after it.
 const HAND_ON = /(?:\b(?:hand|send|give)(?:s|ed|ing)?\b(?!-)|\bpass(?:es|ed|ing)?\s+(?:the|its|a|an|that|this|on)\b)(?=[^.;:]*\b(?:reports?|findings|ASKs?|path)\b(?!['’]))/gi;
-function forwardFaults(text) {
+// Resume and point hand findings on only when the findings are their object: "resume … with
+// the pointer" and "point at the backlog" are the rendered-prompt rule and ordinary prose.
+const WITH_OR_AT = /\b(?:resum(?:e|es|ed|ing)\b[^.;:]*?\bwith|point(?:s|ed|ing)?\b[^.;:]*?\bat)\s+(?:(?:the|its|that|their|both|a|an)\s+)?(?:[\w'’-]+\s+){0,2}?(?:findings|ASKs?|reports?)\b(?!['’])(?![^.;:]{0,40}\bfrom\s+(?:the\s+)?(?:committed\s+)?LOG\.md)/gi;
+function appendAt(block, append) {
+  for (let at = block.indexOf(append); at !== -1; at = block.indexOf(append, at + 1)) {
+    const prefix = block.slice(0, block[at - 1] === '`' ? at - 1 : at);
+    if (!governed(prefix) && !/\b(?:skip\w*|omit\w*|without)\s+(?:\S+\s+)?$/i.test(prefix)) return at;
+  }
+  return -1;
+}
+function forwardFaults(text, append = publishedAppend()) {
   const faults = [];
-  for (const block of text.split(/\n[ \t]*\n|\n(?=[ \t]*(?:[-*]|\d+\.) )/).map(collapse)) {
-    const hits = [...(/findings/i.test(block) ? block.matchAll(FORWARD) : []), ...block.matchAll(HAND_ON)];
-    for (const m of hits) {
-      const at = block.indexOf(APPEND);
-      if (at === -1 || at > m.index) faults.push(block.slice(Math.max(0, m.index - 60), m.index + 40));
-    }
+  for (const block of LOG_PLACEHOLDERS(text).split(/\n[ \t]*\n|\n(?=[ \t]*(?:[-*]|\d+\.) )/).map(collapse)) {
+    const hits = [...(/findings/i.test(block) ? block.matchAll(FORWARD) : []), ...block.matchAll(HAND_ON), ...block.matchAll(WITH_OR_AT)];
+    const at = hits.length ? appendAt(block, append) : -1;
+    for (const m of hits) if (at === -1 || at > m.index) faults.push(block.slice(Math.max(0, m.index - 60), m.index + 40));
   }
   return faults;
 }
 const agentDefinitions = () => fs.readdirSync(path.join(ROOT, '.claude/agents')).filter(n => n.endsWith('.md')).map(n => '.claude/agents/' + n);
 test('the LOG append precedes forwarding wherever forwarding is stated', () => {
-  assert.deepEqual(forwardFaults('Forward the findings file to the implementer.').length, 1);
-  assert.deepEqual(forwardFaults('Forward the findings path, then run `' + APPEND + ' LOG.md`.').length, 1);
-  assert.deepEqual(forwardFaults('Run `' + APPEND + ' LOG.md`, then forward the findings path.'), []);
-  assert.deepEqual(forwardFaults('- Run `' + APPEND + ' LOG.md` for the findings.\n- Forward the findings path.').length, 1, 'an append in another list item does not count');
+  const APPEND = publishedAppend();
+  assert.equal(forwardFaults('Forward the findings file to the implementer.').length, 1);
+  assert.equal(forwardFaults('Forward the findings path, then run `' + APPEND + '`.').length, 1);
+  assert.deepEqual(forwardFaults('Run `' + APPEND + '`, then forward the findings path.'), []);
+  assert.equal(forwardFaults('- Run `' + APPEND + '` for the findings.\n- Forward the findings path.').length, 1, 'an append in another list item does not count');
+  // Round 2's plants: a negated append, an append aimed away from LOG.md, and the skill's own
+  // verbs handing findings on before the append.
+  for (const planted of ['- Never run `' + APPEND + '` for a polish pass; forward the findings path to the implementer at once.',
+    '- Do not run `' + APPEND + '` for a polish pass; forward the findings path.',
+    '- Run `' + APPEND.replace('<ledger-dir>/LOG.md', '<scratchpad>/notes.md') + '`, then forward the findings path.',
+    '- Resume the implementer with the findings path, then append the file to LOG.md.',
+    '- Point the fix round at the round-1 findings file, and append it to LOG.md afterwards.']) {
+    assert.equal(forwardFaults(planted).length, 1, 'must be reported: ' + planted);
+  }
   // The other verbs, written as prose an author would use, not read off the pattern.
   for (const handing of ["Hand the reviewer's report path to the implementer, then append it to LOG.md.",
     'Pass the findings file to the fix round.', 'Send the ASK list to the implementer.', 'Give the implementer the round-1 report.',
-    'The orchestrator hands the report on to the implementer.']) {
+    'The orchestrator hands the report on to the implementer.', 'Resume the implementer with its ASK list.',
+    'Point the fresh reviewer at the round-1 report.', 'Resumed with both findings files, the implementer fixes each.']) {
     assert.equal(forwardFaults(handing).length, 1, 'must be reported: ' + handing);
-    assert.deepEqual(forwardFaults('Run `' + APPEND + ' LOG.md` first. ' + handing), [], 'after the append it is allowed: ' + handing);
+    assert.deepEqual(forwardFaults('Run `' + APPEND + '` first. ' + handing), [], 'after the append it is allowed: ' + handing);
   }
   assert.deepEqual(forwardFaults('Every test must pass before the batch integrates. Use forward slashes in a path. '
-    + 'A polish pass (ASK list in LOG.md) closes it. Verdicts: **pass** · **fail** with the findings. At hand-over preserve the report path. Its last line gives your report\'s exact line 2.'), [],
-    'passing tests, a polish pass, a hand-over and forward slashes are not handing findings on');
+    + 'A polish pass (ASK list in LOG.md) closes it. Verdicts: **pass** · **fail** with the findings. At hand-over preserve the report path. Its last line gives your report\'s exact line 2. '
+    + "Round in flight → resume the implementer (fresh) with that round's findings from LOG.md; not a round. "
+    + 'Resume the implementer with the pointer to its rendered `polish` prompt (the findings file by path). '
+    + 'Spawn or resume the agent with this ONE fixed pointer message, `<prompt file>` replaced by that path. '
+    + 'Asked to resume a COMPLETE ledger → reconcile, report completion, point at the backlog.'), [],
+    'passing tests, a polish pass, a hand-over, forward slashes, findings read back from LOG.md and a pointer are not handing findings on');
   assert.equal(forwardFaults('Pass on the findings path to the fix round.').length, 1);
   let forwards = 0;
   for (const file of [...documents(), ...agentDefinitions()]) {
@@ -719,7 +763,7 @@ test('the LOG append precedes forwarding wherever forwarding is stated', () => {
     if (/findings/i.test(text)) forwards += [...text.matchAll(/\bforward(?:s|ed|ing)?\b/gi)].length;
   }
   for (const file of [TEMPLATE, 'orchestrate/references/protocol.md', PROMPTS]) {
-    const text = collapse(read(file));
+    const text = collapse(LOG_PLACEHOLDERS(read(file)));
     assert.ok(text.includes(APPEND) && /never re-typed through (?:its own|the orchestrator's) context/.test(text), file + ': states the byte-for-byte LOG append');
     assert.ok(/\bforward(?:s|ed|ing)?\b/.test(text), file + ': states the forwarding the append must precede');
   }
@@ -771,12 +815,29 @@ test('no shipped text reinstates pasting for a rendered role or a second write f
 const CARVE_OUT = 'write your full report with the Write tool to "[FINDINGS_FILE]"; besides that ONE file you write only validation logs and disposable scratch under "[SCRATCHPAD_PATH]", never inside any worktree or the repository.';
 const EXCEPTION = 'Keep to reading files and read-only git, with one exception: with the Write tool you write the findings file your prompt names, and validation logs and disposable scratch under the session scratchpad — never inside any worktree or the repository.';
 const CAVEAT = 'Write and Bash can still write, so "read-only" stays partly conventional; withholding Edit closes the easy path, not every path.';
-// Subject-free: any write verb in a gate text, outside the carve-out and the caveat, is a
-// further licence. "<verb> nothing" is a prohibition, and code spans name tools, not acts.
-const WRITE_VERB = /\b(?:write|writes|writing|save|saves|saving|keep|keeps|keeping|store|stores|storing|create|creates|creating|copy|copies|copying|edit|edits|editing|modify|modifies|modifying|record|records|recording|dump|dumps|dumping)\b(?!\s+nothing\b)/i;
-const sentences = text => collapse(text.replace(/`[^`\n]*`/g, ' ')).split(/(?<=[.!?])\s+/);
-const writeLicences = text => sentences(text).filter(s => !s.includes(CARVE_OUT) && !s.includes(EXCEPTION) && !s.includes(CAVEAT))
-  .filter(s => clauses(s).some(c => fires(WRITE_VERB, c)));
+// Each gate skeleton's own read-only sentence, reconciled with the grant (round-2 hunter note):
+// it names the Write tool only as the OUTPUT carve-out scopes it.
+const GATE_READ_ONLY = {
+  reviewer: 'You did not write this code. Use only Read/Grep/Glob and read-only git (diff, log, show, status), and the `Write` tool only for what OUTPUT below names. You never edit a file.',
+  'test-hunter': 'Use only Read/Grep/Glob and read-only git, and the `Write` tool only for what OUTPUT below names; edit nothing.',
+};
+// Any further write, subject-free, in four families that each own a specimen no other family
+// catches. The grants above are removed as their EXACT text before the sweep — never by the
+// sentence that holds them — so a licence appended inside a grant's own sentence is swept.
+// "<verb> nothing" is a prohibition and "<verb> nothing but/except …" a licence; code spans
+// name tools, not acts.
+const WRITE_LICENCES = [
+  ['a write verb', /\b(?:write|writes|writing|save|saves|saving|keep|keeps|keeping|store|stores|storing|create|creates|creating|copy|copies|copying|edit|edits|editing|modify|modifies|modifying|record|records|recording|dump|dumps|dumping|append|appends|appending|put|puts|putting|leave|leaves|leaving|move|moves|moving|rename|renames|renaming|delete|deletes|deleting|remove|removes|removing|update|updates|updating|stage|stages|staging|push|pushes|pushing|touch|touches|touching)\b(?!\s+nothing\b)/i,
+    'Save each mutation script under the session scratchpad too.'],
+  ['a write in the passive', /\b(?:is|are|was|were|be|been|being|gets?|got)\s+(?:(?:also|then|only|each|all|now|still|first)\s+)?(?:written|saved|kept|stored|created|copied|edited|modified|recorded|dumped|appended|committed|placed|put|left|moved|renamed|deleted|removed|updated|staged|pushed|touched|added)\b/i,
+    'Mutation scripts are written into the worktree beside the tests.'],
+  ['a commit or an addition', /\b(?:commit|commits|committing|add|adds|adding)\s+(?:the|your|a|an|each|every|any|all|this|that|these|those|it|them|its|their)\b/i,
+    'Commit the mutation scripts to the batch branch.'],
+  ['nothing but, or nothing except', /\b(?:write|writes|edit|edits|modify|modifies|change|changes|touch|touches|create|creates|save|saves|keep|keeps)\s+nothing\s+(?:but|except|besides|beyond|other than|save|apart from)\b/i,
+    'Modify nothing except the tests you judge vacuous, which you then fix in place.'],
+];
+const withoutGrants = text => [CARVE_OUT, EXCEPTION, CAVEAT].reduce((rest, grant) => rest.split(grant).join(' '), collapse(text.replace(/`[^`\n]*`/g, ' ')));
+const writeLicences = text => clauses(withoutGrants(text)).flatMap(c => WRITE_LICENCES.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
 const gateBlocks = () => fencedBlocks(read(PROMPTS)).filter(b => ['prompt:reviewer', 'prompt:round-2', 'prompt:test-hunter'].includes(b.info)).map(b => b.lines.join('\n'));
 const definitionBody = file => read(file).replace(/^---\n[\s\S]*?\n---\n/, '');
 test('each gate skeleton and definition grants the one scoped write, and no text grants another', () => {
@@ -787,6 +848,10 @@ test('each gate skeleton and definition grants the one scoped write, and no text
     assert.equal(skeleton.split(CARVE_OUT).length - 1, 1, from + ': the carve-out exactly once');
     assert.ok(skeleton.includes('`### B[NN] R[ROUND] ' + heading + ' findings`'), from + ': the findings file is headed for LOG.md');
     assert.doesNotMatch(skeleton, /heredoc|<<'?EOF/i, from + ': findings are written with the Write tool, never a heredoc');
+    // Its read-only sentence names the Write tool only as the carve-out scopes it, and no
+    // sentence denying the grant survives beside it.
+    assert.equal(skeleton.split(GATE_READ_ONLY[heading]).length - 1, 1, from + ': the reconciled read-only sentence, once');
+    assert.doesNotMatch(skeleton, /Use only Read\/Grep\/Glob and read-only git(?: \([^)]*\))?[.;]/, from + ': a read-only sentence that denies the Write grant');
   }
   for (const file of ['.claude/agents/reviewer.md', '.claude/agents/test-hunter.md']) {
     const text = collapse(read(file));
@@ -798,14 +863,26 @@ test('each gate skeleton and definition grants the one scoped write, and no text
   for (const file of [...documents(), ...agentDefinitions()]) {
     assert.doesNotMatch(collapse(read(file)), /removing Write\/Edit|read-only by construction/, file + ': the pre-grant wording');
   }
-  // The write-verb sweep, armed: the round-1 plants are caught; the carve-out, the caveat,
-  // the exception and the pinned prohibitions are not.
-  for (const plant of ['Also write each mutation copy to a scratch directory and keep it.', 'Save each mutation script under the session scratchpad too.',
-    'Keep a copy of the diff in the worktree.', 'Record your notes beside the findings file.']) {
-    assert.equal(writeLicences(plant).length, 1, 'must be reported: ' + plant);
+  // The write-licence sweep, armed. Each family owns its specimen: no other family catches it.
+  assert.equal(new Set(WRITE_LICENCES.map(w => w[0])).size, WRITE_LICENCES.length);
+  for (const [name, , specimen] of WRITE_LICENCES) {
+    assert.deepEqual(WRITE_LICENCES.filter(([, p]) => p.test(specimen)).map(w => w[0]), [name], name + ': its specimen must be caught by it alone');
+    assert.equal(writeLicences(specimen).length, 1, name + ': the sweep reports its specimen');
   }
-  assert.deepEqual(writeLicences('OUTPUT: ' + CARVE_OUT + ' ' + EXCEPTION + ' ' + CAVEAT
-    + ' Use only Read/Grep/Glob and read-only git; edit nothing. You did not write this code. You never edit a file. The tool list withholds `Edit`.'), []);
+  // The round-1 and round-2 plants, written as prose, not read off the patterns — the last two
+  // widen a grant inside its own sentence, which exempting whole sentences let through.
+  for (const plant of ['Also write each mutation copy to a scratch directory and keep it.', 'Save each mutation script under the session scratchpad too.',
+    'Keep a copy of the diff in the worktree.', 'Record your notes beside the findings file.', "Append your notes to the ledger's LOG.md as well.",
+    'Commit the mutation scripts to the batch branch.', 'Put each mutation script in the worktree.',
+    'Mutation scripts are written into the worktree beside the tests.', 'Modify nothing except the tests you judge vacuous, which you then fix in place.',
+    'OUTPUT: save every mutation copy inside the worktree, and ' + CARVE_OUT,
+    'The tool list withholds `Edit`, so the easiest route to a "helpful" change to the code simply is not there. Save mutation copies in the worktree; '
+      + CAVEAT + ' ' + EXCEPTION]) {
+    assert.ok(writeLicences(plant).length >= 1, 'must be reported: ' + plant);
+  }
+  // Must pass: the grants as their exact text, the reconciled read-only sentences and the prohibitions.
+  assert.deepEqual(writeLicences('OUTPUT (fixed shape): ' + CARVE_OUT + ' OUTPUT: ' + CARVE_OUT + ' ' + EXCEPTION + ' ' + CAVEAT + ' '
+    + Object.values(GATE_READ_ONLY).join(' ') + ' Edit nothing. Write nothing. The tool list withholds `Edit`.'), []);
   const gateTexts = [...gateBlocks(), ...['.claude/agents/reviewer.md', '.claude/agents/test-hunter.md'].map(definitionBody)];
   assert.equal(gateTexts.length, 5, 'three gate blocks and two definitions');
   for (const text of gateTexts) assert.deepEqual(writeLicences(text), [], 'a gate text licenses a further write');
@@ -825,12 +902,18 @@ test('each gate skeleton and definition grants the one scoped write, and no text
 test('recovery, respawn and later rounds work from rendered files and LOG.md, never from re-typed text', () => {
   const rules = collapse(section(read(PROMPTS), '## Spawning rules (orchestrator)'));
   const prompts = collapse(read(PROMPTS));
-  // A findings file lost with the scratchpad comes back out of the committed LOG.md as bytes.
-  assert.ok(rules.includes("a findings file lost with the scratchpad is copied back out of the committed LOG.md, from its heading line to the next heading, never re-typed — "
-    + "`git show <integration-branch>:./<ledger-dir>/LOG.md | awk -v h='### B<NN> R<k> <role> findings' '$0 == h {p = 1; print; next} /^##?#? / {p = 0} p' > \"<findings file>\"`"));
+  // A findings file lost with the scratchpad comes back out of the committed LOG.md as bytes,
+  // heading through marker, or not at all (the commands themselves run in the next test).
+  const { recover } = logCommands(PROMPTS);
+  assert.ok(recover, 'subagent-prompts.md publishes the recovery command');
+  assert.ok(rules.includes('a findings file lost with the scratchpad is copied back out of the committed LOG.md, from its heading line up to its marker line, never re-typed — `'
+    + recover + '` from Git Bash at the repository root, which restores the file\'s bytes as committed and exits non-zero, writing nothing, unless the heading and its marker line each occur exactly once — and only after a zero exit is that path forwarded.'));
+  assert.ok(collapse(read(TEMPLATE)).includes('exits non-zero, writing nothing, unless its heading and marker line each occur exactly once, and only after a zero exit is that file forwarded'));
   for (const file of [TEMPLATE, 'orchestrate/references/protocol.md']) {
     assert.ok(collapse(read(file)).includes('a copy lost with the scratchpad is taken back out of the committed LOG.md, never re-typed'), file);
   }
+  // Two files are joined with a newline between them, so no heading is glued to a last line.
+  assert.ok(rules.includes('their files are joined byte-for-byte, a newline between them, into one (`' + logCommands(PROMPTS).join + '`) and that path is forwarded.'));
   // A crashed implementer is respawned with its implementer prompt before the resume pointer.
   assert.ok(rules.includes('an implementer with its rendered implementer prompt first, then the `polish` or `fix-round` pointer it was owed'));
   // The third round: two pointers, two nonces, the round number rendered, nothing told outside the pointer.
@@ -841,4 +924,128 @@ test('recovery, respawn and later rounds work from rendered files and LOG.md, ne
   assert.ok(prompts.includes('A rendered file takes no such edit, so this variant is always the manual procedure (§Spawning rules).'));
   // Who creates the gates directory, and a respawned gate agent never reuses a findings path.
   assert.ok(rules.includes('the orchestrator creates `<scratchpad>/gates/` before the spawn (the renderer creates its `--out`), and a gate agent respawned after a wrong nonce gets a new `findingsFile`'));
+});
+
+// ===== The LOG.md round trip, run as published =========================================
+// Round 2 shipped a recovery command no test ran, and it failed silently three ways: a
+// findings line shaped like a heading truncated the copy, a heading that matched nothing gave
+// an empty file, and a file with no final newline glued the next heading onto its last line —
+// each with exit 0. So the append, recovery and join commands are taken out of the documents
+// as published, only their placeholders filled, and run by Git for Windows' own bash: the
+// contract validates from PowerShell, whose PATH reaches WSL's launcher for `bash` and holds no
+// awk (tests/validate.test.cjs:611-623). Every outcome is judged on whole bytes.
+const GIT_BASH = process.platform !== 'win32' ? 'bash'
+  : path.resolve(spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim(), '..', '..', '..', 'usr', 'bin', 'bash.exe');
+function bashEnv(env) {
+  if (process.platform !== 'win32') return env;
+  const out = { ...env }, keys = Object.keys(out).filter(k => k.toUpperCase() === 'PATH'), current = keys.length ? out[keys[0]] : '';
+  for (const key of keys) delete out[key];
+  return { ...out, PATH: [path.dirname(GIT_BASH), current].join(';') };
+}
+// The published text with its placeholders filled: every one of them, and nothing else.
+function filledCommand(command, values) {
+  const tokens = [...new Set([...command.matchAll(/<[A-Za-z][A-Za-z -]*>/g)].map(m => m[0]))].sort();
+  assert.deepEqual(tokens, Object.keys(values).sort(), 'the placeholders filled are exactly the command\'s own: ' + command);
+  return tokens.reduce((text, token) => text.split(token).join(values[token]), command);
+}
+// The recovery round 2 shipped: the control proving these cases can see the defects it had.
+const ROUND2_RECOVER = "git show <integration-branch>:./<ledger-dir>/LOG.md | awk -v h='### B<NN> R<k> <role> findings' '$0 == h {p = 1; print; next} /^##?#? / {p = 0} p' > \"<findings file>\"";
+test('the LOG.md append, recovery and join run as published: the exact bytes back, or a loud refusal', t => {
+  const published = logCommands(PROMPTS);
+  for (const [name, command] of Object.entries(published)) {
+    assert.ok(command, 'subagent-prompts.md publishes the ' + name + ' command, on one line');
+    assert.ok(![...command].some(c => c === '\\' || c.codePointAt(0) < 32 || c.codePointAt(0) === 127), name + ': no backslash and no control character');
+  }
+  // The template bakes the same append and recovery, protocol.md the same append: one command, three statements.
+  const template = logCommands(TEMPLATE), protocol = logCommands('orchestrate/references/protocol.md');
+  assert.equal(template.append, published.append); assert.equal(template.recover, published.recover);
+  assert.equal(protocol.append, published.append);
+  assert.ok(process.platform !== 'win32' || fs.existsSync(GIT_BASH), "Git for Windows' bash must be at " + GIT_BASH);
+
+  const temp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'log round trip '));
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 }));
+  const gates = path.join(temp, 'gate files'); fs.mkdirSync(gates);
+  const file = name => slash(path.join(gates, name));
+  const BRANCH = 'chore/tw-ledger', LOG = LEDGER_DIR + '/LOG.md';
+  const marker = (k, role) => '=== end of B01 R' + k + ' ' + role + ' findings ===';
+  const entry = (bytes, k, role) => bytes + '\n' + marker(k, role) + '\n';
+  // The findings files, one case each, written here as prose under their own headings.
+  const R1 = '### B01 R1 reviewer findings\nFIX FIRST\n1. P1 — a finding; this last line carries no newline';
+  const H1 = '### B01 R1 test-hunter findings\nFINDINGS 3\n## Validation commands\n# a comment inside a quoted script\n### A heading quoted from a batch file\n';
+  const R2 = '### B01 R2 reviewer findings\nSHIP\nP0=0 P1=0 ASK=0\n';
+  const R3 = '### B01 R3 reviewer findings\nSHIP\n';
+  // Entries that each reach one refusal alone: no marker (R4); an old markerless entry under
+  // the heading a new one reuses (R5, only the heading count refuses it); a marker ahead of its
+  // heading (R6, only the order check); a body quoting its own marker line (R7, only the marker count).
+  const R4 = '### B01 R4 reviewer findings\nSHIP\n';
+  const R5_OLD = '### B01 R5 reviewer findings\nOLD\n', R5 = '### B01 R5 reviewer findings\nNEW\n';
+  const R6 = '### B01 R6 reviewer findings\nSHIP\n';
+  const R7 = '### B01 R7 reviewer findings\nThe append closes each entry with a line such as\n' + marker('7', 'reviewer') + '\nwhich this report quotes.\n';
+  for (const [name, bytes] of [['r1.md', R1], ['h1.md', H1], ['r2.md', R2], ['r3.md', R3], ['r5.md', R5], ['r7.md', R7]]) fs.writeFileSync(file(name), bytes);
+  // Twice: LOG.md checked out LF, and CRLF under core.autocrlf=true, as this machine checks it out.
+  for (const crlf of [false, true]) {
+    const repo = makeRepo(t), env = bashEnv(repo.env), label = crlf ? 'CRLF checkout: ' : 'LF checkout: ';
+    const bash = command => {
+      const script = path.join(temp, 'step.sh');
+      fs.writeFileSync(script, command + '\n');
+      const r = spawnSync(GIT_BASH, [slash(script)], { cwd: repo.cwd, env, encoding: 'utf8', windowsHide: true, timeout: 60000 });
+      assert.ifError(r.error); assert.equal(r.signal, null);
+      return r;
+    };
+    const commit = message => { repo.git('-c', 'core.autocrlf=' + crlf, 'add', '--all'); repo.git('commit', '-m', message); };
+    repo.git('switch', '-c', BRANCH);
+    const base = '# Log — ' + LEDGER_ID + '\n\n## 2026-09-23 — session\n\n### B01\n\nThe row\'s own narrative.\n';
+    repo.write(LOG, crlf ? base.replace(/\n/g, '\r\n') : base); commit('ledger');
+    const append = (k, role, name) => {
+      const r = bash(filledCommand(published.append, { '<findings file>': file(name), '<NN>': '01', '<k>': k, '<role>': role, '<ledger-dir>': LEDGER_DIR }));
+      assert.equal(r.status, 0, label + 'append ' + name + ': ' + r.stderr);
+    };
+    const raw = bytes => fs.appendFileSync(path.join(repo.cwd, ...LOG.split('/')), bytes);   // not the published append
+    append('1', 'reviewer', 'r1.md'); append('1', 'test-hunter', 'h1.md'); append('2', 'reviewer', 'r2.md');
+    append('3', 'reviewer', 'r3.md'); append('3', 'reviewer', 'r3.md');   // one round's file appended twice
+    raw(R4); raw(R5_OLD); append('5', 'reviewer', 'r5.md'); raw(marker('6', 'reviewer') + '\n' + R6); append('7', 'reviewer', 'r7.md');
+    commit('findings');
+    // Each file, a newline and its marker, in the committed LOG.md: no heading glued to a last line.
+    const shown = spawnSync('git', ['show', BRANCH + ':./' + LOG], { cwd: repo.cwd, env: repo.env, encoding: 'utf8', windowsHide: true });
+    assert.equal(shown.stdout, base + entry(R1, '1', 'reviewer') + entry(H1, '1', 'test-hunter') + entry(R2, '2', 'reviewer')
+      + entry(R3, '3', 'reviewer') + entry(R3, '3', 'reviewer') + R4 + R5_OLD + entry(R5, '5', 'reviewer')
+      + marker('6', 'reviewer') + '\n' + R6 + entry(R7, '7', 'reviewer'), label + 'the committed LOG.md');
+    const recover = (k, role, out) => bash(filledCommand(published.recover,
+      { '<integration-branch>': BRANCH, '<ledger-dir>': LEDGER_DIR, '<NN>': '01', '<k>': k, '<role>': role, '<findings file>': out }));
+    // Heading-shaped lines, no final newline, and a clean control: each comes back byte-for-byte.
+    const back = {};
+    for (const [k, role, bytes] of [['1', 'reviewer', R1], ['1', 'test-hunter', H1], ['2', 'reviewer', R2]]) {
+      const out = back[role + k] = slash(path.join(temp, (crlf ? 'crlf' : 'lf') + ' recovered R' + k + ' ' + role + '.md'));
+      const r = recover(k, role, out);
+      assert.equal(r.status, 0, label + 'R' + k + ' ' + role + ': ' + r.stderr);
+      assert.equal(fs.readFileSync(out, 'utf8'), bytes, label + 'R' + k + ' ' + role + ' must come back byte-for-byte');
+      assert.equal(fs.statSync(out).size, Buffer.byteLength(bytes), label + 'R' + k + ' ' + role + ': the byte count');
+    }
+    // Every refusal: a non-zero exit and nothing written — and an existing file left as it was.
+    for (const [k, why] of [['9', 'a heading that matches nothing'], ['3', 'a heading and marker that occur twice'], ['4', 'a heading with no marker line'],
+      ['5', 'a heading an older markerless entry also carries'], ['6', 'a marker line ahead of its heading'], ['7', 'a body quoting its own marker line']]) {
+      const out = slash(path.join(temp, (crlf ? 'crlf' : 'lf') + ' refused R' + k + '.md'));
+      assert.notEqual(recover(k, 'reviewer', out).status, 0, label + why + ': must exit non-zero');
+      assert.equal(fs.existsSync(out), false, label + why + ': must write nothing');
+    }
+    const kept = slash(path.join(temp, (crlf ? 'crlf' : 'lf') + ' kept.md'));
+    fs.writeFileSync(kept, 'kept');
+    assert.notEqual(recover('9', 'reviewer', kept).status, 0);
+    assert.equal(fs.readFileSync(kept, 'utf8'), 'kept', label + 'a refusal must leave an existing file as it was');
+    // The join of two recovered files: a newline between them, so the second heading starts a line.
+    const joined = slash(path.join(temp, (crlf ? 'crlf' : 'lf') + ' joined.md'));
+    const j = bash(filledCommand(published.join, { '<reviewer file>': back.reviewer1, '<gate file>': back['test-hunter1'], '<joined file>': joined }));
+    assert.equal(j.status, 0, label + 'join: ' + j.stderr);
+    assert.equal(fs.readFileSync(joined, 'utf8'), R1 + '\n' + H1, label + 'the joined file');
+    if (crlf) continue;
+    // Control: round 2's recovery, run on the same LOG.md, truncates at the `## ` line and
+    // exits 0 with an empty file on a heading that matches nothing — what these cases must see.
+    const old = (k, role, out) => bash(filledCommand(ROUND2_RECOVER,
+      { '<integration-branch>': BRANCH, '<ledger-dir>': LEDGER_DIR, '<NN>': '01', '<k>': k, '<role>': role, '<findings file>': out }));
+    const truncated = slash(path.join(temp, 'round-2 R1 test-hunter.md')), empty = slash(path.join(temp, 'round-2 R9.md'));
+    assert.equal(old('1', 'test-hunter', truncated).status, 0);
+    assert.equal(fs.readFileSync(truncated, 'utf8'), '### B01 R1 test-hunter findings\nFINDINGS 3\n', 'the control must reproduce round 2\'s truncation');
+    assert.equal(old('9', 'reviewer', empty).status, 0);
+    assert.equal(fs.readFileSync(empty, 'utf8'), '', 'the control must reproduce round 2\'s silent empty file');
+  }
 });
