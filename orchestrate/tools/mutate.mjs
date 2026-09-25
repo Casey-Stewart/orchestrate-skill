@@ -205,9 +205,9 @@ function anchor(dir, realDir, m, originals) {
 // nothing about the tests: a test step with no parsed summary; a test file that failed to load
 // (node reports one as a failing test named after the file, WITH a summary, so it would otherwise
 // read as KILLED) or ran no tests (node counts one as a passing test, so the total holds); a test
-// count unlike the control's; a step in which no test passed; a step whose skipped count moved,
-// failing tests or not (a mutation that flips a skip condition changes which tests run, not how
-// many, and a test the control skipped proves nothing by failing). KILLED needs every failing step
+// count unlike the control's; a step in which no test passed or failed; a step whose skipped count
+// moved, failing tests or not (a mutation that flips a skip condition changes which tests run, not
+// how many, and a test the control skipped proves nothing by failing). KILLED needs every failing step
 // to count failed tests and name them, which a parser-none step never does: it counts nothing.
 const tests = n => `${n} test${n === 1 ? '' : 's'}`;
 function moved(s, c) {
@@ -319,12 +319,12 @@ Prints CONTROL PASS <validate line>, then one line per mutation:
 then MUTATE <k> killed, <s> survived, <u> other. An abort prints only its own line(s):
   ANCHOR-MISSING <id> | ANCHOR-AMBIGUOUS <id> (<n> matches) | CONTROL FAILED <validate line> | UNKNOWN <reason>
 Exit 0 every mutation killed; 1 at least one survived and nothing else went wrong; 2 anything else.
-KILLED: every failing step names its failing tests and no CRASHED cause below holds, so no counted step's
-skipped count moved. SURVIVED: every counted step passed with the control's own passed, skipped and total
-counts. CRASHED: a test step with no parsed summary, a test file that failed to load or ran no tests, a test
-count unlike the control's, a step in which no test passed, a step whose skipped count differs from the
-control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed
-without a named failing test; the log records which.
+KILLED: a step failed, every failing step names its failing tests and no CRASHED cause below holds, so no counted
+step's skipped count moved. SURVIVED: every counted step passed with the control's own passed, skipped and total
+counts. CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to
+load or ran no tests, a test count unlike the control's, a step in which no test passed or failed, a step whose
+skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the
+reverse), or a step that failed without a named failing test; the log records which.
 NOT-APPLIED: the mutated bytes did not read back, or equal the file's own (in a CRLF file, a replace that differs
 from find only in its line breaks). A mutation's line is printed only once its restore holds; RESTORE-FAILED
 replaces it. Git's repository variables (git rev-parse --local-env-vars) are dropped from the environment first.

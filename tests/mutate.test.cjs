@@ -801,9 +801,9 @@ test('every invalid invocation is one UNKNOWN line with exit 2, before any check
 });
 
 // The --help sentences that define the verdicts and the control's rule, exempt from the sweep below by their exact bytes.
-const HELP_DEFINITIONS = ["KILLED: every failing step names its failing tests and no CRASHED cause below holds, so no counted step's skipped count moved.",
+const HELP_DEFINITIONS = ["KILLED: a step failed, every failing step names its failing tests and no CRASHED cause below holds, so no counted step's skipped count moved.",
   "SURVIVED: every counted step passed with the control's own passed, skipped and total counts.",
-  "CRASHED: a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a step in which no test passed, a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed without a named failing test; the log records which.",
+  "CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a step in which no test passed or failed, a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed without a named failing test; the log records which.",
   'each such step must pass at least one test (one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the control.'];
 const resultBesideSkip = (text, results) => HELP_DEFINITIONS.reduce((t, pinned) => t.split(pinned).join(' '), text.replace(/\s+/g, ' ')).split(/(?<=[.!?])\s+/)
   .filter(s => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i').test(s) && /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run|control\s+ran|ran\s+(?:under|in)\s+the\s+control)\b/i.test(s));
@@ -824,6 +824,22 @@ test('--help documents every line kind the tool declares, and the exit codes', a
   const E = 'A step with a named failure is KILLED whatever its skipped count.';
   assert.equal(resultBesideSkip(r.stdout + '\n' + E, RESULTS).length, 1, 'live control: an appended sentence is caught');
   assert.equal(resultBesideSkip(HELP_DEFINITIONS[0].replace(/\.$/, ', or a todo test failed.'), RESULTS).length, 1, 'a qualified definition loses its exemption');
+  // The definitions against what classifyRun does. A one-test kill passes nothing (the live
+  // data.test.cjs cell prints `KILLED m1: add 2 and 3` off a 1/1 control): its step failed, so it is
+  // no "step in which no test passed or failed" — that cause is validate.mjs's NO-TESTS, which fails
+  // nothing. A run that reached no steps is a listed CRASHED cause, never a kill with nothing failing.
+  const { classifyRun } = await api();
+  const one = over => ({ name: 'tests', result: 'PASS', passed: 1, failed: 0, skipped: 0, total: 1, names: [], loadFailures: [], emptyFiles: [], exit: 0, ...over });
+  const control = { status: 'PASS', steps: [one()] };
+  assert.deepEqual(classifyRun(control, { status: 'FAIL', steps: [one({ result: 'FAIL', passed: 0, failed: 1, names: ['the one test'], exit: 1 })] }, ['node']),
+    { kind: 'KILLED', names: ['the one test'] }, 'a one-test kill passes nothing and is KILLED');
+  const noTests = classifyRun(control, { status: 'FAIL', steps: [one({ result: 'NO-TESTS', passed: 0, skipped: 1 })] }, ['node']);
+  assert.deepEqual([noTests.kind, /no test passed/.test(noTests.reason)], ['CRASHED', true], 'the no-pass cause is NO-TESTS: nothing passed and nothing failed');
+  assert.ok(HELP_DEFINITIONS[2].includes(', a step in which no test passed or failed, ') && !help.includes('no test passed,'), '--help\'s no-pass cause leaves out a step whose test failed');
+  const zero = classifyRun(control, { status: 'UNKNOWN', steps: [] }, ['node']);
+  assert.equal(zero.kind, 'CRASHED');
+  assert.ok(HELP_DEFINITIONS[2].startsWith('CRASHED: ' + zero.reason + ', '), 'the zero-step reason is a listed cause: ' + zero.reason);
+  assert.ok(HELP_DEFINITIONS[0].startsWith('KILLED: a step failed, '), 'the text makes no run KILLED without a failed step');
   const at = spawnSync(NODE, [TOOLS['run-at-ref'], '--help'], { encoding: 'utf8', windowsHide: true });
   assert.equal(at.status, 0);
   assert.ok(at.stdout.startsWith('run-at-ref.mjs --repo <repo> --ref <ref> --validate <spec.json> --log <file> [--setup <spec.json>] [--timeout <seconds>]\n'));
