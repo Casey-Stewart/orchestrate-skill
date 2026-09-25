@@ -5,7 +5,7 @@ Cut from the integration tip when the wave opens.
 **Wave**: 1 · **Weight**: M
 **Depends on**: none
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files**: `orchestrate/tools/validate.mjs`, `tests/validate.test.cjs`, `tests/protocol-contract.test.cjs`
+**Files**: `orchestrate/tools/validate.mjs`, `tests/validate.test.cjs`, `tests/protocol-contract.test.cjs`, `orchestrate/tools/mutate.mjs`, `tests/mutate.test.cjs`
 The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: a guard that SAMPLES its domain (every parser pattern owns a case no other catches) · a hand-rolled parse more permissive than the real consumer (prove the Node parser against the real reporter, not only canned text) · a branch no input reaches · a boundary pinned on one side only · the apparatus corrupts the work (no literal control bytes; live control first) · CRLF/LF equivalence asserted, never assumed
 **Spec**: [01-plan.md](01-plan.md) §B01 · **Gate**: fence check → reviewer + test-hunter

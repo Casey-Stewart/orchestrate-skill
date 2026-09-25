@@ -267,8 +267,9 @@ test('a red control, and a control that ran no tests, abort before any mutation'
   const idle = fx.json('idle.json', specOf(['nothing-*.test.cjs']));
   const none = cli(fx, 'mutate', mutateArgs(fx, fx.muts(M.m1), 'idle.log').map(a => a === fx.validate ? idle : a));
   assert.equal(none.lines.length, 1);
-  assert.match(none.lines[0], /^CONTROL FAILED PASS tests 0\/0 \(\d+s\) — step tests ran no tests$/);
+  assert.match(none.lines[0], /^CONTROL FAILED FAIL tests no test passed \(0\/0\) — log: .*idle\.log$/);
   assert.equal(none.code, 2);
+  assert.ok(!readLog(none).includes('==> mutate: mutation'), 'no mutation ran');
 });
 
 test('--setup runs in the checkout before the control, and a setup that does not pass aborts', t => {

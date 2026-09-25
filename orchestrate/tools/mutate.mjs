@@ -251,8 +251,7 @@ export async function mutate({ repo, ref, mutations, validate, setup = null, log
       if (plans.some(p => p.fault)) { for (const p of plans.filter(p => p.fault)) say(p.fault); return 2; }
       // A control that ran no tests would let every mutation survive: it is no control.
       const control = await run('control', validate);
-      const idle = control.steps.find((s, i) => parsers[i] !== 'none' && s.total === 0);
-      if (control.status !== 'PASS' || idle) { say(`CONTROL FAILED ${control.line}${idle ? ` — step ${idle.name} ran no tests` : ''}`); return 2; }
+      if (control.status !== 'PASS') { say(`CONTROL FAILED ${control.line}`); return 2; }
       say(`CONTROL PASS ${control.line}`);
       const tally = { KILLED: 0, SURVIVED: 0, other: 0 };
       for (const { m, file, original, mutated } of plans) {
