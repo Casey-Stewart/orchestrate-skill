@@ -1454,3 +1454,43 @@ Polish pass: the same implementer, resumed with reviewer A (swap sentence wordin
 #### B05 fix-up — polish
 
 Polish @`466a949` (`5579cf7` + `466a949`, same implementer; nonce verified): reviewer A (swap sentence: neither the total nor the skipped count moves; cite neither where the log names no tests), B/hunter #2 (skipped-test sweep vocabulary widened, `CITE_PASSAGE` exempted by bytes; lowercase result words count), hunter #1 (sweep kinds bound to the `RESULTS` export; a KILLED plant needed the "control ran" phrases, added in `466a949`), hunter #3 (no other --help sentence names KILLED/SURVIVED beside those words), --help defines KILLED and lists the unnamed-failure CRASHED cause; `classifyRun` untouched; the count-invariant guard not added (BACKLOG). Mechanical close: fence (manual) PASS — the batch file (five ticked `polish:` lines), `subagent-prompts.md`, `mutate.mjs` (one hunk at :322-327 inside `HELP`, :312-339), both test files; range diff-check clean; worktree clean; orchestrator recipe on `466a949`: 512 tests, 510 pass, 0 fail, 2 skipped. A production file touched → scoped re-review (fresh, strong tier, Opus), duties 1, 2, 4.
+
+#### B05 fix-up — scoped re-review (polish phase)
+
+B05 fix-up scoped re-review (polish phase, not a round) — FIX FIRST @466a949 (strong tier, Opus). Verbatim (token line removed):
+
+FIX FIRST
+
+**Asks**
+- **Reviewer A: CLOSED.** `/home/timetotilt/worktrees/os923/b05f/orchestrate/references/subagent-prompts.md:260-264` has the asked wording. The pin is at `tests/tool-wiring.test.cjs:1007` and the comment at `tests/mutate.test.cjs:305-307`. `git grep` finds "changes no count" and "keeps every count" nowhere. Putting the old wording back, or dropping "cite neither", turns 2 tests red.
+  - Live swap at 466a949, killing variant: the counts go from `1/2, 1 skipped` to `0 pass, 1 fail, 1 skipped`, and the tool prints `KILLED swap: windows join`. The total and skipped count held; passed and failed moved.
+  - Passing variant: `SURVIVED swap`, every count equal.
+  - The log names every test with its skip reason, in both the control and the mutation run. The sentence is true.
+- **Reviewer B / hunter #2: CLOSED.** The word list (`tool-wiring.test.cjs:1204`) is the reviewer's regex plus `not run`, `control ran` and `ran under/in the control`. `CITE_PASSAGE` is exempted by its exact bytes (`:1206`) and pinned once (`:1213`). The specimens include the reviewer's sentence and the hunter's H and I. A lowercase result word now counts. Each of the three planted into the skeleton goes red, and so does a qualified cite passage.
+- **Hunter #1: CLOSED.** The sweep takes `RESULTS` from mutate.mjs (`:1209-1211`) and has `KILLED` specimens. Its live control appends a plant to both hunter texts. The hunter's exact plant goes red in the skeleton and in `.claude/agents/test-hunter.md`.
+- **Hunter #3: CLOSED.** `resultBesideSkip` (`mutate.test.cjs:808-809`) sweeps `--help` with the definitions exempted by their bytes. Mutation E planted after "the log records which." goes red, and so does a lowercase "killed … a test the control skipped" plant.
+- **--help wording: done as asked, but the KILLED definition is false (F1).** "a step that failed without a named failing test" is true of `mutate.mjs:239`. Dropping either new sentence turns the test red.
+
+**Hunk map:** every hunk maps to an ask. The five `polish:` lines are exempt. 466a949's "control ran" words exist to catch hunter #1's exact plant. No scope creep.
+
+**Production unchanged:** mutate.mjs is byte-identical to 306a351 outside the `HELP` literal (one hunk). `classifyRun` is untouched, and no other file under `orchestrate/tools/` changed.
+
+**Validation:** EXIT=0; 512 tests, 510 pass, 0 fail, 2 skipped (both Windows-only bash tests). `git diff --check` is clean on the range, and the worktree is clean at 466a949.
+
+**F1 (P1, FIX FIRST): the new KILLED definition rules out the most common kill.**
+- **Where:** `/home/timetotilt/worktrees/os923/b05f/orchestrate/tools/mutate.mjs:322` says KILLED needs "no CRASHED cause below holds". `:325` lists "a step in which no test passed" as a cause. Both are pinned at `tests/mutate.test.cjs:804,806`.
+- **What the code does:** the no-pass check (`:231`) fires only on `NO-TESTS`. validate.mjs:291 calls any step with a failure FAIL before it ever checks NO-TESTS, so a step where nothing passed but a test failed is KILLED.
+- **Live runs (`rev3/swapfx`):** a 1/1 control whose only test fails prints `KILLED j1: join puts a slash between` (pass 0), exit 0. The swap kill prints `KILLED swap` (pass 0).
+- **The suite pins the same shape:** `mutate.test.cjs:372` (`KILLED m1: add 2 and 3`, 1/1 control) and the hunter's published command at `tool-wiring.test.cjs:1084` (math.test.cjs scoped to 1/1).
+- **How it misleads:** when each scoped step holds one test, every kill has zero passes. Read literally, `--help` calls every such kill CRASHED, which the cite passage says means "the proof did not run". The cause predates the polish, but the polish made KILLED depend on it and pinned it again.
+- **Fix:** at `:325`, change "a step in which no test passed," to "a step in which no test passed or failed," (103+10 = 113 columns, so it fits). Update `HELP_DEFINITIONS[2]` to match, and optionally the comment at `:208`. Checked in-process: a step with nothing passed or failed is always CRASHED, as NO-TESTS, a moved skipped count or a changed total.
+
+**F2 (ASK): the CRASHED list omits one cause.**
+- `classifyRun` also returns CRASHED for "the run did not reach its steps" (`mutate.mjs:220`, pinned at `mutate.test.cjs:704`), and the list does not name it.
+- With zero steps, "every failing step names its failing tests" is vacuously true, and the same vacuity holds for a passing run.
+- It is almost unreachable: validate only returns no steps when it refuses the spec, the log or the timeout, and mutate.mjs checks the spec and timeout first.
+- Optional, in the same edit as F1: add that cause to the list and start KILLED with "a step failed, …".
+
+Evidence is under `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b05f/rev3/`: `validate.log`, `exp.cjs` (12 mutations, 3 controls), `swapfx/work/*.log`, and `clone/`, restored and clean.
+
+Polish-phase FIX FIRST (never counts toward the cap): the implementer redoes the polish within prose — F1 (the CRASHED list says "a step in which no test passed or failed", HELP_DEFINITIONS follow) and F2 (name "the run did not reach its steps"; KILLED starts "a step failed, …") — then a fresh scoped re-review of the new diff. A second polish-phase FIX FIRST discards the polish (`polish discarded: @306a351`).
