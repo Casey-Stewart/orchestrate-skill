@@ -248,28 +248,59 @@ const JEST_TOKENS = lines('PASS src/t.test.js', 'Tests:       1 skipped, 2 todo,
 const PYTEST_TOKENS = lines('FAILED checks/lint.py', 'ERROR tests/test_t.py::test_a - boom',
   '== 1 failed, 2 passed, 1 xfailed, 1 xpassed, 2 errors, 1 warning, 1 rerun in 1.00s ==');
 const CARGO_NO_TIME = 'test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out';
+// Skipped and todo tests count in the total but neither pass nor fail (shapes as node prints them).
+const NODE_SPEC_SKIPS = lines('✔ runs (0.4ms)', '﹣ skipped here (0.4ms) # Windows only', '✔ todo passing (0.1ms) # TODO', '⚠ todo failing (0.1ms) # TODO',
+  nodeSummary('ℹ', { tests: 4, pass: 1, fail: 0, skipped: 1, todo: 2 }));
+// A file that registers no tests is ONE passing top-level entry named after the file, relative,
+// absolute or discovered. Without whitespace, or with a separator, a name is file-shaped.
+const EMPTY_NAMES = ['empty.test.cjs', 'C:\\Users\\Jo Ann\\proj\\test\\gone.test.mjs', 'test/sub/none.test.ts'];
+const NODE_SPEC_EMPTY = lines(...EMPTY_NAMES.map(n => `✔ ${n} (21.5ms)`), '✔ real one (0.4ms)', nodeSummary('ℹ', { tests: 4, pass: 4, fail: 0 }));
+const tapEntry = (n, name, extra = []) => [`# Subtest: ${name}`, `ok ${n} - ${name.replace(/\\/g, '\\\\')}`, '  ---', '  duration_ms: 0.4', ...extra, "  type: 'test'", '  ...'];
+const NODE_TAP_EMPTY = lines('TAP version 13', ...EMPTY_NAMES.flatMap((name, i) => tapEntry(i + 1, name)), ...tapEntry(4, 'real one'), '1..4',
+  nodeSummary('#', { tests: 4, pass: 4, fail: 0 }));
+// The other side of the signature: file-shaped names that are NOT empty files — a nested test, a
+// suite or parent test (children), a directive, and a sentence ending in a file name.
+const NODE_SPEC_NOT_EMPTY = lines(
+  '▶ validate.mjs', '  ✔ nested.test.cjs (0.2ms)', '✔ validate.mjs (0.5ms)',
+  '▶ helpers.mjs', '  ✔ inner (0.2ms)', '✔ helpers.mjs (0.4ms)',
+  '﹣ skipped.test.cjs (0.1ms) # SKIP', '✔ parses config.test.js (0.3ms)', '✔ plain (0.1ms)',
+  nodeSummary('ℹ', { tests: 6, suites: 1, pass: 5, fail: 0, skipped: 1 }));
+const NODE_TAP_NOT_EMPTY = lines('TAP version 13',
+  '# Subtest: validate.mjs', '    # Subtest: nested.test.cjs', '    ok 1 - nested.test.cjs', '      ---', "      type: 'test'", '      ...', '    1..1',
+  'ok 1 - validate.mjs', '  ---', "  type: 'suite'", '  ...',
+  '# Subtest: helpers.mjs', '    # Subtest: inner', '    ok 1 - inner', '      ---', "      type: 'test'", '      ...', '    1..1',
+  'ok 2 - helpers.mjs', '  ---', "  type: 'test'", '  ...',
+  '# Subtest: skipped.test.cjs', 'ok 3 - skipped.test.cjs # SKIP', '  ---', "  type: 'test'", '  ...',
+  ...tapEntry(4, 'parses config.test.js'), '# Subtest: empty-suite.mjs', 'ok 5 - empty-suite.mjs', '  ---', "  type: 'suite'", '  ...',
+  '1..5', nodeSummary('#', { tests: 5, suites: 2, pass: 4, fail: 0, skipped: 1 }));
 
-const ok = (passed, total) => ({ summary: true, passed, failed: 0, total, names: [], loadFailures: [] });
+const ok = (passed, total, skipped = 0) => ({ summary: true, passed, failed: 0, skipped, total, names: [], loadFailures: [], emptyFiles: [] });
+const bad = (passed, failed, skipped, total, names, loadFailures = [], emptyFiles = []) => ({ summary: true, passed, failed, skipped, total, names, loadFailures, emptyFiles });
 const CASES = [
   { parser: 'node', label: 'spec pass', text: NODE_SPEC_PASS, expect: ok(2, 2) },
-  { parser: 'node', label: 'spec fail', text: NODE_SPEC_FAIL, expect: { summary: true, passed: 1, failed: 2, total: 4, names: ['node nested spec failure', 'node spec failure'], loadFailures: [] } },
-  { parser: 'node', label: 'spec load failure', text: NODE_SPEC_LOAD, expect: { summary: true, passed: 0, failed: 2, total: 2, names: ['C:\\work\\tests\\broken.test.cjs', 'parses x.test.cjs'], loadFailures: ['C:\\work\\tests\\broken.test.cjs'] } },
-  { parser: 'node', label: 'spec inline only', text: NODE_SPEC_INLINE, expect: { summary: true, passed: 1, failed: 3, total: 4, names: ['tests/broken.test.cjs', 'inline only failure', 'nested inline failure'], loadFailures: ['tests/broken.test.cjs'] } },
+  { parser: 'node', label: 'spec fail', text: NODE_SPEC_FAIL, expect: bad(1, 2, 1, 4, ['node nested spec failure', 'node spec failure']) },
+  { parser: 'node', label: 'spec load failure', text: NODE_SPEC_LOAD, expect: bad(0, 2, 0, 2, ['C:\\work\\tests\\broken.test.cjs', 'parses x.test.cjs'], ['C:\\work\\tests\\broken.test.cjs']) },
+  { parser: 'node', label: 'spec inline only', text: NODE_SPEC_INLINE, expect: bad(1, 3, 0, 4, ['tests/broken.test.cjs', 'inline only failure', 'nested inline failure'], ['tests/broken.test.cjs']) },
   { parser: 'node', label: 'tap pass', text: NODE_TAP_PASS, expect: ok(1, 1) },
-  { parser: 'node', label: 'tap fail', text: NODE_TAP_FAIL, expect: { summary: true, passed: 1, failed: 4, total: 8, names: ['tap nested failure', 'tap # hashed failure', 'tap cancelled'], loadFailures: [] } },
-  { parser: 'node', label: 'spec script-named entries without location', text: NODE_SPEC_SCRIPTS, expect: { summary: true, passed: 0, failed: 11, total: 11, names: [...SCRIPT_NAMES, 'nine.test.json', 'ten.js.map'], loadFailures: SCRIPT_NAMES } },
-  { parser: 'node', label: 'tap load failure', text: NODE_TAP_LOAD, expect: { summary: true, passed: 0, failed: 2, total: 2, names: ['C:\\work\\tests\\broken.test.cjs', 'parses broken.test.cjs'], loadFailures: ['C:\\work\\tests\\broken.test.cjs'] } },
+  { parser: 'node', label: 'tap fail', text: NODE_TAP_FAIL, expect: bad(1, 4, 3, 8, ['tap nested failure', 'tap # hashed failure', 'tap cancelled']) },
+  { parser: 'node', label: 'spec script-named entries without location', text: NODE_SPEC_SCRIPTS, expect: bad(0, 11, 0, 11, [...SCRIPT_NAMES, 'nine.test.json', 'ten.js.map'], SCRIPT_NAMES) },
+  { parser: 'node', label: 'tap load failure', text: NODE_TAP_LOAD, expect: bad(0, 2, 0, 2, ['C:\\work\\tests\\broken.test.cjs', 'parses broken.test.cjs'], ['C:\\work\\tests\\broken.test.cjs']) },
+  { parser: 'node', label: 'spec skipped and todo', text: NODE_SPEC_SKIPS, expect: ok(1, 4, 3) },
+  { parser: 'node', label: 'spec file entries that are not empty files', text: NODE_SPEC_NOT_EMPTY, expect: ok(5, 6, 1) },
+  { parser: 'node', label: 'tap file entries that are not empty files', text: NODE_TAP_NOT_EMPTY, expect: ok(4, 5, 1) },
+  { parser: 'node', label: 'spec empty files', text: NODE_SPEC_EMPTY, expect: bad(1, 3, 0, 4, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
+  { parser: 'node', label: 'tap empty files', text: NODE_TAP_EMPTY, expect: bad(1, 3, 0, 4, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
   { parser: 'jest', label: 'pass', text: JEST_PASS, expect: ok(2, 2) },
-  { parser: 'jest', label: 'fail', text: JEST_FAIL, expect: { summary: true, passed: 1, failed: 1, total: 3, names: ['math › subtracts'], loadFailures: [] } },
-  { parser: 'jest', label: 'suite failed to run', text: JEST_LOAD, expect: { summary: true, passed: 0, failed: 1, total: 1, names: ['src/broken.test.js'], loadFailures: ['src/broken.test.js'] } },
-  { parser: 'jest', label: 'skipped, todo and pending tokens', text: JEST_TOKENS, expect: ok(3, 7) },
+  { parser: 'jest', label: 'fail', text: JEST_FAIL, expect: bad(1, 1, 1, 3, ['math › subtracts']) },
+  { parser: 'jest', label: 'suite failed to run', text: JEST_LOAD, expect: bad(0, 1, 0, 1, ['src/broken.test.js'], ['src/broken.test.js']) },
+  { parser: 'jest', label: 'skipped, todo and pending tokens', text: JEST_TOKENS, expect: ok(3, 7, 4) },
   { parser: 'pytest', label: 'pass', text: PYTEST_PASS, expect: ok(3, 3) },
   { parser: 'pytest', label: 'no tests ran', text: PYTEST_EMPTY, expect: ok(0, 0) },
-  { parser: 'pytest', label: 'fail', text: PYTEST_FAIL, expect: { summary: true, passed: 1, failed: 2, total: 4, names: ['tests/test_app.py::test_pytest_fails[a - b]', 'tests/test_app.py::test_fixture_breaks'], loadFailures: [] } },
-  { parser: 'pytest', label: 'collection error', text: PYTEST_LOAD, expect: { summary: true, passed: 0, failed: 1, total: 1, names: ['tests/test_broken.py'], loadFailures: ['tests/test_broken.py'] } },
-  { parser: 'pytest', label: 'every other token', text: PYTEST_TOKENS, expect: { summary: true, passed: 2, failed: 3, total: 7, names: ['checks/lint.py', 'tests/test_t.py::test_a'], loadFailures: [] } },
-  { parser: 'cargo', label: 'pass', text: CARGO_PASS, expect: ok(1, 2) },
-  { parser: 'cargo', label: 'fail', text: CARGO_FAIL, expect: { summary: true, passed: 1, failed: 2, total: 4, names: ['tests::cargo_fails', 'src/lib.rs - doc (line 3)'], loadFailures: [] } },
+  { parser: 'pytest', label: 'fail', text: PYTEST_FAIL, expect: bad(1, 2, 1, 4, ['tests/test_app.py::test_pytest_fails[a - b]', 'tests/test_app.py::test_fixture_breaks']) },
+  { parser: 'pytest', label: 'collection error', text: PYTEST_LOAD, expect: bad(0, 1, 0, 1, ['tests/test_broken.py'], ['tests/test_broken.py']) },
+  { parser: 'pytest', label: 'every other token', text: PYTEST_TOKENS, expect: bad(2, 3, 2, 7, ['checks/lint.py', 'tests/test_t.py::test_a']) },
+  { parser: 'cargo', label: 'pass', text: CARGO_PASS, expect: ok(1, 2, 1) },
+  { parser: 'cargo', label: 'fail', text: CARGO_FAIL, expect: bad(1, 2, 1, 4, ['tests::cargo_fails', 'src/lib.rs - doc (line 3)']) },
   { parser: 'cargo', label: 'result line without a finish time', text: CARGO_NO_TIME, expect: ok(3, 3) },
 ];
 // Text that resembles a summary but is not one must never count as one (fail closed).
@@ -293,18 +324,18 @@ test('runSpec and parseRunnerOutput are exported with the documented shapes', as
   const { runSpec, parseRunnerOutput } = await api;
   assert.equal(typeof runSpec, 'function');
   assert.equal(typeof parseRunnerOutput, 'function');
-  assert.deepEqual(Object.keys(parseRunnerOutput('node', '')).sort(), ['failed', 'loadFailures', 'names', 'passed', 'summary', 'total']);
-  assert.deepEqual(parseRunnerOutput('none', NODE_SPEC_PASS), { summary: false, passed: null, failed: null, total: null, names: [], loadFailures: [] });
+  assert.deepEqual(Object.keys(parseRunnerOutput('node', '')).sort(), ['emptyFiles', 'failed', 'loadFailures', 'names', 'passed', 'skipped', 'summary', 'total']);
+  assert.deepEqual(parseRunnerOutput('none', NODE_SPEC_PASS), { summary: false, passed: null, failed: null, skipped: null, total: null, names: [], loadFailures: [], emptyFiles: [] });
   assert.throws(() => parseRunnerOutput('mocha', NODE_SPEC_PASS), /Unknown parser/);
   const dir = tmp(t), logPath = path.join(dir, 'log.txt');
   const pending = runSpec({ steps: [{ name: 'one', argv: fake(dir, 'ok.js', NODE_SPEC_FAIL, 1), parser: 'node' }] }, { cwd: dir, logPath });
   assert.ok(pending instanceof Promise, 'runSpec is async');
   const result = await pending;
   assert.deepEqual(Object.keys(result).sort(), ['line', 'status', 'steps']);
-  assert.deepEqual(result.steps.map(s => Object.keys(s).sort()), [['exit', 'failed', 'loadFailures', 'name', 'names', 'passed', 'result', 'total']]);
-  assert.deepEqual(result.steps[0], { name: 'one', result: 'FAIL', passed: 1, failed: 2, total: 4, names: ['node nested spec failure', 'node spec failure'], loadFailures: [], exit: 1 });
+  assert.deepEqual(result.steps.map(s => Object.keys(s).sort()), [['emptyFiles', 'exit', 'failed', 'loadFailures', 'name', 'names', 'passed', 'result', 'skipped', 'total']]);
+  assert.deepEqual(result.steps[0], { name: 'one', result: 'FAIL', passed: 1, failed: 2, skipped: 1, total: 4, names: ['node nested spec failure', 'node spec failure'], loadFailures: [], emptyFiles: [], exit: 1 });
   assert.equal(result.status, 'FAIL');
-  assert.equal(result.line, `FAIL one 2 of 4 failed: node nested spec failure, node spec failure — log: ${logPath}`);
+  assert.equal(result.line, `FAIL one 2 of 4 failed, 1 skipped: node nested spec failure, node spec failure — log: ${logPath}`);
   const noLog = await runSpec({ steps: [{ name: 'one', argv: [NODE, '-e', ''], parser: 'none' }] }, { cwd: dir });
   assert.equal(noLog.status, 'UNKNOWN');
   assert.equal(noLog.line, 'UNKNOWN a log path is required');
@@ -409,7 +440,7 @@ test('multiple summaries in one output are summed and names de-duplicated', asyn
     const pass = CASES.find(c => c.parser === parser && c.expect.failed === 0), fail = CASES.find(c => c.parser === parser && c.expect.failed > 0);
     const r = parseRunnerOutput(parser, pass.text + '\n' + fail.text + '\n' + fail.text);
     const n = key => pass.expect[key] + 2 * fail.expect[key];
-    assert.deepEqual(r, { summary: true, passed: n('passed'), failed: n('failed'), total: n('total'), names: fail.expect.names, loadFailures: fail.expect.loadFailures }, parser);
+    assert.deepEqual(r, { summary: true, passed: n('passed'), failed: n('failed'), skipped: n('skipped'), total: n('total'), names: fail.expect.names, loadFailures: fail.expect.loadFailures, emptyFiles: [] }, parser);
   }
 });
 
@@ -432,6 +463,29 @@ test('ANSI-coloured output parses identically to plain output, for every kind of
     assert.ok(coloured.includes(ESC) && coloured !== c.text, 'the coloured variant must carry escapes');
     assert.deepEqual(parseRunnerOutput(c.parser, coloured), c.expect, `${kind}: ${c.parser} ${c.label}`);
   }
+});
+
+test('skipped is every counted test that neither passed nor failed, in every corpus summary', async () => {
+  const { parseRunnerOutput } = await api;
+  // Each parser's own not-run kinds, one transcript each: a parser that drops a kind goes red.
+  const KINDS = [
+    ['node', nodeSummary('ℹ', { tests: 5, pass: 1, fail: 1, skipped: 2, todo: 1 }), 3],
+    ['node', nodeSummary('#', { tests: 3, pass: 1, fail: 0, skipped: 0, todo: 2 }), 2],
+    ['jest', 'Tests:       2 skipped, 1 passed, 3 total', 2],
+    ['jest', 'Tests:       2 todo, 1 passed, 3 total', 2],
+    ['jest', 'Tests:       2 pending, 1 passed, 3 total', 2],
+    ['pytest', '=== 1 passed, 2 skipped in 0.10s ===', 2],
+    ['pytest', '=== 1 passed, 2 xfailed in 0.10s ===', 2],
+    ['pytest', '=== 1 passed, 2 xpassed in 0.10s ===', 2],
+    ['pytest', '=== 1 passed, 5 deselected in 0.10s ===', 0],
+    ['cargo', 'test result: ok. 1 passed; 0 failed; 2 ignored; 0 measured; 7 filtered out; finished in 0.00s', 2],
+  ];
+  for (const [parser, text, skipped] of KINDS) assert.equal(parseRunnerOutput(parser, text).skipped, skipped, `${parser}: ${text}`);
+  for (const c of CASES) {
+    const r = parseRunnerOutput(c.parser, c.text);
+    assert.equal(r.passed + r.failed + r.skipped, r.total, `${c.parser} ${c.label}: passed + failed + skipped = total`);
+  }
+  assert.ok(CASES.filter(c => c.expect.skipped > 0).length >= 4, 'the invariant must see summaries with skips');
 });
 
 test('CRLF through the runner end to end matches LF', async t => {
@@ -458,7 +512,7 @@ test('row: a parsed failure count wins over exit 0', t => {
   for (const code of [0, 1]) {
     const r = run(t, [{ name: 'tests', argv: fake(tmp(t), 'r.js', NODE_SPEC_FAIL, code), parser: 'node' }]);
     assert.equal(r.code, 1, 'exit ' + code);
-    assert.equal(r.line, `FAIL tests 2 of 4 failed: node nested spec failure, node spec failure — log: ${r.logPath}`);
+    assert.equal(r.line, `FAIL tests 2 of 4 failed, 1 skipped: node nested spec failure, node spec failure — log: ${r.logPath}`);
   }
 });
 
@@ -486,6 +540,78 @@ test('row: failures counted but no names captured still fails and says so', t =>
   const r = run(t, [{ name: 'tests', argv: fake(tmp(t), 'r.js', nodeSummary('ℹ', { tests: 2, pass: 1, fail: 1 }), 1), parser: 'node' }]);
   assert.equal(r.code, 1);
   assert.equal(r.line, `FAIL tests 1 of 2 failed (names not captured) — log: ${r.logPath}`);
+});
+
+// Per parser: a run in which nothing passed (all skipped, or no test at all) and its sibling in
+// which some tests are skipped but one passes.
+const NO_PASS = [
+  ['node', nodeSummary('ℹ', { tests: 1, pass: 0, fail: 0, skipped: 1 }), 'no test passed (0/1, 1 skipped)'],
+  ['node', nodeSummary('#', { tests: 2, pass: 0, fail: 0, todo: 2 }), 'no test passed (0/2, 2 skipped)'],
+  ['node', nodeSummary('ℹ', { tests: 0, pass: 0, fail: 0 }), 'no test passed (0/0)'],
+  ['jest', 'Tests:       2 skipped, 2 total', 'no test passed (0/2, 2 skipped)'],
+  ['jest', 'Tests:       0 total', 'no test passed (0/0)'],
+  ['pytest', '=== 2 skipped in 0.10s ===', 'no test passed (0/2, 2 skipped)'],
+  ['pytest', '=== 1 xfailed in 0.10s ===', 'no test passed (0/1, 1 skipped)'],
+  ['pytest', '=== 3 deselected in 0.10s ===', 'no test passed (0/0)'],
+  ['pytest', PYTEST_EMPTY, 'no test passed (0/0)'],
+  ['cargo', 'test result: ok. 0 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.00s', 'no test passed (0/2, 2 skipped)'],
+  ['cargo', 'test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s', 'no test passed (0/0)'],
+];
+const SOME_SKIPPED = [
+  ['node', nodeSummary('ℹ', { tests: 3, pass: 1, fail: 0, skipped: 1, todo: 1 }), '1/3, 2 skipped'],
+  ['node', nodeSummary('#', { tests: 2, pass: 1, fail: 0, skipped: 1 }), '1/2, 1 skipped'],
+  ['jest', 'Tests:       1 skipped, 1 passed, 2 total', '1/2, 1 skipped'],
+  ['pytest', '=== 1 passed, 1 skipped, 4 deselected in 0.10s ===', '1/2, 1 skipped'],
+  ['cargo', 'test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s', '1/2, 1 skipped'],
+];
+
+test('row: a summary in which no test passed is never a PASS, whatever the parser (0/0 included)', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), logPath = path.join(dir, 'none.log');
+  assert.deepEqual([...new Set(NO_PASS.map(([p]) => p))].sort(), ['cargo', 'jest', 'node', 'pytest'], 'every parser has a no-pass case');
+  for (const [i, [parser, text, said]] of NO_PASS.entries()) {
+    const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, `n${i}.js`, text + '\n'), parser }] }, { cwd: dir, logPath });
+    assert.equal(r.status, 'FAIL', `${parser}: ${text}`);
+    assert.equal(r.steps[0].result, 'NO-TESTS', `${parser}: ${text}`);
+    assert.equal(r.line, `FAIL tests ${said} — log: ${logPath}`);
+  }
+  // A non-zero exit still names the exit first, now with its skips.
+  const exited = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, 'x.js', NO_PASS[0][1], 2), parser: 'node' }] }, { cwd: dir, logPath });
+  assert.equal(exited.line, `FAIL tests exit 2 after 0/1 passed, 1 skipped — log: ${logPath}`);
+  // Through the CLI: exit code 1.
+  const viaCli = run(t, [{ name: 'tests', argv: fake(dir, 'c.js', NO_PASS[0][1]), parser: 'node' }]);
+  assert.equal(viaCli.code, 1);
+  assert.equal(viaCli.line, `FAIL tests no test passed (0/1, 1 skipped) — log: ${viaCli.logPath}`);
+});
+
+test('row: a run with skips that passes shows them; one without skips keeps the plain count', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), logPath = path.join(dir, 'some.log');
+  assert.deepEqual([...new Set(SOME_SKIPPED.map(([p]) => p))].sort(), ['cargo', 'jest', 'node', 'pytest']);
+  for (const [i, [parser, text, said]] of SOME_SKIPPED.entries()) {
+    const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, `s${i}.js`, text + '\n'), parser }] }, { cwd: dir, logPath });
+    assert.equal(r.status, 'PASS', `${parser}: ${text}`);
+    assert.match(r.line, new RegExp(`^PASS tests ${said} \\(\\d+s\\)$`), `${parser}: ${r.line}`);
+  }
+  const plain = CASES.filter(c => c.expect.failed === 0 && c.expect.skipped === 0 && c.expect.passed > 0);
+  assert.deepEqual([...new Set(plain.map(c => c.parser))].sort(), ['cargo', 'jest', 'node', 'pytest'], 'every parser has a skip-free pass');
+  for (const c of plain) {
+    const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, 'plain.js', c.text + '\n'), parser: c.parser }] }, { cwd: dir, logPath });
+    assert.match(r.line, new RegExp(`^PASS tests ${c.expect.passed}/${c.expect.total} \\(\\d+s\\)$`), `${c.parser} ${c.label}: ${r.line}`);
+  }
+  const failing = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, 'f.js', JEST_FAIL, 1), parser: 'jest' }] }, { cwd: dir, logPath });
+  assert.equal(failing.line, `FAIL tests 1 of 3 failed, 1 skipped: math › subtracts — log: ${logPath}`);
+});
+
+test('row: a file that ran no tests is a failure named as such, never a passing test', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), logPath = path.join(dir, 'empty.log');
+  for (const [label, text] of [['spec', NODE_SPEC_EMPTY], ['tap', NODE_TAP_EMPTY]]) {
+    const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, label + '.js', text + '\n'), parser: 'node' }] }, { cwd: dir, logPath });
+    assert.equal(r.steps[0].result, 'FAIL', label);
+    assert.equal(r.line, `FAIL tests 3 of 4 failed: ${EMPTY_NAMES.map(n => n + ' (ran no tests)').join(', ')} — log: ${logPath}`, label);
+    assert.deepEqual([r.steps[0].loadFailures, r.steps[0].emptyFiles], [EMPTY_NAMES, EMPTY_NAMES], label);
+  }
 });
 
 test('row: parser none is ok on exit 0 and FAIL with the exit code otherwise', t => {
@@ -840,7 +966,7 @@ test('live: the real spec and TAP reporters report the failing name and counts 1
     const logPath = path.join(dir, reporter + '.log');
     const r = await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, files.mixed], parser: 'node' }] }, { cwd: dir, logPath });
     assert.equal(r.status, 'FAIL', reporter);
-    assert.deepEqual(r.steps[0], { name: 'tests', result: 'FAIL', passed: 1, failed: 1, total: 2, names: ['live control zebra fails 7f3a'], loadFailures: [], exit: 1 }, reporter);
+    assert.deepEqual(r.steps[0], { name: 'tests', result: 'FAIL', passed: 1, failed: 1, skipped: 0, total: 2, names: ['live control zebra fails 7f3a'], loadFailures: [], emptyFiles: [], exit: 1 }, reporter);
     assert.equal(r.line, `FAIL tests 1 of 2 failed: live control zebra fails 7f3a — log: ${logPath}`);
     const green = await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, files.green], parser: 'node' }] }, { cwd: dir, logPath });
     assert.equal(green.status, 'PASS', reporter);
@@ -864,6 +990,67 @@ test('live: a test file that fails to load comes back in loadFailures, absolute 
     assert.ok(step.names.includes(step.loadFailures[0]), label);
     assert.ok(step.names.includes('live control zebra fails 7f3a') && !step.loadFailures.includes('live control zebra fails 7f3a'), label);
   }
+});
+
+test('live: a suite whose only test is skipped, or that runs nothing, fails; a partly skipped one passes with its count', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), write = (file, text) => fs.writeFileSync(path.join(dir, file), "const test = require('node:test');\n" + text);
+  // The shape the report measured: a Windows-only test, skipped everywhere else (forced here).
+  write('only-skipped.test.cjs', "test('windows only', { skip: 'Windows only' }, () => {});\n");
+  write('partly.test.cjs', "test('runs', () => {});\ntest('windows only', { skip: 'Windows only' }, () => {});\ntest('later', { todo: true }, () => {});\n");
+  write('plain.test.cjs', "test('runs', () => {});\n");
+  const go = async (reporter, files) => (await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, ...files], parser: 'node' }] },
+    { cwd: dir, logPath: path.join(dir, reporter + '.log') }));
+  for (const reporter of ['spec', 'tap']) {
+    const skipped = await go(reporter, ['only-skipped.test.cjs']);
+    assert.equal(skipped.line, `FAIL tests no test passed (0/1, 1 skipped) — log: ${path.join(dir, reporter + '.log')}`, reporter);
+    assert.deepEqual([skipped.steps[0].result, skipped.steps[0].skipped], ['NO-TESTS', 1], reporter);
+    // A pattern matching no file: node runs nothing, prints a 0/0 summary and exits 0.
+    const nothing = await go(reporter, ['nothing-matches-*.test.cjs']);
+    assert.equal(nothing.steps[0].exit, 0, reporter + ': node exits 0 on it, so only the rule refuses it');
+    assert.equal(nothing.line, `FAIL tests no test passed (0/0) — log: ${path.join(dir, reporter + '.log')}`, reporter);
+    const partly = await go(reporter, ['partly.test.cjs']);
+    assert.match(partly.line, /^PASS tests 1\/3, 2 skipped \(\d+s\)$/, reporter);
+    assert.deepEqual([partly.steps[0].passed, partly.steps[0].skipped, partly.steps[0].total], [1, 2, 3], reporter);
+    const plain = await go(reporter, ['plain.test.cjs']);
+    assert.match(plain.line, /^PASS tests 1\/1 \(\d+s\)$/, reporter + ': no skips, no suffix');
+  }
+});
+
+test('live: a test file that registers no tests is a load failure, relative, absolute or discovered; real tests beside it still pass', async t => {
+  const { runSpec } = await api;
+  const dir = tmp(t), sub = path.join(dir, 'test');
+  fs.mkdirSync(sub);
+  const write = (file, text) => { fs.writeFileSync(path.join(sub, file), "const { test, describe } = require('node:test');\n" + text); return path.join(sub, file); };
+  // R2's mutation: the same data-driven file, once with its data and once emptied.
+  const DATA = "for (const x of ROWS) test('row ' + x, () => {});\n";
+  write('one.test.cjs', "const ROWS = ['a'];\n" + DATA);
+  // File-shaped names that are NOT empty files: a suite and a parent test with children, and a
+  // sentence ending in a file name.
+  write('named.test.cjs', lines("describe('validate.mjs', () => { test('inside', () => {}); });",
+    "test('helpers.mjs', async t => { await t.test('child', () => {}); });", "test('parses config.test.js', () => {});", ''));
+  const go = async (reporter, args) => (await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, ...args], parser: 'node' }] },
+    { cwd: dir, logPath: path.join(dir, reporter + '.log') })).steps[0];
+  for (const reporter of ['spec', 'tap']) {
+    write('data.test.cjs', "const ROWS = ['b'];\n" + DATA);
+    const control = await go(reporter, []);
+    assert.deepEqual([control.result, control.passed, control.total, control.loadFailures], ['PASS', 6, 6, []], reporter + ' control: ' + JSON.stringify(control));
+    write('data.test.cjs', 'const ROWS = [];\n' + DATA);
+    for (const [style, args, name] of [['discovered', [], slashes(path.join('test', 'data.test.cjs'))], ['relative', ['test/data.test.cjs', 'test/one.test.cjs'], 'test/data.test.cjs'],
+      ['absolute', [path.join(sub, 'data.test.cjs'), path.join(sub, 'one.test.cjs')], path.join(sub, 'data.test.cjs')]]) {
+      const step = await go(reporter, args), label = `${reporter} ${style}`;
+      assert.equal(step.result, 'FAIL', label + ': ' + JSON.stringify(step));
+      assert.equal(step.emptyFiles.length, 1, label + ': ' + JSON.stringify(step));
+      assert.ok(slashes(step.emptyFiles[0]).endsWith(slashes(name)), label + ': ' + step.emptyFiles[0]);
+      assert.deepEqual(step.loadFailures, step.emptyFiles, label);
+      assert.equal(step.failed, 1, label + ': the file counts as failed, not passed');
+      assert.equal(step.passed, step.total - 1, label);
+    }
+  }
+  // The documented false rejection: a real test deliberately named like a file path.
+  write('data.test.cjs', "test('data.test.cjs', () => {});\n");
+  const named = await go('spec', ['test/data.test.cjs']);
+  assert.deepEqual([named.result, named.emptyFiles], ['FAIL', ['data.test.cjs']]);
 });
 
 // ---------------------------------------------------------------------------------------
@@ -945,6 +1132,23 @@ test('flags: unknown, duplicate, missing or malformed are UNKNOWN exit 2; --help
   assert.equal(help.status, 0);
   assert.match(help.stdout, /--spec <file\.json> --log <file>/);
   assert.match(help.stdout, /"steps"/);
+});
+
+test('--help states the pass rule, the skipped display and count, and the empty-file rule with its false rejection', () => {
+  const help = spawnSync(NODE, [TOOL, '--help'], { encoding: 'utf8' });
+  assert.equal(help.status, 0);
+  const text = help.stdout.replace(/\s+/g, ' ');
+  for (const needed of [
+    'A parsed step passes only when its summary shows zero failures, at least one passed test, and it exits 0',
+    '0/0 included) is FAIL "no test passed (<passed>/<total>, <k> skipped)"',
+    'Skips show on the line only when there are any: "tests 497/499, 2 skipped"',
+    'skipped counts every test in the total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending; pytest skipped + xfailed + xpassed; cargo ignored',
+    'as one passing test named after the file',
+    'counted as failed, named "(ran no tests)" and listed in loadFailures',
+    'The price is one false rejection: a real top-level test, or an empty describe under the spec reporter, deliberately named like a file path such as "config.test.js" fails the step',
+    'no whitespace unless it holds a / or \\)',
+  ]) assert.ok(text.includes(needed), 'the --help text must say: ' + needed);
+  assert.doesNotMatch(text, /passes only when its summary shows zero failures and it exits 0/, 'the old rule is gone');
 });
 
 test('--cwd sets where steps run', t => {
