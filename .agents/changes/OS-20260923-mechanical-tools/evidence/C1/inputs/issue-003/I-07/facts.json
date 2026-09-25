@@ -1,0 +1,6 @@
+{
+  "repoPath": "/c1-smoke/repo",
+  "worktreePath": "/c1-smoke/worktree",
+  "scratchpadPath": "/c1-smoke/scratchpad",
+  "guardrails": "none"
+}

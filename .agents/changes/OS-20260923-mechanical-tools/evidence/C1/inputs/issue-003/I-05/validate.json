@@ -1,0 +1,12 @@
+{
+  "steps": [
+    {
+      "name": "tests",
+      "argv": [
+        "node",
+        "--test"
+      ],
+      "parser": "node"
+    }
+  ]
+}
