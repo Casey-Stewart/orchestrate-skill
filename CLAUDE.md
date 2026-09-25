@@ -114,6 +114,11 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   contradiction sweep could not see it, because it keyed on the rule's own vocabulary and this
   was a narrowing, not a restatement. When a fix replaces prose with an enumeration, ask what
   the enumeration excludes that the old text allowed. *(BL-016 round 1)*
+- **A test that reads a child's raw output has a verdict that depends on the terminal.** Run from
+  a colour terminal, node's runner hands `FORCE_COLOR=1` to test files, and a child's reporter
+  lines arrive painted; strip ANSI before matching them, and run the suite under
+  `FORCE_COLOR=1` as well as plain — every agent run here writes to a file, never a TTY.
+  *(`tests/validate.test.cjs`, the forced-colour loop; OS-20260923 C1 issue 2)*
 
 ### Documents as code
 
@@ -188,6 +193,10 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   isolated from the real machine by design; a subagent is not. A step needs a human only
   when it needs a device, a GUI, held credentials, or a judgement about whether something
   looks right. A checkpoint asks the user for a **verdict**, not for labour. *(BL-016)*
+- **An issued input derived from the tree goes stale when a repair changes the tree.** A pin of
+  the skill directory's hash issued at one checkpoint failed at its re-issue because the
+  fix-ups had changed three skill files. Before any re-issue, regenerate and re-validate every
+  input derived from files a repair touched. *(OS-20260923 C1 issue 2, step 6)*
 
 ## Orchestration
 
@@ -195,3 +204,8 @@ Multi-batch work runs from a ledger under `.agents/changes/`; the ledger's own
 `00-READBEFORE.md` is the contract and outranks the skill's reference docs. Statuses are
 claims, git is truth. Never commit to `main`, never push, and never merge toward `main`
 without the user's explicit words in the session that acts on them.
+
+- **Severity is about behaviour, never about the fence.** A violated criterion whose fix sits
+  outside the batch's files is still P0/P1; the fence decides how it is fixed (`NEEDS_FENCE`,
+  a recorded extension), not whether it blocks. Two such findings routed to the backlog as
+  ASKs cost a failed checkpoint. *(OS-20260923 C1 issue 1)*

@@ -3,7 +3,7 @@
 **Identifier**: OS-20260923-mechanical-tools
 **Started**: 2026-09-23 · **Base**: fceab31e0ebfb7859a75dda3cb1e4be2f86c2403 (the default-branch commit the ledger
 branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
-**State**: AT-CHECKPOINT C1
+**State**: COMPLETE
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
@@ -69,14 +69,14 @@ C1 issue 001 (2026-09-24, build `450d7e9`): `I-01`…`I-09` under `evidence/C1/i
 
 | Request item | Source | Batch | Version | Status |
 |--------------|--------|-------|---------|--------|
-| R1 — validation wrapper (#5) | request | B01 | — | ⬜ |
-| R2 — shared ledger parser (build rule 3) and scaffold parse check (#2) | request | B02 | — | ⬜ |
-| R3 — skill-directory SHA-256 pin: the hash command | request (interview 2026-09-23) | B02 | — | ⬜ |
-| R4 — pin, wrapper and parse check wired into contract, scaffold and SKILL.md | request (interview 2026-09-23) | B03 | — | ⬜ |
-| R5 — SKILL.md discovery command resolvable outside this repository | planning proposal, approved 2026-09-23 | B03 | — | ⬜ |
-| R6 — rendered prompts and file-based findings (#3) | request | B04 | — | ⬜ |
-| R7 — #12's three prompt rules | planning proposal, approved 2026-09-23 | B04 | — | ⬜ |
-| R8 — mutation harness, disposable checkout, and the hunter's use of it (#6) | request | B05 | — | ⬜ |
+| R1 — validation wrapper (#5) | request | B01 | — | ✅ B01 `437c42a` + tip repair `224a84c`; C1 fix-ups `8dc09a3`, `f1fde3c` |
+| R2 — shared ledger parser (build rule 3) and scaffold parse check (#2) | request | B02 | — | ✅ B02 `5c24ece` |
+| R3 — skill-directory SHA-256 pin: the hash command | request (interview 2026-09-23) | B02 | — | ✅ B02 `5c24ece` |
+| R4 — pin, wrapper and parse check wired into contract, scaffold and SKILL.md | request (interview 2026-09-23) | B03 | — | ✅ B03 `3d3b264` |
+| R5 — SKILL.md discovery command resolvable outside this repository | planning proposal, approved 2026-09-23 | B03 | — | ✅ B03 `3d3b264` |
+| R6 — rendered prompts and file-based findings (#3) | request | B04 | — | ✅ B04 `e8a9ca0` |
+| R7 — #12's three prompt rules | planning proposal, approved 2026-09-23 | B04 | — | ✅ B04 `e8a9ca0` |
+| R8 — mutation harness, disposable checkout, and the hunter's use of it (#6) | request | B05 | — | ✅ B05 `2137e7d`; C1 fix-up `8712d87` |
 
 ## Session log
 
@@ -102,3 +102,4 @@ C1 issue 001 (2026-09-24, build `450d7e9`): `I-01`…`I-09` under `evidence/C1/i
 | 2026-09-25 | C1 re-issue: inputs issue-002 (I-10…I-12) and issue-003 (I-05/I-06 re-pinned — the QA runner caught step 6 failing on the stale pin); canonical steps revised (1→r3, 2→r2, 3→r3 for B01's recorded extension, 6–10→r2, 11–13→r2, 14→r2) and 15–19 added; every "before the fix" clause observed on `450d7e9`; QA runner 18/18 agent steps PASS (6–10 at `a54dcc9`, the rest at `e681144`, same code); page rebuilt with `--previous` = the issued sidecar; substitute artifact proof 23 step blocks as described — LOG "C1 re-issue" | AT-CHECKPOINT C1 (re-issued) — awaiting the user's verdict; step 14 still needs the branch pushed |
 | 2026-09-25 | C1 issue 2 FAIL on step 14 → B01 (verdict log); fix-up `fix/B01-c1-followup-2` (fresh agents, per the user): DONE → fence PASS → 6b substitute proof → R1 SHIP asks=1 → polish → merged `f1fde3c`, tip green plain and under FORCE_COLOR=1 → B01 🧪; C1 re-issue (steps 1 → r4, 14 → r3) next, then the preauthorized push | — |
 | 2026-09-25 | C1 issue 3: step 1 → r4 (fresh QA runner PASS at `f1fde3c`, plain and colour-forced), step 14 → r3; page rebuilt with `--previous` = the issue-2 sidecar; substitute artifact proof clean — LOG "C1 issue 3"; `chore/mechanical-tools-ledger` pushed on the user's preauthorization | AT-CHECKPOINT C1 (issue 3) — awaiting the user's verdict and the Windows re-run of step 14 |
+| 2026-09-25 | C1 PASS on issue 3 (verbatim, verdict log) → B01–B05 ✅; change-complete close-out: coverage audit from PROGRESS + git (convergence pass off) — R1–R8 all merged, no fold-ins; three guardrails distilled into `CLAUDE.md`; residuals BL-029…BL-045 written to `BACKLOG.md` on `main` after the merge, with the user's BL-028 carried as written; merge to `main` and push on the user's words — LOG "Change complete" | **CHANGE COMPLETE** |
