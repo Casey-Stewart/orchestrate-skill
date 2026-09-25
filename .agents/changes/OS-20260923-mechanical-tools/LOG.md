@@ -1563,3 +1563,9 @@ Gate blocks on the committed tip `5a0d8f7`, run from the worktree root: `git bra
 ## 2026-09-25 — push for the Windows run
 
 The user ruled the classifyRun count-invariant guard to BACKLOG (a named residual at close-out) and authorized the push, verbatim in the verdict log. Pushed `chore/mechanical-tools-ledger` only (fast-forward from `f3a8e0c`, no force), so step 14 can run on the Windows laptop; the fix-up branches and `main` untouched.
+
+## 2026-09-25 — C1 issue 2: step 14 fails on B01
+
+The user's Windows run of step 14 (PowerShell, a colour terminal, Node v22.22.3, 812 s): 512 tests, 511 pass, 1 fail, 0 skipped — the two Windows-only cases ran and passed. The failure: `tests/validate.test.cjs:1084`, in B01 fix-up round 1's live empty-file test — `spec discovered: the emptied file (line -1) must follow the parent test (line -1)`. Every production assertion before it passed (FAIL, one empty file with the right name, counted as failed), so B01's empty-file detection works on Windows and Node v22 — the first evidence of that. Root cause: the ordering check searches the step's RAW log for lines beginning `✔ ` / `ok N - `; a suite run from a colour terminal hands its colour setting to the inner `node --test` child, whose log then carries ANSI escapes, and neither regex matches. The parser strips them, the check does not. Reproduced on Linux: the test alone with `FORCE_COLOR=1` fails with the same message and passes without it; the whole recipe under `FORCE_COLOR=1` fails exactly that one test (512 / 509 / 1 fail / 2 skipped). Every validation in this session ran with output to a file, never a TTY, so every gate missed it — an escaped defect (checkpoint metric `escaped=1`).
+
+Verdict verbatim in the verdict log: step 14 fail → B01 ❌, `fix-up pending: fix/B01-c1-followup-2`; B02–B05 stay 🧪. The user asked for fresh sub-agents. Every gate of this fix-up also runs the recipe under `FORCE_COLOR=1`, the faithful Linux stand-in for her terminal.
