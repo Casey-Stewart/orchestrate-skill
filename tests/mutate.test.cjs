@@ -806,7 +806,7 @@ const HELP_DEFINITIONS = ["KILLED: every failing step names its failing tests an
   "CRASHED: a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a step in which no test passed, a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed without a named failing test; the log records which.",
   'each such step must pass at least one test (one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the control.'];
 const resultBesideSkip = (text, results) => HELP_DEFINITIONS.reduce((t, pinned) => t.split(pinned).join(' '), text.replace(/\s+/g, ' ')).split(/(?<=[.!?])\s+/)
-  .filter(s => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i').test(s) && /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run)\b/i.test(s));
+  .filter(s => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i').test(s) && /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run|control\s+ran|ran\s+(?:under|in)\s+the\s+control)\b/i.test(s));
 test('--help documents every line kind the tool declares, and the exit codes', async () => {
   const { RESULTS, NOT_RUN } = await api();
   const r = spawnSync(NODE, [TOOLS.mutate, '--help'], { encoding: 'utf8', windowsHide: true });

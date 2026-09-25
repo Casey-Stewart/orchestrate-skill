@@ -1199,9 +1199,9 @@ test('no hunter text offers a line that means the proof did not run as a proof, 
 // cannot show; the cite passage pairs the results with "did not run" to say something else. Anywhere
 // else in the hunter's texts such a sentence could claim those tests as covered (R1 hunter: an
 // appended "skipped ones included" sentence stayed green; R2: "including the ones it never ran", and
-// a KILLED line said to name only tests the control ran). Every result kind the tool exports, in any
+// a KILLED line said to name only tests the control ran — a claim with no word for skipping). Every result kind the tool exports, in any
 // case: "a mutation that survived" makes the same claim as a `SURVIVED` line. Exempt by exact bytes.
-const NOT_RAN_WORDS = /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run)\b/i;
+const NOT_RAN_WORDS = /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run|control\s+ran|ran\s+(?:under|in)\s+the\s+control)\b/i;
 const resultPattern = results => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i');
 const resultBesideNotRan = (text, results) => [SKIP_SURVIVED, SKIP_SWAP, CITE_PASSAGE].reduce((t, pinned) => t.split(pinned).join(' '), collapse(text))
   .split(/(?<=[.!?])\s+/).filter(sentence => resultPattern(results).test(sentence) && NOT_RAN_WORDS.test(sentence));
@@ -1220,10 +1220,13 @@ test('no hunter text ties a result line to tests the control did not run, outsid
     'A `KILLED` line names only tests the control ran, never one it skipped, so cite it without reading the log.',
     'A `KILLED` line refutes a finding even for a todo test.',
     "A `SURVIVED` line covers the tests the control didn't run.",
-    'A `KILLED` line settles tests that were not run as well.'];
+    'A `KILLED` line settles tests that were not run as well.',
+    // A claim about which tests the control ran, with no word for skipping (R2 hunter's own plant).
+    'A `KILLED` line names only tests the control ran, so cite it as a refutation without reading the log.',
+    'A `SURVIVED` line vouches for every test that ran under the control.'];
   for (const specimen of specimens) assert.equal(swept(specimen).length, 1, 'the sweep catches: ' + specimen);
   // Each word and each result kind has a specimen caught through it.
-  for (const word of ['skip', 'todo', 'never ran', 'did not run', "didn't run", 'not run']) assert.ok(specimens.some(s => s.includes(word)), 'a specimen says ' + word);
+  for (const word of ['skip', 'todo', 'never ran', 'did not run', "didn't run", 'not run', 'control ran', 'ran under the control']) assert.ok(specimens.some(s => s.includes(word)), 'a specimen says ' + word);
   for (const kind of RESULTS) assert.ok(specimens.some(s => s.includes('`' + kind + '`')), 'a specimen names ' + kind);
   for (const clean of ['Cite a `SURVIVED` line as the proof.', 'A runner may skip a named test file that does not exist.', 'A `KILLED` line names the failing tests.'])
     assert.deepEqual(swept(clean), [], 'not a claim about tests the control did not run: ' + clean);
