@@ -1114,3 +1114,47 @@ The polish closes all five asks and changes no behaviour. I found two optional A
 Scratch files (probes, the mutation runner and its logs, validate.log) are in `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/rev3/`.
 
 Its two optional ASKs (the sweep's "never fails" / "success" phrasings; "slash or backslash" in the price sentence) are test/wording residuals for BACKLOG at close-out. Integration: dry run clean (tree `55af17a`), merged `--no-ff` as `8dc09a3` (same tree); tip validation (pwsh) 507 / 505 / 0 fail / 2 skipped (the Windows-only pair), `git diff --check HEAD^1 HEAD` clean → B01 🧪 (the fix-up's covered row returns to the checkpoint; the page is re-issued after B05's fix-up). Worktree `b01f` removed. Fix-up metrics: rounds=1, asks=5 (+2 optional to BACKLOG), gate = 16 findings (R1 5 + 4, R2 3 + 2, scoped 2), 1 needing a production change (P1-1).
+
+### B05 fix-up (`fix/B05-c1-followup`)
+
+Implementer (default tier; nonce verified) — report verbatim (nonce line removed):
+
+DONE
+
+EVIDENCE: I ran `pwsh -NoProfile -File …/scratchpad/validate.ps1 > …/scratchpad/fixup-b05/validate.log 2>&1` from `/home/timetotilt/worktrees/os923/b05f`. It exited 0: 511 tests, 509 pass, 0 fail, 2 skipped (the baseline 507 plus 4 new tests; the 2 skips are the Windows-only pair). `git diff --check` is clean, the worktree is clean, and the diff against `chore/mechanical-tools-ledger` touches only 4 files, all inside the fence. Nothing was pushed.
+Commit: `e7f1a8b` on `fix/B05-c1-followup`.
+
+1. **SURVIVED now needs identical counts.** `classifyRun` compares each parsed step's passed and skipped counts with the control's. A step with no failing test whose counts moved is CRASHED, logged as "1 test skipped that ran in the control", "N tests ran that the control skipped", or "P passed, the control Q". Pinned by the skip-flip test (f1, plus the reverse p1) and new classification rows. Red on 8dc09a3 (`SURVIVED f1`) and red when I delete the check.
+2. **Accurate reasons.** A mutated step where no test passed logs "no test passed (0/2, 2 skipped)". An emptied file logs "a test file ran no tests (…)", kept apart from real load failures, and both are named when both happen. Both appear in the log and in `--help`. Pinned by the f2 test and the e1 test; red on 8dc09a3 and under 3 mutations of the new code.
+3. **Old claims fixed.** In `mutate.mjs`: the `classifyRun` comment, the control comment, and `--help` (the CRASHED list, a new SURVIVED definition, and "must pass at least one test … all skipped or todo … is CONTROL FAILED"). In `subagent-prompts.md`: the blind-spot sentence is rewritten around what remains and keeps the "check the log before citing a SURVIVED line" instruction. Its pin in `tool-wiring.test.cjs` is updated, still verbatim and once, with a guard that the old wording is gone. A grep of `orchestrate/`, `README.md` and `.claude/` found nothing else false. That pin is red on 8dc09a3.
+4. **Tests in `tests/mutate.test.cjs`**, all real `node --test` runs through the CLI, each with a positive sibling:
+   - (a) plus a partly skipped control: `CONTROL FAILED FAIL tests no test passed (0/1, 1 skipped) — log: …`, exit 2, nothing mutated. The 1/2-with-1-skipped control gives KILLED m1 and SURVIVED m2, exit 1.
+   - Skip-flip: CRASHED f1 beside KILLED m1 and SURVIVED m2, then CRASHED p1.
+   - No test passed: CRASHED f2 beside KILLED m1.
+   - (b): `CRASHED e1: FAIL tests 1 of 1 failed: data.test.cjs (ran no tests) — log: …` beside `KILLED m1: add 2 and 3`, exit 2.
+5. **Proofs ran outside the worktree.** The tests passed on their first run. I then copied them onto a `git clone --shared` of 8dc09a3, and ran 5 mutations of the new code in a shared clone of `e7f1a8b`, restoring each from saved bytes. Every mutation turned at least one test red. Both clones are deleted.
+
+**Root cause:** SURVIVED only checked that the step passed and the total was unchanged. A run can keep its total while changing which tests ran, because skipped tests count toward the total. The old reasons also predated B01's `NO-TESTS` result and its `emptyFiles` list, so they named the wrong cause. `validate.mjs` already exposes everything needed, so no fence change was required.
+
+**Decisions:**
+- **Moved counts only matter without a failure.** In a step that has a named failure, fewer passes are expected, so a skip beside the failure still reads KILLED.
+- **Fail closed across steps.** A count that moved in one step turns a named failure in another step into CRASHED.
+- **New hunter sentence.** I added one sentence to the hunter skeleton, which is my addition rather than something you asked for: "A test the control skipped (`, <n> skipped` on its line) runs under no mutation, so no `SURVIVED` line says anything about it." It's there because a partly skipped control is still allowed. Code covered only by a test that skips will read SURVIVED, and that proves nothing about the skipped test.
+- **Items 3 and 4:** I agree with your reading; README and `test-hunter.md` state nothing false.
+
+**Results on 8dc09a3:**
+- **Pass:** the (a) plus partial-control test. This is the expected regression pin.
+- **Fail:**
+  - skip-flip, at `SURVIVED f1`;
+  - no test passed, at the log reason;
+  - (b), at the log reason only, after its line and exit checks pass;
+  - the classification table;
+  - the tool-wiring hunter pin.
+
+**What the checkpoint re-run should check:**
+- The user's scenario (a) gives `CONTROL FAILED FAIL tests no test passed (0/1, 1 skipped) …` with exit 2.
+- R2's emptied file gives a `CRASHED` line naming `(ran no tests)`, and the log says "a test file ran no tests".
+- A mutation that flips one test's skip condition gives `CRASHED`, not `SURVIVED`, and the log says "1 test skipped that ran in the control".
+- Steps 11–13 still produce their lines unchanged.
+
+Fence (manual fallback; the helper cannot link a fix-up branch name): `git diff --name-status -M d483d32...e7f1a8b` = `orchestrate/references/subagent-prompts.md`, `orchestrate/tools/mutate.mjs`, `tests/mutate.test.cjs`, `tests/tool-wiring.test.cjs`, all in B05's fence; range diff-check clean; worktree clean → PASS. 6b: the branch's `tests/mutate.test.cjs` and `tests/tool-wiring.test.cjs` on `8dc09a3` — 58 tests, 53 pass, 5 fail (the emptied-file reason, the no-test-passed reason, the skip-flip, the classification table, the hunter pin); the scenario-(a) cell passes on the base, as the spec predicted (B01's merged fix delivers it; a regression pin) → PROVEN. Gate: a fresh reviewer (strong tier, Opus) and test-hunter (default), in parallel.
