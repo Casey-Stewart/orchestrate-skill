@@ -1321,3 +1321,132 @@ Commits: `e7f1a8b` (the first repair) and `306a351` (this round), both on `fix/B
 **For the checkpoint re-run:** besides the earlier checks, a Windows-only test unskipped by a mutation that then fails should read `CRASHED`, not `KILLED`. Steps 11–13 should still print their listed lines.
 
 Manual fence PASS on `306a351` (same 4 paths, all in B05's fence; range diff-check clean; worktree clean). R2: a fresh reviewer (strong tier, Opus) marks every round-1 finding and re-scans `git diff e7f1a8b..HEAD`; a fresh test-hunter scoped to the tests that diff adds or changes. The last round before the cap.
+
+#### B05 fix-up — R2
+
+B05 fix-up R2 reviewer — SHIP @306a351 (strong tier, Opus; nonce verified). Verbatim (nonce line removed):
+
+SHIP
+
+**Previous findings, checked at 306a351**
+- **Reviewer #1 (P1): FIX VERIFIED.** The check at `/home/timetotilt/worktrees/os923/b05f/orchestrate/tools/mutate.mjs:234` now makes a moved skipped count CRASHED whether or not a test failed. The table row at `/home/timetotilt/worktrees/os923/b05f/tests/mutate.test.cjs:694-696` is flipped, and live cells f3 (`:329-335`) and u1 (`:338-342`) were added. The comment (`:203-211`) and HELP (`:322-325`) now match the code. Live results, e7f1a8b → 306a351:
+  - e1: `KILLED e1: direct adds` → `CRASHED e1`, log "1 test skipped that ran in the control", exit 2.
+  - e2: `KILLED e2: feature adds` → `CRASHED e2`, log "1 test ran that the control skipped".
+  - The honest kill m1 is still KILLED and the comment-only c1 is still SURVIVED.
+- **ASK 2: CLOSED.** "one blind spot" is now "a blind spot" (`subagent-prompts.md:252`), the false sentence is replaced (`:258-263`), the pins are updated (`tool-wiring.test.cjs:1006-1007, :1023, :1036`), and the test header and title are reworded (`mutate.test.cjs:304-306, :324`). One wording residue is new ASK A below.
+- **ASK 3: CLOSED.** The `control. --log …` and `repository. --timeout …` lines are byte-identical to 8dc09a3, and no `--help` line is over 113 columns.
+- **Hunter #1: FIX VERIFIED.** Live u1 goes from `KILLED u1` (exit 0) to `CRASHED u1: FAIL tests 1 of 2 failed: windows path join` (exit 2), with `KILLED j1` beside it. The table rows at `mutate.test.cjs:710-714` cover it. A mutation exempting only the fewer-skipped direction beside a failure turns the u1 cell and the table red.
+- **Hunter #2: FIX VERIFIED.** The pins at `mutate.test.cjs:809-816` hold: putting e7f1a8b's CRASHED wording back turns the `--help` test red.
+- **Hunter #3: FIX VERIFIED.** The sentence is rewritten, and the new sweep catches the hunter's own appended sentence (full suite red). It samples its domain, though: new ASK B.
+- **Hunter #4: FIX VERIFIED.** The impossible fallback and its row are gone, and `step()` asserts the count rule for every table state (`mutate.test.cjs:666-670`).
+
+**New findings**
+
+**A. ASK: the swap sentence says "changes no count", which is false for the KILLED case it names.**
+- **Where:** `/home/timetotilt/worktrees/os923/b05f/orchestrate/references/subagent-prompts.md:260-263`. Pinned at `tests/tool-wiring.test.cjs:1007`; the same claim sits in the comment at `tests/mutate.test.cjs:305` ("keeps every count").
+- **Class violated:** documents as code.
+- **Scenario (live):** control `1/2, 1 skipped`; mutation `=== 'win32'` → `!==` skips `posix join` and runs `windows join`, which fails. The run reads `1 of 2 failed, 1 skipped` and the tool prints `KILLED swap2: windows join`, exit 0. The passed and failed counts both moved. A hunter who expects a swap to leave the counts alone cites this KILLED against a finding about `posix join`, which never ran under the mutation.
+- **Second problem:** the name comparison it orders is impossible where the log names no tests. pytest's default output prints only dots per file, and jest names tests only when it runs a single file.
+- **Fix:** replace "changes no count" with "changes neither the total nor the skipped count", and append "; where the log does not name each test, cite neither". Update the pin and the `:305` comment.
+
+**B. ASK: the new skip sweep only recognises the word "skip".**
+- **Where:** `/home/timetotilt/worktrees/os923/b05f/tests/tool-wiring.test.cjs:1201-1202`.
+- **Class violated:** a guard that samples the domain it claims to sweep.
+- **Scenario:** I planted "A `SURVIVED` line also vouches for every test the control listed, including the ones it never ran." after `subagent-prompts.md:263`. The full suite stayed green (512/510/0). It contradicts the pinned sentence in the swap sentence's own words. The hunter's specimen in the same spot goes red, so the text is being read.
+- **Fix:** match `/\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run)\b/i`, exempt `CITE_PASSAGE` by its exact bytes (it pairs `SURVIVED` with "did not run"), and add my sentence as a specimen. Checked in scratch: both hunter texts stay clean, the three specimens and the qualifier plant are still caught, the clean lines pass, and my sentence is caught.
+- **Outside what the test claims:** it checks SURVIVED only, so "A `KILLED` line always names a test that ran under the control." also stays green.
+
+**Validation:** EXIT=0. 512 tests, 510 pass, 0 fail, 2 skipped; both skips are the Windows-only bash tests. `git diff --check` is clean inside the script and on the range. The worktree is clean at 306a351 and all 4 changed files are in the fence. Log: `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b05f/rev2/validate.log`.
+
+**Hunk map (e7f1a8b..306a351):** every hunk maps; nothing is scope creep.
+- Classification comment, skip check, HELP CRASHED list, f3/u1/j1 fixtures and cell, flipped row: reviewer P1 and hunter #1.
+- `moved()` fallback removed, count-rule comment, `step()` assertion, impossible row removed: hunter #4.
+- HELP re-wrap: ASK 3.
+- Hunter sentences, their pins, the test header and title: ASK 2.
+- `--help` pins: hunter #2.
+- New sweep: hunter #3.
+
+**Live runs** (scratch clones only):
+- (a) prints `CONTROL FAILED FAIL tests no test passed (0/1, 1 skipped)`, exit 2, no mutation run.
+- (b) prints `CRASHED e1: … data.test.cjs (ran no tests)`, and the log says "a test file ran no tests".
+- The skip-flip prints `CRASHED f1`. A partly skipped control gives KILLED m1 and SURVIVED c1.
+- Across steps, x1 is CRASHED with "step more: 1 test skipped…".
+- Every run left the repository untouched and the temp root empty.
+- Smoke steps 11–13 on a fresh I-09 clone print exactly the README's lines (exits 1, 2, 0). The issued inputs hash unchanged.
+
+**Decision table:**
+- SURVIVED needs every step to pass and, in every parsed step, no failed-to-load or empty file, the control's total, a passing step (not NO-TESTS) and the control's skipped count.
+- KILLED also needs named failures, and no parsed step anywhere with a moved skipped count. The same-step and cross-step rules are now one rule.
+- Two documented gaps remain: the swap (live `SURVIVED swap` and `KILLED swap2`) and the space-in-name empty file.
+- By design, a real kill beside a same-step skip move, and a pytest strict-xfail XPASS, now read CRASHED. That is the stated cost, and it is consistent with criterion 2.
+
+**The dropped passed-count check:**
+- **Does total = passed + failed + skipped hold?** Yes, for every current parser: node and jest by their runners' own counters, pytest and cargo by construction. `found()` keeps it when it moves empty files, and jest adds load failures to failed and total alike. `tests/validate.test.cjs:491-512` pins it over the whole corpus.
+- **Every path into `classifyRun`:** TIMEOUT, no summary, failed-to-load or empty files, a changed total and NO-TESTS all return before the skip check. Parser-none steps are skipped and can never read KILLED.
+- **If a future parser broke it:** the code fails **open**. Given 4 of 5 passed, 0 failed, 0 skipped against a 5/5 control, 306a351 returns SURVIVED where e7f1a8b returned CRASHED.
+- This is not blocking. A one-line guard in `classifyRun`, `if (s.passed + s.failed + s.skipped !== s.total) → CRASHED`, pinned by a row built without `step()`, would close it.
+
+**Failing-on-base:** with round 2's test files on 8dc09a3: 59 tests, 52 pass, 7 fail. That is round 1's five plus the `--help` pins and the new sweep; the (a)/partial cell passes, as predicted. On e7f1a8b: 59/54/5, exactly the implementer's five, and the skip-count cell fails at `KILLED f3`. Consistent with the diff.
+
+**Sweeps:** nothing in `orchestrate/`, `README.md` or `.claude/` still states the old behaviour.
+
+**Other notes:**
+- Any sentence sweep misses a follow-up sentence that uses a pronoun ("Yet such a line does show the skipped tests ran…" stays green). This file's other sweeps share that limit.
+- The HELP CRASHED list still omits "a step failed without a named failing test" (for example a failing parser-none step). That predates this change, but the new pin now freezes it; adding it is optional.
+- Windows and Node 22: nothing in the diff is platform-specific. u1's switch is fixed off on every platform, so the cell behaves the same on win32.
+
+Evidence is in `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b05f/rev2/`: `probe/` (`head.out`, `e7.out`, the scripts), `runs/`, `smoke/` and `base-run.log`. I wrote nothing outside `rev2/`, and the mutation clone there is restored and clean.
+
+B05 fix-up R2 test-hunter — FINDINGS 3 @306a351 (default tier; nonce verified). Verbatim (nonce line removed):
+
+FINDINGS 3
+
+**Round-1 hunter findings, re-run against 306a351:**
+- **#1 CLOSED.** I put the round-1 guard back (mutation A: `if (s.failed === 0 && s.skipped !== c.skipped)`). It goes red at the f3 cell (`KILLED f3`) and at the classification table. Each direction goes red on its own:
+  - B exempts only "ran that the control skipped" beside a failure. It goes red live at `KILLED u1: windows join`, and in the table at `mutate.test.cjs:703`.
+  - C exempts only "skipped that ran" beside a failure. It goes red at `KILLED f3`, and in the table at `:694`.
+- **#2 CLOSED.** Mutation D puts back the old CRASHED wording from e7f1a8b. The `--help` test goes red.
+- **#3 CLOSED for the exact sentence it named.** Mutation F appends the R1 sentence ("skipped ones included"), and the new sweep goes red. The same sweep still misses nearby wordings; see findings 1 and 2.
+- **#4 CLOSED.** The passed-only fallback and the impossible row are gone. The `step()` assertion checks only states the table builds by hand. The same rule for real parser output is already pinned in `tests/validate.test.cjs:509`, which covers at least 4 summaries with skips. So the `classifyRun` comment at `mutate.mjs:232-233` rests on a pinned fact.
+
+**Method:** for each mutation I made a fresh `git clone --shared` checked out at 306a351, under `.../gate-b05f/hunt2/`. The apply script (`hunt2/apply.cjs`) stops unless its anchor matches exactly once.
+- Unmutated control: tool-wiring 27/27, mutate 32/32, full suite 512 tests, 510 pass, 0 fail, 2 skipped.
+- Every surviving mutation below was also run through the full suite, and each stayed at 510 pass, 0 fail.
+- The worktree is still clean at 306a351, and all clones are deleted. Logs are in `hunt2/`.
+
+**Findings, ranked by risk:**
+
+**1. MEDIUM: the `KILLED` half of the swap sentence is not swept at all (→ ASK).**
+- **Test:** `tests/tool-wiring.test.cjs:1201-1218` (`skipAsSurvived` and its test).
+- **Class:** a guard that samples the domain it claims to sweep, and a positive-only assertion on prose.
+- **Why:** `SKIP_SWAP` (`:1235`, in `subagent-prompts.md:259-263`) warns that a `SURVIVED` **or `KILLED`** line may rest on a test the control never ran. The sweep only looks for `kindPattern('SURVIVED')`. The neighbouring not-run sweep (`:1170`) ignores a sentence that names only result kinds.
+- **Mutation, green (ran it):** I added this after `subagent-prompts.md:263` ("ran in the log."): "A `KILLED` line names only tests the control ran, so cite it as a refutation without reading the log." tool-wiring stayed 27/27 and the full suite stayed 510 pass, 0 fail.
+- **Assertion to add:** sweep for any result kind the tool exports (RESULTS: `SURVIVED` and `KILLED`), with a `KILLED` specimen and a live control on both hunter texts.
+
+**2. MEDIUM: the sweep's words sample what "a skipped test" can be called (→ ASK).**
+- **Test:** `tests/tool-wiring.test.cjs:1202`, the `/\bskip(?:s|ped|ping)?\b/i` filter and the case-sensitive `SURVIVED` pattern.
+- **Class:** a guard that samples its domain.
+- **Mutations, green (ran both, same anchor, full suite green):**
+  - H: "A `SURVIVED` line covers every scoped test, including any the control did not run."
+  - I: "A mutation that survived proves every skipped test too."
+  - The clean specimen at `:1217` ('A `survived` line that skipped nothing.') treats the lowercase form as correct by design.
+- **Assertion to add:** extend the words to include `did not run`, `never ran`, `not run` and `todo`, each with a caught specimen. Also decide explicitly whether a lowercase `survived` next to a skip word counts.
+
+**3. LOW: the verbatim `--help` pins only check that text is present (→ ASK).**
+- **Test:** `tests/mutate.test.cjs:809-817`.
+- **Class:** a positive-only assertion on prose.
+- **Mutation, green (ran it):** mutation E adds "A step with a named failure is KILLED whatever its skipped count." after `mutate.mjs:325` ("the log records which."). mutate stayed 32/32 and the full suite stayed 510 pass, 0 fail.
+- **Assertion to add:** check that no `--help` sentence other than the pinned CRASHED definition names `KILLED` or `SURVIVED` next to a skip word, with a live control.
+- **Optional (production wording → P1):** `--help` never defines KILLED. Adding "named failures in steps whose skipped count did not move" would give that rule something to pin.
+
+**Checked and holding (reasoned from the tests, not run):**
+- The u1 cell is reached by the input it claims: the control is 1/2 with 1 skipped, and the run is 1 passed, 1 failed, 0 skipped. Its log reason is asserted from the real log.
+- The f3 run is FAIL, not NO-TESTS, and the log tells it apart.
+- The cross-step case in the table (`:708-711`) still holds with the new rule.
+- Moving the skip check above NO-TESTS would turn the f2 log check red.
+- The KILLED sibling beside the control's own skips (`:705`) guards against a rule that CRASHes too much.
+- A qualifier added inside a pinned sentence breaks the exemption (`:1220`).
+
+**Not flagged:** moving the skip check above the total check or the load-failure check only changes which accurate reason is logged. Both reasons are true, and the kind stays CRASHED.
+
+Polish pass: the same implementer, resumed with reviewer A (swap sentence wording + "cite neither" where the log names no tests), reviewer B = hunter #2 (the sweep's skipped-test vocabulary, CITE_PASSAGE exempted by its bytes), hunter #1 (sweep KILLED as well as SURVIVED), hunter #3 (a contradiction check on the --help pins), and two --help wording additions (define KILLED; list "a step failed without a named failing test" under CRASHED) — prose only. Not folded: the reviewer's one-line classifyRun guard against a parser breaking total = passed + failed + skipped (today unreachable, pinned in validate.test.cjs; it fails open to SURVIVED if a future parser broke it) — a behaviour change, so never a polish; named BACKLOG residual, surfaced to the user with the offer to take it now as a reviewed change.
