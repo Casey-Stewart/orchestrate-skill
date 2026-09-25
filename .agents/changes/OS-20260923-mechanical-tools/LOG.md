@@ -1060,3 +1060,7 @@ FINDINGS 2
 - STOPSUB: narrowing the backward scan's stop to `# Subtest: ` alone stays green (run, 45/0). It is equivalent on real node output, because every top-level TAP entry opens with `# Subtest:`. That stop is defensive.
 
 Polish pass: the same implementer, resumed with ASK-A, ASK-B, ASK-C and hunter #1 (#2 = ASK-C). ASK-A takes the wording fix, not the optional production narrowing (a polish never changes behaviour). The `--help` text lives in `validate.mjs`, so the polish touches a production file and closes with a fix-diff-only scoped re-review.
+
+#### B01 fix-up — polish
+
+Polish @`3f6fae5` (same implementer; nonce verified): ASK-A price sentence (wording only), ASK-B "Not recognised" sentence, ASK-C/hunter #2 sentence-boundary sweep with widened vocabulary and its seven specimens proven red, hunter #1 a space in the file's own name (corpus, absolute, live discovered); 11 mutations red after a passing control. Mechanical close: fence (manual) PASS — `git diff 334b0ac..3f6fae5` = the batch file (four ticked `polish:` lines), `orchestrate/tools/validate.mjs` (one hunk at :361, inside the `HELP` string at :338), `tests/validate.test.cjs`; range diff-check clean; worktree clean; orchestrator recipe on `3f6fae5`: 507 tests, 505 pass, 0 fail, 2 skipped. A production file touched → fix-diff-only scoped re-review (fresh, strong tier, Opus), duties 1, 2, 4.
