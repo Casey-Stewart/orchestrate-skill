@@ -933,3 +933,130 @@ DONE
   - The empty-file probes should still give `FAIL … (ran no tests)`.
 
 Manual fence PASS on `334b0ac` (same 5 paths; batch file unchanged since `e2514d8`; worktree clean). R2: a fresh reviewer (strong tier, Opus) marks every round-1 finding and re-scans `git diff e2514d8..HEAD`; a fresh test-hunter scoped to the tests that diff adds or changes.
+
+#### B01 fix-up — R2
+
+B01 fix-up R2 reviewer — SHIP @334b0ac (strong tier, Opus; nonce verified). Verbatim (nonce line removed):
+
+SHIP
+
+**Round-1 findings, checked at 334b0ac.** Each mutation below was run by an anchored applier in a shared clone. The unmutated control gave 47 tests, 45 pass, 0 fail, 2 skipped.
+- **P1-1: FIX VERIFIED.**
+  - Round 1's scenario, live: the two real Shipping App titles beside a normal test give `PASS tests 3/3 (0s)` under spec and TAP.
+  - An emptied file beside a real one, and an emptied file sorting after a describe file and a parent-test file, still give `FAIL … (ran no tests)` under both reporters.
+  - Putting round 1's rule back turns 4 tests red: the corpus, CRLF, ANSI and live tests.
+  - Top-level titles across her three repos (shipping-app 2548, amazon-sheets-logger 1120, orchestrate-skill 321): the tip rejects 0 of 3989. Round 1's rule rejected 4, including `amazon-sheets-logger/test/sephora-pdp.test.js:1825` and `target-pdp.test.js:645`.
+- **ASK-1 / hunter #1: CLOSED.** M23 turns 5 tests red. `tests/validate.test.cjs:1081-1082` asserts the emptied entry follows `helpers.mjs` under both reporters.
+- **ASK-2: CLOSED.** M26 turns 4 red. M18 turns red "without a summary, an empty-file entry is still reported as a load failure".
+- **ASK-3: CLOSED.** `validate.mjs:357` names all three filters. Cutting it to `--test-name-pattern` turns the `--help` test red.
+- **ASK-4: CLOSED.** The comment at `tests/mutate.test.cjs:266-267` is now true: node exits 0 on a glob that matches nothing (asserted live at `validate.test.cjs:1033`), and validate refuses the run as `no test passed (0/0)`.
+- **Hunter #2: FIX VERIFIED.** The unanchored regex turns 4 red. `✔ todo.test.cjs … # TODO` is in the fixture at :275 and the live file at :1057.
+- **Hunter #3: FIX VERIFIED** for both of the hunter's mutations. The sweep is still porous; see ASK-C.
+- **Hunter #4: FIX VERIFIED.** Dropping the second `${sk}` turns :564-565 red.
+- **New mutations of the narrowed rule:** all 7 turn red — no whitespace anywhere, forward slash only, backslash only, last segment, dirname, the old rule in spec only, the old rule in TAP only.
+
+**New findings (all ASK)**
+
+**ASK-A**: `/home/timetotilt/worktrees/os923/b01f/orchestrate/tools/validate.mjs:360-362`, pinned at `tests/validate.test.cjs:1183`
+- **Violates:** spec item 3 ("document the one false rejection"). This is P1-1's class: round 1 said such a rejection is acceptable only if the price sentence states it.
+- **Scenario:** a top-level `test('I/O errors from the reader surface through reader.js')` beside `test('plain')`, live under spec and TAP, gives `FAIL tests 1 of 2 failed: I/O errors … reader.js (ran no tests)`, exit 1. The same holds for any title whose first word has a slash (and/or, CI/CD, read/write) and that ends in a script file name. None of the 3989 real titles does this.
+- **Fix (wording):** "The price is a false rejection of any real top-level test, or an empty describe under the spec reporter, whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first word holds a slash ("I/O errors from reader.js"); rename it." Update the pin.
+- **Optional production fix instead:** also require `!/\s/.test(name.split(/[\\/]/).pop())`. The cost is that an emptied file whose basename holds a space would no longer be recognised.
+
+**ASK-B**: `validate.mjs:362-364`, pinned at `tests/validate.test.cjs:1185`
+- **Violates:** the documented gap is narrower than what the code actually misses — the silent side of reject-on-doubt.
+- **Scenario:** plain `node --test` (discovery, the form amazon-sheets-logger's `npm test` uses) over an emptied `my dir/x.test.cjs` beside `one.test.cjs` gives `PASS tests 2/2 (0s)`, exit 0, under spec and TAP. This is reported defect (b), silent, and nothing was "given". Node also strips `./`, so `./my dir/…` is missed too. None of her repos has such a folder today.
+- **Fix:** "Not recognised: a file that node names by a relative path whose first segment holds a space, whether given, globbed or discovered (…)". Update the pin.
+
+**ASK-C**: `tests/validate.test.cjs:1188-1194`
+- **Violates:** "a guard that samples its domain". The comment says any appended contradiction goes red.
+- **Scenario:** appending " An empty file such as x.test.js passes." or " Skipped tests (e.g. todo) pass." to the `--help` text stays green, 47/45/0. The `[^.]*` stops at every dot in a file name.
+- **Fix:** split `rest` with `/\.(?=\s+[A-Z]|\s*$)/`, then require that no sentence matches both a subject and a verdict. I checked this: today's `--help` stays green, and both examples plus H3's original go red.
+
+**Evidence and duties**
+- **Validation (duty 3):** EXIT=0. 507 tests, 505 pass, 0 fail, 2 skipped (the two "on Windows …" cells). `git diff --check` on the range is clean. Log: `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/rev2/validate.log`
+- **Smoke at the tip:** smoke 1 gives `PASS tests 505/507, 2 skipped (21s)`, exit 0. Smoke 2 gives `FAIL tests 1 of 2 failed: fixture fails on purpose — log: …`, exit 1.
+- **User's scenarios, live:**
+  - skip-only: `FAIL tests no test passed (0/1, 1 skipped)`, exit 1, both reporters
+  - partly skipped: `PASS tests 1/2, 1 skipped`
+  - normal: `PASS tests 2/2 (0s)`, the no-skip form unchanged
+  - empty file beside a real one: `FAIL tests 1 of 2 failed: empty.test.cjs (ran no tests)`
+- **Hunk map (e2514d8..HEAD):** every hunk maps to a finding.
+  - `validate.mjs:29-31` → P1-1; `--help` → P1-1's gap sentence and ASK-3
+  - `mutate.test.cjs:266` → ASK-4
+  - fixtures at :254-287 → P1-1, ASK-1, M26, H2; CASES and :635 are bookkeeping for those fixtures
+  - :439 → M18; :564 → H4; live test :1048-1088 and help test :1181-1194 → the same findings
+  - No scope creep, and the batch file is unchanged since e2514d8.
+- **What the narrowing gave up:** the tip now misses exactly the names that contain a separator and have whitespace in their first segment. Node prints those only as relative names — given, globbed, `./`-prefixed or discovered — and I probed all four live. Absolute paths start with `""`, `C:` or a UNC prefix, so they are always recognised; her recipe uses absolute paths. Given and globbed names are inside the documented gap; discovered ones are not stated (ASK-B).
+- **Sibling reader:** `validate.mjs:102`, the location-less fallback for failing entries, is not a finding. A failing real title gets a location live, and `loadFailures` comes back `[]` under both reporters.
+- **Failing-on-base (duty 5):**
+  - The tip's test files on 7fbca77 give 75 tests, 56 pass, 17 fail, 2 skipped. That is round 1's 15 plus the new M18 cell and the H4 cell, so it is consistent with the diff.
+  - On e2514d8 exactly 5 fail — the corpus, CRLF, ANSI, live empty-file and `--help` tests, i.e. the P1-1 cells — as the implementer said.
+- **Node 22 / Windows:**
+  - The new ordering assertion (:1081) and the spec parent tracking need a parent test to close as a column-0 `✔ name (Xms)`.
+  - An archived run shows exactly that: `/home/timetotilt/worktrees/os923/b01f/.agents/archive/OS-20260918-readonly-evidence-smoke-inputs/evidence/W2/B03/polish/full-validation.txt:55-58`. The file itself names no version; that ledger recorded Windows and Node v22.22.3, so this is an inference.
+  - Backslashes: TAP's `\\` is unescaped (:60) before the split.
+- **Owed to B05's fix-up (duty 6):**
+  - `/home/timetotilt/worktrees/os923/b01f/orchestrate/references/subagent-prompts.md:252-255` and its pin at `tests/tool-wiring.test.cjs:1016-1017`.
+  - `mutate.mjs`'s comment, `classifyRun` reason and HELP (round 1's list).
+  - One addition: the blind spot does not vanish at the tip. It narrows to scoped files that node names by a relative path whose first segment holds a space. B05 should rewrite that sentence around what remains and keep its "check the log" instruction, not delete it.
+  - Nothing else: my grep of the repo found no other shipped statement of the old rule or the old `--help` wording.
+- **Scratch files:** probes, mutation files and logs are under `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/rev2/`. The clone is clean and the worktree was not touched.
+
+B01 fix-up R2 test-hunter — FINDINGS 2 @334b0ac (default tier; nonce verified). Verbatim (nonce line removed):
+
+FINDINGS 2
+
+**Round-1 findings, each re-run against 334b0ac. All went red, so all are closed:**
+- Hunter #1 / ASK-1 (M23, backward scan with no stop): **CLOSED**. 5 tests fail, including the corpus test, the "row: a file that ran no tests" test and the live test.
+- Hunter #2 (spec end-regex without its `$` anchor): **CLOSED**. 4 tests fail (corpus, CRLF, ANSI, live).
+- Hunter #3 (replace the "Not recognised" sentence with "A run with no tests at all passes."): **CLOSED**. The `--help` test fails.
+- Hunter #4 (drop `${sk}` from the names-not-captured line): **CLOSED**. The names-not-captured row fails.
+- ASK-2 M26 (`SCRIPT_FILE` changed to `/\.\w+$/`): **CLOSED**. 4 tests fail.
+- ASK-2 M18 (`missing(names, loadFailures)`): **CLOSED**. The new "without a summary" test fails.
+- Also red, beyond the ask: the old `fileShaped` rule (4 tests fail, the two real Shipping App titles among them) and shortening the ASK-3 filter list back to `--test-name-pattern` alone (the `--help` test fails).
+
+**Setup.** I used a scratch clone (`git clone --shared`) at 334b0ac under `.../scratchpad/gate-b01f/hunt2/c`. The runner `hunt2/run.cjs` applies each mutation only if its anchor matches exactly once, otherwise it aborts. It runs only `tests/validate.test.cjs`, then restores the file. The first control run was bogus: I had set `NODE_TEST_CONTEXT=''`, node treated that as a nested run and ran nothing. I fixed that by deleting the variable. The real unmutated control gave 47 tests, 45 pass, 0 fail. Logs are in `hunt2/logs/*.log`. The clone's `git status` is clean, and I did not touch the worktree.
+
+**1. MEDIUM-HIGH: `fileShaped` allows whitespace after the first separator, but the tests only check whitespace in the directories of absolute paths. A discovered empty file with a space in its name can silently pass again.** Class: a boundary pinned on one side only / a guard that samples its domain.
+- Test: `/home/timetotilt/worktrees/os923/b01f/tests/validate.test.cjs:258` (`EMPTY_NAMES`), and the live test at :1043, whose temp paths contain no space.
+- Production: `/home/timetotilt/worktrees/os923/b01f/orchestrate/tools/validate.mjs:31`.
+- Two mutations stay green (both run, 45 pass / 0 fail, against the live control above):
+  - BASENAME: append `&& !/\s/.test(name.split(/[\\/]/).pop())` to `fileShaped`.
+  - ABSONLY: replace the first-segment clause with `(/^(?:[A-Za-z]:)?[\\/]/.test(name) || !/\s/.test(name))`.
+- What that costs, run live under node 24:
+  - Setup: the files `test/one.test.cjs` and an emptied `test/my data.test.cjs`, run discovered and absolute, under spec and TAP.
+  - At the tip, all 4 runs report `emptyFiles` naming `my data.test.cjs` (1 passed, 1 failed).
+  - Under either mutation, the mutated `fileShaped` returns false on that name, so the step reads PASS 2/2. That is the original defect.
+  - Probe: `hunt2/probe.mjs`.
+- The `--help` text promises that such a file is recognised: the only exclusion it states is whitespace in the first segment.
+- Assertions to add:
+  - To `EMPTY_NAMES`: `test/my data.test.cjs` (discovered form) and `C:\proj\my file.test.mjs` (space in the basename of an absolute path). Optionally `test/my dir/a.test.cjs`.
+  - Ideally, a live emptied file whose name holds a space, run discovered.
+- Test-only, so **ASK**.
+
+**2. LOW-MEDIUM: the `--help` contradiction sweep only checks a sample of subject and verdict words. It even accepts the original defect restated.** Class: positive-only assertions on prose (the sweep samples its domain).
+- Test: `/home/timetotilt/worktrees/os923/b01f/tests/validate.test.cjs:1192-1194`.
+- Production: the HELP text, `orchestrate/tools/validate.mjs:338-364`.
+- Each of these sentences, appended after `…"my dir/a.test.js").`, stays green (all run, 45/0):
+  - "A file that registered no tests counts as a passing test." `passing` and `counts` are not verdict words.
+  - "A run with zero tests succeeds." `zero tests` is not a subject; `succeeds` is not a verdict.
+  - "A step whose every test was skipped is accepted." `accepted` is not a verdict.
+  - "An empty file such as data.test.js passes." The `[^.]*` window stops at the dot in the file name.
+- The words were probably narrowed so the sweep would not trip on "as one passing test", which the text itself contains.
+- Fix, test-only (**ASK**):
+  - Split the text into sentences by `. ` followed by a capital letter, not by any `.`.
+  - Take the legitimate sentences out verbatim, as the test already does for RULE.
+  - Widen the verbs to `pass(?:es|ed|ing)?|green|ok|succeeds?|accepted|counts as pass` and the subjects to add `zero|every test|all tests?`.
+
+**Checked and holding:**
+- Other sides of the narrowed `fileShaped`: the old rule, the M26 extension check, the separator split (both `\` and `/` are needed: `C:\Users\Jo Ann\…` and `/home/Jo Ann/…` each pin one), and the first-segment side (the two real titles and `parses config.test.js`).
+- The TAP directive clause (SKIP and TODO), the TAP suite clause (`empty-suite.mjs`) and the spec `▶` parent tracking.
+- The live test's "emptied file follows the parent" position check is real under both reporters (it is part of why H1 went red).
+- The new no-summary test pins `missing`'s merge through a deepEqual.
+- The `mutate.test.cjs` change is a comment only.
+
+**Not a finding:**
+- STOPSUB: narrowing the backward scan's stop to `# Subtest: ` alone stays green (run, 45/0). It is equivalent on real node output, because every top-level TAP entry opens with `# Subtest:`. That stop is defensive.
+
+Polish pass: the same implementer, resumed with ASK-A, ASK-B, ASK-C and hunter #1 (#2 = ASK-C). ASK-A takes the wording fix, not the optional production narrowing (a polish never changes behaviour). The `--help` text lives in `validate.mjs`, so the polish touches a production file and closes with a fix-diff-only scoped re-review.
