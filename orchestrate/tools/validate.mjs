@@ -26,9 +26,9 @@ const uniq = list => [...new Set(list)];
 const slashes = p => p.replace(/[\\/]+/g, '/');
 // The name and the location may each be relative or absolute (spec: absolute name, relative location).
 const isFileOf = (name, file) => { const n = slashes(name), f = slashes(file); return f === n || f.endsWith('/' + n) || n.endsWith('/' + f); };
-// A name taken for a test file's path: a script extension, and no whitespace unless it holds a
-// separator (an absolute path may hold a space; a sentence ending "config.js" is a test name).
-const fileShaped = name => SCRIPT_FILE.test(name) && (!/\s/.test(name) || /[\\/]/.test(name));
+// A name taken for a test file's path: a script extension, and no whitespace before its first
+// separator (an absolute path may hold a space later; a sentence ending "src/config.js" is a test name).
+const fileShaped = name => SCRIPT_FILE.test(name) && !/\s/.test(name.split(/[\\/]/, 1)[0]);
 // `skipped` counts every test in the total that neither passed nor failed.
 const empty = () => ({ summary: false, passed: null, failed: null, skipped: null, total: null, names: [], loadFailures: [], emptyFiles: [] });
 // A result with a summary; `emptyFiles` are passing entries moved to the failures.
@@ -354,13 +354,14 @@ line only when there are any: "tests 497/499, 2 skipped". skipped counts every t
 total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending;
 pytest skipped + xfailed + xpassed; cargo ignored (pytest's deselected and cargo's filtered
 out are outside the total). node reports a test file that registered no tests, or whose every
-test --test-name-pattern filtered out, as one passing test named after the file; any top-level
-passing entry (no directive, no subtests, not a suite) whose name is file-shaped (a script
-extension, and no whitespace unless it holds a / or \\) is taken for one: counted as failed,
-named "(ran no tests)" and listed in loadFailures. The price is one false rejection: a real
-top-level test, or an empty describe under the spec reporter, deliberately named like a file
-path such as "config.test.js" fails the step; rename it. Not recognised: a file named with a
-space and given without a directory ("my file.test.js").
+test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing
+test named after the file; any top-level passing entry (no directive, no subtests, not a suite)
+whose name is file-shaped (a script extension, and no whitespace before its first / or \\) is
+taken for one: counted as failed, named "(ran no tests)" and listed in loadFailures. The price
+is one false rejection: a real top-level test, or an empty describe under the spec reporter,
+deliberately named like a file path such as "config.test.js" fails the step; rename it. Not
+recognised: a file given by a relative path whose first segment holds a space ("my
+file.test.js", "my dir/a.test.js").
 `;
 
 export async function validateCli(args) {

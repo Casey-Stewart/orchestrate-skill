@@ -263,7 +263,8 @@ test('a red control, and a control that ran no tests, abort before any mutation'
   assert.deepEqual(red.lines, [`CONTROL FAILED FAIL tests 1 of 5 failed: extra two runs — log: ${red.log}`]);
   assert.equal(red.code, 2);
   assert.ok(!readLog(red).includes('==> mutate: mutation'), 'no mutation ran');
-  // A pattern that matches no file runs no tests and passes: every mutation would survive it.
+  // A pattern that matches no file runs no tests and node exits 0; validate.mjs refuses it as
+  // `no test passed (0/0)`, so it is no control: every mutation would survive it.
   const idle = fx.json('idle.json', specOf(['nothing-*.test.cjs']));
   const none = cli(fx, 'mutate', mutateArgs(fx, fx.muts(M.m1), 'idle.log').map(a => a === fx.validate ? idle : a));
   assert.equal(none.lines.length, 1);

@@ -252,19 +252,29 @@ const CARGO_NO_TIME = 'test result: ok. 3 passed; 0 failed; 0 ignored; 0 measure
 const NODE_SPEC_SKIPS = lines('✔ runs (0.4ms)', '﹣ skipped here (0.4ms) # Windows only', '✔ todo passing (0.1ms) # TODO', '⚠ todo failing (0.1ms) # TODO',
   nodeSummary('ℹ', { tests: 4, pass: 1, fail: 0, skipped: 1, todo: 2 }));
 // A file that registers no tests is ONE passing top-level entry named after the file, relative,
-// absolute or discovered. Without whitespace, or with a separator, a name is file-shaped.
-const EMPTY_NAMES = ['empty.test.cjs', 'C:\\Users\\Jo Ann\\proj\\test\\gone.test.mjs', 'test/sub/none.test.ts'];
-const NODE_SPEC_EMPTY = lines(...EMPTY_NAMES.map(n => `✔ ${n} (21.5ms)`), '✔ real one (0.4ms)', nodeSummary('ℹ', { tests: 4, pass: 4, fail: 0 }));
+// absolute or discovered. With no whitespace before its first separator, a name is file-shaped:
+// absolute paths holding a space later are file-shaped. The entries follow a parent test with a
+// child, the position most empty files hold in a real run.
+const EMPTY_NAMES = ['empty.test.cjs', 'C:\\Users\\Jo Ann\\proj\\test\\gone.test.mjs', '/home/Jo Ann/proj/test/deep.test.cjs', 'test/sub/none.test.ts'];
+const NODE_SPEC_EMPTY = lines('▶ parent', '  ✔ child (0.1ms)', '✔ parent (0.3ms)', ...EMPTY_NAMES.map(n => `✔ ${n} (21.5ms)`), '✔ real one (0.4ms)',
+  nodeSummary('ℹ', { tests: 7, pass: 7, fail: 0 }));
 const tapEntry = (n, name, extra = []) => [`# Subtest: ${name}`, `ok ${n} - ${name.replace(/\\/g, '\\\\')}`, '  ---', '  duration_ms: 0.4', ...extra, "  type: 'test'", '  ...'];
-const NODE_TAP_EMPTY = lines('TAP version 13', ...EMPTY_NAMES.flatMap((name, i) => tapEntry(i + 1, name)), ...tapEntry(4, 'real one'), '1..4',
-  nodeSummary('#', { tests: 4, pass: 4, fail: 0 }));
+const TAP_PARENT = ['# Subtest: parent', '    # Subtest: child', '    ok 1 - child', '      ---', "      type: 'test'", '      ...', '    1..1',
+  'ok 1 - parent', '  ---', "  type: 'test'", '  ...'];
+const NODE_TAP_EMPTY = lines('TAP version 13', ...TAP_PARENT, ...EMPTY_NAMES.flatMap((name, i) => tapEntry(i + 2, name)), ...tapEntry(6, 'real one'), '1..6',
+  nodeSummary('#', { tests: 7, pass: 7, fail: 0 }));
 // The other side of the signature: file-shaped names that are NOT empty files — a nested test, a
-// suite or parent test (children), a directive, and a sentence ending in a file name.
+// suite or parent test (children), a directive (skip and todo), a file name without a script
+// extension, sentences ending in a file name, and two real titles of the Shipping App suite whose
+// last word is a path.
+const REAL_TITLES = ['settings-view: the hardcoded kind names and basenames match src/shared/data-files.js',
+  'no console.* diagnostic survives anywhere in src/main outside logger.js'];
 const NODE_SPEC_NOT_EMPTY = lines(
   '▶ validate.mjs', '  ✔ nested.test.cjs (0.2ms)', '✔ validate.mjs (0.5ms)',
   '▶ helpers.mjs', '  ✔ inner (0.2ms)', '✔ helpers.mjs (0.4ms)',
-  '﹣ skipped.test.cjs (0.1ms) # SKIP', '✔ parses config.test.js (0.3ms)', '✔ plain (0.1ms)',
-  nodeSummary('ℹ', { tests: 6, suites: 1, pass: 5, fail: 0, skipped: 1 }));
+  '﹣ skipped.test.cjs (0.1ms) # SKIP', '✔ todo.test.cjs (0.1ms) # TODO', '✔ parses config.test.js (0.3ms)', '✔ plain (0.1ms)',
+  ...REAL_TITLES.map(t => `✔ ${t} (0.3ms)`), '✔ package.json (0.1ms)',
+  nodeSummary('ℹ', { tests: 10, suites: 1, pass: 8, fail: 0, skipped: 1, todo: 1 }));
 const NODE_TAP_NOT_EMPTY = lines('TAP version 13',
   '# Subtest: validate.mjs', '    # Subtest: nested.test.cjs', '    ok 1 - nested.test.cjs', '      ---', "      type: 'test'", '      ...', '    1..1',
   'ok 1 - validate.mjs', '  ---', "  type: 'suite'", '  ...',
@@ -272,7 +282,9 @@ const NODE_TAP_NOT_EMPTY = lines('TAP version 13',
   'ok 2 - helpers.mjs', '  ---', "  type: 'test'", '  ...',
   '# Subtest: skipped.test.cjs', 'ok 3 - skipped.test.cjs # SKIP', '  ---', "  type: 'test'", '  ...',
   ...tapEntry(4, 'parses config.test.js'), '# Subtest: empty-suite.mjs', 'ok 5 - empty-suite.mjs', '  ---', "  type: 'suite'", '  ...',
-  '1..5', nodeSummary('#', { tests: 5, suites: 2, pass: 4, fail: 0, skipped: 1 }));
+  ...tapEntry(6, REAL_TITLES[0]), ...tapEntry(7, REAL_TITLES[1]), ...tapEntry(8, 'package.json'),
+  '# Subtest: todo.test.cjs', 'ok 9 - todo.test.cjs # TODO', '  ---', "  type: 'test'", '  ...',
+  '1..9', nodeSummary('#', { tests: 9, suites: 2, pass: 7, fail: 0, skipped: 1, todo: 1 }));
 
 const ok = (passed, total, skipped = 0) => ({ summary: true, passed, failed: 0, skipped, total, names: [], loadFailures: [], emptyFiles: [] });
 const bad = (passed, failed, skipped, total, names, loadFailures = [], emptyFiles = []) => ({ summary: true, passed, failed, skipped, total, names, loadFailures, emptyFiles });
@@ -286,10 +298,10 @@ const CASES = [
   { parser: 'node', label: 'spec script-named entries without location', text: NODE_SPEC_SCRIPTS, expect: bad(0, 11, 0, 11, [...SCRIPT_NAMES, 'nine.test.json', 'ten.js.map'], SCRIPT_NAMES) },
   { parser: 'node', label: 'tap load failure', text: NODE_TAP_LOAD, expect: bad(0, 2, 0, 2, ['C:\\work\\tests\\broken.test.cjs', 'parses broken.test.cjs'], ['C:\\work\\tests\\broken.test.cjs']) },
   { parser: 'node', label: 'spec skipped and todo', text: NODE_SPEC_SKIPS, expect: ok(1, 4, 3) },
-  { parser: 'node', label: 'spec file entries that are not empty files', text: NODE_SPEC_NOT_EMPTY, expect: ok(5, 6, 1) },
-  { parser: 'node', label: 'tap file entries that are not empty files', text: NODE_TAP_NOT_EMPTY, expect: ok(4, 5, 1) },
-  { parser: 'node', label: 'spec empty files', text: NODE_SPEC_EMPTY, expect: bad(1, 3, 0, 4, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
-  { parser: 'node', label: 'tap empty files', text: NODE_TAP_EMPTY, expect: bad(1, 3, 0, 4, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
+  { parser: 'node', label: 'spec file entries that are not empty files', text: NODE_SPEC_NOT_EMPTY, expect: ok(8, 10, 2) },
+  { parser: 'node', label: 'tap file entries that are not empty files', text: NODE_TAP_NOT_EMPTY, expect: ok(7, 9, 2) },
+  { parser: 'node', label: 'spec empty files', text: NODE_SPEC_EMPTY, expect: bad(3, 4, 0, 7, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
+  { parser: 'node', label: 'tap empty files', text: NODE_TAP_EMPTY, expect: bad(3, 4, 0, 7, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
   { parser: 'jest', label: 'pass', text: JEST_PASS, expect: ok(2, 2) },
   { parser: 'jest', label: 'fail', text: JEST_FAIL, expect: bad(1, 1, 1, 3, ['math › subtracts']) },
   { parser: 'jest', label: 'suite failed to run', text: JEST_LOAD, expect: bad(0, 1, 0, 1, ['src/broken.test.js'], ['src/broken.test.js']) },
@@ -424,6 +436,15 @@ test('every corpus transcript parses to its expected result', async () => {
   for (const c of NOT_SUMMARIES) assert.equal(parseRunnerOutput(c.parser, c.text).summary, false, `${c.parser} ${c.label}`);
 });
 
+test('without a summary, an empty-file entry is still reported as a load failure', async () => {
+  const { parseRunnerOutput } = await api;
+  // A run that died before its summary: the entries it did print still name the empty file.
+  for (const text of [lines('✔ gone.test.cjs (20ms)', '✔ real one (0.4ms)'), lines('TAP version 13', ...tapEntry(1, 'gone.test.cjs'))]) {
+    assert.deepEqual(parseRunnerOutput('node', text), { summary: false, passed: null, failed: null, skipped: null, total: null,
+      names: ['gone.test.cjs'], loadFailures: ['gone.test.cjs'], emptyFiles: ['gone.test.cjs'] }, text);
+  }
+});
+
 test('each parser owns its cases: no other parser finds a summary in them', async () => {
   const { parseRunnerOutput } = await api;
   const parsers = [...new Set(CASES.map(c => c.parser))];
@@ -540,6 +561,8 @@ test('row: failures counted but no names captured still fails and says so', t =>
   const r = run(t, [{ name: 'tests', argv: fake(tmp(t), 'r.js', nodeSummary('ℹ', { tests: 2, pass: 1, fail: 1 }), 1), parser: 'node' }]);
   assert.equal(r.code, 1);
   assert.equal(r.line, `FAIL tests 1 of 2 failed (names not captured) — log: ${r.logPath}`);
+  const skipped = run(t, [{ name: 'tests', argv: fake(tmp(t), 'r.js', nodeSummary('ℹ', { tests: 3, pass: 1, fail: 1, skipped: 1 }), 1), parser: 'node' }]);
+  assert.equal(skipped.line, `FAIL tests 1 of 3 failed, 1 skipped (names not captured) — log: ${skipped.logPath}`);
 });
 
 // Per parser: a run in which nothing passed (all skipped, or no test at all) and its sibling in
@@ -609,7 +632,7 @@ test('row: a file that ran no tests is a failure named as such, never a passing 
   for (const [label, text] of [['spec', NODE_SPEC_EMPTY], ['tap', NODE_TAP_EMPTY]]) {
     const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, label + '.js', text + '\n'), parser: 'node' }] }, { cwd: dir, logPath });
     assert.equal(r.steps[0].result, 'FAIL', label);
-    assert.equal(r.line, `FAIL tests 3 of 4 failed: ${EMPTY_NAMES.map(n => n + ' (ran no tests)').join(', ')} — log: ${logPath}`, label);
+    assert.equal(r.line, `FAIL tests 4 of 7 failed: ${EMPTY_NAMES.map(n => n + ' (ran no tests)').join(', ')} — log: ${logPath}`, label);
     assert.deepEqual([r.steps[0].loadFailures, r.steps[0].emptyFiles], [EMPTY_NAMES, EMPTY_NAMES], label);
   }
 });
@@ -1022,35 +1045,47 @@ test('live: a test file that registers no tests is a load failure, relative, abs
   const dir = tmp(t), sub = path.join(dir, 'test');
   fs.mkdirSync(sub);
   const write = (file, text) => { fs.writeFileSync(path.join(sub, file), "const { test, describe } = require('node:test');\n" + text); return path.join(sub, file); };
-  // R2's mutation: the same data-driven file, once with its data and once emptied.
+  // R2's mutation: the same data-driven file, once with its data and once emptied. It sorts
+  // after named.test.cjs, so its entry follows a suite and a parent test: the common position.
   const DATA = "for (const x of ROWS) test('row ' + x, () => {});\n";
   write('one.test.cjs', "const ROWS = ['a'];\n" + DATA);
-  // File-shaped names that are NOT empty files: a suite and a parent test with children, and a
-  // sentence ending in a file name.
+  // File-shaped names that are NOT empty files: a suite and a parent test with children, a
+  // todo, sentences ending in a file name (two real Shipping App titles), a non-script file name.
   write('named.test.cjs', lines("describe('validate.mjs', () => { test('inside', () => {}); });",
-    "test('helpers.mjs', async t => { await t.test('child', () => {}); });", "test('parses config.test.js', () => {});", ''));
-  const go = async (reporter, args) => (await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, ...args], parser: 'node' }] },
-    { cwd: dir, logPath: path.join(dir, reporter + '.log') })).steps[0];
+    "test('helpers.mjs', async t => { await t.test('child', () => {}); });", "test('parses config.test.js', () => {});",
+    ...REAL_TITLES.map(title => `test(${JSON.stringify(title)}, () => {});`), "test('package.json', () => {});",
+    "test('todo.test.cjs', { todo: true }, () => {});", ''));
+  const go = async (reporter, args) => {
+    const logPath = path.join(dir, reporter + '.log');
+    const step = (await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, ...args], parser: 'node' }] }, { cwd: dir, logPath })).steps[0];
+    return { ...step, log: fs.readFileSync(logPath, 'utf8').split(/\r?\n/) };
+  };
+  const at = (log, re) => log.findIndex(l => re.test(l));
   for (const reporter of ['spec', 'tap']) {
-    write('data.test.cjs', "const ROWS = ['b'];\n" + DATA);
+    write('zz-data.test.cjs', "const ROWS = ['b'];\n" + DATA);
     const control = await go(reporter, []);
-    assert.deepEqual([control.result, control.passed, control.total, control.loadFailures], ['PASS', 6, 6, []], reporter + ' control: ' + JSON.stringify(control));
-    write('data.test.cjs', 'const ROWS = [];\n' + DATA);
-    for (const [style, args, name] of [['discovered', [], slashes(path.join('test', 'data.test.cjs'))], ['relative', ['test/data.test.cjs', 'test/one.test.cjs'], 'test/data.test.cjs'],
-      ['absolute', [path.join(sub, 'data.test.cjs'), path.join(sub, 'one.test.cjs')], path.join(sub, 'data.test.cjs')]]) {
+    assert.deepEqual([control.result, control.passed, control.skipped, control.total, control.loadFailures], ['PASS', 9, 1, 10, []], reporter + ' control: ' + JSON.stringify(control));
+    write('zz-data.test.cjs', 'const ROWS = [];\n' + DATA);
+    const named = path.join(sub, 'named.test.cjs');
+    for (const [style, args, name] of [['discovered', [], slashes(path.join('test', 'zz-data.test.cjs'))],
+      ['relative', ['test/named.test.cjs', 'test/zz-data.test.cjs', 'test/one.test.cjs'], 'test/zz-data.test.cjs'],
+      ['absolute', [named, path.join(sub, 'zz-data.test.cjs'), path.join(sub, 'one.test.cjs')], path.join(sub, 'zz-data.test.cjs')]]) {
       const step = await go(reporter, args), label = `${reporter} ${style}`;
       assert.equal(step.result, 'FAIL', label + ': ' + JSON.stringify(step));
-      assert.equal(step.emptyFiles.length, 1, label + ': ' + JSON.stringify(step));
+      assert.equal(step.emptyFiles.length, 1, label + ': ' + JSON.stringify(step.emptyFiles));
       assert.ok(slashes(step.emptyFiles[0]).endsWith(slashes(name)), label + ': ' + step.emptyFiles[0]);
       assert.deepEqual(step.loadFailures, step.emptyFiles, label);
       assert.equal(step.failed, 1, label + ': the file counts as failed, not passed');
-      assert.equal(step.passed, step.total - 1, label);
+      assert.equal(step.passed, step.total - step.skipped - 1, label);
+      // The emptied file's entry really follows the parent test's, so the scan's bound is exercised.
+      const parent = at(step.log, /^(?:✔ |ok \d+ - )helpers\.mjs\b/), emptied = at(step.log, /^(?:✔ |ok \d+ - ).*zz-data\.test\.cjs\b/);
+      assert.ok(parent >= 0 && emptied > parent, `${label}: the emptied file (line ${emptied}) must follow the parent test (line ${parent})`);
     }
   }
   // The documented false rejection: a real test deliberately named like a file path.
-  write('data.test.cjs', "test('data.test.cjs', () => {});\n");
-  const named = await go('spec', ['test/data.test.cjs']);
-  assert.deepEqual([named.result, named.emptyFiles], ['FAIL', ['data.test.cjs']]);
+  write('zz-data.test.cjs', "test('data.test.cjs', () => {});\n");
+  const falseRejection = await go('spec', ['test/zz-data.test.cjs']);
+  assert.deepEqual([falseRejection.result, falseRejection.emptyFiles], ['FAIL', ['data.test.cjs']]);
 });
 
 // ---------------------------------------------------------------------------------------
@@ -1143,12 +1178,20 @@ test('--help states the pass rule, the skipped display and count, and the empty-
     '0/0 included) is FAIL "no test passed (<passed>/<total>, <k> skipped)"',
     'Skips show on the line only when there are any: "tests 497/499, 2 skipped"',
     'skipped counts every test in the total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending; pytest skipped + xfailed + xpassed; cargo ignored',
-    'as one passing test named after the file',
+    'or whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing test named after the file',
     'counted as failed, named "(ran no tests)" and listed in loadFailures',
     'The price is one false rejection: a real top-level test, or an empty describe under the spec reporter, deliberately named like a file path such as "config.test.js" fails the step',
-    'no whitespace unless it holds a / or \\)',
+    'no whitespace before its first / or \\)',
+    'Not recognised: a file given by a relative path whose first segment holds a space ("my file.test.js", "my dir/a.test.js").',
   ]) assert.ok(text.includes(needed), 'the --help text must say: ' + needed);
   assert.doesNotMatch(text, /passes only when its summary shows zero failures and it exits 0/, 'the old rule is gone');
+  // No other sentence may speak of passing alongside skips, empty runs or 0/0: the rule sentence
+  // is the only one, so an appended contradiction ("a run with no tests at all passes") goes red.
+  const RULE = 'A parsed step passes only when its summary shows zero failures, at least one passed test, and it exits 0: a run in which nothing passed (every test skipped, or no test at all, 0/0 included) is FAIL "no test passed (<passed>/<total>, <k> skipped)".';
+  assert.ok(text.includes(RULE), 'the rule sentence is pinned whole');
+  const rest = text.split(RULE).join(' ');
+  const verdict = '\\b(?:pass|passes|green|ok)\\b', subject = '(?:0\\/0|\\bno tests?\\b|\\bnothing\\b|\\bskipped\\b|\\bempty\\b)';
+  for (const re of [new RegExp(`${subject}[^.]*${verdict}`, 'i'), new RegExp(`${verdict}[^.]*${subject}`, 'i')]) assert.doesNotMatch(rest, re);
 });
 
 test('--cwd sets where steps run', t => {
