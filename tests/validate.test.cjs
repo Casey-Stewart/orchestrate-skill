@@ -10,6 +10,10 @@ const TOOL = path.join(__dirname, '..', 'orchestrate', 'tools', 'validate.mjs');
 // Built, never written literally: a literal ESC or BEL byte fails the invisible-character sweep.
 const ESC = String.fromCharCode(27), BEL = String.fromCharCode(7), BOM = String.fromCharCode(0xfeff);
 const NODE = process.execPath;
+// validate.mjs's own ANSI pattern (not exported), for reading a child's raw log by text: a suite
+// run from a colour terminal hands FORCE_COLOR on to the child, whose spec reporter then paints.
+const ANSI = /\u001b(?:\[[0-?]*[ -\/]*[@-~]|\][^\u0007\u001b]*(?:\u0007|\u001b\\)|[ -\/]+[0-~]|[@-Z\\-_])/g;
+const stripAnsi = text => text.replace(ANSI, '');
 const lines = (...l) => l.join('\n');
 const slashes = p => p.replace(/[\\/]+/g, '/');
 
@@ -1060,19 +1064,25 @@ test('live: a test file that registers no tests is a load failure, relative, abs
   const go = async (reporter, args) => {
     const logPath = path.join(dir, reporter + '.log');
     const step = (await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter, ...args], parser: 'node' }] }, { cwd: dir, logPath })).steps[0];
-    return { ...step, log: fs.readFileSync(logPath, 'utf8').split(/\r?\n/) };
+    const raw = fs.readFileSync(logPath, 'utf8');
+    return { ...step, raw: raw.split(/\r?\n/), log: stripAnsi(raw).split(/\r?\n/) };
   };
   const at = (log, re) => log.findIndex(l => re.test(l));
-  for (const reporter of ['spec', 'tap']) {
+  // Plain AND coloured in every run, whatever terminal started the suite: FORCE_COLOR reaches the
+  // child through the environment runSpec forwards (NO_COLOR and NODE_DISABLE_COLORS would only warn).
+  const COLOUR_KEYS = ['FORCE_COLOR', 'NO_COLOR', 'NODE_DISABLE_COLORS'], savedColour = COLOUR_KEYS.map(k => [k, process.env[k]]);
+  try { for (const [colour, reporter] of [['0', 'spec'], ['0', 'tap'], ['1', 'spec'], ['1', 'tap']]) {
+    for (const k of COLOUR_KEYS) delete process.env[k];
+    process.env.FORCE_COLOR = colour;
     write('zz-data.test.cjs', "const ROWS = ['b'];\n" + DATA);
     const control = await go(reporter, []);
-    assert.deepEqual([control.result, control.passed, control.skipped, control.total, control.loadFailures], ['PASS', 9, 1, 10, []], reporter + ' control: ' + JSON.stringify(control));
+    assert.deepEqual([control.result, control.passed, control.skipped, control.total, control.loadFailures], ['PASS', 9, 1, 10, []], `${reporter} FORCE_COLOR=${colour} control: ` + JSON.stringify(control));
     write('zz-data.test.cjs', 'const ROWS = [];\n' + DATA);
     const named = path.join(sub, 'named.test.cjs');
     for (const [style, args, name] of [['discovered', [], slashes(path.join('test', 'zz-data.test.cjs'))],
       ['relative', ['test/named.test.cjs', 'test/zz-data.test.cjs', 'test/one.test.cjs'], 'test/zz-data.test.cjs'],
       ['absolute', [named, path.join(sub, 'zz-data.test.cjs'), path.join(sub, 'one.test.cjs')], path.join(sub, 'zz-data.test.cjs')]]) {
-      const step = await go(reporter, args), label = `${reporter} ${style}`;
+      const step = await go(reporter, args), label = `${reporter} ${style} FORCE_COLOR=${colour}`;
       assert.equal(step.result, 'FAIL', label + ': ' + JSON.stringify(step));
       assert.equal(step.emptyFiles.length, 1, label + ': ' + JSON.stringify(step.emptyFiles));
       assert.ok(slashes(step.emptyFiles[0]).endsWith(slashes(name)), label + ': ' + step.emptyFiles[0]);
@@ -1082,8 +1092,14 @@ test('live: a test file that registers no tests is a load failure, relative, abs
       // The emptied file's entry really follows the parent test's, so the scan's bound is exercised.
       const parent = at(step.log, /^(?:✔ |ok \d+ - )helpers\.mjs\b/), emptied = at(step.log, /^(?:✔ |ok \d+ - ).*zz-data\.test\.cjs\b/);
       assert.ok(parent >= 0 && emptied > parent, `${label}: the emptied file (line ${emptied}) must follow the parent test (line ${parent})`);
+      // Live control: the plain run is plain, and in the coloured spec run the very lines found are painted.
+      if (colour === '0') assert.ok(!step.raw.some(l => l.includes(ESC)), label + ': the plain log must hold no escape');
+      else if (reporter === 'spec') assert.ok(step.raw.length === step.log.length && step.raw[parent].includes(ESC) && step.raw[emptied].includes(ESC),
+        `${label}: both entries must be painted in the raw log: ${JSON.stringify([step.raw[parent], step.raw[emptied]])}`);
     }
-  }
+  } } finally { for (const [k, v] of savedColour) if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  // Presence as well as value: a key unset before must be unset again, never the string 'undefined'.
+  assert.deepEqual(COLOUR_KEYS.map(k => [k, k in process.env, process.env[k]]), savedColour.map(([k, v]) => [k, v !== undefined, v]), 'the colour environment is restored');
   // The documented false rejection: a real test deliberately named like a file path.
   write('zz-data.test.cjs', "test('data.test.cjs', () => {});\n");
   const falseRejection = await go('spec', ['test/zz-data.test.cjs']);
