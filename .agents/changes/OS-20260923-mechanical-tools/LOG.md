@@ -655,3 +655,99 @@ Verbatim in the verdict log. The user asked whether counting skipped tests and t
 Node v24 prints a test file that registers no tests exactly as a passing test named after the file (`✔ empty.test.cjs`), in both the spec and TAP reporters — indistinguishable in text from a real test so named (probed 2026-09-25). Detection therefore has to reject on doubt.
 
 Fix-ups run in sequence, B01 first: both fences contain `tests/protocol-contract.test.cjs` (not disjoint), and B05's repair consumes what B01's parser reports. `fix/B01-c1-followup` is cut from the tip below; `fix/B05-c1-followup` is cut from the tip after B01's fix-up merges.
+
+### B01 fix-up (`fix/B01-c1-followup`)
+
+Implementer (default tier; nonce verified) — reports verbatim (nonce lines removed):
+
+NEEDS_FENCE
+
+**EVIDENCE**
+- Validation: `pwsh -NoProfile -File …/scratchpad/validate.ps1 > …/fixup-b01/validate.log 2>&1` gave **EXIT=1**. Totals: `ℹ tests 506`, `ℹ pass 503`, `ℹ fail 1`, `ℹ skipped 2`, `ℹ todo 0`. The one failure is outside the fence (below).
+- `tests/validate.test.cjs` alone: 46 tests, 44 pass, 0 fail, 2 skipped (the Windows pair). Through the tool itself it prints `PASS tests 44/46, 2 skipped (19s)`, exit 0.
+- Commit: `4460f88` on `fix/B01-c1-followup`. The diff against `chore/mechanical-tools-ledger` touches only `orchestrate/tools/validate.mjs` and `tests/validate.test.cjs`. Worktree is clean; nothing pushed.
+- Red on the un-fixed code: I copied the new test file into a `git clone --shared` of `7fbca77`, and all 14 new or changed tests fail there. I also made 16 single mutations of the new code in the clone; every one turned a test red. The unmutated control run in that clone passed 44 of 44.
+
+**Items**
+1. **Done.** A step now fails if no test passed: every test skipped, or none at all, and 0/0 counts. Its line reads `FAIL tests no test passed (0/1, 1 skipped)` and its result is a new `NO-TESTS`. Pinned by "row: a summary in which no test passed…", which covers all four parsers, TAP, 0/0, and the order when the exit code is non-zero. Also pinned by the live test running real `node --test` (spec and TAP) on a skip-only file and on a glob that matches nothing. Red on old code: yes.
+2. **Done.** Every parser result and every step now carries `skipped`. The line shows it only when it is non-zero, e.g. `PASS tests 1/3, 2 skipped`; with no skips the line is byte-identical to before. Pinned by "skipped is every counted test…" (checks each parser's kinds and passed + failed + skipped = total over the whole corpus) and "row: a run with skips that passes…" (includes a skip-free pass for every parser). Red: yes.
+3. **Done.** A file that registered no tests is detected by shape (details below), moved from passed to failed, and listed in `loadFailures` plus a new `emptyFiles` field. On the line it reads `empty.test.cjs (ran no tests)`. Pinned by corpus cases for spec and TAP, including the look-alikes that must not trip it, and by a live test: relative, absolute and discovered paths, both reporters, and the R2 data-emptying case with a passing control. Red: yes.
+4. **Done.** `--help` states the new pass rule, the skipped display and how skipped is counted per parser, the empty-file rule, its one false rejection, and the gap it cannot catch. Pinned by the "--help states…" test, which also checks the old wording is gone. Red: yes.
+5. **Done.** Each refusal has a positive sibling and a live control through real `node --test`.
+
+**Root cause.** The PASS row only checked "summary found, 0 failures, exit 0". It never checked that anything passed. Node also counts a file with no tests as a passing test, and the parser took the count at face value.
+
+**Decisions**
+- **0/0 is not a pass.** It is `NO-TESTS`, following the "could not tell means conservative" guardrail.
+- **The rule is "at least one test passed", not "one ran".** Todo and xfail tests do run, but their outcome doesn't count as proof.
+- **What `skipped` counts:** every test in the total that neither passed nor failed.
+  - node: skipped + todo
+  - jest: skipped + todo + pending
+  - pytest: skipped + xfailed + xpassed
+  - cargo: ignored
+  - pytest's deselected and cargo's filtered-out tests are outside the total.
+- **Empty-file signature** (spec `✔ name (Nms)`, TAP `ok N - name`). An entry counts as an empty file when all of these hold:
+  - it is a top-level passing entry with no `#` directive;
+  - it has no children (spec: no open `▶ name`; TAP: no indented subtests before it);
+  - it is not a TAP `type: 'suite'`;
+  - its name is file-shaped: a script extension, and no whitespace unless it contains `/` or `\`.
+- **Known false rejection:** a real top-level test named like a file path, or an empty `describe` named that way under the spec reporter. A sentence such as "parses config.test.js" is exempt because it contains a space.
+- **Known gap:** a file whose name contains a space, passed without a directory, is not recognised. Both cases are in `--help`.
+- **Filtered-out files:** a file whose every test is removed by `--test-name-pattern` prints the same signature, so it also fails. That matters if scoped B05 runs use name patterns.
+- **Node v22 is not verified; I could not run it.** The mechanism is `FileTest.#skipReporting()` in node's `runner.js`: the file-level test is reported only when it has no reported children. I read this from the v24.20.0 binary. I believe it dates from Node 20, but that is from memory.
+
+**NEEDS_FENCE**
+- **Expected:** the full suite green.
+- **Found:** `tests/mutate.test.cjs`, test "a red control, and a control that ran no tests, abort before any mutation" (line 260). The control line is now `CONTROL FAILED FAIL tests no test passed (0/0) — log: <log> — step tests ran no tests`. The test's `checkLogPaths` (line 90, called from line 268) requires the log path to end the line, and line 270 still expects `PASS tests 0/0`.
+- **Why it matters:** `mutate.mjs:255` still adds its "ran no tests" suffix. That check can no longer trigger on a passing control, because validate no longer passes 0/0.
+- **How to proceed:** the minimal change is:
+  - `orchestrate/tools/mutate.mjs:254-255`: drop the `idle` check, leaving `if (control.status !== 'PASS') { say(\`CONTROL FAILED ${control.line}\`); return 2; }`.
+  - `tests/mutate.test.cjs:270`: change the regex to `/^CONTROL FAILED FAIL tests no test passed \(0\/0\) — log: .*idle\.log$/`.
+- **Also out of fence and now false:** `orchestrate/references/subagent-prompts.md:252-255` says an emptied one-test file "reads `SURVIVED`". It now reads CRASHED through `loadFailures`. The sentence is pinned verbatim at `tests/tool-wiring.test.cjs:1016-1017` and 1026. It should be removed or rewritten in the same change. B05's fix-up could take all four files.
+
+**What the checkpoint re-run should check**
+- Smoke 1 now expects `PASS tests 497/499, 2 skipped (…)` on Linux, and plain `PASS tests N/N` on Windows.
+- Smoke 2 is unchanged, since that fixture has no skips.
+- Re-run the report's own probes:
+  - the skip-only spec should give `FAIL tests no test passed (0/1, 1 skipped)`, exit 1;
+  - `empty.test.cjs` next to `one.test.cjs` should give `FAIL … empty.test.cjs (ran no tests)`, with a `loadFailures` entry.
+
+---- (resumed after the fence extension) ----
+
+DONE
+
+**EVIDENCE**
+- Validation: `pwsh -NoProfile -File …/scratchpad/validate.ps1 > …/fixup-b01/validate.log 2>&1` gave **EXIT=0**. Totals: `ℹ tests 506`, `ℹ pass 504`, `ℹ fail 0`, `ℹ skipped 2`, `ℹ todo 0`. The 2 skipped are the expected Windows-only pair.
+- Commits on `fix/B01-c1-followup`, not pushed:
+  - `4460f88`: the validate.mjs fix and its tests (reported earlier).
+  - `e2514d8`: the fence-extension change.
+- `git diff --name-status -M chore/mechanical-tools-ledger...HEAD` shows M for the batch file, `orchestrate/tools/mutate.mjs`, `orchestrate/tools/validate.mjs`, `tests/mutate.test.cjs` and `tests/validate.test.cjs`. `git status --porcelain` is empty.
+- Red on the un-fixed tip: in a `git clone --shared` checked out at `7fbca77`, with only the new `tests/mutate.test.cjs` copied in, "a red control, and a control that ran no tests, abort before any mutation" fails. The error is that the input did not match `/^CONTROL FAILED FAIL tests no test passed \(0\/0\) — log: .*idle\.log$/`. On my branch it passes in the full run. The clone has been deleted.
+
+**Items**
+1. **Done** in `4460f88`: a step where no test passed is FAIL, and 0/0 counts as that case. Pinned by "row: a summary in which no test passed…" and the live skip-only test. Red on old code: yes.
+2. **Done** in `4460f88`: every result carries `skipped`, and the line shows it only when it is non-zero. Pinned by "skipped is every counted test…" and "row: a run with skips that passes…". Red: yes.
+3. **Done** in `4460f88`: a file that registered no tests is moved to the failures and listed in `loadFailures` and `emptyFiles`. Pinned by the corpus cases for spec and TAP and the live relative, absolute and discovered runs. Red: yes.
+4. **Done** in `4460f88`: `--help` states the pass rule, the skipped display and the empty-file rule with its false rejection. Pinned by the "--help states…" test. Red: yes.
+5. **Done**: each refusal has a positive sibling and a live control; 16 single mutations of the new code were each caught. The fence extension adds the mutate test re-point, red on `7fbca77` and green here.
+
+**The fence-extension change (`e2514d8`)**
+- `orchestrate/tools/mutate.mjs`: I removed the now-dead `idle` lookup. The control check is now `if (control.status !== 'PASS') { say(\`CONTROL FAILED ${control.line}\`); return 2; }`. Nothing else in the file changed; `parsers` is still used by `classifyRun`.
+- `tests/mutate.test.cjs`: the idle-control expectation now matches `CONTROL FAILED FAIL tests no test passed (0/0) — log: …idle.log`. The line-count and exit-2 assertions are kept.
+  - I added one line to the idle leg, `!readLog(none).includes('==> mutate: mutation')`. It mirrors the "no mutation ran" check the red leg already had, which the idle leg lacked.
+- Batch file: the `**Files**:` line now also lists `` `orchestrate/tools/mutate.mjs`, `tests/mutate.test.cjs` `` in the same form. There are no other edits to it.
+
+**Left for B05's fix-up, not touched here**
+- In `tests/mutate.test.cjs:266`, the comment "A pattern that matches no file runs no tests and passes" now reads loosely: node exits 0, but the step no longer passes. I left it because it is outside the minimal change.
+- `orchestrate/references/subagent-prompts.md:252-255` is now false: a mutation that empties a one-test file reads CRASHED through `loadFailures`, not `SURVIVED`. Its verbatim pin is in `tests/tool-wiring.test.cjs:1016-1017` and 1026.
+- The comment at `mutate.mjs:252` is still true as a rationale.
+
+**What the checkpoint re-run should check**
+- Smoke 1 on Linux should print `PASS tests 497/499, 2 skipped (…)`, exit 0. On Windows it stays plain `PASS tests N/N`.
+- Smoke 2 is unchanged.
+- The report's probes:
+  - the skip-only spec should print `FAIL tests no test passed (0/1, 1 skipped)`, exit 1;
+  - `empty.test.cjs` next to `one.test.cjs` should print `FAIL … empty.test.cjs (ran no tests)`;
+  - through `mutate.mjs`, the skip-only case should now print `CONTROL FAILED`, not `SURVIVED`.
+
+Fence: the helper returned UNKNOWN (`authority`: plan/PROGRESS branch linkage does not agree — a fix-up branch never carries the plan's branch name); the contract's manual fallback PASSED: `git diff --name-status -M 4a8a0a9...e2514d8` = 5 modified paths, all in B01's fence plus the two recorded extensions; the batch file changed only its Files line, by exactly those two paths; worktree clean; `filter` unspecified on every path. 6b failing-on-base: the branch's `tests/validate.test.cjs` and `tests/mutate.test.cjs` on the base `7fbca77` — 74 tests, 57 pass, 15 fail, 2 skipped; the failures are the named behaviours (skip-only and 0/0 steps, empty test files, the skipped display and count, the re-pointed idle control) plus corpus/shape cells that now carry `skipped` — PROVEN. Gate: a fresh reviewer (strong tier, Opus) and test-hunter (default), in parallel.
