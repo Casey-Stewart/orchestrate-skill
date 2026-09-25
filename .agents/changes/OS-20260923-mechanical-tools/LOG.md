@@ -886,3 +886,50 @@ Setup: a scratch clone (`git clone --shared`) at e2514d8 under `.../scratchpad/g
 Probe files: `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/hunt/probe/` (tap.txt, spec.txt). Mutation logs are `hunt/M1.log` … `hunt/M6.log`.
 
 Decision on P1-1: take the reviewer's fix (whitespace allowed only after the first path separator; the relative-first-segment-with-a-space gap documented in `--help`), not the widened price sentence — a false rejection of ordinary titles in a real repository's green suite (the user's own) costs more than the narrow gap. Fix round: the same implementer, resumed with both reports; the items owed to B05's fix-up stay there.
+
+#### B01 fix-up — fix round
+
+Same implementer, resumed; report verbatim (nonce line removed):
+
+DONE
+
+**EVIDENCE**
+- Validation (`pwsh -NoProfile -File …/scratchpad/validate.ps1 > …/fixup-b01/validate.log 2>&1`): **EXIT=0**, with `ℹ tests 507`, `ℹ pass 505`, `ℹ fail 0`, `ℹ skipped 2` (the Windows-only pair), `ℹ todo 0`.
+- Commit `334b0ac` on `fix/B01-c1-followup`, on top of `4460f88` and `e2514d8`. Not pushed.
+- `git diff --name-status -M chore/mechanical-tools-ledger...HEAD` lists five files, all modified: the batch file (only the `Files` line changed, in `e2514d8`), `orchestrate/tools/mutate.mjs`, `orchestrate/tools/validate.mjs`, `tests/mutate.test.cjs` and `tests/validate.test.cjs`. `git status --porcelain` is empty. Nothing was ticked in the batch file.
+- How red was checked, all in `git clone --shared` copies under my scratch directory:
+  - **On `e2514d8`, new test file only:** 5 tests fail — the corpus test, the CRLF and ANSI loops over the corpus, the live empty-file test and the `--help` test. The corpus assertion fails on the two real Shipping App titles.
+  - **Nine single mutations of the fixed code:** each one turned a test red. The unmutated control ran 45 pass, 0 fail.
+  - The clones have been deleted.
+
+**Findings**
+- **P1-1:** closed with the reviewer's fix: `fileShaped = name => SCRIPT_FILE.test(name) && !/\s/.test(name.split(/[\\/]/, 1)[0])`.
+  - `--help` "Not recognised" now reads: "a file given by a relative path whose first segment holds a space ("my file.test.js", "my dir/a.test.js")".
+  - Both real titles are pinned as not-empty in `NODE_SPEC_NOT_EMPTY`, `NODE_TAP_NOT_EMPTY` and live in `named.test.cjs`, under both reporters.
+  - Absolute paths with spaces are still recognised: `C:\Users\Jo Ann\…` and `/home/Jo Ann/…` are in `EMPTY_NAMES`.
+  - Red on `e2514d8`, and red on the old-rule mutation.
+- **ASK-1 / H1:** closed.
+  - `NODE_SPEC_EMPTY` and `NODE_TAP_EMPTY` now put the empty entries after a parent test with a child.
+  - The live test's emptied file is now `zz-data.test.cjs`. It runs discovered, and relative and absolute with `named.test.cjs` first. The test reads the log to assert the emptied entry comes after `helpers.mjs`, then asserts `emptyFiles.length === 1` under both reporters.
+  - Red on M23 (unbounded backward scan): the corpus cases and the live test both fail. The live failure can only come from TAP, since spec does not use that scan.
+- **ASK-2:**
+  - M26: a `package.json` test is in both not-empty fixtures and live. Red on M26.
+  - M18: I pinned the branch instead of dropping it. New test "without a summary, an empty-file entry is still reported as a load failure" checks spec and TAP text with no summary. Red on M18.
+- **ASK-3:** closed. `--help` now says "whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only)", and the `--help` test pins it. Red on the mutation that shortens it to `--test-name-pattern` alone.
+- **ASK-4:** closed. `tests/mutate.test.cjs:266` now reads: "…runs no tests and node exits 0; validate.mjs refuses it as `no test passed (0/0)`, so it is no control…". It is a comment only, so no red applies.
+- **H2:** closed. `✔ todo.test.cjs (0.1ms) # TODO` is in the spec not-empty fixture, the TAP fixture has the `# TODO` form, and the live `named.test.cjs` has a file-shaped todo test. Red on the hunter's non-anchored regex mutation.
+- **H3:** closed.
+  - The "Not recognised" sentence and the whole rule sentence are pinned verbatim.
+  - The rest of `--help` is swept both ways for a subject (`0/0`, no test(s), nothing, skipped, empty) next to a verdict (pass, passes, green, ok) within one sentence.
+  - Red on appending "A run with no tests at all passes.", and red on deleting the gap sentence.
+- **H4:** closed. The names-not-captured row now also expects `FAIL tests 1 of 3 failed, 1 skipped (names not captured) — log: …`. Red on dropping that `${sk}`.
+
+**Notes**
+- **Cost of the P1 fix:** a file emptied under a relative directory whose first segment holds a space now passes as a real test. That gap is stated in `--help`. The user's recipe passes absolute paths, whose first segment is `C:`, so it is unaffected.
+- **Untouched, owed to B05's fix-up:** `subagent-prompts.md:252-256` and its pin in `tool-wiring.test.cjs`; `mutate.mjs`'s comments, HELP and `classifyRun` reason that call an emptied file "failed to load"; and the "must run a test" wording.
+- **Checkpoint re-run:**
+  - Smoke 1 should give `PASS tests 505/507, 2 skipped (…)` on Linux.
+  - A spec or TAP run with a top-level test titled like "…match src/shared/data-files.js" should give `PASS`.
+  - The empty-file probes should still give `FAIL … (ran no tests)`.
+
+Manual fence PASS on `334b0ac` (same 5 paths; batch file unchanged since `e2514d8`; worktree clean). R2: a fresh reviewer (strong tier, Opus) marks every round-1 finding and re-scans `git diff e2514d8..HEAD`; a fresh test-hunter scoped to the tests that diff adds or changes.
