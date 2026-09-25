@@ -184,10 +184,12 @@ the merge.
 
 3. **Do**: From the integration worktree root, run `node orchestrate/tools/check-ledger.mjs
    parse --dir .agents/changes/OS-20260923-mechanical-tools`.
-   **Pass**: one line, `PARSE FAIL 1 problem(s): 02-batches-04-prompt-renderer.md:8 Files line
-   differs from the plan fence`; exit code 1. *(Revision 2, corrected at C1 close-out:
-   revision 1 expected `PARSE OK 5 batches`; the parse check runs at scaffold time only, and
-   B04's recorded fence extension later made its Files line differ from the plan, by design.)*
+   **Pass**: one line, `PARSE FAIL 2 problem(s): 02-batches-01-validate-wrapper.md:8 Files line
+   differs from the plan fence; 02-batches-04-prompt-renderer.md:8 Files line differs from the
+   plan fence`; exit code 1. *(Revision 3 at the C1 re-issue: B01's fix-up recorded a fence
+   extension too. Revision 2 named B04 alone; revision 1 expected `PARSE OK 5 batches`. The
+   parse check runs at scaffold time only, and a recorded fence extension later makes a batch's
+   Files line differ from the plan, by design.)*
    **Runner**: agent (CLI).
 4. **Do**: Run the same command with `--dir` pointing at the issued copy `I-03`.
    **Pass**: one line beginning `PARSE FAIL` that names `02-batches-02-ledger-parser.md` and
