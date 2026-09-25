@@ -18,11 +18,10 @@ not prose. `.agents/changes/` holds live ledgers; `.agents/archive/` holds close
   discovery, `node --test --test-reporter=spec`, then `git diff --check`. `node --test`
   bare from the repository root is the portable equivalent. `node --test tests/` is **not**:
   Node's directory-argument discovery differs and the suite fails.
-- `tests/protocol-contract.test.cjs` mirrors `orchestrate/references/protocol.md` against
-  `orchestrate/templates/00-READBEFORE.md` — the §Read-only evidence tools sections must be
-  byte-identical after placeholder substitution, and two decision tables are pinned by
-  SHA-256. Removing content from those files is far riskier than adding to it, and a
-  one-sided edit to either mirror goes red.
+- `protocol.md` and the contract template mirror each other, pinned by
+  `tests/protocol-contract.test.cjs`: edit both in the same change, and treat removal as riskier
+  than addition. Its two decision tables are SHA-256-pinned: even a coordinated edit reddens, by
+  design — never regenerate the hash to make it pass.
 - **Never rewrite a completed ledger.** `.agents/archive/**` and any ledger whose PROGRESS
   says COMPLETE are historical records. Read them freely; write to neither.
 - **Line endings**: `.gitattributes` pins specific fixture files and `git diff --check` is
@@ -36,7 +35,8 @@ not prose. `.agents/changes/` holds live ledgers; `.agents/archive/` holds close
 ## Bug-class guardrails
 
 Every class below was produced by this repository, not imagined. Each names the class and
-what now enforces it. Check a diff against the ones its fence can actually violate.
+what now enforces it; the incidents behind the longer ones are in `docs/guardrail-receipts.md`. Check a
+diff against the ones its fence can actually violate.
 
 ### Assertions that cannot fail
 
@@ -50,39 +50,27 @@ what now enforces it. Check a diff against the ones its fence can actually viola
   the first line alone when you mean the message. *(BL-004, round 2)*
 - **A boundary pinned on one side only.** A range check needs a case above *and* below it;
   pinning only the strengthening direction leaves loosening undetected. *(BL-004, polish)*
-- **A guard that SAMPLES the domain it claims to sweep.** The most productive class this
-  repository has: eleven sightings in one change, five in another, including in the very
-  assertions written to close earlier sightings. Every instance was caught by a gate that
-  MUTATED the fix; none by one that read it. The author is thinking about the behaviour
-  being pinned, not about whether the new pin can fail. Ask of any guard: **is its subject
-  the domain or one sample of it, and does its control exercise the tight case or the
-  comfortable one?** Greppable shapes, no understanding of the code required:
-  - Two literals that partition the same collection with nothing relating them — for every
-    array literal used as a loop domain, is there an assertion whose subject is the DOMAIN
-    (size, set-equality, a count over results) rather than its members?
-  - A set-size check that is really a uniqueness check (`new Set([...a, ...b]).size ===
-    a.length + b.length`): delete a member and both sides shrink together.
-  - `indexOf` without a loop — only the FIRST occurrence is governed, and a second one
-    appended later is applauded.
-  - A fixed ±N window per occurrence, where two occurrences closer than N overlap and the
-    second is satisfied by the first's markers — while the arming control, written with a
-    generous gap, exercises only the non-overlapping branch.
-  - A corpus whose every entry satisfies the pattern's own proximity bound, which means it
-    was derived from the pattern however the comment describes it. Write the corpus as prose
-    first, pin its size and set, and require each pattern to own an entry no other catches —
-    otherwise a family loses half itself when one alternation is replaced by a dead literal.
-  - An out-parameter passed inline as a fresh literal and never bound, declining half of
-    what the function returned.
-  On any rewrite of a guard, assert the new family is a superset of the old: a sweep grown
-  from ten patterns to fourteen once lost a spelling while every visible signal said it grew.
-  Prefer binding a domain to the checkout over hand-writing it.
-  *(BL-004 polish, BL-016 round 2, and five more in `OS-20260921-backlog-closeout`)*
+- **A guard that SAMPLES the domain it claims to sweep** — this repository's most productive
+  class, caught only by gates that MUTATE a fix, never by ones that read it. Ask of any guard:
+  **is its subject the domain or one sample of it, and does its control exercise the tight case
+  or the comfortable one?** Greppable shapes, no understanding of the code required:
+  - two literals partitioning one collection with nothing relating them — for every array
+    literal used as a loop domain, assert on the DOMAIN (size, set-equality, a count over
+    results), not its members;
+  - `new Set([...a, ...b]).size === a.length + b.length` — a uniqueness check, not a size check
+    (delete a member and both sides shrink);
+  - `indexOf` without a loop — only the FIRST occurrence is governed;
+  - a fixed ±N window per occurrence — occurrences closer than N share markers, and a
+    generously spaced arming control never exercises the overlap;
+  - a corpus whose every entry sits inside the pattern's own bound (derived from it, whatever
+    the comment says) — write it as prose first, pin its size and set, and require each pattern
+    to own an entry no other catches;
+  - an out-parameter passed inline as a fresh literal and never bound.
+  On any rewrite of a guard, assert the new family is a superset of the old. Prefer binding a
+  domain to the checkout over hand-writing it. *(BL-004 polish, BL-016 round 2)*
 - **A branch no input reaches.** Recursion proven at depth one; an error path no fixture
   triggers; a filter attribute no test resolves. If a mutation of the branch leaves the
   suite green, the branch is untested however correct it is. *(BL-005, BL-009)*
-- **A self-fulfilling canary.** "No filter command was executed" proves nothing when the
-  fixture contains nothing that could execute one. Add a live control that makes the
-  marker appear, so its absence elsewhere means something. *(BL-003 polish)*
 - **A test that pins the defect.** An existing assertion can encode the old, wrong meaning
   of "correct". When a fix changes what correct means, hunt for the assertion that froze
   the old one.
@@ -107,13 +95,9 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A guard whose verdict depends on the checkout rather than the code.** CRLF/LF
   behaviour that passes only because this machine happens to check out one way. Assert the
   equivalence explicitly. *(BL-004, polish)*
-- **A sweep built to catch reversals of a rule is blind to an edit that NARROWS its scope.** A
-  closed enumeration ("human ONLY when it needs a device, a GUI, held credentials, or a
-  look-and-see judgement") shipped one clause from a human list naming grounds it omitted —
-  another OS, live data — which would have licensed tagging a live-data step `agent`. The
-  contradiction sweep could not see it, because it keyed on the rule's own vocabulary and this
-  was a narrowing, not a restatement. When a fix replaces prose with an enumeration, ask what
-  the enumeration excludes that the old text allowed. *(BL-016 round 1)*
+- **A sweep built to catch reversals of a rule is blind to an edit that NARROWS its scope.**
+  When a fix replaces prose with an enumeration, ask what the enumeration excludes that the
+  old text allowed. *(BL-016 round 1)*
 - **A test that reads a child's raw output has a verdict that depends on the terminal.** Run from
   a colour terminal, node's runner hands `FORCE_COLOR=1` to test files, and a child's reporter
   lines arrive painted; strip ANSI before matching them, and run the suite under
@@ -131,31 +115,17 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **Vacuous-until-later documentation.** A sentence can be true when written and false
   when a later batch lands. When a change makes an existing claim load-bearing, re-check
   the claims written before it.
-- **A backlog entry can be right about the defect and wrong about the file.** Re-verify
-  every entry against the source before drawing a fence; a backlog is a pointer, not a
-  specification. *(BL-003 named the wrong file; BL-002 was wider than its text)*
-- **…and wrong about its own FIX SHAPE.** Two of three entries in one change misdescribed
-  the repair, not the location: one proposed a code-span exemption when the real defect was
-  that the scan ran over the filled OUTPUT, and one named a wiring target that is pre-page
-  by construction while the pass it wires is post-page. Both would have shipped as written.
-  Re-derive what the fix IS, not merely where it goes.
-- **A close whose rationale points at documentation that does not contain the fact.** An
-  entry was closed as accepted on the ground that a declared `KNOWN_GAP` documented all
-  three cases; it documented two, and the same diff deleted the only other live record of
-  the third. Every signal read like a decision; the effect was a silent deletion. When a
+- **A pointer is not a specification.** A backlog entry or a ledger can be right about the
+  defect and wrong about the file, wrong about its own FIX SHAPE, or give an illustrative list
+  or a number that is not a specification — shipping an example behind an ONLY once narrowed a
+  safety rule. Re-verify the entry against the source, re-derive what the fix IS, and re-derive any number,
+  before drawing a fence or relying on it. *(BL-002, BL-003)*
+- **A close whose rationale points at documentation that does not contain the fact.** When a
   close cites a document as its resolution, open that document and confirm the fact is in
   it — and check what the same diff removes.
 - **Reading a stale copy of a document ONCE contaminates work that afterwards uses the
-  fresh one.** A ledger was scaffolded with a `**Files**` header taken from a stale
-  installed copy of this skill, read early and discarded later; the form was plausible, so
-  nothing looked wrong, and it silently killed the fence tool's Files-line branch for the
-  whole ledger. When a source turns out to be stale, re-derive what was already taken from
+  fresh one.** When a source turns out to be stale, re-derive what was already taken from
   it rather than merely ceasing to read it.
-- **An illustrative list implemented as a closed set.** A backlog entry's "a device, a GUI, held
-  credentials, or a judgement" was an example, not a specification; shipping it behind an ONLY
-  narrowed a safety rule. Five figures baked into one ledger — a registry-row count, a PyYAML
-  claim, a gap-family size, a file set, a violation count — were each corrected by the agent asked
-  to act on them. Re-derive a number before relying on it; a ledger is a pointer too.
 
 ### Hand-over artifacts
 
@@ -169,34 +139,20 @@ what now enforces it. Check a diff against the ones its fence can actually viola
 - **A step whose output a human cannot reasonably check is not a check.** If verifying
   means scanning hundreds of records, have the command report the answer.
 - **The apparatus that writes or verifies the work can corrupt it, and its output looks right
-  either way.** Six sightings in one change, five tools: `Set-Content` collapsed a test file to
-  one line; `git checkout` ate an uncommitted edit mid-mutation; an editor decoded `\uXXXX` into
-  literal control bytes that behaved identically; a heredoc collapsed `\\n`; the Bash tool
-  collapsed `\\b` into a backspace inside a `new RegExp`, making every pattern dead and
-  producing a **false clean result**. The first three corrupted the work, the last two the
-  verification of it. **Run a live control through your own harness before trusting any green or
-  any zero** — it paid out twice in a single round. Restore-by-checkout is only safe once the
-  real edit is committed. A seventh sighting, on the very commit that distilled the first six:
-  backticked filenames inside a DOUBLE-QUOTED `node -e "…"` string were command-substituted by
-  bash and replaced with nothing, so a close-out record read "puts  and  inside a test's domain".
-  Markdown here is full of backticks; write such content through the file tools, or single-quote
-  the script, and sweep the result for the damage signature rather than rereading the line.
-- **A GATE's evidence needs a control as much as an implementer's.** A test-hunter proved a
-  real finding with a mutation anchored on a tag the shipped template does not contain, so
-  it never applied and its "suite stayed green" measured nothing — and by the same token its
-  claim about what the old code caught was unfounded too. The conclusion survived a correctly
-  anchored re-run; the proof did not. Later the same session, two more mutation scripts
-  aborted on their own anchor guards, each of which would otherwise have been a false green.
-  Treat "I mutated it and nothing reddened" as a claim to verify: every mutation script must
-  abort loudly when its anchor is absent, and say so in its report.
-- **"No test can verify this" is not "no agent can verify this."** Test fixtures are
-  isolated from the real machine by design; a subagent is not. A step needs a human only
-  when it needs a device, a GUI, held credentials, or a judgement about whether something
-  looks right. A checkpoint asks the user for a **verdict**, not for labour. *(BL-016)*
-- **An issued input derived from the tree goes stale when a repair changes the tree.** A pin of
-  the skill directory's hash issued at one checkpoint failed at its re-issue because the
-  fix-ups had changed three skill files. Before any re-issue, regenerate and re-validate every
-  input derived from files a repair touched. *(OS-20260923 C1 issue 2, step 6)*
+  either way — and so can a gate's evidence.** **Run a live control through your own harness
+  before trusting any green or any zero**: a canary needs a case that makes its marker appear,
+  or it is self-fulfilling and its absence elsewhere means nothing; every mutation script must
+  abort loudly when its anchor is absent, and say so in its report — "I mutated it and nothing
+  reddened" is a claim to verify. Restore-by-checkout is only safe once the real edit is
+  committed. Write Markdown through the file tools or a single-quoted script — a double-quoted
+  shell string command-substitutes its backticks — and sweep the result for emptied code spans
+  (a doubled space where a name was) rather than rereading the line. *(BL-003 polish)*
+- **"No test can verify this" is not "no agent can verify this."** A step is human only on the
+  grounds `protocol.md`'s Runner rule lists, pinned by `tests/protocol-contract.test.cjs`; a
+  checkpoint asks the user for a verdict, not for labour. *(BL-016)*
+- **An issued input derived from the tree goes stale when a repair changes the tree.** Before
+  any re-issue, regenerate and re-validate every input derived from files a repair touched.
+  *(OS-20260923 C1 issue 2, step 6)*
 
 ## Orchestration
 
@@ -207,5 +163,4 @@ without the user's explicit words in the session that acts on them.
 
 - **Severity is about behaviour, never about the fence.** A violated criterion whose fix sits
   outside the batch's files is still P0/P1; the fence decides how it is fixed (`NEEDS_FENCE`,
-  a recorded extension), not whether it blocks. Two such findings routed to the backlog as
-  ASKs cost a failed checkpoint. *(OS-20260923 C1 issue 1)*
+  a recorded extension), not whether it blocks. *(OS-20260923 C1 issue 1)*
