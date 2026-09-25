@@ -5,8 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { StringDecoder } from 'node:string_decoder';
-import { pathToFileURL } from 'node:url';
-import { parseFlags } from './git-evidence.mjs';
+import { parseFlags, isMain } from './git-evidence.mjs';
 
 const PARSERS = ['node', 'jest', 'pytest', 'cargo', 'none'];
 const SHELLS = ['pwsh', 'powershell', 'bash'];
@@ -307,7 +306,8 @@ const oneLine = text => SEPARATORS.reduce((t, s) => t.split(s).join(' '), text.r
 
 // Step `result` is PASS, FAIL, NO-TESTS, CRASHED, NO-SUMMARY, TIMEOUT or COULD-NOT-START; counts
 // are null without a summary. `status` is UNKNOWN when a step could not start or the input is invalid.
-export async function runSpec(spec, { cwd = process.cwd(), logPath, timeoutMs } = {}) {
+// Steps inherit `env` (a caller may pass a scrubbed copy; process.env itself is never changed).
+export async function runSpec(spec, { cwd = process.cwd(), logPath, timeoutMs, env: inherited = process.env } = {}) {
   const unknown = reason => ({ status: 'UNKNOWN', line: oneLine(`UNKNOWN ${reason}`), steps: [] });
   const problem = checkSpec(spec);
   if (problem) return unknown(`spec: ${problem}`);
@@ -317,7 +317,7 @@ export async function runSpec(spec, { cwd = process.cwd(), logPath, timeoutMs } 
   try { fs.mkdirSync(path.dirname(path.resolve(logPath)), { recursive: true }); log = logWriter(fs.openSync(logPath, 'w')); }
   catch (e) { return unknown(`cannot open log ${logPath} (${e.code || e.name})`); }
   // A validation run is never a nested test context.
-  const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k.toUpperCase() !== 'NODE_TEST_CONTEXT'));
+  const env = Object.fromEntries(Object.entries(inherited).filter(([k]) => k.toUpperCase() !== 'NODE_TEST_CONTEXT'));
   const started = Date.now(), steps = [], texts = [];
   try {
     for (const step of spec.steps) {
@@ -383,6 +383,6 @@ export async function validateCli(args) {
   return { code: { PASS: 0, FAIL: 1, UNKNOWN: 2 }[result.status], text: result.line + '\n' };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   const output = await validateCli(process.argv.slice(2)); process.stdout.write(output.text); process.exitCode = output.code;
 }

@@ -7,8 +7,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { decode, parseFlags, validId, validPath } from './git-evidence.mjs';
+import { fileURLToPath } from 'node:url';
+import { decode, parseFlags, validId, validPath, isMain } from './git-evidence.mjs';
 import { exactPaths, table, oneRow, branchCell, skillPin } from './ledger-parse.mjs';
 import { oneLine } from './check-ledger.mjs';
 
@@ -298,7 +298,7 @@ export function promptCli(args) {
   } catch (e) { return { code: 2, line: e instanceof Unknown ? `UNKNOWN ${e.message}` : `UNKNOWN internal error: ${e.message}` }; }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   const output = promptCli(process.argv.slice(2));
   process.stdout.write((output.code === 0 && output.line.includes('\n') ? output.line : oneLine(output.line)) + '\n');
   process.exitCode = output.code;

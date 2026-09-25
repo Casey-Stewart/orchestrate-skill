@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 // This mechanical gate does not replace semantic review or grant scope.
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { git, capture, readBlob, worktrees, validId, validPath, validFullRef, parseFlags, diagnostic } from './git-evidence.mjs';
+import { git, capture, readBlob, worktrees, validId, validPath, validFullRef, parseFlags, diagnostic, isMain } from './git-evidence.mjs';
 import { linesOf, exactPaths, table, oneRow, branchCell, extensions } from './ledger-parse.mjs';
 
 export function validateBatchEdit(baseline, proposed, originalPaths, addedPaths, batchPath) {
@@ -140,6 +138,6 @@ export function fenceCli(args) {
   catch { result = { status: 'UNKNOWN', integrationSha: null, batchSha: null, mergeBase: null, violations: [], unknowns: [diagnostic('usage', 'Unknown, missing or duplicate flag; use --help')], evidence: {} }; }
   return { result, code: { PASS: 0, VIOLATION: 1, UNKNOWN: 2 }[result.status] };
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   const output = fenceCli(process.argv.slice(2)); process.stdout.write(output.text ?? JSON.stringify(output.result) + '\n'); process.exitCode = output.code;
 }

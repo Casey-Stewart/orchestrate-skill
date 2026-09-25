@@ -8,8 +8,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
-import { capture, git, parseFlags, validPath } from './git-evidence.mjs';
+import { capture, git, parseFlags, validPath, isMain, localGitVars as listedGitVars } from './git-evidence.mjs';
 import { oneLine } from './check-ledger.mjs';
 import { runSpec } from './validate.mjs';
 
@@ -66,8 +65,8 @@ export function checkMutations(doc) {
   return null;
 }
 // The work tree holding <repo>: a mutation's file is relative to its top.
-export function topLevel(repo) {
-  const r = git(repo, ['rev-parse', '--show-toplevel']);
+export function topLevel(repo, env) {
+  const r = git(repo, ['rev-parse', '--show-toplevel'], { env });
   if (!r.ok || !r.text.trim()) throw new Unknown(`usage: not inside a git work tree: ${repo}`);
   return path.resolve(r.text.trim());
 }
@@ -82,15 +81,9 @@ export function inside(top, file) {
 // injected config — as git itself lists them (`git rev-parse --local-env-vars`), never a copy of
 // that list. One inherited by the clone's checkout, or by a validate step inside the clone, acts
 // on the caller's repository instead: a GIT_DIR detaches its HEAD, a GIT_INDEX_FILE stages into
-// its index. Git is asked with no GIT_* variable set, so none of them can bend its answer.
-let localVars = null;
+// its index. The list is git-evidence.mjs's, whose probes drop its repository-location names.
 export function localGitVars() {
-  if (localVars) return localVars;
-  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
-  const r = spawnSync('git', ['rev-parse', '--local-env-vars'], { env, encoding: 'utf8', shell: false, windowsHide: true, timeout: 15000 });
-  const names = !r.error && r.status === 0 ? r.stdout.split(/\r?\n/).filter(Boolean) : [];
-  if (!names.length || names.some(name => !/^GIT_[A-Z0-9_]+$/.test(name))) throw new Unknown('git did not list the variables that tie it to a repository (git rev-parse --local-env-vars)');
-  return (localVars = names);
+  try { return listedGitVars(); } catch (e) { throw new Unknown(e.message); }
 }
 // Names compare case-folded: Windows reads its environment without regard to case.
 export function withoutLocalGitEnv(env) {
@@ -109,8 +102,8 @@ export const removeTree = dir => fs.rmSync(dir, { recursive: true, force: true, 
 // Clone and checkout write only inside the disposable directory; hooks point at an empty
 // directory there, so no hook the user configured runs, and git's repository variables are
 // dropped, so neither acts on the caller's repository. Git's stderr goes to the log only.
-function gitIn(cwd, args, log, what) {
-  const r = spawnSync('git', args, { cwd, env: { ...withoutLocalGitEnv(process.env), GIT_TERMINAL_PROMPT: '0' }, shell: false, windowsHide: true, timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
+function gitIn(cwd, args, env, log, what) {
+  const r = spawnSync('git', args, { cwd, env: { ...env, GIT_TERMINAL_PROMPT: '0' }, shell: false, windowsHide: true, timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
   if (!r.error && r.status === 0) return;
   const how = r.error ? r.error.code || r.error.name : `exit ${r.status ?? r.signal}`;
   log.note(`git ${what} failed (${how})`);
@@ -120,10 +113,13 @@ function gitIn(cwd, args, log, what) {
 // A shared clone reads the repository's objects without copying them and registers nothing in
 // it: no worktree entry, no admin directory. `<ref>` is resolved in `repo` first, so HEAD of a
 // batch worktree works. The clone sits in a short directory under the temp root (Windows paths
-// stop at 260 characters) and is removed however `fn` ends.
+// stop at 260 characters) and is removed however `fn` ends. Git's repository variables are dropped
+// here for every caller, not only for a CLI that scrubbed its process first: the ref lookup, the
+// clone and `fn`'s validate steps (it is handed `env`) use a scrubbed copy; process.env is untouched.
 export async function withDisposableCheckout(repo, ref, fn, { tmpRoot = os.tmpdir(), log = NO_LOG, remove = removeTree } = {}) {
-  const top = topLevel(repo);
-  const sha = capture(top, ref, []), short = sha && git(top, ['rev-parse', '--short', sha]);
+  const env = withoutLocalGitEnv(process.env);
+  const top = topLevel(repo, env);
+  const sha = capture(top, ref, [], { env }), short = sha && git(top, ['rev-parse', '--short', sha], { env });
   if (!sha || !short.ok) throw new Unknown(`ref ${ref} names no commit in ${top}`);
   let root;
   try { root = fs.mkdtempSync(path.join(tmpRoot, 'mut-')); }
@@ -133,9 +129,9 @@ export async function withDisposableCheckout(repo, ref, fn, { tmpRoot = os.tmpdi
     const dir = path.join(root, 'c'), hooks = path.join(root, 'hooks');
     fs.mkdirSync(hooks);
     log.note(`checkout ${sha} into ${dir}`);
-    gitIn(root, ['-c', `core.hooksPath=${hooks}`, 'clone', '--shared', '--no-checkout', '--quiet', '--', top, dir], log, 'clone');
-    gitIn(dir, ['-c', `core.hooksPath=${hooks}`, 'checkout', '--quiet', '--detach', sha], log, 'checkout');
-    value = await fn({ dir, sha, short: short.text.trim(), scratch: root });
+    gitIn(root, ['-c', `core.hooksPath=${hooks}`, 'clone', '--shared', '--no-checkout', '--quiet', '--', top, dir], env, log, 'clone');
+    gitIn(dir, ['-c', `core.hooksPath=${hooks}`, 'checkout', '--quiet', '--detach', sha], env, log, 'checkout');
+    value = await fn({ dir, sha, short: short.text.trim(), scratch: root, env });
   } catch (e) { failure = e; }
   finally {
     try { remove(root); }
@@ -161,11 +157,11 @@ export function openLog(file) {
 }
 // One validate.mjs run in the checkout. Its own log is copied into the invocation's log under a
 // header and its line re-pointed there, so every `log:` path printed outlives the checkout.
-export async function runLogged(spec, { cwd, log, label, scratch, timeoutMs }) {
+export async function runLogged(spec, { cwd, log, label, scratch, timeoutMs, env }) {
   const runLog = path.join(scratch, 'run.log');
   fs.rmSync(runLog, { force: true });
   log.note(label);
-  const result = await runSpec(spec, { cwd, logPath: runLog, timeoutMs });
+  const result = await runSpec(spec, { cwd, logPath: runLog, timeoutMs, env });
   log.append(fs.readFileSync(runLog));
   return { ...result, line: result.line.split(runLog).join(log.path) };
 }
@@ -257,8 +253,8 @@ export async function mutate({ repo, ref, mutations, validate, setup = null, log
   const wrote = (file, bytes) => { try { writeFile(file, bytes); return fs.readFileSync(file).equals(bytes); } catch { return false; } };
   let code = 2;
   try {
-    code = await withDisposableCheckout(repo, ref, async ({ dir, scratch }) => {
-      const run = (label, spec) => runLogged(spec, { cwd: dir, log, label, scratch, timeoutMs });
+    code = await withDisposableCheckout(repo, ref, async ({ dir, scratch, env }) => {
+      const run = (label, spec) => runLogged(spec, { cwd: dir, log, label, scratch, timeoutMs, env });
       if (setup) {
         const done = await run('setup', setup);
         if (done.status !== 'PASS') { say(`UNKNOWN setup ${done.line}`); return 2; }
@@ -358,7 +354,7 @@ export async function mutateCli(args, emit = () => {}) {
   } catch (e) { return refuse(e instanceof Unknown ? e.message : `internal error: ${e.message}`); }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   // Exit 1 reads as "a mutation survived", so a crash never ends with it: UNKNOWN, exit 2.
   process.on('uncaughtException', e => { fs.writeSync(1, oneLine(`UNKNOWN internal error: ${e?.message ?? e}`) + '\n'); process.exit(2); });
   const output = await mutateCli(process.argv.slice(2), line => process.stdout.write(line + '\n'));

@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
@@ -171,6 +172,79 @@ test('worktree and ledger CLIs retain unavailable observations and config failur
   const result = cli(repo, 'worktrees'); assert.equal(result.status, 2); assert.equal(result.json.completeness, 'partial'); assert.equal(result.json.evidence.worktrees.find(w => w.branch === 'refs/heads/missing-worktree').cleanliness, 'unknown'); assert.ok(result.json.diagnostics.some(d => d.code === 'worktree-unavailable'));
   const missing = cli(repo, 'ledger', ['--ref', 'refs/heads/no-object', '--ledger', 'FIXTURE']); assert.equal(missing.status, 2); assert.equal(missing.json.evidence.refSha, null); assert.equal(missing.json.evidence.active.exists, null); assert.equal(missing.json.evidence.archive.exists, null);
   const configured = repo.cli('git-evidence.mjs', ['ancestry', '--repo', repo.cwd, '--ancestor', MAIN, '--descendant', MAIN], { GIT_CONFIG_COUNT: 'not-a-number' }); assert.equal(configured.status, 2); unknown(configured.json); assert.equal(configured.json.diagnostics[0].command, 'rev-parse');
+});
+// Git exports GIT_DIR and GIT_INDEX_FILE to every hook, so a tool run from one inherits them. The
+// evidence still describes --repo: git's repository-location variables are dropped from every
+// probe (config injection stays surfaced, as the GIT_CONFIG_COUNT case above pins).
+test('an inherited GIT_DIR or GIT_INDEX_FILE never points the git-evidence or check-fence CLI at another repository', async t => {
+  const repo = makeRepo(t), decoy = makeRepo(t), batchFile = `${LEDGER}/02-batches-01-work.md`;
+  repo.write(`${LEDGER}/01-plan.md`, '# Plan\n\n| # | Batch | Branch | Files (fence) |\n|---|---|---|---|\n| B01 | Work | batch-one | `allowed.txt` |\n');
+  repo.write(`${LEDGER}/PROGRESS.md`, '# Progress\n\n## Batches\n\n| # | Branch | Notes |\n|---|---|---|\n| B01 | batch-one | — |\n\n## Session log\n\n| Date | Detail |\n|---|---|\n');
+  repo.write(batchFile, '# B01 — Work (feature, —)\n\n**Branch**: `batch-one`\n**Files**: `allowed.txt`\n\n## Checklist\n\n- [ ] Implement behavior.\n\n## Acceptance\n\nPreserve this text.\n');
+  repo.write('allowed.txt', 'before\n'); repo.commit('authority'); repo.git('branch', 'integration');
+  const wt = path.join(repo.root, 'batch worktree'); repo.git('worktree', 'add', '-b', 'batch-one', wt);
+  repo.at(wt).write('allowed.txt', 'implemented\n'); repo.at(wt).commit('implement');
+  // The decoy has the same branch names at other commits, and a file of its own in its index.
+  decoy.write('decoy-only.txt', 'decoy\n'); decoy.commit('decoy'); decoy.git('branch', 'integration'); decoy.git('branch', 'batch-one');
+  const decoyGit = path.join(decoy.cwd, '.git');
+  const fence = ['--repo', repo.cwd, '--integration', 'refs/heads/integration', '--batch', 'refs/heads/batch-one', '--ledger', 'FIXTURE', '--batch-id', 'B01', '--batch-file', batchFile];
+  const runs = { discovery: env => repo.cli('git-evidence.mjs', ['discovery', '--repo', repo.cwd], env), worktrees: env => repo.cli('git-evidence.mjs', ['worktrees', '--repo', repo.cwd], env), fence: env => repo.cli('check-fence.mjs', fence, env) };
+  const clean = Object.fromEntries(Object.entries(runs).map(([name, run]) => [name, run({})]));
+  assert.deepEqual(Object.values(clean).map(r => r.status), [0, 0, 0], JSON.stringify(clean.fence.json));
+  assert.equal(clean.fence.json.status, 'PASS');
+  const gitOut = (env, args) => { const r = spawnSync('git', args, { cwd: repo.cwd, env: { ...repo.env, ...env }, encoding: 'utf8', windowsHide: true }); return [r.status, r.stdout]; };
+  for (const [label, env, probe] of [
+    ['GIT_DIR', { GIT_DIR: decoyGit }, ['for-each-ref', '--format=%(refname) %(objectname)']],
+    ['GIT_INDEX_FILE', { GIT_INDEX_FILE: path.join(decoyGit, 'index') }, ['status', '--porcelain', '--untracked-files=all']],
+    ['both', { GIT_DIR: decoyGit, GIT_INDEX_FILE: path.join(decoyGit, 'index') }, ['for-each-ref', '--format=%(refname) %(objectname)']],
+  ]) {
+    // Live control: plain git in this environment reads the decoy (its index names objects this repository lacks).
+    assert.equal(gitOut({}, probe)[0], 0, label);
+    assert.notDeepEqual(gitOut(env, probe), gitOut({}, probe), label + ': the plant is live');
+    for (const [name, run] of Object.entries(runs)) {
+      const r = run(env);
+      assert.deepEqual([r.status, r.json], [clean[name].status, clean[name].json], label + ': ' + name);
+      assert.ok(!r.stdout.includes(decoy.root), label + ': ' + name + ': the decoy appears nowhere');
+    }
+    // The exported API drops them from a caller's env the same way.
+    assert.deepEqual((await api).discovery({ repo: repo.cwd, env: { ...repo.env, ...env } }), clean.discovery.json, label + ': the API');
+  }
+});
+test("git's repository-location variables are dropped from a probe's environment whatever their case, and its config injection and everything else are kept", async () => {
+  const { localGitVars, repositoryEnv } = await api;
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
+  const listed = spawnSync('git', ['rev-parse', '--local-env-vars'], { env, encoding: 'utf8', windowsHide: true });
+  assert.equal(listed.status, 0, listed.stderr);
+  const names = listed.stdout.split(/\r?\n/).filter(Boolean);
+  assert.deepEqual(localGitVars(), names, 'the list is the one git prints, never a copy');
+  const config = names.filter(name => /^GIT_CONFIG(?:_|$)/.test(name)), location = names.filter(name => !config.includes(name));
+  assert.ok(location.includes('GIT_DIR') && location.includes('GIT_INDEX_FILE') && config.includes('GIT_CONFIG_COUNT') && config.includes('GIT_CONFIG_PARAMETERS'), names.join(' '));
+  const keep = { PATH: 'p', GIT_TERMINAL_PROMPT: '0', GIT_CONFIG_GLOBAL: 'g', GIT_CONFIG_KEY_0: 'k', GIT_CONFIG_VALUE_0: 'v', GIT_CEILING_DIRECTORIES: 'c', GIT_DIRECTORY: 'not git_dir' };
+  for (const name of config) { keep[name] = 'kept'; keep[name.toLowerCase()] = 'kept'; }
+  const planted = { ...keep };
+  for (const name of location) { planted[name] = 'x'; planted[name.toLowerCase()] = 'x'; }
+  assert.deepEqual(repositoryEnv(planted), keep);
+  assert.equal(planted.GIT_DIR, 'x', "the caller's object is not changed");
+});
+// With no trustworthy list there is nothing to drop by: every probe refuses, none runs unscrubbed.
+// The fake is node under git's name (a link, or a copy where links need privileges), answering
+// through a --require hook that acts only in a process started as git.
+test('a git that lists no repository variable, or a name that is not one, fails every evidence probe closed', t => {
+  const repo = makeRepo(t), bin = path.join(repo.root, 'fake-bin'), fake = path.join(bin, process.platform === 'win32' ? 'git.exe' : 'git');
+  fs.mkdirSync(bin);
+  try { fs.symlinkSync(process.execPath, fake); } catch { fs.copyFileSync(process.execPath, fake); }
+  const hook = path.join(repo.root, 'fake-git.cjs');
+  fs.writeFileSync(hook, "if (require('path').basename(process.argv0).replace(/[.]exe$/i, '') === 'git') { process.stdout.write(process.env.FAKE_GIT_OUT); process.exit(0); }\n");
+  const pathKey = Object.keys(repo.env).find(key => key.toUpperCase() === 'PATH');
+  for (const [label, out] of [['a list of nothing', ''], ['a name that is not a git variable', 'GIT_DIR\nPATH\n']]) {
+    const env = { [pathKey]: bin + path.delimiter + repo.env[pathKey], NODE_OPTIONS: '--require "' + hook.split(path.sep).join('/') + '"', FAKE_GIT_OUT: out };
+    // Live control: a PATH lookup finds the fake, and it answers as told.
+    const probe = spawnSync('git', ['rev-parse', '--local-env-vars'], { env: { ...repo.env, ...env }, encoding: 'utf8', windowsHide: true });
+    assert.deepEqual([probe.status, probe.stdout], [0, out], label + ': the fake answers ' + probe.stderr);
+    const r = repo.cli('git-evidence.mjs', ['ancestry', '--repo', repo.cwd, '--ancestor', MAIN, '--descendant', MAIN], env);
+    assert.equal(r.status, 2, label); unknown(r.json);
+    assert.deepEqual(r.json.diagnostics.map(d => [d.code, d.command, d.error]), [['git-probe', 'rev-parse', 'local-env-vars'], ['git-probe', 'rev-parse', 'local-env-vars']], label);
+  }
 });
 test('read-only probes do not execute configured external diff or fsmonitor shell commands', async t => {
   const repo = makeRepo(t); repo.write('tracked', 'before'); repo.commit('tracked'); repo.write('tracked', 'after');

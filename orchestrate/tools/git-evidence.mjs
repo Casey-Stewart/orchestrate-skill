@@ -3,7 +3,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const decoder = new TextDecoder('utf-8', { fatal: true });
 const SHA = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
@@ -15,9 +15,48 @@ export const validFullRef = ref => typeof ref === 'string' && /^refs\/(?:heads|r
 function safeRef(ref) { return typeof ref === 'string' && ref.length > 0 && !ref.startsWith('-') && !/[\x00-\x20\x7f]/.test(ref); }
 export function decode(bytes) { return decoder.decode(bytes); }
 
+// A tool runs its CLI only as the entry script. Node resolves the entry's import.meta.url through
+// links but leaves process.argv[1] as typed, so both sides are resolved: through a linked directory
+// or file (an installed skill) a tool runs as it does in place. Imported under another file name it
+// is a library; a mismatch under its own name never exits 0 unrun, which a gate reads as PASS.
+export function isMain(moduleUrl) {
+  const entry = process.argv[1], self = fileURLToPath(moduleUrl);
+  if (!entry) return false;
+  let real = null;
+  try { real = fs.realpathSync(entry); } catch { /* an argument, not a file (node -e): no entry */ }
+  if (real === fs.realpathSync(self)) return true;
+  if (path.basename(entry) !== path.basename(self)) return false;
+  fs.writeSync(2, `${path.basename(self)}: not run: the entry script ${entry} does not resolve to this module ${self}`.replace(/[\x00-\x1f\x7f]/g, '?') + '\n');
+  process.exit(2);
+}
+
+// The variables that tie git to one repository, as git itself lists them (`git rev-parse
+// --local-env-vars`), never a copy of that list. Git is asked with no GIT_* variable set, so none
+// of them can bend its answer. It throws when the list is empty or names a non-variable.
+let localVars = null;
+export function localGitVars() {
+  if (localVars) return localVars;
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
+  const r = spawnSync('git', ['rev-parse', '--local-env-vars'], { env, encoding: 'utf8', shell: false, windowsHide: true, timeout: 15000 });
+  const names = !r.error && r.status === 0 ? r.stdout.split(/\r?\n/).filter(Boolean) : [];
+  if (!names.length || names.some(name => !/^GIT_[A-Z0-9_]+$/.test(name))) throw new Error('git did not list the variables that tie it to a repository (git rev-parse --local-env-vars)');
+  return (localVars = names);
+}
+// Every probe reads the repository it was given: an inherited GIT_DIR or GIT_INDEX_FILE (git
+// exports them to hooks) would point it at another, so git's repository-location variables are
+// dropped, names compared case-folded (Windows). Its config-injection ones (GIT_CONFIG*) stay: an
+// injected setting is surfaced as a failed probe, never hidden.
+export function repositoryEnv(env) {
+  const drop = new Set(localGitVars().filter(name => !/^GIT_CONFIG(?:_|$)/.test(name)));
+  return Object.fromEntries(Object.entries(env).filter(([key]) => !drop.has(key.toUpperCase())));
+}
+
 export function git(repo, args, options = {}) {
+  let env;
+  try { env = repositoryEnv(options.env ?? process.env); }
+  catch { return { ok: false, exit: null, text: null, diagnostic: diagnostic('git-probe', 'Git did not list its repository variables; probe not run', { command: args[0], exit: null, error: 'local-env-vars' }) }; }
   const result = spawnSync('git', ['--no-optional-locks', '-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false', ...args], {
-    cwd: repo, env: { ...(options.env ?? process.env), GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_NO_LAZY_FETCH: '1' },
+    cwd: repo, env: { ...env, GIT_OPTIONAL_LOCKS: '0', GIT_TERMINAL_PROMPT: '0', GIT_NO_LAZY_FETCH: '1' },
     ...(options.input === undefined ? {} : { input: options.input }),
     shell: false, windowsHide: true, timeout: 15000, maxBuffer: 16 * 1024 * 1024,
   });
@@ -378,6 +417,6 @@ export function evidenceCli(args) {
     return { code: result.completeness === 'complete' ? 0 : 2, result };
   } catch { return { code: 2, result: { operation, repo: null, completeness: 'unknown', evidence: {}, diagnostics: [diagnostic('usage', 'Invalid invocation; use --help for explicit command and flags')] } }; }
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   const output = evidenceCli(process.argv.slice(2)); process.stdout.write(output.text ?? JSON.stringify(output.result) + '\n'); process.exitCode = output.code;
 }

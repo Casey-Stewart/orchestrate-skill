@@ -624,17 +624,17 @@ test('a git that lists no repository variable, or a name that is not one, is UNK
   }
 });
 
+// A step that passes only where its environment holds none of git's variables, in any case,
+// and git finds the clone's own repository.
+const whereStep = names => ({ name: 'where', argv: [NODE, '-e', "const names = new Set(JSON.parse(process.argv[1])); if (Object.keys(process.env).some(key => names.has(key.toUpperCase()))) process.exit(2); "
+  + "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);", JSON.stringify(names)], parser: 'none' });
 test("git's repository variables in the caller's environment — a GIT_DIR, a GIT_INDEX_FILE, every one git lists — never reach the repository, the clone or a validate step, for both tools", async t => {
   const fx = fixture(t);
   // The user has a change staged: an index a stray checkout would rewrite.
   fx.repo.write('sub/keep.txt', 'staged\n');
   fx.repo.git('add', 'sub/keep.txt');
-  // A step that passes only where its environment holds none of git's variables, in any case,
-  // and git finds the clone's own repository.
   const names = gitListed();
-  const where = { name: 'where', argv: [NODE, '-e', "const names = new Set(JSON.parse(process.argv[1])); if (Object.keys(process.env).some(key => names.has(key.toUpperCase()))) process.exit(2); "
-    + "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);", JSON.stringify(names)], parser: 'none' };
-  const spec = fx.json('where.json', { steps: [...specOf().steps, where] });
+  const spec = fx.json('where.json', { steps: [...specOf().steps, whereStep(names)] });
   const gitDir = path.join(fx.repo.cwd, '.git');
   // Every name git lists, planted at once through the CLIs: each must be scrubbed, or the step sees it.
   const every = Object.fromEntries(names.map(name => [name, 'planted']));
@@ -658,6 +658,34 @@ test("git's repository variables in the caller's environment — a GIT_DIR, a GI
     assert.deepEqual(state(fx.repo), before, name + ': the repository is untouched in process too');
     assert.deepEqual(leftUnder(tmp), []);
   }
+});
+
+// The exported API drops them itself, for a caller that never scrubbed its process: the ref lookup
+// names the repository's commit and every validate step runs without them. The caller's
+// process.env keeps them. The decoy has one commit, so HEAD~1 names nothing there.
+test("a direct caller of withDisposableCheckout, mutate() or runAtRef() with a decoy GIT_DIR and GIT_INDEX_FILE gets lookups and validate steps that never see them, and keeps its own process.env", async t => {
+  const fx = fixture(t), decoy = makeRepo(t), decoyGit = path.join(decoy.cwd, '.git');
+  const plant = { GIT_DIR: decoyGit, GIT_INDEX_FILE: path.join(decoyGit, 'index') };
+  const names = gitListed(), spec = { steps: [...specOf().steps, whereStep(names)] };
+  const { withDisposableCheckout, mutate } = await api(), { runAtRef } = await atRefApi();
+  const tmp = fs.mkdtempSync(path.join(fx.repo.root, 'tmp-')), before = state(fx.repo);
+  const atLog = path.join(fx.work, 'api-at.log'), mutateLog = path.join(fx.work, 'api-mutate.log');
+  await isolated(fx, () => withEnv(plant, async () => {
+    const caller = { ...process.env };
+    // Live control: git in the caller's environment reads the decoy.
+    const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: fx.repo.cwd, encoding: 'utf8', windowsHide: true });
+    assert.deepEqual([head.status, head.stdout.trim()], [0, decoy.base], 'the plant is live');
+    const seen = await withDisposableCheckout(fx.repo.cwd, 'HEAD~1', ({ sha, env }) => ({ sha, seen: Object.keys(env).filter(key => names.includes(key.toUpperCase())) }), { tmpRoot: tmp });
+    assert.deepEqual(seen, { sha: fx.red, seen: [] }, 'the lookup names the repository\'s commit, and fn is handed none of them');
+    assert.deepEqual(await runAtRef({ repo: fx.repo.cwd, ref: 'HEAD~1', validate: spec, logPath: atLog, tmpRoot: tmp }),
+      { code: 1, line: `AT ${fx.short(fx.red)} FAIL tests 1 of 5 failed: extra two runs; where ok — log: ${atLog}` });
+    const m = await mutate({ repo: fx.repo.cwd, ref: 'HEAD', mutations: [M.m1], validate: spec, logPath: mutateLog, tmpRoot: tmp });
+    assert.match(m.lines[0], /^CONTROL PASS PASS tests 5\/5; where ok \(\d+s\)$/, m.lines.join(' | '));
+    assert.deepEqual([m.lines.slice(1), m.code], [['KILLED m1: add sums two numbers', 'MUTATE 1 killed, 0 survived, 0 other'], 0]);
+    assert.deepEqual({ ...process.env }, caller, "the caller's process.env is unchanged");
+  }));
+  assert.deepEqual(state(fx.repo), before);
+  assert.deepEqual(leftUnder(tmp), []);
 });
 
 // ===== The classification rows, each fed directly ===================================================
