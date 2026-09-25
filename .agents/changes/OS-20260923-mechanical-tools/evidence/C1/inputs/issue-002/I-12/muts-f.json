@@ -1,0 +1,10 @@
+{
+  "mutations": [
+    {
+      "id": "f1",
+      "file": "lib.cjs",
+      "find": "const MODE = 'full';",
+      "replace": "const MODE = 'lite';"
+    }
+  ]
+}

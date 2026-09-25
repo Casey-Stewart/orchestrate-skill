@@ -1,0 +1,268 @@
+[
+  {
+    "id": "I-10.skip-only.test.cjs",
+    "path": "evidence/C1/inputs/issue-002/I-10/skip-only.test.cjs",
+    "sha256": "5547c7c9ccb3d9ed9cc864f0a4ac408ec0632738bd7260afcede18c8ba11a5c1",
+    "size": 204,
+    "requirements": "A node:test file whose only test is skipped by a switch that is off, and a validate.mjs spec with one argv step named `tests` running it (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS skip-only.test.cjs registers exactly one test, and it is skipped; PASS `node --test` run directly: exit 0 with pass 0, skipped 1 (node alone calls this green); PASS spec.json: one argv step named `tests`, parser node, running that file",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-10.spec.json",
+    "path": "evidence/C1/inputs/issue-002/I-10/spec.json",
+    "sha256": "f5dd22c64a9a463b8801dde6a77f2ae99756e303547a7a82ce238efd27c7cf82",
+    "size": 199,
+    "requirements": "A node:test file whose only test is skipped by a switch that is off, and a validate.mjs spec with one argv step named `tests` running it (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS skip-only.test.cjs registers exactly one test, and it is skipped; PASS `node --test` run directly: exit 0 with pass 0, skipped 1 (node alone calls this green); PASS spec.json: one argv step named `tests`, parser node, running that file",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-11.empty.test.cjs",
+    "path": "evidence/C1/inputs/issue-002/I-11/empty.test.cjs",
+    "sha256": "d545b0e67ab46d623a8b85372893ed2dba783ea4865324cbaff715e7042eaa79",
+    "size": 163,
+    "requirements": "A node:test file that registers no tests (a loop over an empty array) beside a file with one real test, and a spec running both (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS empty.test.cjs registers no test; one.test.cjs registers one; PASS `node --test` run directly counts the empty file as a passing test (pass 2, exit 0) — the behaviour the fix must see through; PASS spec.json: one argv step named `tests`, parser node, running both files",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-11.one.test.cjs",
+    "path": "evidence/C1/inputs/issue-002/I-11/one.test.cjs",
+    "sha256": "389949089d02a267cccb648e8aae2accfc3876871dc6006630a7d57798247480",
+    "size": 134,
+    "requirements": "A node:test file that registers no tests (a loop over an empty array) beside a file with one real test, and a spec running both (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS empty.test.cjs registers no test; one.test.cjs registers one; PASS `node --test` run directly counts the empty file as a passing test (pass 2, exit 0) — the behaviour the fix must see through; PASS spec.json: one argv step named `tests`, parser node, running both files",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-11.spec.json",
+    "path": "evidence/C1/inputs/issue-002/I-11/spec.json",
+    "sha256": "9303910fa59d6d51160bf0be92e94132aaa672e55665103d47d8a9c4b97c2edf",
+    "size": 219,
+    "requirements": "A node:test file that registers no tests (a loop over an empty array) beside a file with one real test, and a spec running both (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS empty.test.cjs registers no test; one.test.cjs registers one; PASS `node --test` run directly counts the empty file as a passing test (pass 2, exit 0) — the behaviour the fix must see through; PASS spec.json: one argv step named `tests`, parser node, running both files",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-12.README.md",
+    "path": "evidence/C1/inputs/issue-002/I-12/README.md",
+    "sha256": "357626c7929f3384bb52fca91734004b4bc42ec41142c9593d60eba3a8ed2599",
+    "size": 1070,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.fixture.bundle",
+    "path": "evidence/C1/inputs/issue-002/I-12/fixture.bundle",
+    "sha256": "283664bbba97327858715d0be1fe3823bc4e2a006d758a656b60d68b16189e35",
+    "size": 1051,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.generate-c1-inputs-002.mjs",
+    "path": "evidence/C1/inputs/issue-002/I-12/generate-c1-inputs-002.mjs",
+    "sha256": "9771e8849ad081c157928f5705fb4ec1c5271ff0abf3d55b148268e487b6e529",
+    "size": 6576,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.muts-a.json",
+    "path": "evidence/C1/inputs/issue-002/I-12/muts-a.json",
+    "sha256": "b29b977449c487e45f2da98930e601223a43d739b0d068cfb0d98bc9408f50ac",
+    "size": 144,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.muts-b.json",
+    "path": "evidence/C1/inputs/issue-002/I-12/muts-b.json",
+    "sha256": "314f18a4843e89f18268e35b3b0d041cd6541f14396086571f6537fc42765e7b",
+    "size": 159,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.muts-f.json",
+    "path": "evidence/C1/inputs/issue-002/I-12/muts-f.json",
+    "sha256": "87f2d0cba176e5d618773be259adb4edb96adbab07dc9e32cd012541f0fda6dc",
+    "size": 158,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.validate-a.json",
+    "path": "evidence/C1/inputs/issue-002/I-12/validate-a.json",
+    "sha256": "7898184617707759532be66cb724917662fa08cf334b795516997db1462c014f",
+    "size": 197,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.validate-b.json",
+    "path": "evidence/C1/inputs/issue-002/I-12/validate-b.json",
+    "sha256": "f0423a0924410eac6e4b793d765ab5d852d6a85aac4e77974dc07f6914f554fa",
+    "size": 194,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-12.validate-f.json",
+    "path": "evidence/C1/inputs/issue-002/I-12/validate-f.json",
+    "sha256": "110efa5897a045605b983e29eff58fa88f171d29882d1e3e082032bd03548d46",
+    "size": 194,
+    "requirements": "A git bundle of a one-commit fixture (lib.cjs with add, FEATURE_ON off, MODE full, one ROWS entry; feature, rows and flip test files), three validate specs and three one-mutation files for scenarios (a) skip-only control, (b) a file emptied of tests, (f) a skip flip; the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-002/independent-check.md",
+      "sha256": "6e7d678d6ad0269a2d03f256267f5768ea1450224299833ef953acf17408a949",
+      "size": 3277,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs-002.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-002",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (inside the fresh clone); PASS a fresh clone checks out `main`, and the README names its commit; PASS (a) feature.test.cjs run directly: pass 0, skipped 1 — its control passes nothing; PASS (b) rows.test.cjs run directly: pass 1; PASS (f) flip.test.cjs run directly: pass 2, skipped 0; PASS muts-a.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-a.json: one argv step named `tests`, parser node; PASS muts-b.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-b.json: one argv step named `tests`, parser node; PASS muts-f.json: one mutation whose find occurs exactly once in lib.cjs; PASS validate-f.json: one argv step named `tests`, parser node; PASS (b) with e1 applied by hand, rows.test.cjs registers no test; PASS (f) with f1 applied by hand, flip.test.cjs: pass 1, skipped 1 (the total holds, the skipped count moves); PASS the generator is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fail-fixture` before Step 17; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fail-fixture and clone again; the issued bundle and JSON files are never modified."
+  }
+]

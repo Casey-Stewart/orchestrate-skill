@@ -1,0 +1,10 @@
+{
+  "mutations": [
+    {
+      "id": "a1",
+      "file": "lib.cjs",
+      "find": "return a + b;",
+      "replace": "return a - b;"
+    }
+  ]
+}

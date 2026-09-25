@@ -1,0 +1,10 @@
+{
+  "mutations": [
+    {
+      "id": "e1",
+      "file": "lib.cjs",
+      "find": "const ROWS = [[2, 3, 5]];",
+      "replace": "const ROWS = [];"
+    }
+  ]
+}
