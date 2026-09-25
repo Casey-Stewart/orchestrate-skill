@@ -62,6 +62,7 @@ C1 issue 001 (2026-09-24, build `450d7e9`): `I-01`…`I-09` under `evidence/C1/i
 | 2026-09-25 | C1 | fail — B01, B05 | User, after the C1 hand-over, asking: "Is counting skipped tests and test files with no tests not a p/p1 level bug?" — then, after the orchestrator confirmed both (a reproduced `CONTROL PASS PASS tests 0/1` → `SURVIVED m1`; the R2-measured `SURVIVED empty-one`) and recommended failing C1: "Fail on B05 and B01. Rework them both." B02, B03, B04 not explicitly passed — they stay 🧪 for the re-run. |
 | 2026-09-25 | — | count-invariant guard → BACKLOG; push authorized: `chore/mechanical-tools-ledger` → `origin` | User, after the orchestrator sized the guard and recommended BACKLOG: "Yeah backlog. Push to origin. Then I can run the test on Windows." |
 | 2026-09-25 | C1 | fail — step 14 → B01 | User, after pasting the Windows run of step 14 (512 tests, 511 pass, 1 fail: `live: a test file that registers no tests is a load failure, relative, absolute or discovered; real tests beside it still pass` — `spec discovered: the emptied file (line -1) must follow the parent test (line -1)`, validate.test.cjs:1084) and the orchestrator's diagnosis: "Yes, fail step 14 on B01 and fix it. Use new sub agents, no reason to spin up the old ones." |
+| 2026-09-25 | — | push preauthorized: `chore/mechanical-tools-ledger` → `origin` once the B01 second fix-up is done (merged and the C1 page re-issued) | User, while the fix-up's gate ran: "Push it as soon as you get done with it. Thanks. This is my preauthorization." |
 
 ## Item → batch coverage audit
 
