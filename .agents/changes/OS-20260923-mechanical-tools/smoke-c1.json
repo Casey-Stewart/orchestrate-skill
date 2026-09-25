@@ -3,10 +3,10 @@
   "checkpoint": 1,
   "batches": "B01–B05",
   "branch": "chore/mechanical-tools-ledger",
-  "buildSha": "a54dcc9f56abb091f378f2086a496e61ef424373",
+  "buildSha": "f1fde3c026558414bd1104163f6366524bd90df5",
   "ckptKey": "os923-c1",
   "suite": "512 tests: 510 pass, 0 fail, 2 skipped (the Windows-only pair) — pwsh recipe on the integration tip, Linux",
-  "standfirst": "Re-issue after your C1 fail on B01 and B05. 19 steps in 7 sections: Steps 1–13 and 15–19 were run by the QA runner on this build, Step 14 is yours (the Windows laptop). Steps 1–3 and 6–14 carry a new revision (6–10 use re-pinned inputs); Section 7 is new. When you're done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the chat. Saving is browser-local.",
+  "standfirst": "Issue 3: re-issued after your step-14 fail on B01 (a test read its log with colour codes in it). Only Steps 1 and 14 changed (new revisions); every other pre-verified result carries over unchanged. 19 steps in 7 sections; Step 14 is yours (the Windows laptop). When you're done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the chat. Saving is browser-local.",
   "facts": [
     {
       "dt": "Version",
@@ -17,21 +17,21 @@
       "dd": "18 steps pre-verified by the QA runner on this machine; 1 step for you, on the Windows laptop"
     },
     {
-      "dt": "Previous build",
-      "dd": "<code>450d7e9</code> (issue 1, failed on B01 and B05)"
+      "dt": "Previous builds",
+      "dd": "<code>450d7e9</code> (issue 1, failed on B01 and B05) · <code>a54dcc9</code> (issue 2, failed on step 14 → B01)"
     }
   ],
   "gate": {
     "intro": "Steps 1–13 and 15–19 were run by the QA runner on the Linux workstation; their evidence is linked on each step. On the checkout you verify from (and on the laptop before Step 14), create the scratch directory first (<code>mkdir -p ../c1-scratch</code> in bash; <code>New-Item -ItemType Directory -Force ../c1-scratch</code> in PowerShell), then run:",
     "commands": [
       "git branch --show-current",
-      "git merge-base --is-ancestor a54dcc9f56abb091f378f2086a496e61ef424373 HEAD",
-      "git diff --name-only a54dcc9f56abb091f378f2086a496e61ef424373..HEAD -- . \":(exclude).agents/\"",
+      "git merge-base --is-ancestor f1fde3c026558414bd1104163f6366524bd90df5 HEAD",
+      "git diff --name-only f1fde3c026558414bd1104163f6366524bd90df5..HEAD -- . \":(exclude).agents/\"",
       "node orchestrate/tools/validate.mjs --spec .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002/I-10/spec.json --cwd .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-002/I-10 --log ../c1-scratch/c1-canary.log"
     ],
     "checks": [
       "The first command prints <code>chore/mechanical-tools-ledger</code>.",
-      "The containment check exits 0 and the diff prints NOTHING: this checkout contains build <code>a54dcc9</code>, with no change outside the ledger since.",
+      "The containment check exits 0 and the diff prints NOTHING: this checkout contains build <code>f1fde3c</code>, with no change outside the ledger since.",
       "There is no version to read: this repository has no version file, so the build is identified by the containment check alone.",
       "Canary: the last command prints <code>FAIL tests no test passed (0/1, 1 skipped) — log: …</code> and exits 1. On the issue-1 build <code>450d7e9</code> it printed <code>PASS tests 0/1 (0s)</code> and exited 0 — if it behaves that way, stop and say so: the checkout did not take."
     ]
@@ -927,15 +927,15 @@
           "inputs": [
             "I-02.spec.json"
           ],
-          "revision": 3,
+          "revision": 4,
           "do": "Run the repository's own validation recipe through the wrapper (it takes about a minute here; allow up to ten):<pre><code>node orchestrate/tools/validate.mjs --spec .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001/I-02/spec.json --log ../c1-scratch/c1-validate-repo.log --timeout 570</code></pre>",
           "pass": "Exactly one output line beginning <code>PASS tests </code>; exit code 0; the log file exists and ends with the reporter's summary, whose <code>ℹ fail</code> is 0 and whose <code>ℹ skipped</code> equals the line's total minus its passed count (0 on Windows; on Linux 2, the Windows-only pair in <code>tests/validate.test.cjs</code>); on Linux the line reads <code>PASS tests &lt;p&gt;/&lt;t&gt;, 2 skipped (…)</code>, on Windows the plain <code>PASS tests &lt;t&gt;/&lt;t&gt; (…)</code>.",
-          "aside": "Revision 3 at the C1 re-issue: after the B01 fix-up the line shows its skips. Revision 2 (issue 1) had corrected revision 1, which required passed = total — impossible on Linux, where the total counts skipped tests.",
+          "aside": "Revision 4 at the C1 issue-3 re-issue: text unchanged; the suite it runs gained the colour-independent empty-file test (the step-14 fail). Revision 3: after the B01 fix-up the line shows its skips. Revision 2 (issue 1) had corrected revision 1, which required passed = total — impossible on Linux, where the total counts skipped tests.",
           "pre": {
-            "sha": "e681144416b2442344ae898ae12379d135347739",
-            "stepRevision": 3,
+            "sha": "f1fde3c026558414bd1104163f6366524bd90df5",
+            "stepRevision": 4,
             "env": "Linux 7.0.0-31-generic; node v24.20.0; git 2.53.0; PowerShell 7.6.5 (pwsh)",
-            "evidence": "evidence/C1/issue-2/step-01.md"
+            "evidence": "evidence/C1/issue-3/step-01.md"
           }
         },
         {
@@ -1210,12 +1210,12 @@
       "n": 6,
       "title": "The suite on Windows (your laptop)",
       "lede": "The only human step. The Linux runs above skip the two Windows-only cases in <code>tests/validate.test.cjs</code> (bash resolution under a PowerShell PATH); this run is where they execute. You asked for it to run once on the laptop at C1.",
-      "need": "The Windows laptop with PowerShell and Git for Windows (Git Bash), and this build on it: <code>chore/mechanical-tools-ledger</code> at <code>a54dcc9</code> or later. The branch on <code>origin</code> is older, so the build reaches the laptop only once you authorize pushing it (asked in the hand-over).",
+      "need": "The Windows laptop with PowerShell and Git for Windows (Git Bash), and this build on it: <code>chore/mechanical-tools-ledger</code> at <code>f1fde3c</code> or later. The branch on <code>origin</code> is older, so the build reaches the laptop only once you authorize pushing it (asked in the hand-over).",
       "steps": [
         {
           "n": 14,
-          "revision": 2,
-          "aside": "Revision 2 at the C1 re-issue: the suite it runs now includes the fix-ups' tests; the text is unchanged. It is also the first run of B01's empty-file detection on Node v22 (your laptop), which could not be run here.",
+          "revision": 3,
+          "aside": "Revision 3 at the C1 issue-3 re-issue: revision 2 failed on your laptop (511/512 — a B01 fix-up test read its log with colour codes in it); B01's second fix-up makes that test colour-independent. Expect 512 tests, 512 pass, 0 fail, 0 skipped. Text unchanged. It is also the first run of B01's empty-file detection on Node v22 (your laptop), which could not be run here.",
           "do": "In PowerShell on the laptop, from the repository root with the branch checked out, run the contract's validation recipe:<pre><code>$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)\nif ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }\nnode --test --test-reporter=spec @testFiles\nif ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }\ngit diff --check\nif ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }</code></pre>",
           "pass": "It finishes without throwing; the totals read <code>ℹ fail 0</code> and <code>ℹ skipped 0</code> (the two Windows-only cases ran and passed), and <code>git diff --check</code> prints nothing."
         }

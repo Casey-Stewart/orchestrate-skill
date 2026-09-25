@@ -3,11 +3,11 @@
 **Identifier**: OS-20260923-mechanical-tools
 **Started**: 2026-09-23 · **Base**: fceab31e0ebfb7859a75dda3cb1e4be2f86c2403 (the default-branch commit the ledger
 branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
-**State**: ACTIVE
+**State**: AT-CHECKPOINT C1
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
-**Smoke page**: `smoke-c1.html` (ledger-relative; re-issued 2026-09-25 after the C1 fail, build `a54dcc9`, as a file hand-over in the desktop app; issue 1 delivered 2026-09-24)
+**Smoke page**: `smoke-c1.html` (ledger-relative; issue 3 re-issued 2026-09-25, build `f1fde3c`, as a file hand-over in the desktop app; issue 2 build `a54dcc9`, issue 1 delivered 2026-09-24)
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
 before believing any row (§Recovery in the contract).
 
@@ -41,7 +41,7 @@ before believing any row (§Recovery in the contract).
 
 | Checkpoint | After wave | Covers | Why here | Status | Verdict |
 |------------|------------|--------|----------|--------|---------|
-| C1 | W5 | B01, B02, B03, B04, B05 | the mandatory final checkpoint and the only one: no batch is hands-on, and every smoke step is agent-run — plus one human step (14, the Windows run) the user asked for at C1 | ❌ | issue 2 (build `a54dcc9`, re-issued 2026-09-25) FAIL on step 14 → B01 (verdict log); steps 1–13 and 15–19 pre-verified, no user marks yet — issue 1 FAIL 2026-09-25 on B01 and B05 (verdict log) — both defects were found by the gates and routed to BACKLOG by the orchestrator as non-blocking; re-issue after the fix-ups · m: pre-smoke=13/1 human-smoke-min=— escaped=1 |
+| C1 | W5 | B01, B02, B03, B04, B05 | the mandatory final checkpoint and the only one: no batch is hands-on, and every smoke step is agent-run — plus one human step (14, the Windows run) the user asked for at C1 | 🧪 | issue 3 re-issued 2026-09-25 (build `f1fde3c`; step 1 r4 re-verified, 14 r3 human, the rest carried over) — issue 2 FAIL on step 14 → B01 (verdict log) — issue 1 FAIL 2026-09-25 on B01 and B05 (verdict log) — both defects were found by the gates and routed to BACKLOG by the orchestrator as non-blocking; re-issue after the fix-ups · m: pre-smoke=13/1 human-smoke-min=— escaped=1 |
 
 ## Issued checkpoint inputs
 
@@ -100,3 +100,4 @@ C1 issue 001 (2026-09-24, build `450d7e9`): `I-01`…`I-09` under `evidence/C1/i
 | 2026-09-25 | B05 fix-up: R1 FIX FIRST (P1 found by both gates) → fix round → R2 SHIP asks=5 → polish → scoped re-review FIX FIRST (polish phase: a false --help sentence) → prose redo → second scoped re-review SHIP → merged `8712d87` (dry-run tree `7f0df46`), tip 512/510/0/2 → B05 🧪; both C1 fix-ups integrated — C1 re-issue next — LOG §B05 fix-up | — |
 | 2026-09-25 | C1 re-issue: inputs issue-002 (I-10…I-12) and issue-003 (I-05/I-06 re-pinned — the QA runner caught step 6 failing on the stale pin); canonical steps revised (1→r3, 2→r2, 3→r3 for B01's recorded extension, 6–10→r2, 11–13→r2, 14→r2) and 15–19 added; every "before the fix" clause observed on `450d7e9`; QA runner 18/18 agent steps PASS (6–10 at `a54dcc9`, the rest at `e681144`, same code); page rebuilt with `--previous` = the issued sidecar; substitute artifact proof 23 step blocks as described — LOG "C1 re-issue" | AT-CHECKPOINT C1 (re-issued) — awaiting the user's verdict; step 14 still needs the branch pushed |
 | 2026-09-25 | C1 issue 2 FAIL on step 14 → B01 (verdict log); fix-up `fix/B01-c1-followup-2` (fresh agents, per the user): DONE → fence PASS → 6b substitute proof → R1 SHIP asks=1 → polish → merged `f1fde3c`, tip green plain and under FORCE_COLOR=1 → B01 🧪; C1 re-issue (steps 1 → r4, 14 → r3) next, then the preauthorized push | — |
+| 2026-09-25 | C1 issue 3: step 1 → r4 (fresh QA runner PASS at `f1fde3c`, plain and colour-forced), step 14 → r3; page rebuilt with `--previous` = the issue-2 sidecar; substitute artifact proof clean — LOG "C1 issue 3"; `chore/mechanical-tools-ledger` pushed on the user's preauthorization | AT-CHECKPOINT C1 (issue 3) — awaiting the user's verdict and the Windows re-run of step 14 |
