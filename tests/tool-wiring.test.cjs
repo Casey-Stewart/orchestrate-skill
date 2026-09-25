@@ -1013,8 +1013,11 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
     SETUP_CLAUSE + ' (a repository with a setup step fails its control without it).',
     // node --test skips a named file that does not exist and still passes: only the count shows it.
     'Its `CONTROL PASS` line must count the tests you scoped: a runner may skip a named test file that does not exist.',
-    // Node counts a test file that registers no tests as one passing test: the count cannot see it emptied.
-    'The count has one blind spot: node counts a test file that registers no tests as one passing test named after the file, so a mutation after which a one-test file registers nothing does not change the count and reads `SURVIVED` — before you cite a `SURVIVED` line, check its run in the log for a scoped test file reported under its own file name.',
+    // Node counts a test file that registers no tests as one passing test; validate.mjs catches it
+    // by the file's name, except the relative name whose first segment holds a space (its --help).
+    'The count has one blind spot: node counts a test file that registers no tests as one passing test named after the file, which the harness reports as a file that ran no tests unless node names it by a relative path whose first segment holds a space (`my file.test.js`, `my dir/a.test.js`) — there a mutation after which a one-test file registers nothing does not change the count and reads `SURVIVED`, so before you cite a `SURVIVED` line, check its run in the log for a scoped test file reported under its own file name.',
+    // A control may pass with skips; a test it skipped never ran, under the control or any mutation.
+    'A test the control skipped (`, <n> skipped` on its line) runs under no mutation, so no `SURVIVED` line says anything about it.',
     // (1 + mutations) runs of the scoped suite can outlast the shell's cap, and a killed run skips the tool's cleanup.
     "A run costs the scoped suite once for the control and once per mutation; when that may outlast the runtime's command timeout, run it as a background task whose completion reports its lines and exit code, or pass `--timeout` and split the mutations across runs — a run the command timeout kills never cleans up its clone.",
     "means the proof did not run — say so, never offer it as a finding's proof.",
@@ -1024,6 +1027,9 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
   }
   // R2: the earlier blind-spot wording sent the hunter to the mutated file, which may register nothing.
   assert.ok(!hunter.includes('still registers its tests') && hunter.split('does not change the count').length === 2, 'the blind spot is stated once, in its corrected form');
+  // C1: an emptied file is now caught by name; only the unrecognised name keeps the blind spot.
+  assert.equal(hunter.split('node counts a test file that registers no tests').length, 2, 'the blind spot is stated once');
+  assert.ok(!/node counts a test file that registers no tests as one passing test named after the file, so /.test(hunter), 'the blind spot is no longer every one-test file');
   // SURVIVED proves, KILLED refutes, and every other kind the tool declares means "did not run".
   const { RESULTS, NOT_RUN } = await mutateTool();
   const cite = /Cite its lines: (.*?) means the proof did not run/.exec(hunter);

@@ -33,6 +33,16 @@ const CRLF_TEST = lines("const test = require('node:test');", "const assert = re
   "test('crlf.txt keeps CRLF line endings', () => { assert.equal(text.split(CRLF).length, text.split(LF).length); });",
   "test('crlf.txt says alpha then beta', () => { assert.equal(text, ['alpha', 'beta', ''].join(CRLF)); });");
 const CRLF_TXT = 'alpha\r\nbeta\r\n';
+// Suites that skip, each run scoped by its own spec, never by the default one: a test skipped on
+// every platform (the user's Windows-only test, off Windows); two tests whose skip conditions a
+// mutation can flip, both running (flip) or the second skipped (part); and a one-test file whose
+// test comes from data a mutation can empty.
+const HEAD_LINES = ["const test = require('node:test');", "const assert = require('node:assert/strict');", "const { add } = require('./math.cjs');"];
+const SKIPPED_TEST = lines(...HEAD_LINES, "test('add sums, where it runs', { skip: 'not on this platform' }, () => { assert.equal(add(2, 3), 5); });");
+const twoSkippable = (label, second) => lines(...HEAD_LINES, `const SKIP = { first: false, second: ${second} };`,
+  `test('${label} first adds', { skip: SKIP.first && 'flipped off' }, () => { assert.equal(add(1, 1), 2); });`,
+  `test('${label} second adds', { skip: SKIP.second && 'flipped off' }, () => { assert.equal(add(2, 2), 4); });`);
+const DATA_TEST = lines(...HEAD_LINES, 'const CASES = [[2, 3, 5]];', 'for (const [a, b, sum] of CASES) test(`add ${a} and ${b}`, () => { assert.equal(add(a, b), sum); });');
 const TESTS = ['math.test.cjs', 'extra.test.cjs', 'crlf.test.cjs'];
 const specOf = (files = TESTS) => ({ steps: [{ name: 'tests', argv: [NODE, '--test', ...files], parser: 'node' }] });
 // The mutations, one per outcome. m3 breaks the module's syntax, so math.test.cjs fails to load
@@ -49,6 +59,11 @@ const M = {
   x1: { id: 'x1', file: 'mixed.txt', find: 'two\nthree', replace: 'two\nTHREE' },
   x2: { id: 'x2', file: 'flat.txt', find: 'flat', replace: 'flat\nline' },
   h1: { id: 'h1', file: 'math.cjs', find: 'a + b', replace: '(() => { for (;;); })()' },
+  // f1 skips one of flip's two tests and f2 both; p1 runs the test part skips; e1 empties data's cases.
+  f1: { id: 'f1', file: 'flip.test.cjs', find: 'second: false', replace: 'second: true' },
+  f2: { id: 'f2', file: 'flip.test.cjs', find: '{ first: false, second: false }', replace: '{ first: true, second: true }' },
+  p1: { id: 'p1', file: 'part.test.cjs', find: 'second: true', replace: 'second: false' },
+  e1: { id: 'e1', file: 'data.test.cjs', find: 'const CASES = [[2, 3, 5]];', replace: 'const CASES = [];' },
 };
 
 function fixture(t) {
@@ -56,7 +71,8 @@ function fixture(t) {
   const work = path.join(repo.root, 'work');
   fs.mkdirSync(work);
   const files = { 'math.cjs': MATH, 'math.test.cjs': MATH_TEST, 'crlf.txt': CRLF_TXT, 'crlf.test.cjs': CRLF_TEST, 'sub/keep.txt': 'kept\n', 'overlap.txt': 'aaa\n',
-    'mixed.txt': 'one\r\ntwo\nthree\n', 'flat.txt': 'flat' };
+    'mixed.txt': 'one\r\ntwo\nthree\n', 'flat.txt': 'flat', 'skipped.test.cjs': SKIPPED_TEST, 'flip.test.cjs': twoSkippable('flip', false),
+    'part.test.cjs': twoSkippable('part', true), 'data.test.cjs': DATA_TEST };
   for (const [file, text] of Object.entries(files)) repo.write(file, text);
   repo.write('extra.test.cjs', extraTest(true));
   const red = repo.commit('red: extra two fails');
@@ -271,6 +287,70 @@ test('a red control, and a control that ran no tests, abort before any mutation'
   assert.match(none.lines[0], /^CONTROL FAILED FAIL tests no test passed \(0\/0\) — log: .*idle\.log$/);
   assert.equal(none.code, 2);
   assert.ok(!readLog(none).includes('==> mutate: mutation'), 'no mutation ran');
+});
+
+// ===== Skips and files that run no tests: SURVIVED only when every test the control ran still ran ==
+const scoped = (fx, files, muts, log) => mutateArgs(fx, muts, log).map(a => a === fx.validate ? fx.json(log.replace(/\.log$/, '.json'), specOf(files)) : a);
+const secs = '\\(\\d+s\\)';
+test('a scoped suite whose only test is skipped is no control: CONTROL FAILED, nothing mutated; a partly skipped one runs, and its skip is no verdict', t => {
+  const fx = fixture(t);
+  // The user's C1 scenario: the one test covering math.cjs never runs, so nothing passed.
+  const idle = cli(fx, 'mutate', scoped(fx, ['skipped.test.cjs'], fx.muts(M.m1), 'only-skipped.log'));
+  assert.deepEqual(idle.lines, [`CONTROL FAILED FAIL tests no test passed (0/1, 1 skipped) — log: ${idle.log}`]);
+  assert.equal(idle.code, 2);
+  assert.ok(!readLog(idle).includes('==> mutate: mutation'), 'no mutation was applied or run');
+  // One test passed beside the skipped one: a control. m1 breaks the test that runs; m2 changes
+  // a comment; both leave the skipped test skipped, so the counts the verdicts rest on are equal.
+  const part = cli(fx, 'mutate', scoped(fx, ['part.test.cjs'], fx.muts(M.m1, M.m2), 'part.log'));
+  assert.match(part.lines[0], new RegExp(`^CONTROL PASS PASS tests 1/2, 1 skipped ${secs}$`));
+  assert.deepEqual(part.lines.slice(1), ['KILLED m1: part first adds', 'SURVIVED m2', 'MUTATE 1 killed, 1 survived, 0 other']);
+  assert.equal(part.code, 1);
+});
+
+test('a mutation that changes which tests run, not how many — a test skipped that ran, or run that was skipped — is CRASHED, never SURVIVED', t => {
+  const fx = fixture(t);
+  // f1 skips flip's second test: the run passes 1 of 2, the total unchanged, no test failed.
+  // Positive siblings in the same run: m1 breaks what both running tests check, m2 changes a comment.
+  const r = cli(fx, 'mutate', scoped(fx, ['flip.test.cjs'], fx.muts(M.f1, M.m1, M.m2), 'flip.log'));
+  assert.match(r.lines[0], new RegExp(`^CONTROL PASS PASS tests 2/2 ${secs}$`));
+  assert.match(r.lines[1], new RegExp(`^CRASHED f1: PASS tests 1/2, 1 skipped ${secs}$`));
+  assert.deepEqual(r.lines.slice(2), ['KILLED m1: flip first adds, flip second adds', 'SURVIVED m2', 'MUTATE 1 killed, 1 survived, 1 other']);
+  assert.equal(r.code, 2);
+  assert.ok(readLog(r).includes('==> mutate: f1: CRASHED — step tests: 1 test skipped that ran in the control'), readLog(r));
+  // The reverse: p1 runs the test part's control skipped. It passes too, and proves nothing about it.
+  const back = cli(fx, 'mutate', scoped(fx, ['part.test.cjs'], fx.muts(M.p1), 'part-back.log'));
+  assert.match(back.lines[0], new RegExp(`^CONTROL PASS PASS tests 1/2, 1 skipped ${secs}$`));
+  assert.match(back.lines[1], new RegExp(`^CRASHED p1: PASS tests 2/2 ${secs}$`));
+  assert.deepEqual(back.lines.slice(2), ['MUTATE 0 killed, 0 survived, 1 other']);
+  assert.equal(back.code, 2);
+  assert.ok(readLog(back).includes('==> mutate: p1: CRASHED — step tests: 1 test ran that the control skipped'), readLog(back));
+});
+
+test('a mutation after which no test passes is CRASHED, and its log says that no test passed', t => {
+  const fx = fixture(t);
+  // f2 skips both of flip's tests: validate.mjs's NO-TESTS, which no failing test names.
+  const none = cli(fx, 'mutate', scoped(fx, ['flip.test.cjs'], fx.muts(M.f2, M.m1), 'no-pass.log'));
+  assert.match(none.lines[0], new RegExp(`^CONTROL PASS PASS tests 2/2 ${secs}$`));
+  assert.deepEqual(none.lines.slice(1), [`CRASHED f2: FAIL tests no test passed (0/2, 2 skipped) — log: ${none.log}`, 'KILLED m1: flip first adds, flip second adds',
+    'MUTATE 1 killed, 0 survived, 1 other']);
+  assert.equal(none.code, 2);
+  const noneLog = readLog(none);
+  assert.ok(noneLog.includes('==> mutate: f2: CRASHED — step tests: no test passed (0/2, 2 skipped)'), noneLog);
+  assert.ok(!noneLog.includes('without a named failing test'), 'a run in which nothing passed is named as that');
+});
+
+test('a mutation after which a one-test file registers no tests is CRASHED, naming the file as one that ran no tests', t => {
+  const fx = fixture(t);
+  // R2's scenario: e1 empties the one test's data, so node counts the file as one passing test
+  // and the total holds. m1, beside it, breaks the test while it still registers.
+  const emptied = cli(fx, 'mutate', scoped(fx, ['data.test.cjs'], fx.muts(M.e1, M.m1), 'emptied.log'));
+  assert.match(emptied.lines[0], new RegExp(`^CONTROL PASS PASS tests 1/1 ${secs}$`));
+  assert.deepEqual(emptied.lines.slice(1), [`CRASHED e1: FAIL tests 1 of 1 failed: data.test.cjs (ran no tests) — log: ${emptied.log}`, 'KILLED m1: add 2 and 3',
+    'MUTATE 1 killed, 0 survived, 1 other']);
+  assert.equal(emptied.code, 2);
+  const emptiedLog = readLog(emptied);
+  assert.ok(emptiedLog.includes('==> mutate: e1: CRASHED — step tests: a test file ran no tests (data.test.cjs)'), emptiedLog);
+  assert.ok(!emptiedLog.includes('failed to load'), 'a file that ran no tests is not called one that failed to load');
 });
 
 test('--setup runs in the checkout before the control, and a setup that does not pass aborts', t => {
@@ -557,10 +637,10 @@ test("git's repository variables in the caller's environment — a GIT_DIR, a GI
 });
 
 // ===== The classification rows, each fed directly ===================================================
-test('classification: TIMEOUT first, then CRASHED on no summary, a load failure or a changed total; KILLED only on named test failures', async () => {
+test('classification: TIMEOUT first, then CRASHED on no summary, a file that failed to load or ran no tests, a changed total, no test passed or a moved count; KILLED only on named test failures', async () => {
   const { classifyRun, verdictLine } = await api();
-  const step = over => ({ name: 'tests', result: 'PASS', passed: 5, failed: 0, total: 5, names: [], loadFailures: [], exit: 0, ...over });
-  const lint = over => ({ name: 'lint', result: 'PASS', passed: null, failed: null, total: null, names: [], loadFailures: [], exit: 0, ...over });
+  const step = over => ({ name: 'tests', result: 'PASS', passed: 5, failed: 0, skipped: 0, total: 5, names: [], loadFailures: [], emptyFiles: [], exit: 0, ...over });
+  const lint = over => ({ name: 'lint', result: 'PASS', passed: null, failed: null, skipped: null, total: null, names: [], loadFailures: [], emptyFiles: [], exit: 0, ...over });
   const control = { status: 'PASS', steps: [step(), lint()] }, parsers = ['node', 'none'];
   // Kind and the reason the log records, so each check is told apart from the ones after it: a
   // run with no summary also has a total unlike the control's, and only the reason says which rule fired.
@@ -574,6 +654,18 @@ test('classification: TIMEOUT first, then CRASHED on no summary, a load failure 
     ['no parsed summary', run('FAIL', step({ result: 'CRASHED', passed: null, failed: null, total: null, exit: 1 }), lint()), ['CRASHED', 'step tests printed no parsed summary']],
     ['a load failure beside a named failure', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, names: ['x.test.cjs'], loadFailures: ['x.test.cjs'], exit: 1 }), lint()),
       ['CRASHED', 'step tests: a test file failed to load (x.test.cjs)']],
+    // validate.mjs lists a file that ran no tests in loadFailures AND emptyFiles, as failed, not passed.
+    ['a file that ran no tests', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, names: ['e.test.cjs'], loadFailures: ['e.test.cjs'], emptyFiles: ['e.test.cjs'], exit: 0 }), lint()),
+      ['CRASHED', 'step tests: a test file ran no tests (e.test.cjs)']],
+    ['a load failure beside a file that ran no tests', run('FAIL', step({ result: 'FAIL', passed: 3, failed: 2, names: ['x.test.cjs', 'e.test.cjs'], loadFailures: ['x.test.cjs', 'e.test.cjs'], emptyFiles: ['e.test.cjs'], exit: 1 }), lint()),
+      ['CRASHED', 'step tests: a test file failed to load (x.test.cjs); a test file ran no tests (e.test.cjs)']],
+    ['no test passed', run('FAIL', step({ result: 'NO-TESTS', passed: 0, skipped: 5 }), lint()), ['CRASHED', 'step tests: no test passed (0/5, 5 skipped)']],
+    ['one test skipped that ran, passing', run('PASS', step({ passed: 4, skipped: 1 }), lint()), ['CRASHED', 'step tests: 1 test skipped that ran in the control']],
+    ['two tests skipped that ran, beside a failing parser-none step', run('FAIL', step({ passed: 3, skipped: 2 }), lint({ result: 'FAIL', exit: 1 })),
+      ['CRASHED', 'step tests: 2 tests skipped that ran in the control']],
+    ['a passed count moved with the skips held', run('PASS', step({ passed: 4 }), lint()), ['CRASHED', 'step tests: 4 passed, the control 5']],
+    // A step with a named failure has fewer passes by its failures; a skip beside them is no verdict.
+    ['a named failure beside a skip in its step', run('FAIL', step({ result: 'FAIL', passed: 3, failed: 1, skipped: 1, names: ['a test'], exit: 1 }), lint()), ['KILLED', undefined]],
     ['a changed total, passing', run('PASS', step({ passed: 4, total: 4 }), lint()), ['CRASHED', 'step tests ran 4 tests, the control 5']],
     ['a changed total, failing by name', run('FAIL', step({ result: 'FAIL', passed: 5, failed: 1, total: 6, names: ['a test'], exit: 1 }), lint()), ['CRASHED', 'step tests ran 6 tests, the control 5']],
     ['failures counted without names', run('FAIL', step({ result: 'FAIL', passed: 4, failed: 1, exit: 1 }), lint()), ['CRASHED', UNNAMED]],
@@ -583,6 +675,14 @@ test('classification: TIMEOUT first, then CRASHED on no summary, a load failure 
     ['a run that never reached its steps', run('UNKNOWN'), ['CRASHED', 'the run did not reach its steps']],
   ];
   for (const [label, got, want] of rows) assert.deepEqual(got, want, label);
+  // The reverse move, against a control that skipped two; and a moved count in one step voids a named failure in another.
+  const skipping = { status: 'PASS', steps: [step({ passed: 3, skipped: 2 })] };
+  assert.deepEqual(classifyRun(skipping, { status: 'PASS', steps: [step({ passed: 4, skipped: 1 })] }, ['node']), { kind: 'CRASHED', reason: 'step tests: 1 test ran that the control skipped' });
+  assert.deepEqual(classifyRun(skipping, { status: 'PASS', steps: [step({ passed: 3, skipped: 2 })] }, ['node']), { kind: 'SURVIVED' }, 'the control\'s own skips are no verdict');
+  const two = { status: 'PASS', steps: [step(), step({ name: 'more' })] };
+  assert.deepEqual(classifyRun(two, { status: 'FAIL', steps: [failed, step({ name: 'more', passed: 4, skipped: 1 })] }, ['node', 'node']),
+    { kind: 'CRASHED', reason: 'step more: 1 test skipped that ran in the control' });
+  assert.deepEqual(classifyRun(two, { status: 'FAIL', steps: [failed, step({ name: 'more' })] }, ['node', 'node']).kind, 'KILLED');
   assert.deepEqual(classifyRun(control, { status: 'FAIL', steps: [failed, lint()] }, parsers).names, ['a test']);
   // The names cap, both sides of it, and the other line forms.
   const names = n => Array.from({ length: n }, (_, i) => 't' + (i + 1));
