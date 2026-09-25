@@ -1207,7 +1207,7 @@ test('--help states the pass rule, the skipped display and count, and the empty-
     'skipped counts every test in the total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending; pytest skipped + xfailed + xpassed; cargo ignored',
     'or whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing test named after the file',
     'counted as failed, named "(ran no tests)" and listed in loadFailures',
-    'The price is a false rejection of any real top-level test, or an empty describe under the spec reporter, whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first word holds a slash ("I/O errors from reader.js"); rename it.',
+    'The price is a false rejection of any real top-level test, or an empty describe under the spec reporter, whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first word holds a slash or a backslash ("I/O errors from reader.js"); rename it.',
     'no whitespace before its first / or \\)',
     'Not recognised: a file that node names by a relative path whose first segment holds a space, whether given, globbed, ./-prefixed or discovered ("my file.test.js", "my dir/a.test.js").',
   ]) assert.ok(text.includes(needed), 'the --help text must say: ' + needed);
@@ -1218,13 +1218,14 @@ test('--help states the pass rule, the skipped display and count, and the empty-
   const RULE = 'A parsed step passes only when its summary shows zero failures, at least one passed test, and it exits 0: a run in which nothing passed (every test skipped, or no test at all, 0/0 included) is FAIL "no test passed (<passed>/<total>, <k> skipped)".';
   const COUNTS = 'Skips show on the line only when there are any: "tests 497/499, 2 skipped". skipped counts every test in the total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending; pytest skipped + xfailed + xpassed; cargo ignored (pytest\'s deselected and cargo\'s filtered out are outside the total). node reports a test file that registered no tests, or whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing test named after the file; any top-level passing entry (no directive, no subtests, not a suite) whose name is file-shaped (a script extension, and no whitespace before its first / or \\) is taken for one: counted as failed, named "(ran no tests)" and listed in loadFailures.';
   const SUBJECT = /0\/0|\bno tests?\b|\bzero\b|\bnothing\b|\bskip(?:ped|s)?\b|\bempty\b|\bevery test\b|\ball tests?\b|\btodo\b|\bregistered no\b/i;
-  const VERDICT = /\bpass(?:es|ed|ing)?\b|\bgreen\b|\bok\b|\bsucceeds?\b|\baccepted\b|\bcounts? as\b/i;
+  const VERDICT = /\bpass(?:es|ed|ing)?\b|\bgreen\b|\bok\b|\bsucceeds?\b|\baccepted\b|\bcounts? as\b|\bnever fails?\b|\bsuccess(?:ful(?:ly)?)?\b/i;
   const speaking = t => t.split(/\.(?=\s+[A-Z]|\s*$)/).map(x => x.trim()).filter(Boolean).map(x => x + '.').filter(x => SUBJECT.test(x) && VERDICT.test(x));
   assert.deepEqual(speaking(text), [RULE, COUNTS], 'only the two rule sentences speak of passing and skips, verbatim');
   // Live control of the sweep: every contradiction the reviews found, appended, is caught.
   const SPECIMENS = ['A run with no tests at all passes.', 'An empty file such as x.test.js passes.', 'Skipped tests (e.g. todo) pass.',
     'A file that registered no tests counts as a passing test.', 'A run with zero tests succeeds.', 'A step whose every test was skipped is accepted.',
-    'An empty file such as data.test.js passes.'];
+    'An empty file such as data.test.js passes.', 'A run with no tests never fails.', 'A step whose every test was skipped is a success.',
+    'An empty file runs successfully.'];
   for (const specimen of SPECIMENS) assert.deepEqual(speaking(`${text} ${specimen}`), [RULE, COUNTS, specimen], specimen);
 });
 

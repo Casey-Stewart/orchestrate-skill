@@ -317,8 +317,8 @@ then MUTATE <k> killed, <s> survived, <u> other. An abort prints only its own li
 Exit 0 every mutation killed; 1 at least one survived and nothing else went wrong; 2 anything else.
 KILLED: a step failed, every failing step names its failing tests and no CRASHED cause below holds, so no counted
 step's skipped count moved. SURVIVED: every counted step passed with the control's own passed, skipped and total
-counts. CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to
-load or ran no tests, a test count unlike the control's, a step in which no test passed or failed, a step whose
+counts, and no CRASHED cause below holds. CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to
+load or ran no tests, a test count unlike the control's, a counted step in which no test passed or failed, a step whose
 skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the
 reverse), or a step that failed without a named failing test; the log records which.
 NOT-APPLIED: the mutated bytes did not read back, or equal the file's own (in a CRLF file, a replace that differs

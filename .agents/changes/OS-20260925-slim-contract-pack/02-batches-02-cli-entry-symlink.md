@@ -89,7 +89,7 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 - [x] `tests/cli-entry.test.cjs`: domain enumerated from the checkout, live real-path control, directory link and file link per tool
 - [x] [BL-036] git child env scrubbed in `git-evidence.mjs` (shared with `mutate.mjs`), CLI test with a decoy `GIT_DIR`
 - [x] [BL-037] scrub inside `withDisposableCheckout`, API-level test
-- [ ] [BL-041] the `--help` wording residuals and the sweep phrasings
+- [x] [BL-041] the `--help` wording residuals and the sweep phrasings
 
 ## Acceptance criteria
 

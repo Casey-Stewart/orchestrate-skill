@@ -360,7 +360,7 @@ whose name is file-shaped (a script extension, and no whitespace before its firs
 taken for one: counted as failed, named "(ran no tests)" and listed in loadFailures. The price
 is a false rejection of any real top-level test, or an empty describe under the spec reporter,
 whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first
-word holds a slash ("I/O errors from reader.js"); rename it. Not recognised: a file that node
+word holds a slash or a backslash ("I/O errors from reader.js"); rename it. Not recognised: a file that node
 names by a relative path whose first segment holds a space, whether given, globbed, ./-prefixed
 or discovered ("my file.test.js", "my dir/a.test.js").
 `;
