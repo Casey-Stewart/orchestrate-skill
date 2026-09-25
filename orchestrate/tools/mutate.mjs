@@ -200,20 +200,38 @@ function anchor(dir, realDir, m, originals) {
   const at = original.indexOf(find);
   return { m, file, original, mutated: Buffer.concat([original.subarray(0, at), eolOf(m.replace, crlf), original.subarray(at + find.length)]) };
 }
-// One mutation run against the control. CRASHED means the run proved nothing about the tests: a
-// test step with no parsed summary; a test file that failed to load (node reports one as a failing
-// test named after the file, WITH a summary, so it would otherwise read as KILLED); a test count
-// unlike the control's. KILLED needs every failing step to count failed tests and name them, which
-// a parser-none step never does: it counts nothing.
+// One mutation run against the control. SURVIVED needs every parsed step to have run and passed
+// what the control's did: the same passed, skipped and total counts. CRASHED means the run proved
+// nothing about the tests: a test step with no parsed summary; a test file that failed to load
+// (node reports one as a failing test named after the file, WITH a summary, so it would otherwise
+// read as KILLED) or ran no tests (node counts one as a passing test, so the total holds); a test
+// count unlike the control's; a step in which no test passed or failed; a step whose skipped count
+// moved, failing tests or not (a mutation that flips a skip condition changes which tests run, not
+// how many, and a test the control skipped proves nothing by failing). KILLED needs every failing step
+// to count failed tests and name them, which a parser-none step never does: it counts nothing.
+const tests = n => `${n} test${n === 1 ? '' : 's'}`;
+function moved(s, c) {
+  const more = s.skipped - c.skipped;
+  if (more > 0) return `${tests(more)} skipped that ran in the control`;
+  return `${tests(-more)} ran that the control skipped`;
+}
 export function classifyRun(control, run, parsers) {
   const steps = run.steps;
   if (steps.length !== parsers.length) return { kind: 'CRASHED', reason: 'the run did not reach its steps' };
   if (steps.some(s => s.result === 'TIMEOUT')) return { kind: 'TIMEOUT', reason: 'a step outlived --timeout' };
   for (const [i, s] of steps.entries()) {
     if (parsers[i] === 'none') continue;
+    const c = control.steps[i];
     if (s.total === null) return { kind: 'CRASHED', reason: `step ${s.name} printed no parsed summary` };
-    if (s.loadFailures.length) return { kind: 'CRASHED', reason: `step ${s.name}: a test file failed to load (${s.loadFailures.join(', ')})` };
-    if (s.total !== control.steps[i].total) return { kind: 'CRASHED', reason: `step ${s.name} ran ${s.total} tests, the control ${control.steps[i].total}` };
+    // validate.mjs lists a file that ran no tests among the load failures too: each is named as what it is.
+    const loads = s.loadFailures.filter(f => !s.emptyFiles.includes(f));
+    const files = [loads.length && `a test file failed to load (${loads.join(', ')})`, s.emptyFiles.length && `a test file ran no tests (${s.emptyFiles.join(', ')})`].filter(Boolean);
+    if (files.length) return { kind: 'CRASHED', reason: `step ${s.name}: ${files.join('; ')}` };
+    if (s.total !== c.total) return { kind: 'CRASHED', reason: `step ${s.name} ran ${s.total} tests, the control ${c.total}` };
+    if (s.result === 'NO-TESTS') return { kind: 'CRASHED', reason: `step ${s.name}: no test passed (${s.passed}/${s.total}${s.skipped ? `, ${s.skipped} skipped` : ''})` };
+    // Every parser's total is passed + failed + skipped (validate.mjs), the totals are equal here and
+    // the control failed nothing: an equal skipped count leaves only failures to move a passed count.
+    if (s.skipped !== c.skipped) return { kind: 'CRASHED', reason: `step ${s.name}: ${moved(s, c)}` };
   }
   if (run.status === 'PASS') return { kind: 'SURVIVED' };
   const failing = steps.filter(s => s.result !== 'PASS');
@@ -249,7 +267,8 @@ export async function mutate({ repo, ref, mutations, validate, setup = null, log
       const originals = new Map(), realDir = fs.realpathSync(dir);
       const plans = mutations.map(m => anchor(dir, realDir, m, originals));
       if (plans.some(p => p.fault)) { for (const p of plans.filter(p => p.fault)) say(p.fault); return 2; }
-      // A control that ran no tests would let every mutation survive: it is no control.
+      // A control in which no test passed would let every mutation survive: validate.mjs fails it
+      // (NO-TESTS), so it is no control.
       const control = await run('control', validate);
       if (control.status !== 'PASS') { say(`CONTROL FAILED ${control.line}`); return 2; }
       say(`CONTROL PASS ${control.line}`);
@@ -300,7 +319,12 @@ Prints CONTROL PASS <validate line>, then one line per mutation:
 then MUTATE <k> killed, <s> survived, <u> other. An abort prints only its own line(s):
   ANCHOR-MISSING <id> | ANCHOR-AMBIGUOUS <id> (<n> matches) | CONTROL FAILED <validate line> | UNKNOWN <reason>
 Exit 0 every mutation killed; 1 at least one survived and nothing else went wrong; 2 anything else.
-CRASHED: a test step with no parsed summary, a test file that failed to load, or a test count unlike the control's.
+KILLED: a step failed, every failing step names its failing tests and no CRASHED cause below holds, so no counted
+step's skipped count moved. SURVIVED: every counted step passed with the control's own passed, skipped and total
+counts. CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to
+load or ran no tests, a test count unlike the control's, a step in which no test passed or failed, a step whose
+skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the
+reverse), or a step that failed without a named failing test; the log records which.
 NOT-APPLIED: the mutated bytes did not read back, or equal the file's own (in a CRLF file, a replace that differs
 from find only in its line breaks). A mutation's line is printed only once its restore holds; RESTORE-FAILED
 replaces it. Git's repository variables (git rev-parse --local-env-vars) are dropped from the environment first.
@@ -309,7 +333,8 @@ Mutations (JSON; any other key is rejected):
 id: unique, [A-Za-z0-9._-]+. file: repository-relative with forward slashes, a regular file. find: occurs
 exactly once in the file; in a CRLF file the line breaks of find and replace are matched and written as CRLF.
 --validate and --setup are validate.mjs specs (see its --help), run from the checkout root. --validate needs
-a step whose parser counts tests (node, jest, pytest, cargo), and each such step must run a test in the
+a step whose parser counts tests (node, jest, pytest, cargo), and each such step must pass at least one test
+(one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the
 control. --log is written fresh by each invocation, every run appending to it, and must lie outside the
 repository. --timeout (whole seconds, at most ${MAX_TIMEOUT_S}) applies per step of every run.`;
 

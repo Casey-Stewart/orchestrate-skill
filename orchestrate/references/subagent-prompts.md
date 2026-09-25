@@ -249,10 +249,19 @@ command timeout). Run
 adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists (a
 repository with a setup step fails its control without it). Its `CONTROL PASS` line must
 count the tests you scoped: a runner may skip a named test file that does not exist.
-The count has one blind spot: node counts a test file that registers no tests as one
-passing test named after the file, so a mutation after which a one-test file registers
-nothing does not change the count and reads `SURVIVED` — before you cite a `SURVIVED`
-line, check its run in the log for a scoped test file reported under its own file name.
+The count has a blind spot: node counts a test file that registers no tests as one
+passing test named after the file, which the harness reports as a file that ran no tests
+unless node names it by a relative path whose first segment holds a space
+(`my file.test.js`, `my dir/a.test.js`) — there a mutation after which a one-test file
+registers nothing does not change the count and reads `SURVIVED`, so before you cite a
+`SURVIVED` line, check its run in the log for a scoped test file reported under its own
+file name. A `SURVIVED` line says nothing about a test the control skipped
+(`, <n> skipped` on its line), since a mutation of code only that test covers still
+reads `SURVIVED`. Counts are not names: a mutation that skips one test and runs one the
+control skipped changes neither the total nor the skipped count, so its `SURVIVED` or
+`KILLED` line may rest on a test the control never ran — before citing either, compare
+the tests its run and the control ran in the log; where the log does not name each test,
+cite neither.
 A run costs the scoped suite once for the control and once per
 mutation; when that may outlast the runtime's command timeout, run it as a background task
 whose completion reports its lines and exit code, or pass `--timeout` and split the

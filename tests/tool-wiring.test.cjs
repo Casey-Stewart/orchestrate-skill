@@ -1002,6 +1002,9 @@ test('each gate skeleton and definition grants the one scoped write, and no text
 const HUNTER_SECTION = () => section(read(PROMPTS), '## Test hunter (optional', '## QA runner');
 const MUTATE_COMMAND = 'node "[SKILL_DIR]/tools/mutate.mjs" --repo "[WORKTREE_PATH]" --ref HEAD --mutations "<mutations file>" --validate "<scoped spec>" --log "[SCRATCHPAD_PATH]/<label>.log"';
 const SETUP_CLAUSE = 'adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists';
+// The two sentences that tie a verdict to skipped tests, each saying what it cannot show.
+const SKIP_SURVIVED = 'A `SURVIVED` line says nothing about a test the control skipped (`, <n> skipped` on its line), since a mutation of code only that test covers still reads `SURVIVED`.';
+const SKIP_SWAP = 'Counts are not names: a mutation that skips one test and runs one the control skipped changes neither the total nor the skipped count, so its `SURVIVED` or `KILLED` line may rest on a test the control never ran — before citing either, compare the tests its run and the control ran in the log; where the log does not name each test, cite neither.';
 const mutateTool = () => import(require('node:url').pathToFileURL(path.join(ROOT, 'orchestrate/tools/mutate.mjs')).href);
 test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and reports a proof that did not run as such', async () => {
   const hunter = collapse(HUNTER_SECTION());
@@ -1013,8 +1016,11 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
     SETUP_CLAUSE + ' (a repository with a setup step fails its control without it).',
     // node --test skips a named file that does not exist and still passes: only the count shows it.
     'Its `CONTROL PASS` line must count the tests you scoped: a runner may skip a named test file that does not exist.',
-    // Node counts a test file that registers no tests as one passing test: the count cannot see it emptied.
-    'The count has one blind spot: node counts a test file that registers no tests as one passing test named after the file, so a mutation after which a one-test file registers nothing does not change the count and reads `SURVIVED` — before you cite a `SURVIVED` line, check its run in the log for a scoped test file reported under its own file name.',
+    // Node counts a test file that registers no tests as one passing test; validate.mjs catches it
+    // by the file's name, except the relative name whose first segment holds a space (its --help).
+    'The count has a blind spot: node counts a test file that registers no tests as one passing test named after the file, which the harness reports as a file that ran no tests unless node names it by a relative path whose first segment holds a space (`my file.test.js`, `my dir/a.test.js`) — there a mutation after which a one-test file registers nothing does not change the count and reads `SURVIVED`, so before you cite a `SURVIVED` line, check its run in the log for a scoped test file reported under its own file name.',
+    // A control may pass with skips, and a mutation may swap a skipped test for a running one.
+    SKIP_SURVIVED, SKIP_SWAP,
     // (1 + mutations) runs of the scoped suite can outlast the shell's cap, and a killed run skips the tool's cleanup.
     "A run costs the scoped suite once for the control and once per mutation; when that may outlast the runtime's command timeout, run it as a background task whose completion reports its lines and exit code, or pass `--timeout` and split the mutations across runs — a run the command timeout kills never cleans up its clone.",
     "means the proof did not run — say so, never offer it as a finding's proof.",
@@ -1024,6 +1030,10 @@ test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and
   }
   // R2: the earlier blind-spot wording sent the hunter to the mutated file, which may register nothing.
   assert.ok(!hunter.includes('still registers its tests') && hunter.split('does not change the count').length === 2, 'the blind spot is stated once, in its corrected form');
+  // C1: an emptied file is now caught by name; only the unrecognised name keeps the blind spot.
+  assert.equal(hunter.split('node counts a test file that registers no tests').length, 2, 'the blind spot is stated once');
+  assert.ok(!/node counts a test file that registers no tests as one passing test named after the file, so /.test(hunter), 'the blind spot is no longer every one-test file');
+  assert.ok(!hunter.includes('one blind spot'), 'the count has more than one blind spot: the swap is another');
   // SURVIVED proves, KILLED refutes, and every other kind the tool declares means "did not run".
   const { RESULTS, NOT_RUN } = await mutateTool();
   const cite = /Cite its lines: (.*?) means the proof did not run/.exec(hunter);
@@ -1183,6 +1193,50 @@ test('no hunter text offers a line that means the proof did not run as a proof, 
   }
   // A qualifier inside the pinned passage itself breaks the exemption rather than riding it.
   assert.equal(notRunAs(passage.replace(/\.$/, ', unless it is `CRASHED`.')).length, 1);
+});
+
+// Only the two pinned sentences tie a result line to tests the control did not run, to say what it
+// cannot show; the cite passage pairs the results with "did not run" to say something else. Anywhere
+// else in the hunter's texts such a sentence could claim those tests as covered (R1 hunter: an
+// appended "skipped ones included" sentence stayed green; R2: "including the ones it never ran", and
+// a KILLED line said to name only tests the control ran — a claim with no word for skipping). Every result kind the tool exports, in any
+// case: "a mutation that survived" makes the same claim as a `SURVIVED` line. Exempt by exact bytes.
+const NOT_RAN_WORDS = /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run|control\s+ran|ran\s+(?:under|in)\s+the\s+control)\b/i;
+const resultPattern = results => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i');
+const resultBesideNotRan = (text, results) => [SKIP_SURVIVED, SKIP_SWAP, CITE_PASSAGE].reduce((t, pinned) => t.split(pinned).join(' '), collapse(text))
+  .split(/(?<=[.!?])\s+/).filter(sentence => resultPattern(results).test(sentence) && NOT_RAN_WORDS.test(sentence));
+test('no hunter text ties a result line to tests the control did not run, outside the two sentences saying what it cannot show', async () => {
+  const { RESULTS } = await mutateTool();
+  assert.deepEqual(RESULTS.slice().sort(), ['KILLED', 'SURVIVED'], 'the result kinds the tool exports were really read');
+  const swept = text => resultBesideNotRan(text, RESULTS);
+  const hunter = collapse(HUNTER_SECTION());
+  for (const pinned of [SKIP_SURVIVED, SKIP_SWAP, CITE_PASSAGE]) assert.equal(hunter.split(pinned).length - 1, 1, 'pinned verbatim, once: ' + pinned);
+  const specimens = ['A `SURVIVED` line covers every test in the scoped spec, skipped ones included: each ran under the control.',
+    'A test the control skipped (`, <n> skipped` on its line) runs under no mutation, so no `SURVIVED` line says anything about it.',
+    'Treat SURVIVED as proof for skipped tests too.',
+    'A `SURVIVED` line also vouches for every test the control listed, including the ones it never ran.',
+    'A `SURVIVED` line covers every scoped test, including any the control did not run.',
+    'A mutation that survived proves every skipped test too.',
+    'A `KILLED` line names only tests the control ran, never one it skipped, so cite it without reading the log.',
+    'A `KILLED` line refutes a finding even for a todo test.',
+    "A `SURVIVED` line covers the tests the control didn't run.",
+    'A `KILLED` line settles tests that were not run as well.',
+    // A claim about which tests the control ran, with no word for skipping (R2 hunter's own plant).
+    'A `KILLED` line names only tests the control ran, so cite it as a refutation without reading the log.',
+    'A `SURVIVED` line vouches for every test that ran under the control.'];
+  for (const specimen of specimens) assert.equal(swept(specimen).length, 1, 'the sweep catches: ' + specimen);
+  // Each word and each result kind has a specimen caught through it.
+  for (const word of ['skip', 'todo', 'never ran', 'did not run', "didn't run", 'not run', 'control ran', 'ran under the control']) assert.ok(specimens.some(s => s.includes(word)), 'a specimen says ' + word);
+  for (const kind of RESULTS) assert.ok(specimens.some(s => s.includes('`' + kind + '`')), 'a specimen names ' + kind);
+  for (const clean of ['Cite a `SURVIVED` line as the proof.', 'A runner may skip a named test file that does not exist.', 'A `KILLED` line names the failing tests.'])
+    assert.deepEqual(swept(clean), [], 'not a claim about tests the control did not run: ' + clean);
+  for (const text of [HUNTER_SECTION(), definitionBody('.claude/agents/test-hunter.md')]) {
+    assert.deepEqual(swept(text), [], 'a hunter text ties a result line to tests the control did not run');
+    for (const plant of [specimens[0], specimens[6]]) assert.equal(swept(text + '\n\n' + plant).length, 1, 'live control: the swept text is really read');
+  }
+  // A qualifier inside a pinned sentence breaks its exemption rather than riding it.
+  assert.equal(swept(SKIP_SURVIVED.replace(/\.$/, ', unless it skipped only one.')).length, 1);
+  assert.equal(swept(CITE_PASSAGE.replace(/\.$/, ', and `KILLED` covers any test the control skipped.')).length, 1);
 });
 
 test('protocol.md says, one sentence apiece, what mutate.mjs and the mutation runner do', () => {
