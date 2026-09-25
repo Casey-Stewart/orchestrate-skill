@@ -229,7 +229,8 @@ smoke-input inventory).
    `tests/validate.test.cjs`); on Linux the line reads `PASS tests <p>/<t>, 2 skipped (…)`, on
    Windows the plain `PASS tests <t>/<t> (…)`. *(Revision 3, C1 re-issue after the B01 fix-up:
    the line now shows skips. Revision 2 corrected revision 1, which required passed = total —
-   impossible on Linux, where the total counts skipped tests.)*
+   impossible on Linux, where the total counts skipped tests. Revision 4 at the C1 issue-3
+   re-issue: text unchanged; the suite it runs gained the colour-independent empty-file test.)*
    **Runner**: agent (CLI — Node and PowerShell on this machine).
 2. **Do**: Run `node orchestrate/tools/validate.mjs --spec <I-01>/spec.json --cwd <I-01>
    --log <scratch>/c1-validate-fail.log`.
