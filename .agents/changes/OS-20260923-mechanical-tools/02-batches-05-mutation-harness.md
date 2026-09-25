@@ -218,3 +218,30 @@ clone again. The issued bundle is never modified.
     **Pass**: one line beginning `AT ` followed by `HEAD~1`'s short SHA and the result the
     `I-09` README lists for that commit.
     **Runner**: agent (CLI).
+
+Steps 11–13 are revision 2 at the C1 re-issue: text unchanged, the covered code changed.
+
+**Added at the C1 re-issue** (the C1 fail, verdict log 2026-09-25) — **you need**: issued input
+`I-12` (`evidence/C1/inputs/issue-002/`), a one-commit fixture bundle whose skip conditions read
+production switches, never the platform. **Working copy**: `git clone <I-12>/fixture.bundle
+<scratch>/c1-fail-fixture` before step 17; **reset** = delete that clone and clone again.
+
+17. **Do**: Run `node orchestrate/tools/mutate.mjs --repo <scratch>/c1-fail-fixture --ref HEAD
+    --mutations <I-12>/muts-a.json --validate <I-12>/validate-a.json --log
+    <scratch>/c1-fail-a.log` (the user's scenario: the scoped suite's only test is skipped).
+    **Pass**: exactly one line, `CONTROL FAILED FAIL tests no test passed (0/1, 1 skipped) — log:
+    …`; exit code 2; no mutation applied. (Before the fix: `CONTROL PASS PASS tests 0/1`, then
+    `SURVIVED`.)
+    **Runner**: agent (CLI).
+18. **Do**: Run it with `--mutations <I-12>/muts-b.json --validate <I-12>/validate-b.json
+    --log <scratch>/c1-fail-b.log` (a mutation that leaves a one-test file registering nothing).
+    **Pass**: `CONTROL PASS PASS tests 1/1 (…)`, then a line beginning `CRASHED e1: FAIL tests 1
+    of 1 failed: rows.test.cjs (ran no tests)`, then `MUTATE 0 killed, 0 survived, 1 other`; exit
+    code 2. (Before the fix: `SURVIVED e1`.)
+    **Runner**: agent (CLI).
+19. **Do**: Run it with `--mutations <I-12>/muts-f.json --validate <I-12>/validate-f.json
+    --log <scratch>/c1-fail-f.log` (a mutation that skips a test the control ran).
+    **Pass**: `CONTROL PASS PASS tests 2/2 (…)`, then a line beginning `CRASHED f1: PASS tests
+    1/2, 1 skipped`, then `MUTATE 0 killed, 0 survived, 1 other`; exit code 2; the log records
+    `1 test skipped that ran in the control`. (Before the fix: `SURVIVED f1`.)
+    **Runner**: agent (CLI).

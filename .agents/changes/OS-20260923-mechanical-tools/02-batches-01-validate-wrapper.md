@@ -225,11 +225,28 @@ smoke-input inventory).
    **Pass**: exactly one output line beginning `PASS tests `; exit code 0; the log file exists
    and ends with the reporter's summary, whose `ℹ fail` is 0 and whose `ℹ skipped` equals the
    line's total minus its passed count (0 on Windows; on Linux 2, the Windows-only pair in
-   `tests/validate.test.cjs`). *(Revision 2, corrected at C1 close-out: revision 1 required
-   passed = total, which the line cannot show on Linux — its total counts skipped tests.)*
+   `tests/validate.test.cjs`); on Linux the line reads `PASS tests <p>/<t>, 2 skipped (…)`, on
+   Windows the plain `PASS tests <t>/<t> (…)`. *(Revision 3, C1 re-issue after the B01 fix-up:
+   the line now shows skips. Revision 2 corrected revision 1, which required passed = total —
+   impossible on Linux, where the total counts skipped tests.)*
    **Runner**: agent (CLI — Node and PowerShell on this machine).
 2. **Do**: Run `node orchestrate/tools/validate.mjs --spec <I-01>/spec.json --cwd <I-01>
    --log <scratch>/c1-validate-fail.log`.
    **Pass**: exactly one line beginning `FAIL tests 1 of 2 failed: fixture fails on
-   purpose`, ending with the log path; exit code 1.
+   purpose`, ending with the log path; exit code 1. *(Revision 2 at the C1 re-issue: text
+   unchanged, the covered code changed.)*
    **Runner**: agent (CLI).
+
+**Added at the C1 re-issue** (the C1 fail, verdict log 2026-09-25) — **you need**: issued
+inputs `I-10` and `I-11` (`evidence/C1/inputs/issue-002/`).
+
+15. **Do**: Run `node orchestrate/tools/validate.mjs --spec <I-10>/spec.json --cwd <I-10>
+    --log <scratch>/c1-skip-only.log` (a suite whose only test is skipped).
+    **Pass**: exactly one line, `FAIL tests no test passed (0/1, 1 skipped) — log: …`; exit
+    code 1. (Before the fix: `PASS tests 0/1`, exit 0.)
+    **Runner**: agent (CLI).
+16. **Do**: Run `node orchestrate/tools/validate.mjs --spec <I-11>/spec.json --cwd <I-11>
+    --log <scratch>/c1-empty-file.log` (a test file that registers no tests, beside a real one).
+    **Pass**: exactly one line, `FAIL tests 1 of 2 failed: empty.test.cjs (ran no tests) — log:
+    …`; exit code 1. (Before the fix: `PASS tests 2/2`, exit 0.)
+    **Runner**: agent (CLI).
