@@ -1158,3 +1158,127 @@ Commit: `e7f1a8b` on `fix/B05-c1-followup`.
 - Steps 11–13 still produce their lines unchanged.
 
 Fence (manual fallback; the helper cannot link a fix-up branch name): `git diff --name-status -M d483d32...e7f1a8b` = `orchestrate/references/subagent-prompts.md`, `orchestrate/tools/mutate.mjs`, `tests/mutate.test.cjs`, `tests/tool-wiring.test.cjs`, all in B05's fence; range diff-check clean; worktree clean → PASS. 6b: the branch's `tests/mutate.test.cjs` and `tests/tool-wiring.test.cjs` on `8dc09a3` — 58 tests, 53 pass, 5 fail (the emptied-file reason, the no-test-passed reason, the skip-flip, the classification table, the hunter pin); the scenario-(a) cell passes on the base, as the spec predicted (B01's merged fix delivers it; a regression pin) → PROVEN. Gate: a fresh reviewer (strong tier, Opus) and test-hunter (default), in parallel.
+
+#### B05 fix-up — R1
+
+B05 fix-up R1 reviewer — FIX FIRST @e7f1a8b (strong tier, Opus; nonce verified). Verbatim (nonce line removed):
+
+FIX FIRST
+
+**1. P1: a skip move beside a failure in the same step still reads KILLED.**
+- **Where:** `/home/timetotilt/worktrees/os923/b05f/orchestrate/tools/mutate.mjs:233`. The `s.failed === 0 &&` guard switches off the skipped comparison along with the passed one. The diff pins this as correct at `/home/timetotilt/worktrees/os923/b05f/tests/mutate.test.cjs:667-668`.
+- **Violates:** B05 criterion 2, "changes how many tests run, is CRASHED, never KILLED", read the user's way: a skipped test did not run.
+  - It also breaks the table's own consistency. A changed total beside a named failure is CRASHED (`mutate.test.cjs:670`). A skip move in another step voids a named failure (`:683-684`). The same move inside the failing step does not.
+  - The existing title at `:181` promises CRASHED for this case.
+  - The stated rationale ("fewer passes are expected") only justifies ignoring `passed`. A failure moves a test from passed to failed; it never moves one into or out of skipped.
+- **Scenario (live, e7f1a8b):**
+  - e2: control `1/2, 1 skipped`; mutation flips a production feature flag on; the control-skipped test runs and fails. Result: `KILLED on: feature adds`, exit 0. The refutation names a test the control never ran.
+  - e1: control `2/2`; flag off; one test fails and the other skips. Result: `KILLED off: direct adds`, exit 0, although only 1 of the control's 2 tests ran.
+- **Fix:** change the line to `if (s.skipped !== c.skipped || (s.failed === 0 && s.passed !== c.passed)) return { kind: 'CRASHED', … }`. Then flip row `:668` to `['CRASHED', 'step tests: 1 test skipped that ran in the control']`, add an e2-style CLI cell, and reword the HELP (`:321-324`) and the comment (`:208-209`).
+  - I tried this in a scratch clone. e1 and e2 become CRASHED with accurate reasons. Scenarios a–d and smoke steps 11–13 are unchanged. Of the 58 cells in the two test files, only `:668` goes red.
+  - Cost: genuine same-step kills beside a skip move, and pytest strict-xfail XPASS (validate counts xfailed as skipped), would read CRASHED. That is the same conservative choice the tool already makes for a changed total.
+  - As shipped, the `|| s.skipped !== c.skipped` part never decides anything: deleting it keeps all 58 green.
+  - If you rule the exemption acceptable instead, criterion 2 and the title at `:181` must be reworded, because today they contradict the code.
+
+**2. ASK: the added hunter sentence states a false premise.**
+- **Where:** `/home/timetotilt/worktrees/os923/b05f/orchestrate/references/subagent-prompts.md:258-259`, plus "one blind spot" at `:252`. Pinned at `/home/timetotilt/worktrees/os923/b05f/tests/tool-wiring.test.cjs:1018,1020`.
+- **Violates:** documents as code. The tool's own new log reason (`mutate.mjs:216`, "ran that the control skipped") and HELP (`:324`, "or the reverse") contradict it.
+- **Scenario:** "runs under no mutation" is false:
+  - for p1 (the batch's own cell, `mutate.test.cjs:321-326`);
+  - for e2;
+  - for a node todo test, whose body runs under every mutation;
+  - for e3: complementary posix/windows tests gated on a production `isWin()`, mutation `=== 'win32'` → `!==`, gives `SURVIVED swap` even though the one test the control ran was skipped. So the count has a second blind spot, and "one blind spot" is false too.
+- **Fix:** for example: "The count has a blind spot: … file name. A `SURVIVED` line says nothing about a test the control skipped (`, <n> skipped` on its line), since a mutation of code only that test covers still reads `SURVIVED`; and counts are not names: a mutation that skips one test and runs one the control skipped keeps every count." Update both pins. The same overclaim sits in `mutate.test.cjs:292` (section header) and the title at `:310`; e3 is a counterexample to both.
+
+**3. ASK: HELP text re-wrapped around the edit.**
+- **Where:** `/home/timetotilt/worktrees/os923/b05f/orchestrate/tools/mutate.mjs:333-335`.
+- **Violates:** the contract's rule never to reflow or reformat surrounding text. The unchanged `--log`/`--timeout` sentences were re-broken, leaving `--help` lines 128 and 149 columns wide where every other line is 113 or less.
+- **Fix:** re-wrap only the edited sentence when you reword the HELP for finding 1.
+
+**Validation:** EXIT=0. 511 tests, 509 pass, 0 fail, 2 skipped; both skips are the Windows-only bash-resolution tests. Range `git diff --check` is clean, the worktree is clean at e7f1a8b, and all 4 changed files are in the fence. Log: `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b05f/rev/validate.log`.
+
+**Duty 1 (hunk map):** every hunk maps.
+- `classifyRun` and `moved()`: outcomes 1 and 2.
+- The `classifyRun` comment, the control comment and both HELP hunks: outcome 3 (plus 1 and 2 in the HELP text).
+- The hunter rewrite and the tool-wiring pin: outcome 3.
+- Four new CLI tests and the new table rows: outcome 4.
+- The added hunter sentence is in scope, not creep. Item 4 keeps partly skipped controls legal, and my probe g shows the user's scenario (a) with one passing test beside it still reads `SURVIVED m1` for code whose only test never ran. That sentence is the only guard against it; its wording is ASK 2.
+
+**Duty 2 (live, scratch clone of e7f1a8b):**
+- (a) prints `CONTROL FAILED FAIL tests no test passed (0/1, 1 skipped)`, exit 2, no mutation run, repository untouched, temp root empty.
+- (b) prints `CRASHED empty-one: FAIL tests 1 of 1 failed: one.test.cjs (ran no tests)`, and the log says "a test file ran no tests (one.test.cjs)".
+- Skip-flip prints `CRASHED f1` with the reason "1 test skipped that ran in the control".
+- Partly skipped control: `KILLED m1`, `SURVIVED m2`, exit 1.
+- Smoke steps 11–13 against I-09 print exactly the lines its README lists (exits 1, 2, 0). The fixture clone is untouched and the issued inputs hash unchanged.
+- A todo-only control is CONTROL FAILED, as the HELP now says.
+
+**Duty 4 (decision table):**
+- SURVIVED requires equal passed, skipped and total counts in every parsed step, and every step passing. Two residuals: e3 (the swap) and the documented space-in-name gap (e4 still reads `SURVIVED empty`, as the rewritten sentence says).
+- KILLED's only open path is finding 1.
+- No honest KILLED became wrongly CRASHED. The cross-step rule matches the total rule, and the m1 kills in scenarios b, c and d are intact.
+- The rewritten sentence keeps "check the log before citing a SURVIVED line". Nothing in the agent definition, `protocol.md` or the template contradicts it.
+
+**Duty 5 (failing-on-base):** I re-ran it in a scratch clone of 8dc09a3 and got the same result: 58 tests, 53 pass, 5 fail, same names. Each of the five fails at exactly the assertion the diff changed, and the (a)/partial cell passes, as the spec predicted. Consistent with the diff.
+
+**Duty 6 (sweeps):** a grep of `orchestrate/`, `README.md` and `.claude/` finds no other text still stating the old behaviour. The README's "then KILLED or SURVIVED each" predates this change and is not made false by it.
+
+**Other notes:**
+- Worth a BACKLOG entry at close-out: counts cannot see which tests ran (e3). Closing that needs per-test names from `validate.mjs` (B01's fence), and not every runner prints them.
+- Windows and Node 22: nothing in the diff is platform-specific, and the new cells skip with a constant string, so they behave the same on win32.
+- The main checkout shows ` M BACKLOG.md`. That was not from this review; I wrote nothing outside `rev/`.
+
+Evidence is in `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b05f/rev/`: `probe/` (`probe.mjs`, `edges.mjs`, `partial-a.mjs`, `runs/`), `base-run.log`, `fixprobe-run.log`, `redundant-run.log`.
+
+B05 fix-up R1 test-hunter — FINDINGS 4 @e7f1a8b (default tier; nonce verified). Verbatim (nonce line removed):
+
+FINDINGS 4
+
+Control first: I cloned e7f1a8b with `git clone --shared` into `.../scratchpad/gate-b05f/hunt/c0` and ran the full suite unmutated. It passed: 511 tests, 509 pass, 0 fail, 2 skipped. I applied each mutation in its own fresh shared clone, using a script that stops loudly unless its anchor matches exactly once, and re-ran the full suite each time. Those clones are deleted.
+
+**1. HIGH: a skipped test that now runs and fails reads KILLED (→ P1)**
+- **Test:** `tests/mutate.test.cjs:668`, the row "a named failure beside a skip in its step". It pins only one direction: a test that ran in the control is skipped under the mutation, beside a named failure.
+- **Code:** `/home/timetotilt/worktrees/os923/b05f/orchestrate/tools/mutate.mjs:233`, the condition `s.failed === 0 && (...)`. Any failure turns the moved-count check off in both directions.
+- **Class:** a boundary pinned on one side only, and a test that pins the defect.
+- **Ran it:** I built a scratch repository with a test `{ skip: !onWindows() && 'Windows only' }` and a mutation `u1` that makes `onWindows()` return `true`.
+  - Control: `CONTROL PASS PASS tests 1/2, 1 skipped`.
+  - Result: `KILLED u1: windows path join`, then `MUTATE 1 killed, 0 survived, 0 other`, exit 0.
+- **Why it matters:** the test named as "killed" never ran in the control. It fails only because it is a Windows test running on Linux. This is the same skipped-test counting the user reported, and it breaks acceptance criterion 2 ("changes how many tests run, is CRASHED, never KILLED"). It gives a false KILLED, which hides a vacuous test from the hunter.
+- **Assertions to add:**
+  - A classification row where the mutated step skipped fewer tests than the control, with a named failure, expecting `CRASHED 'step tests: 1 test ran that the control skipped'`.
+  - A live cell where a p1-shaped mutation unskips a test that fails, expecting CRASHED and exit 2.
+- **Also rule on:** a mutation that skips a test the control ran and also breaks a different test still reads KILLED. That is the implementer's own call, and criterion 2 argues against it.
+
+**2. MEDIUM: the new `--help` text has no test at all (→ ASK)**
+- **Test:** `tests/mutate.test.cjs:769` checks only that each kind token (`SURVIVED `, `CRASHED ` and so on) appears.
+- **Mutation, green:** I put back the old wording at `mutate.mjs:321-324` and `:333-334`: "CRASHED: … a test file that failed to load, or a test count unlike the control's." and "each such step must run a test in the control."
+- **Result:** full suite green, 509/0.
+- **Assertions to add:** pin the SURVIVED and CRASHED definitions and the "must pass at least one test" rule word for word, and check that "must run a test" is gone.
+
+**3. MEDIUM: the new hunter sentence is only checked for presence, and it is false (→ ASK for the sweep, P1 for the wording)**
+- **Test:** `tests/tool-wiring.test.cjs:1020` checks that the sentence is present, but nothing looks for contradictions.
+- **Mutation, green:** I appended "A `SURVIVED` line covers every test in the scoped spec, skipped ones included: each ran under the control." after the sentence at `/home/timetotilt/worktrees/os923/b05f/orchestrate/references/subagent-prompts.md:258`. Full suite green, 509/0.
+- **The sentence itself is wrong:** it says a test the control skipped "runs under no mutation". The implementer's own `p1` cell runs such a test, and so does `u1` in finding 1. The accurate claim is that no SURVIVED line can rest on it.
+- **Fix:** reword the sentence, and add a sweep of the hunter skeleton that flags any other sentence tying SURVIVED to skipped tests.
+
+**4. LOW: a classification row feeds counts that no parser can produce (→ ASK)**
+- **Test:** `tests/mutate.test.cjs:666`, the row "a passed count moved with the skips held", feeds passed 4, failed 0, skipped 0, total 5.
+- **Why that is impossible:** in every parser, total equals passed + failed + skipped (`validate.mjs:35-36`, `:72`, `:113`, `:141-142`, `:158`). By line 233 the totals are already known to be equal, and a passing control has no failures. So "passed moved" and "skipped moved" are the same condition.
+- **Consequences:**
+  - The fallback reason "P passed, the control Q" at `mutate.mjs:217` cannot be reached by a real run.
+  - **Mutation, green:** I deleted `|| s.skipped !== c.skipped` at `mutate.mjs:233`. Full suite green. This is an equivalent mutation, so no defect gets through today.
+- **Class:** a branch no input reaches. The twist is that the test only reaches it with a state the upstream producer cannot emit. This may be worth adding as its own class.
+- **Fix:** either assert the invariant or remove the fallback. The row and `--help` currently describe two independent conditions that are really one.
+
+**Checked and holding** (reasoned from the tests; I did not run these):
+- Deleting the `failed === 0` guard turns rows 668 and 681-683 red.
+- Deleting the NO-TESTS line turns the f2 log check and the "no test passed" row red.
+- Dropping the `emptyFiles` filter turns the row at 658 and the e1 `!includes('failed to load')` check red.
+- Swapping the order of the joined reasons turns row 661 red.
+- The check across steps (a moved count in one step voids a named failure in another) is pinned in both directions.
+- The skip-flip is pinned both ways, live and in the table.
+- The e1 and f2 reasons are checked against the log text the tool really writes.
+- The old blind-spot wording is checked to be gone, and the new one is checked to appear once.
+
+The (a) and (b) scenarios, f1, p1 and f2 all check real CLI output.
+
+Fix round: the same implementer, resumed with both reports — P1 (the reviewer's fix: a moved skip count is CRASHED whatever the failures; only a moved passed count is exempt beside a failure), reviewer ASK 2 (= hunter #3: the added hunter sentence reworded to what is true, naming the swap blind spot, plus a contradiction sweep), ASK 3 (the reflowed HELP), hunter #2 (pin the HELP definitions), #4 (the unreachable passed-only row: assert the invariant or drop the fallback). The swap blind spot (counts cannot see which tests ran) is a BACKLOG residual at close-out — closing it needs per-test names from validate.mjs.
