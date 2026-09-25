@@ -1098,6 +1098,8 @@ test('live: a test file that registers no tests is a load failure, relative, abs
         `${label}: both entries must be painted in the raw log: ${JSON.stringify([step.raw[parent], step.raw[emptied]])}`);
     }
   } } finally { for (const [k, v] of savedColour) if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  // Presence as well as value: a key unset before must be unset again, never the string 'undefined'.
+  assert.deepEqual(COLOUR_KEYS.map(k => [k, k in process.env, process.env[k]]), savedColour.map(([k, v]) => [k, v !== undefined, v]), 'the colour environment is restored');
   // The documented false rejection: a real test deliberately named like a file path.
   write('zz-data.test.cjs', "test('data.test.cjs', () => {});\n");
   const falseRejection = await go('spec', ['test/zz-data.test.cjs']);

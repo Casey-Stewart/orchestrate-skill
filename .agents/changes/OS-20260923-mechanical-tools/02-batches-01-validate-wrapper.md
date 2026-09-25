@@ -195,6 +195,7 @@ exit with a chosen code; specs point at them via `argv: [process.execPath, scrip
 - [x] polish: --help's "Not recognised" sentence covers every way node names such a file (given, globbed, ./-prefixed or discovered) and its pin follows
 - [x] polish: the --help contradiction sweep splits on real sentence boundaries, takes the legitimate sentences out verbatim, widens subjects and verdicts, and proves every listed specimen red
 - [x] polish: EMPTY_NAMES pins a space in the file's own name (discovered and absolute forms), plus a live discovered emptied file whose name holds a space
+- [x] polish: (C1 fix-up 2) the colour environment is asserted restored after the forced-colour loop
 
 ## Acceptance criteria
 
