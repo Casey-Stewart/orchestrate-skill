@@ -1064,3 +1064,53 @@ Polish pass: the same implementer, resumed with ASK-A, ASK-B, ASK-C and hunter #
 #### B01 fix-up — polish
 
 Polish @`3f6fae5` (same implementer; nonce verified): ASK-A price sentence (wording only), ASK-B "Not recognised" sentence, ASK-C/hunter #2 sentence-boundary sweep with widened vocabulary and its seven specimens proven red, hunter #1 a space in the file's own name (corpus, absolute, live discovered); 11 mutations red after a passing control. Mechanical close: fence (manual) PASS — `git diff 334b0ac..3f6fae5` = the batch file (four ticked `polish:` lines), `orchestrate/tools/validate.mjs` (one hunk at :361, inside the `HELP` string at :338), `tests/validate.test.cjs`; range diff-check clean; worktree clean; orchestrator recipe on `3f6fae5`: 507 tests, 505 pass, 0 fail, 2 skipped. A production file touched → fix-diff-only scoped re-review (fresh, strong tier, Opus), duties 1, 2, 4.
+
+#### B01 fix-up — scoped re-review and integration
+
+Scoped re-review (fresh, strong tier, Opus; polish-phase, not a round) — SHIP @`3f6fae5`, verbatim (token line removed):
+
+SHIP
+
+The polish closes all five asks and changes no behaviour. I found two optional ASKs, below; neither blocks.
+
+**Hunk map (duty 1): no scope creep.**
+- `validate.mjs:361-365` → ASK-A and ASK-B.
+- `validate.test.cjs:258-260` (comment and EMPTY_NAMES) → hunter #1. The count changes at :262, :266-267, :305-306 and :637 are bookkeeping for those two new names.
+- :1091-1099 (live spaced test) → hunter #1.
+- :1194 and :1196 (pins) → ASK-A and ASK-B.
+- :1199-1212 (sweep) → ASK-C.
+- The batch file adds only the 4 ticked `polish:` lines (4 added, 0 removed). 3f6fae5's parent is 334b0ac.
+
+**Asks (duty 2)**
+- **ASK-A: CLOSED.** The price sentence is the reviewer's suggested wording, word for word, and the :1194 pin matches it. Putting the old sentence back turns the `--help` test red on the needed-phrase list. `fileShaped` is unchanged.
+- **ASK-B: CLOSED.** The sentence now reads "whether given, globbed, ./-prefixed or discovered", pinned at :1196. Putting the old sentence back turns it red.
+- **ASK-C / hunter #2: CLOSED.**
+  - The split uses exactly the reviewer's regex. The two rule sentences are compared word for word through `deepEqual(speaking(text), [RULE, COUNTS])`. The vocabulary is a superset of the hunter's list, and all 7 specimens from the reports are in SPECIMENS.
+  - I ran real HELP mutations in a shared clone. Each turned the test red on "only the two rule sentences…": two appended specimens, one inserted after the price sentence, one lowercase-initial insert that merges into COUNTS, and one edit inside COUNTS that is not in the needed-phrase list.
+  - Chunk [4] (COUNTS) is really three sentences, because "skipped counts…" and "node reports…" start lowercase. Since it is pinned word for word, the merge can only make the check stricter; it cannot let a contradiction through.
+- **Hunter #1: CLOSED.**
+  - Control: 47 tests, 45 pass, 0 fail, 2 skipped.
+  - BASENAME and ABSONLY each turn 5 red: corpus, CRLF, ANSI, the row test and the live test.
+  - My extra mutation, which checks the basename's whitespace only for absolute paths, turns 4 red. So `C:\proj\my file.test.mjs` catches a mutation of its own.
+
+**No production change (duty 4)**
+- The only validate.mjs hunk is at lines 361-365, inside `HELP` (lines 338-366). `fileShaped` (:31) and every parser are untouched.
+- Live checks under spec and TAP through `runSpec`:
+  - An emptied `my dir/x.test.cjs` beside `one.test.cjs` gives `PASS tests 2/2` whether discovered, given, globbed or `./`-prefixed. Node names it `my dir/x.test.cjs` every time (it strips the `./`), so the documented gap matches behaviour.
+  - Absolute paths and `../my dir/…` are recognised, which fits "first segment".
+  - `I/O errors from the reader surface through reader.js` and `config.test.js` titles each give `FAIL … (ran no tests)`, as the price sentence says.
+- Full validation: EXIT=0, 507 tests, 505 pass, 0 fail, 2 skipped (both "on Windows …"). `git diff --check` on the range is clean. The worktree and the clone are both clean.
+
+**Findings**
+1. **ASK (test-only, optional):** `tests/validate.test.cjs:1205`. The sweep still misses contradictions phrased as "does not fail" or "success". I appended each of these to the text and all stayed green, 45 of 47 passing:
+   - "A step whose every test was skipped never fails." (also run as a real HELP mutation)
+   - "An empty file is treated as a success." (also run as a real HELP mutation)
+   - "A skip-only run is not a failure."
+   - "A run with no tests does not fail the step."
+
+   The comment at :1199 says no other sentence may "speak of passing". Fix: add `|\bsucce(?:eds?|ss(?:ful)?)\b|\bnever fails?\b|\b(?:is|are) not (?:a )?fail(?:ure|ed)?\b|\bdo(?:es)?(?: not|n't) fail\b` to VERDICT and put the four sentences in SPECIMENS. I probed this: today's text still has exactly the 2 flagged sentences, and all 11 specimens are caught. This is what is left of hunter #2's class.
+2. **ASK (wording, optional):** `validate.mjs:363`. The price sentence says "a title whose first word holds a slash", but a backslash does the same. `test('\\r\\n endings are normalised by validate.mjs')` gives FAIL `(ran no tests)` under both reporters, live. "file-shaped", defined in the previous sentence with `/ or \`, already covers it. Changing "a slash" to "a slash or backslash" would make the listed examples cover it too.
+
+Scratch files (probes, the mutation runner and its logs, validate.log) are in `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/rev3/`.
+
+Its two optional ASKs (the sweep's "never fails" / "success" phrasings; "slash or backslash" in the price sentence) are test/wording residuals for BACKLOG at close-out. Integration: dry run clean (tree `55af17a`), merged `--no-ff` as `8dc09a3` (same tree); tip validation (pwsh) 507 / 505 / 0 fail / 2 skipped (the Windows-only pair), `git diff --check HEAD^1 HEAD` clean → B01 🧪 (the fix-up's covered row returns to the checkpoint; the page is re-issued after B05's fix-up). Worktree `b01f` removed. Fix-up metrics: rounds=1, asks=5 (+2 optional to BACKLOG), gate = 17 findings (R1 5 + 4, R2 3 + 2, scoped 2 + 1 counted once), 1 needing a production change (P1-1).
