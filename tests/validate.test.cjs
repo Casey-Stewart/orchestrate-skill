@@ -255,14 +255,16 @@ const NODE_SPEC_SKIPS = lines('✔ runs (0.4ms)', '﹣ skipped here (0.4ms) # Wi
 // absolute or discovered. With no whitespace before its first separator, a name is file-shaped:
 // absolute paths holding a space later are file-shaped. The entries follow a parent test with a
 // child, the position most empty files hold in a real run.
-const EMPTY_NAMES = ['empty.test.cjs', 'C:\\Users\\Jo Ann\\proj\\test\\gone.test.mjs', '/home/Jo Ann/proj/test/deep.test.cjs', 'test/sub/none.test.ts'];
+// A space in the file's OWN name is file-shaped too, discovered or absolute.
+const EMPTY_NAMES = ['empty.test.cjs', 'C:\\Users\\Jo Ann\\proj\\test\\gone.test.mjs', '/home/Jo Ann/proj/test/deep.test.cjs', 'test/sub/none.test.ts',
+  'test/my data.test.cjs', 'C:\\proj\\my file.test.mjs'];
 const NODE_SPEC_EMPTY = lines('▶ parent', '  ✔ child (0.1ms)', '✔ parent (0.3ms)', ...EMPTY_NAMES.map(n => `✔ ${n} (21.5ms)`), '✔ real one (0.4ms)',
-  nodeSummary('ℹ', { tests: 7, pass: 7, fail: 0 }));
+  nodeSummary('ℹ', { tests: 9, pass: 9, fail: 0 }));
 const tapEntry = (n, name, extra = []) => [`# Subtest: ${name}`, `ok ${n} - ${name.replace(/\\/g, '\\\\')}`, '  ---', '  duration_ms: 0.4', ...extra, "  type: 'test'", '  ...'];
 const TAP_PARENT = ['# Subtest: parent', '    # Subtest: child', '    ok 1 - child', '      ---', "      type: 'test'", '      ...', '    1..1',
   'ok 1 - parent', '  ---', "  type: 'test'", '  ...'];
-const NODE_TAP_EMPTY = lines('TAP version 13', ...TAP_PARENT, ...EMPTY_NAMES.flatMap((name, i) => tapEntry(i + 2, name)), ...tapEntry(6, 'real one'), '1..6',
-  nodeSummary('#', { tests: 7, pass: 7, fail: 0 }));
+const NODE_TAP_EMPTY = lines('TAP version 13', ...TAP_PARENT, ...EMPTY_NAMES.flatMap((name, i) => tapEntry(i + 2, name)), ...tapEntry(8, 'real one'), '1..8',
+  nodeSummary('#', { tests: 9, pass: 9, fail: 0 }));
 // The other side of the signature: file-shaped names that are NOT empty files — a nested test, a
 // suite or parent test (children), a directive (skip and todo), a file name without a script
 // extension, sentences ending in a file name, and two real titles of the Shipping App suite whose
@@ -300,8 +302,8 @@ const CASES = [
   { parser: 'node', label: 'spec skipped and todo', text: NODE_SPEC_SKIPS, expect: ok(1, 4, 3) },
   { parser: 'node', label: 'spec file entries that are not empty files', text: NODE_SPEC_NOT_EMPTY, expect: ok(8, 10, 2) },
   { parser: 'node', label: 'tap file entries that are not empty files', text: NODE_TAP_NOT_EMPTY, expect: ok(7, 9, 2) },
-  { parser: 'node', label: 'spec empty files', text: NODE_SPEC_EMPTY, expect: bad(3, 4, 0, 7, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
-  { parser: 'node', label: 'tap empty files', text: NODE_TAP_EMPTY, expect: bad(3, 4, 0, 7, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
+  { parser: 'node', label: 'spec empty files', text: NODE_SPEC_EMPTY, expect: bad(3, 6, 0, 9, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
+  { parser: 'node', label: 'tap empty files', text: NODE_TAP_EMPTY, expect: bad(3, 6, 0, 9, EMPTY_NAMES, EMPTY_NAMES, EMPTY_NAMES) },
   { parser: 'jest', label: 'pass', text: JEST_PASS, expect: ok(2, 2) },
   { parser: 'jest', label: 'fail', text: JEST_FAIL, expect: bad(1, 1, 1, 3, ['math › subtracts']) },
   { parser: 'jest', label: 'suite failed to run', text: JEST_LOAD, expect: bad(0, 1, 0, 1, ['src/broken.test.js'], ['src/broken.test.js']) },
@@ -632,7 +634,7 @@ test('row: a file that ran no tests is a failure named as such, never a passing 
   for (const [label, text] of [['spec', NODE_SPEC_EMPTY], ['tap', NODE_TAP_EMPTY]]) {
     const r = await runSpec({ steps: [{ name: 'tests', argv: fake(dir, label + '.js', text + '\n'), parser: 'node' }] }, { cwd: dir, logPath });
     assert.equal(r.steps[0].result, 'FAIL', label);
-    assert.equal(r.line, `FAIL tests 4 of 7 failed: ${EMPTY_NAMES.map(n => n + ' (ran no tests)').join(', ')} — log: ${logPath}`, label);
+    assert.equal(r.line, `FAIL tests 6 of 9 failed: ${EMPTY_NAMES.map(n => n + ' (ran no tests)').join(', ')} — log: ${logPath}`, label);
     assert.deepEqual([r.steps[0].loadFailures, r.steps[0].emptyFiles], [EMPTY_NAMES, EMPTY_NAMES], label);
   }
 });
@@ -1086,6 +1088,15 @@ test('live: a test file that registers no tests is a load failure, relative, abs
   write('zz-data.test.cjs', "test('data.test.cjs', () => {});\n");
   const falseRejection = await go('spec', ['test/zz-data.test.cjs']);
   assert.deepEqual([falseRejection.result, falseRejection.emptyFiles], ['FAIL', ['data.test.cjs']]);
+  // A space in the emptied file's own name, discovered: still recognised under both reporters.
+  const spaced = tmp(t);
+  fs.mkdirSync(path.join(spaced, 'test'));
+  fs.writeFileSync(path.join(spaced, 'test', 'one.test.cjs'), "require('node:test')('real one', () => {});\n");
+  fs.writeFileSync(path.join(spaced, 'test', 'my data.test.cjs'), "const test = require('node:test');\nfor (const x of []) test(x, () => {});\n");
+  for (const reporter of ['spec', 'tap']) {
+    const r = await runSpec({ steps: [{ name: 'tests', argv: [NODE, '--test', '--test-reporter=' + reporter], parser: 'node' }] }, { cwd: spaced, logPath: path.join(spaced, reporter + '.log') });
+    assert.deepEqual([r.steps[0].result, r.steps[0].passed, r.steps[0].failed, r.steps[0].emptyFiles.map(slashes)], ['FAIL', 1, 1, ['test/my data.test.cjs']], reporter + ': ' + r.line);
+  }
 });
 
 // ---------------------------------------------------------------------------------------
@@ -1180,18 +1191,25 @@ test('--help states the pass rule, the skipped display and count, and the empty-
     'skipped counts every test in the total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending; pytest skipped + xfailed + xpassed; cargo ignored',
     'or whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing test named after the file',
     'counted as failed, named "(ran no tests)" and listed in loadFailures',
-    'The price is one false rejection: a real top-level test, or an empty describe under the spec reporter, deliberately named like a file path such as "config.test.js" fails the step',
+    'The price is a false rejection of any real top-level test, or an empty describe under the spec reporter, whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first word holds a slash ("I/O errors from reader.js"); rename it.',
     'no whitespace before its first / or \\)',
-    'Not recognised: a file given by a relative path whose first segment holds a space ("my file.test.js", "my dir/a.test.js").',
+    'Not recognised: a file that node names by a relative path whose first segment holds a space, whether given, globbed, ./-prefixed or discovered ("my file.test.js", "my dir/a.test.js").',
   ]) assert.ok(text.includes(needed), 'the --help text must say: ' + needed);
   assert.doesNotMatch(text, /passes only when its summary shows zero failures and it exits 0/, 'the old rule is gone');
-  // No other sentence may speak of passing alongside skips, empty runs or 0/0: the rule sentence
-  // is the only one, so an appended contradiction ("a run with no tests at all passes") goes red.
+  // No sentence but the two that state the rules may speak of passing alongside skips, empty runs
+  // or 0/0. Sentences end at a dot before a capital or the end, never at a dot inside a file name;
+  // the two rule sentences come out verbatim, so an edit inside either goes red too.
   const RULE = 'A parsed step passes only when its summary shows zero failures, at least one passed test, and it exits 0: a run in which nothing passed (every test skipped, or no test at all, 0/0 included) is FAIL "no test passed (<passed>/<total>, <k> skipped)".';
-  assert.ok(text.includes(RULE), 'the rule sentence is pinned whole');
-  const rest = text.split(RULE).join(' ');
-  const verdict = '\\b(?:pass|passes|green|ok)\\b', subject = '(?:0\\/0|\\bno tests?\\b|\\bnothing\\b|\\bskipped\\b|\\bempty\\b)';
-  for (const re of [new RegExp(`${subject}[^.]*${verdict}`, 'i'), new RegExp(`${verdict}[^.]*${subject}`, 'i')]) assert.doesNotMatch(rest, re);
+  const COUNTS = 'Skips show on the line only when there are any: "tests 497/499, 2 skipped". skipped counts every test in the total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending; pytest skipped + xfailed + xpassed; cargo ignored (pytest\'s deselected and cargo\'s filtered out are outside the total). node reports a test file that registered no tests, or whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing test named after the file; any top-level passing entry (no directive, no subtests, not a suite) whose name is file-shaped (a script extension, and no whitespace before its first / or \\) is taken for one: counted as failed, named "(ran no tests)" and listed in loadFailures.';
+  const SUBJECT = /0\/0|\bno tests?\b|\bzero\b|\bnothing\b|\bskip(?:ped|s)?\b|\bempty\b|\bevery test\b|\ball tests?\b|\btodo\b|\bregistered no\b/i;
+  const VERDICT = /\bpass(?:es|ed|ing)?\b|\bgreen\b|\bok\b|\bsucceeds?\b|\baccepted\b|\bcounts? as\b/i;
+  const speaking = t => t.split(/\.(?=\s+[A-Z]|\s*$)/).map(x => x.trim()).filter(Boolean).map(x => x + '.').filter(x => SUBJECT.test(x) && VERDICT.test(x));
+  assert.deepEqual(speaking(text), [RULE, COUNTS], 'only the two rule sentences speak of passing and skips, verbatim');
+  // Live control of the sweep: every contradiction the reviews found, appended, is caught.
+  const SPECIMENS = ['A run with no tests at all passes.', 'An empty file such as x.test.js passes.', 'Skipped tests (e.g. todo) pass.',
+    'A file that registered no tests counts as a passing test.', 'A run with zero tests succeeds.', 'A step whose every test was skipped is accepted.',
+    'An empty file such as data.test.js passes.'];
+  for (const specimen of SPECIMENS) assert.deepEqual(speaking(`${text} ${specimen}`), [RULE, COUNTS, specimen], specimen);
 });
 
 test('--cwd sets where steps run', t => {

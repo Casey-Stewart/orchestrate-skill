@@ -358,10 +358,11 @@ test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), a
 test named after the file; any top-level passing entry (no directive, no subtests, not a suite)
 whose name is file-shaped (a script extension, and no whitespace before its first / or \\) is
 taken for one: counted as failed, named "(ran no tests)" and listed in loadFailures. The price
-is one false rejection: a real top-level test, or an empty describe under the spec reporter,
-deliberately named like a file path such as "config.test.js" fails the step; rename it. Not
-recognised: a file given by a relative path whose first segment holds a space ("my
-file.test.js", "my dir/a.test.js").
+is a false rejection of any real top-level test, or an empty describe under the spec reporter,
+whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first
+word holds a slash ("I/O errors from reader.js"); rename it. Not recognised: a file that node
+names by a relative path whose first segment holds a space, whether given, globbed, ./-prefixed
+or discovered ("my file.test.js", "my dir/a.test.js").
 `;
 
 export async function validateCli(args) {
