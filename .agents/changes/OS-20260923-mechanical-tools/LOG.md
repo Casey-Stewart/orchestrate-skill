@@ -751,3 +751,138 @@ DONE
   - through `mutate.mjs`, the skip-only case should now print `CONTROL FAILED`, not `SURVIVED`.
 
 Fence: the helper returned UNKNOWN (`authority`: plan/PROGRESS branch linkage does not agree — a fix-up branch never carries the plan's branch name); the contract's manual fallback PASSED: `git diff --name-status -M 4a8a0a9...e2514d8` = 5 modified paths, all in B01's fence plus the two recorded extensions; the batch file changed only its Files line, by exactly those two paths; worktree clean; `filter` unspecified on every path. 6b failing-on-base: the branch's `tests/validate.test.cjs` and `tests/mutate.test.cjs` on the base `7fbca77` — 74 tests, 57 pass, 15 fail, 2 skipped; the failures are the named behaviours (skip-only and 0/0 steps, empty test files, the skipped display and count, the re-pointed idle control) plus corpus/shape cells that now carry `skipped` — PROVEN. Gate: a fresh reviewer (strong tier, Opus) and test-hunter (default), in parallel.
+
+#### B01 fix-up — R1
+
+B01 fix-up R1 reviewer — FIX FIRST @e2514d8 (strong tier, Opus; nonce verified). Verbatim (nonce line removed):
+
+FIX FIRST
+
+**P1-1**: `/home/timetotilt/worktrees/os923/b01f/orchestrate/tools/validate.mjs:31` (`fileShaped`), plus `--help` at :360-362
+- **Violates:** spec item 3 accepts one false rejection, "a real test deliberately named like a file path". The rule's whitespace-plus-separator clause also rejects ordinary sentence titles that happen to end in a path with a `/` or `\`. This is the "false rejection that reddens a real repository's green suite" that duty 4 asked about.
+- **Scenario:** these two real Shipping App titles, run live at e2514d8 under spec and under TAP beside a normal test, give `FAIL tests 2 of 3 failed: no console.* … (ran no tests), settings-view: … (ran no tests)` and exit 1, although every test passed:
+  - `/home/timetotilt/projects/shipping-app/scripts/renderer.test.js:13026`: "settings-view: the hardcoded kind names and basenames match src/shared/data-files.js"
+  - `/home/timetotilt/projects/shipping-app/scripts/ipc-registration.test.js:7655`: "no console.* diagnostic survives anywhere in src/main outside logger.js"
+  - They are 2 of that suite's 2548 top-level titles. Its current custom reporter can't be parsed anyway (a pre-existing gap), so they bite once its `validate.json` uses spec, or TAP (node's default when output goes to a pipe).
+- **Minimal fix:** `const fileShaped = name => SCRIPT_FILE.test(name) && !/\s/.test(name.split(/[\\/]/, 1)[0]);`
+  - Whitespace is allowed only after the first separator, so absolute paths with spaces still match.
+  - Checked in a shared clone: `tests/validate.test.cjs` stays 46 tests / 44 pass / 0 fail, and both titles then read `PASS 3/3`.
+  - Cost: an emptied file under a relative directory whose first segment holds a space (`sp ace/e.test.cjs`) is no longer recognised; the tip does recognise it. Add that to `--help`'s "Not recognised" sentence, and pin both real titles as not-empty cases for spec and TAP.
+  - If you would rather keep today's reach under reject-on-doubt, the `--help` "price" sentence must say so (any title ending in a script extension that contains `/` or `\`, spaces or not). This finding then drops to an ASK.
+- **Class:** P1
+
+**ASK-1**: `/home/timetotilt/worktrees/os923/b01f/tests/validate.test.cjs:1020-1049` and the empty-file cases at :256-260
+- **Violates:** B01's acceptance criterion "mutating any single parser's name pattern … turns at least one test red", and outcome 5's "input shape its real channel delivers". No fixture puts an empty-file entry after an entry that has children.
+- **Scenario:** mutation M23 at validate.mjs:58, `…; j >= 0 && !/^(?:# Subtest: |(?:not )?ok \d+ )/.test(lines[j]); j--)` changed to `…; j >= 0; j--)`, leaves the file green (46/44/0). Live, `test/a-parent.test.cjs` (one parent test with a subtest) plus an emptied `test/b-data.test.cjs` under TAP then reads `PASS tests 3/3`, which is the reported defect back, silently. The tip correctly gives `FAIL tests 1 of 3 failed: test/b-data.test.cjs (ran no tests)`.
+- **Fix:** in the live cell, name the emptied file so it sorts after `named.test.cjs` (for example `zz-data.test.cjs`). Also add spec and TAP corpus cases where an empty-file entry follows a parent entry.
+- **Class:** ASK
+
+**ASK-2**: validate.mjs:31 and :37/:104. Two sides of the new signature are pinned on one side only; both mutations below leave the file green.
+- **M26:** `SCRIPT_FILE.test(name)` changed to `/\.\w+$/.test(name)` in `fileShaped`. It would falsely reject a passing test named `package.json`. Fix: add such a name to both NOT_EMPTY fixtures.
+- **M18:** `missing(names, loadFailures, emptyFiles)` changed to `missing(names, loadFailures)`. No input reaches that branch. Fix: pin it or drop it.
+- **Class:** ASK
+
+**ASK-3**: validate.mjs:356-357 (`--help`)
+- **Scenario:** `--test-skip-pattern` and `--test-only` produce the same file-level signature, but `--help` names only `--test-name-pattern`. Live:
+  - `--test-skip-pattern=beta` over a file whose only test is "beta only" gives `FAIL … b.test.cjs (ran no tests)`.
+  - `--test-only` with a file that has no `only` test gives `FAIL … a.test.cjs (ran no tests)`.
+- **Fix:** "or whose every test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only)".
+- **Class:** ASK
+
+**ASK-4**: `/home/timetotilt/worktrees/os923/b01f/tests/mutate.test.cjs:266`
+- **Scenario:** the comment "runs no tests and passes" is now false: `validate.mjs` reports that run as `no test passed (0/0)`.
+- **Fix:** reword the comment, either in this extension or in B05's fix-up.
+- **Class:** ASK
+
+**Validation and hunk map.** Validation EXIT=0: 506 tests, 504 pass, 0 fail, 2 skipped (the Windows-only pair); diff-check clean. Log: `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/rev/validate.log`. Every hunk maps to an outcome or to the recorded extension; there is no scope creep. The extra "no mutation ran" assertion in `mutate.test.cjs` is the regression check for removing the dead idle check.
+
+**Required outcomes, reproduced at e2514d8:**
+- **Skip-only suite:** `FAIL tests no test passed (0/1, 1 skipped)`, exit 1, under spec and TAP.
+- **Positive siblings:** a partly skipped suite gives `PASS tests 1/2, 1 skipped`; a normal suite gives `PASS tests 2/2 (0s)`, byte-identical to before.
+- **Empty file beside a real one:** `empty.test.cjs` + `one.test.cjs` gives `FAIL tests 1 of 2 failed: empty.test.cjs (ran no tests)`, with a `loadFailures` entry.
+- **Through `mutate.mjs`:** the skip-only control gives `CONTROL FAILED`, and R2's case gives `CRASHED empty-one`.
+- **Smoke re-runs:** smoke 1 gives `PASS tests 504/506, 2 skipped (21s)`. I-01 has no skips, so smoke 2 is unchanged. B05's smoke steps 11 and 13 give the same lines.
+
+**Consumers and rule choices:**
+- The idle check was dead: a passing parsed step now needs at least one passed test, so its total is above 0. Removing it changes no behaviour.
+- `run-at-ref.mjs` only passes the status and line through; `NO-TESTS` is a step result, never a status.
+- "At least one test passed" is the right rule for all four parsers: todo, xfail and xpass tests run but prove nothing, and node counts a passing todo under todo, not pass. `passed + failed + skipped = total` holds for every corpus case and is pinned.
+- A file emptied under a `describe` is not a false pass: node counts the empty describe as a suite, so the total drops honestly, and `mutate.mjs`'s total check reports CRASHED.
+
+**Node v22 and Windows.** I could not run v22.
+- The code relies on node reporting a file with no tests as one passing file-level entry, which I believe predates v22.
+- If v22 did not print that entry, the file would add 0 tests to the count, not a pass. The live cell would then go red on her laptop, loudly.
+- If v22 closes a parent with `▶ name (Xms)`, as I recall v20 did, the parser never takes that line for a file.
+- Backslash names and TAP's `\\` escaping are handled. Her recipe passes absolute paths (first segment `C:`), which match under both the tip's rule and the proposed fix.
+
+**Failing-on-base (duty 5) is consistent.** 46 + 28 = 74 tests. The 15 failures are the 7 new cells, 7 existing validate cells whose expectations now carry `skipped`/`emptyFiles` or ", 1 skipped", and the mutate idle cell. Unchanged cells pass on base.
+
+**Not a finding:** an empty `describe` named like a file, alone under spec (inside the documented false rejection), reports `passed` as -1 and the line reads "1 of 0 failed".
+
+**Owed to B05's fix-up (duty 6):**
+- `/home/timetotilt/worktrees/os923/b01f/orchestrate/references/subagent-prompts.md:252-256` and its verbatim pin at `tests/tool-wiring.test.cjs:1016-1017` and :1026 are false: the emptied one-test file now reads CRASHED, confirmed live.
+- In `/home/timetotilt/worktrees/os923/b01f/orchestrate/tools/mutate.mjs`, the comment at :203-207, the HELP at :303 and the `classifyRun` reason at :215 call an emptied file "failed to load". My probe's log reads "a test file failed to load (one.test.cjs)". None of them lists the all-skipped mutation run, which now reaches CRASHED as "a step failed without a named failing test".
+- Its HELP at :312-313 says the control "must run a test", but the rule enforced now is "pass a test": a control with only todo tests is refused.
+
+No other shipped file states the old pass rule; I grepped `orchestrate/` and `README.md`.
+
+B01 fix-up R1 test-hunter — FINDINGS 4 @e2514d8 (default tier; nonce verified). Verbatim (nonce line removed):
+
+FINDINGS 4
+
+Setup: a scratch clone (`git clone --shared`) at e2514d8 under `.../scratchpad/gate-b01f/hunt/c`. Each mutation was applied by an anchored applier that aborts unless its anchor matches exactly once (`hunt/mut.cjs`). The unmutated control ran `tests/validate.test.cjs` at 46 tests, 44 pass, 0 fail, 2 skipped. The worktree was not touched and the clone is clean after the runs.
+
+**1. HIGH: The TAP empty-file check is only tested with the empty file first. Behind a suite or parent test, a silent false acceptance stays green.** Guard that samples its domain; boundary pinned on one side.
+- Tests:
+  - `tests/validate.test.cjs:292` ("tap empty files"). The empty entries there follow no parent.
+  - `tests/validate.test.cjs:1020` (the live empty-file test). `data.test.cjs` sorts before `named.test.cjs` in the discovered run, and the relative and absolute runs pass only data and one.
+- Production: `orchestrate/tools/validate.mjs:58`, the stop condition on the backward child scan.
+- Mutation: `j >= 0 && !/^(?:# Subtest: |(?:not )?ok \d+ )/.test(lines[j]); j--)` changed to `j >= 0; j--)`.
+  - I ran it: 44/44 pass, 0 fail.
+- Real consequence, probed with live `node --test --test-reporter=tap` on `test/a.test.cjs` (a describe with one test) plus `test/b.test.cjs` (a data loop over `[]`):
+  - Unmutated: `emptyFiles ["test/b.test.cjs"]`, 2 passed, 1 failed.
+  - Mutated: `emptyFiles []`, 3 passed, 0 failed. That is R2's `SURVIVED empty-one` again.
+  - In any real run most files sort after one that uses describe or subtests, so this is the common position, not an edge case.
+- Assertion to add: a TAP case with a file-shaped childless entry after a parent that has indented subtests, in both the corpus and the live test. For the live test, name the emptied file so it sorts after `named.test.cjs` (e.g. `zdata.test.cjs`), and expect `emptyFiles` to have length 1 under TAP. Test-only → ASK.
+
+**2. MEDIUM: The spec reporter's "no directive" clause is pinned on the accepting side only.** Boundary pinned on one side.
+- Test: `tests/validate.test.cjs:263/289` (`NODE_SPEC_NOT_EMPTY`). Its only directive entry is `﹣ skipped.test.cjs … # SKIP`, and the `﹣` glyph never reaches the `✔` regex. The corpus's `✔ todo passing (0.1ms) # TODO` is not file-shaped, so it doesn't exercise the anchor either.
+- Production: `orchestrate/tools/validate.mjs:48`. The `$` anchor after `(Nms)` is the whole directive clause for spec.
+- Mutation: `/^([✔✖]) (.+) \(\d+(?:\.\d+)?ms\)$/` changed to `/^([✔✖]) (.+?) \(\d+(?:\.\d+)?ms\)/`.
+  - I ran it: 44/44 pass.
+- Live probe: node 24 prints `✔ todo.test.cjs (0.41ms) # TODO`. Under the mutation that todo becomes an empty file, a false rejection that is not the documented one.
+- Assertion to add: `✔ x.test.cjs (0.1ms) # TODO` in `NODE_SPEC_NOT_EMPTY` with `emptyFiles: []`, and ideally a live file-shaped todo. Test-only → ASK.
+
+**3. LOW: `--help` prose is checked for presence only.** Positive-only assertions on prose.
+- Test: `tests/validate.test.cjs:1137`. It checks the needed passages are present and that one exact old sentence is absent.
+- Production: `orchestrate/tools/validate.mjs:362`, the "Not recognised: a file named with a space…" sentence.
+- Mutation: replace that sentence with ` A run with no tests at all passes.`
+  - I ran it: 44/44 pass. The documented gap vanished and a directive contradicting the 0/0 rule was accepted.
+- Assertions to add:
+  - pin the "Not recognised" sentence;
+  - sweep the help text for contradicting directives, e.g. `/\b(0\/0|no tests?)\b[^.]*\bpass(es)?\b/` outside the pinned passage.
+- Test-only → ASK.
+
+**4. LOW: The skip suffix on the "names not captured" branch is never exercised.** A branch no input reaches.
+- Test: `tests/validate.test.cjs:539-542`. Its transcript has 0 skipped.
+- Production: `orchestrate/tools/validate.mjs:291`, the second `${sk}`.
+- Mutation: `failed${sk} (names not captured)` changed to `failed (names not captured)`.
+  - I ran it: 44/44 pass.
+- Assertion to add: the same row with a skipped count, expecting `FAIL tests 1 of 3 failed, 1 skipped (names not captured) — log: …`. Test-only → ASK.
+
+**Checked and holding** (each mutation turned a test red, except where marked):
+- **Forward suite scan unbounded** (line 59 without the indentation stop): the live discovered case went red.
+- **Spec `▶` parent tracking removed:** 4 tests went red.
+- **Other signature clauses, by reading the corpus:** the TAP suite, children and directive clauses, each side of the `fileShaped` whitespace/separator clause (`parses config.test.js` vs `C:\Users\Jo Ann\…`), and the `✔`-only restriction. Each is pinned by an exact `deepEqual` in the corpus. I did not run these.
+- **Skipped kinds per parser:** every kind is in the KINDS table (node skipped + todo, both reporters; jest skipped/todo/pending; pytest skipped/xfailed/xpassed/deselected; cargo ignored). The passed + failed + skipped = total invariant runs over all CASES.
+- **The no-test-passed rule:**
+  - 0/0, all skipped and all todo are covered for all four parsers, plus TAP. The live tests cover both reporters and a glob that matches nothing.
+  - A non-zero exit is still reported ahead of NO-TESTS.
+  - Real node counts a todo outside `pass`, which matches the fixture.
+- **Byte identity:** every skip-free passing CASE per parser is checked against `^PASS tests p/t \(\d+s\)$`.
+- **`mutate.mjs` removed idle check:** the check is dead, and the new regex would go red if it came back. The added "no mutation ran" assertion reads a header mutate really writes (`==> mutate: mutation`, `mutate.mjs:160`).
+- **Not tried:** `!(passed > 0)` against `total === skipped` is equivalent on every reachable input, so I didn't run it.
+
+Probe files: `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b01f/hunt/probe/` (tap.txt, spec.txt). Mutation logs are `hunt/M1.log` … `hunt/M6.log`.
+
+Decision on P1-1: take the reviewer's fix (whitespace allowed only after the first path separator; the relative-first-segment-with-a-space gap documented in `--help`), not the widened price sentence — a false rejection of ordinary titles in a real repository's green suite (the user's own) costs more than the narrow gap. Fix round: the same implementer, resumed with both reports; the items owed to B05's fix-up stay there.
