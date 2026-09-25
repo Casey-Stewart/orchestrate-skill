@@ -1282,3 +1282,42 @@ Control first: I cloned e7f1a8b with `git clone --shared` into `.../scratchpad/g
 The (a) and (b) scenarios, f1, p1 and f2 all check real CLI output.
 
 Fix round: the same implementer, resumed with both reports — P1 (the reviewer's fix: a moved skip count is CRASHED whatever the failures; only a moved passed count is exempt beside a failure), reviewer ASK 2 (= hunter #3: the added hunter sentence reworded to what is true, naming the swap blind spot, plus a contradiction sweep), ASK 3 (the reflowed HELP), hunter #2 (pin the HELP definitions), #4 (the unreachable passed-only row: assert the invariant or drop the fallback). The swap blind spot (counts cannot see which tests ran) is a BACKLOG residual at close-out — closing it needs per-test names from validate.mjs.
+
+#### B05 fix-up — fix round
+
+Same implementer, resumed; report verbatim (nonce line removed):
+
+DONE
+
+EVIDENCE: I ran the validation command from `/home/timetotilt/worktrees/os923/b05f` (log at `…/scratchpad/fixup-b05/validate.log`). It exited 0: 512 tests, 510 pass, 0 fail, 2 skipped (the Windows-only pair). `git diff --check` is clean, the worktree is clean, and the diff against `chore/mechanical-tools-ledger` touches only 4 files, all inside the fence. Nothing was pushed and the batch file is untouched.
+Commits: `e7f1a8b` (the first repair) and `306a351` (this round), both on `fix/B05-c1-followup`.
+
+- **P1:** In `classifyRun`, a moved skipped count is now CRASHED whether or not a test failed. The row that pinned the defect now expects CRASHED "1 test skipped that ran in the control". I added the other direction (fewer skipped than the control, beside a named failure → CRASHED "1 test ran that the control skipped") and a sibling where a failure beside the control's own skips is still KILLED. Two new live CLI cells:
+  - **f3** (the reviewer's e1): skips one test and breaks the other. It gives `CRASHED f3: FAIL tests 1 of 2 failed, 1 skipped: flip first adds`.
+  - **u1** (the hunter's u1): turns on a switch in `paths.cjs` that is fixed off, so the Windows-only test the control skipped runs and fails. It gives `CRASHED u1: FAIL tests 1 of 2 failed: windows join`, exit 2. Beside it, `KILLED j1: join puts a slash between` is the positive sibling.
+  - The HELP text and the comment are reworded to match.
+  - **Red:** on e7f1a8b the test fails at `KILLED f3`. Putting the old guard back fails the same test and the table. The u1 cell is unreached in both of those runs, so I showed it red separately with a mutation that exempts only the fewer-skipped direction: it printed `KILLED u1: windows join`.
+- **ASK2:** "one blind spot" is now "a blind spot". The false sentence is replaced by two: a `SURVIVED` line says nothing about a test the control skipped, and counts are not names — a swap changes no count, so check a `SURVIVED` or `KILLED` line against the control's run in the log.
+  - Both sentences are pinned verbatim, once each, plus a check that "one blind spot" is gone.
+  - A new sweep of the hunter skeleton and `test-hunter.md` flags any other sentence that ties `SURVIVED` to skipped tests. It catches three specimens (the hunter's appended sentence, my old sentence, one bare) and a qualifier added inside a pinned sentence. It lets clean sentences through and has a live control.
+  - The `mutate.test.cjs` section header and the test title no longer claim that equal counts mean the same tests ran.
+  - **Red:** on e7f1a8b both the pin test and the sweep fail. The hunter's appended sentence fails the sweep.
+- **ASK3:** I re-wrapped only the edited HELP sentences. The `--log`/`--timeout` sentences have their original line breaks back (the diff against the base leaves those lines untouched). No `--help` line is over 113 columns except the synopsis, which was already 140.
+- **H2:** The SURVIVED definition, the CRASHED definition and the "must pass at least one test … is CONTROL FAILED" rule are pinned verbatim in the `--help` test, which also asserts "must run a test" is gone. **Red:** on e7f1a8b, and separately when I put back the old CRASHED wording or the old control rule.
+- **H4:** I dropped the passed-only fallback (the "P passed, the control Q" reason and the comparison of passed counts). Every parser's total is passed + failed + skipped, so with equal totals and equal skipped counts, only failures can move the passed count. I removed the impossible row. The table's `step()` helper now asserts that invariant for every step it builds, so an unreachable state fails loudly.
+
+**The rule now:** a mutated run is SURVIVED only if every parsed step passes with the control's total and skipped count (passed then matches too, by the invariant). A moved skipped count is always CRASHED. KILLED needs named failures in steps whose skipped count did not move.
+
+**What it costs:** a genuine kill in the same step as a skip move now reads CRASHED. So does a pytest strict-xfail XPASS, because `validate.mjs` counts xfailed as skipped. This is the same cautious choice the tool already makes for a changed total.
+
+**What remains:**
+- **The swap:** a mutation that skips one test and runs one the control skipped changes no count, so it can still read SURVIVED or KILLED. It is now written in the hunter prompt. Closing it needs per-test names from `validate.mjs`, which is B01's fence; worth a BACKLOG entry at close-out.
+- **The space-in-name gap:** a file node names by a relative path whose first segment holds a space still hides an emptied file, as the prompt says.
+
+**Which new cells fail and pass on e7f1a8b:**
+- **Fail (5):** the skip-count test at f3, the classification table, the `--help` pins, the hunter pin test, and the new sweep.
+- **Pass:** everything else, including the (a)/partial, f2 and e1 cells.
+
+**For the checkpoint re-run:** besides the earlier checks, a Windows-only test unskipped by a mutation that then fails should read `CRASHED`, not `KILLED`. Steps 11–13 should still print their listed lines.
+
+Manual fence PASS on `306a351` (same 4 paths, all in B05's fence; range diff-check clean; worktree clean). R2: a fresh reviewer (strong tier, Opus) marks every round-1 finding and re-scans `git diff e7f1a8b..HEAD`; a fresh test-hunter scoped to the tests that diff adds or changes. The last round before the cap.
