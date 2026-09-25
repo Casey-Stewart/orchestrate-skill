@@ -28,8 +28,12 @@ checkpoint artifacts created later rather than at scaffold time:
 A scaffolded ledger is a **closed system**: every repo-specific fact (validation
 commands, version files, merge policy, wave map, checkpoint placement, smoke procedure,
 gate agents, runners, tiers) is baked into its READBEFORE and plan at scaffold time. A
-session without this skill can drive the change by reading the ledger alone — that
-property is the point; never generate a ledger that references this skill. Closed
+ledger references ONLY its pinned skill directory, by absolute path and hash, and every
+step a tool performs also has a baked manual procedure (the recipe block for validation,
+the pasted-prompt list for spawning, the fence's manual fallback), so a session without
+this skill — or with a changed one — can drive the change by reading the ledger alone;
+that property is the point. A changed skill stops the ledger at its next boot and asks,
+and never silently changes how it runs. Closed
 ledgers may be parked in a sibling `.agents/archive/` directory; discovery never globs it.
 
 ## Roles, gates, tiers
@@ -44,19 +48,29 @@ ledgers may be parked in a sibling `.agents/archive/` directory; discovery never
 - **Implementer** — a sub-agent given one batch. Codes inside the file fence in the
   batch's isolated worktree, ticks the batch checklist, commits on the batch branch (one
   commit per fold-in item). Wave siblings run concurrently. Reports in the fixed shape:
-  line 1 `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`; an evidence block (each
-  validation command, exit code, last ~10 lines; SHAs; checklist n/m); ≤40 lines of
+  line 1 `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`; line 2 `NONCE <nonce>` (the
+  nonce its rendered prompt ends with); an evidence block (each validation run's
+  `validate.mjs` line and exit code; SHAs; checklist n/m); ≤40 lines of
   prose. `NEEDS_FENCE` / `BLOCKED` use Expected / Found / Why it matters / How to proceed.
 - **Reviewer** — ONE fresh read-only sub-agent per batch per round, never the
   implementer, never reused. Maps every hunk to a batch item (unmapped = scope creep =
   reject; the batch file's ticks are exempt), verifies acceptance criteria, runs
   validations, checks guardrails, confirms failing-on-base cells and doc sweeps. Line-1
   verdict: `SHIP` (no P0/P1; may carry ASKs) / `FIX FIRST` (P0 or P1 with a concrete
-  failure scenario) / `NEEDS A CLOSER LOOK` (names what would confirm it).
+  failure scenario) / `NEEDS A CLOSER LOOK` (names what would confirm it); line 2
+  `NONCE <nonce>`. The full report goes to the ONE findings file its prompt names, first
+  line its LOG heading (`### B<NN> R<k> reviewer findings`); the final message is four
+  lines: verdict, nonce, `P0=<n> P1=<n> ASK=<n>`, the file's path.
 - **Gate agents** — optional read-only agents the contract names (e.g. a test hunter
   asking "what production mutation keeps this test green?"), run by the ORCHESTRATOR in
-  parallel with the reviewer over the batch's new/changed tests. Implementers never
+  parallel with the reviewer over the batch's new/changed tests. Each writes its full
+  report with the Write tool to the findings file its prompt names — its only other
+  writes are validation logs and disposable scratch under the session scratchpad, never
+  inside a worktree or the repository — and returns four lines: its verdict, `NONCE <nonce>`, `FINDINGS <n>`, the file's path. Implementers never
   spawn them. A gate finding needing a production change is a P1; test-only → ASK.
+  A test hunter proves each mutation it chooses itself with the skill's `mutate.mjs`, on a
+  disposable clone of the batch's commit. The contract's mutation runner, when it names
+  one, is a different tool: an optional sweep of the batch's changed files.
 - **QA runner** — one sub-agent executing the agent-runnable smoke steps at a checkpoint
   close-out, writing `evidence/C<n>/`.
 - **Plan pre-flight** (scaffold time) and **convergence** (change-complete) — one fresh
@@ -107,7 +121,8 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
   polish passes, scoped re-reviews and `NEEDS A CLOSER LOOK` checks never do — nor does a
   `FIX FIRST` a scoped re-review returns: its bound is the polish-discard rule above, not
   the cap.
-- Round 1: resume the SAME implementer with the findings verbatim; a fresh re-review
+- Round 1: resume the SAME implementer with the pointer to its rendered fix-round prompt
+  (the findings file by path, after the LOG append — §Session algorithm step 6); a fresh re-review
   verifies the fixes and scans only the fix diff. Reviewers are fresh every round. An
   agent gone after a crash → fresh, at the first unticked item.
 - The SECOND `FIX FIRST`: `⛔ defective` (finding open, not green) or `⛔ green, residual
@@ -519,8 +534,21 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
 
 ## §Session algorithm ("continue")
 
-1. Boot + reconcile + resume-time validation (validation commands, quiet form, on the
-   integration tip; red → step 2 first).
+1. Boot + reconcile + resume-time validation (validation commands on the
+   integration tip; red → step 2 first). A contract carrying a `**Skill**` pin line
+   verifies it FIRST, before reconcile: `node "<skill-dir>/tools/check-ledger.mjs" skill
+   --contract <ledger-dir>/00-READBEFORE.md` from the integration worktree root —
+   `SKILL MATCH` continues; anything but `SKILL MATCH` (including a tool that does not run)
+   STOPs and asks, continuing only
+   on the user's explicit words recorded verbatim in the session log (an upgrade: the pin
+   line rewritten in the commit that records them; or the contract's manual procedures). Such a
+   contract runs every validation — resume-time and tip validation alike — through
+   `node "<skill-dir>/tools/validate.mjs" --spec <ledger-dir>/validate.json --log <file>`:
+   its one line is the result, its exit code the real one, and the log is read only when
+   the line is not PASS. Never pipe or tail it; when it may outlast the runtime's command
+   timeout, run it as a background task whose completion reports the one line and the exit
+   code, and never read the log before it exits. Without a pin line, or when the wrapper is
+   unavailable, the manual procedure is the validation commands in their quiet form.
 2. Repairs first, as mini-batches (Git model).
    - **Checkpoint failure** (`❌`): ONE fix-up implementer on the branch the verdict
      intake recorded in Notes as `fix-up pending: fix/<batch>-c<n>-followup[-<k>]` (suffix
@@ -588,11 +616,16 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    (name collision, or a stale base from an earlier crashed open — re-cut only on the
    user's word; never delete unasked).
 5. Spawn ALL of the wave's implementers concurrently, one per batch, each pinned to
-   its worktree, on the tier its weight calls for. Prompts are SELF-CONTAINED (spec text,
+   its worktree, on the tier its weight calls for. Each prompt is rendered by
+   `node "<skill-dir>/tools/prompt.mjs"` and the agent spawned with the fixed pointer
+   message (`subagent-prompts.md` §Spawning rules), the printed nonce kept for the gate
+   and never put in the pointer. When the renderer is unavailable or refuses, the manual
+   procedure is a pasted prompt with no nonce line; pasted prompts are SELF-CONTAINED (spec text,
    fence, acceptance criteria, applicable guardrails, validation commands, conventions,
    prohibitions, report shape, checklist-ticking and self-fence-check instructions).
 6. Gate per batch, as each implementer reports — don't wait for the wave's slowest.
-   Report lacking status line + evidence → resume for it (not a round). Then:
+   Report lacking status line + evidence, or with the wrong nonce (line 2 not
+   `NONCE <the printed nonce>`), is no report → resume for it (not a round). Then:
    6a fence check (read-only helper above, or its manual fallback; clean worktree;
    `git diff --name-status -M <integration>...HEAD`; every
    path, both rename endpoints, in plan fence ∪ recorded extensions ∪ own batch file;
@@ -602,12 +635,19 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    per-worktree setup there, unless `n/a`, then copy the batch's test-only files and
    run its changed tests; assertion failure proves it, all-pass = P0, setup failure
    or cannot-run = inconclusive → duty (e)); 6c reviewer +
-   gate agents in parallel (hunk→item mapping, acceptance criteria vs the three-dot diff,
+   gate agents in parallel, each rendered and pointed at like step 5 (hunk→item mapping, acceptance criteria vs the three-dot diff,
    validations, guardrails, failing-on-base cells — an inconclusive 6b means the reviewer
    establishes one from the test text — doc sweeps; S-weight → one combined
    pass); verdict handling per §Severity and round accounting, each verdict recorded in
    the row's Notes as `R<k> <verdict> @<sha>` (`asks=<n>` appended when a `SHIP` carries
-   ASKs; findings in LOG.md under the row's heading). After the second
+   ASKs; findings in LOG.md under the row's heading: every findings file reaches LOG.md
+   first, closed by a newline and a marker line — from the integration worktree root,
+   `(cat -- "<findings file>" && echo && echo '=== end of B<NN> R<k> <role> findings ===') >> <ledger-dir>/LOG.md`
+   in Git Bash or an equivalent byte copy, never re-typed through the
+   orchestrator's context, committed with the PROGRESS update — and only then is its path
+   forwarded to the polish, fix-round or round-2 prompt; a copy lost with the scratchpad is
+   taken back out of the committed LOG.md, never re-typed — `subagent-prompts.md`
+   §Spawning rules). After the second
    `FIX FIRST` → ⛔ (defective / green-residual), left out of integration, dependents
    blocked, STOP with the three verdicts.
 7. Integrate serially per the integration procedure (dry run → merge → tip validation →

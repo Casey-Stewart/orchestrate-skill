@@ -1,0 +1,572 @@
+[
+  {
+    "id": "I-01.one-fails.test.cjs",
+    "path": "evidence/C1/inputs/issue-001/I-01/one-fails.test.cjs",
+    "sha256": "fd2135a42f5663fada76e5dc1eb954c1892ad18b03d6ce75b154650989a19010",
+    "size": 234,
+    "requirements": "A node:test file with `fixture passes` and `fixture fails on purpose`, and a validate.mjs spec with one argv step named `tests` running it (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `node --test one-fails.test.cjs` run directly: exit 1, 1 pass, 1 fail; PASS spec.json: one argv step named `tests`, parser `node`, running that file",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-01.spec.json",
+    "path": "evidence/C1/inputs/issue-001/I-01/spec.json",
+    "sha256": "04a8db71a2d3c0942a6f9abbb1b2323ce8d4bdeefae25e3aea9fb61a9eee9bfc",
+    "size": 199,
+    "requirements": "A node:test file with `fixture passes` and `fixture fails on purpose`, and a validate.mjs spec with one argv step named `tests` running it (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `node --test one-fails.test.cjs` run directly: exit 1, 1 pass, 1 fail; PASS spec.json: one argv step named `tests`, parser `node`, running that file",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-02.spec.json",
+    "path": "evidence/C1/inputs/issue-001/I-02/spec.json",
+    "sha256": "049841ea0a1e4ac48bd72d3736b80ab98a8d339fe9bb9c02669d90354a15571d",
+    "size": 511,
+    "requirements": "A validate.mjs spec with one pwsh shell step named `tests` whose script is the contract's validation recipe (parser node).",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS spec.json: one `pwsh` shell step named `tests`, parser `node`; PASS its script is the contract's validation recipe, byte for byte; PASS the recipe run directly on the tip exits 0",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.00-READBEFORE.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/00-READBEFORE.md",
+    "sha256": "b0c5d3d214d498e87a11167554c29fe6d834e3a94455874e51d985d026067cd6",
+    "size": 72787,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.00-request.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/00-request.md",
+    "sha256": "e18887a6c8fb62b93492405a6294f45a81cda435fdd1898882cf6a45ff21a8e0",
+    "size": 3669,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.01-plan.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/01-plan.md",
+    "sha256": "b6797c49c134630eda900ddf641d612b19c3b360b1e284549a2b872b39eb1c42",
+    "size": 12995,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.02-batches-01-validate-wrapper.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/02-batches-01-validate-wrapper.md",
+    "sha256": "74ff698204bdd2407e5626ea64dadd867df4bda968a7c9e27fc63db3c47d6c94",
+    "size": 15173,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.02-batches-02-ledger-parser.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/02-batches-02-ledger-parser.md",
+    "sha256": "c0376afee4e903dbbfbfb5a99c2533d5d6373c5471e5978266aded2d1e11de14",
+    "size": 14120,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.02-batches-03-contract-tool-wiring.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/02-batches-03-contract-tool-wiring.md",
+    "sha256": "aba4d5cd441dd3729793bea52b17c07128fb9eaaa4cac4e1113792ee62154862",
+    "size": 17300,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.02-batches-04-prompt-renderer.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/02-batches-04-prompt-renderer.md",
+    "sha256": "80546b449626062217bc23fb2c7f8a8fcafb2491224ed891dae694ae0dc6fe9a",
+    "size": 18023,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.02-batches-05-mutation-harness.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/02-batches-05-mutation-harness.md",
+    "sha256": "2549445db0265558b9b6e06460a508d656aaa542239b7e730fdc1cceaab28ce0",
+    "size": 15847,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.LOG.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/LOG.md",
+    "sha256": "5106900d8b128ca61d137a086d84ee391aa49ac657f1c4cd6fcf320a391e7eac",
+    "size": 138979,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-03.PROGRESS.md",
+    "path": "evidence/C1/inputs/issue-001/I-03/PROGRESS.md",
+    "sha256": "af884d053b59cf77f59badb283869424b6c82b6b52378958a7abc4c099186722",
+    "size": 14891,
+    "requirements": "This ledger's top-level Markdown files at the tip, identical except that B02's Files line lacks its last path.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS holds exactly the ledger's top-level Markdown files; PASS a diff against the tip copy shows exactly one line: B02's Files line, one path shorter",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-04.00-READBEFORE.md",
+    "path": "evidence/C1/inputs/issue-001/I-04/00-READBEFORE.md",
+    "sha256": "986033d3ea457ee34e1ef6660ca4200a0661745a1a87523ee0becfef00875417",
+    "size": 102,
+    "requirements": "A one-line contract whose Skill line pins `orchestrate` with 64 zeros as the hash.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS one line in the template's documented form `**Skill**: `<dir>` · sha256 `<64 hex>``, pinning `orchestrate` with 64 zeros; PASS the pinned hash differs from the real one",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.00-READBEFORE.md",
+    "path": "evidence/C1/inputs/issue-001/I-05/00-READBEFORE.md",
+    "sha256": "39bcee2de44d600dcbeaf5b8ac5ea70c9ae5e86caff6a72849ee207f580e04ae",
+    "size": 63388,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.00-request.md",
+    "path": "evidence/C1/inputs/issue-001/I-05/00-request.md",
+    "sha256": "6bb630fceb909f8b1beba2a15bfcea2ce1e7789e2bb1fd88c395a9a058dc17ba",
+    "size": 122,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.01-plan.md",
+    "path": "evidence/C1/inputs/issue-001/I-05/01-plan.md",
+    "sha256": "3d00852adac3c78a65ba7ed7e7b25f9f811a7f43a0f39ecf6a6021913f205015",
+    "size": 622,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.02-batches-01-smoke-batch.md",
+    "path": "evidence/C1/inputs/issue-001/I-05/02-batches-01-smoke-batch.md",
+    "sha256": "d8e9f4002618c5684c36f45811a81017185d878366dfcdb340ae7a3e9c679847",
+    "size": 786,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.LOG.md",
+    "path": "evidence/C1/inputs/issue-001/I-05/LOG.md",
+    "sha256": "524133edeb353ce4ce3a73155f2b7106f53671a2156c7ca09d22dc4f6ccffd94",
+    "size": 510,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.PROGRESS.md",
+    "path": "evidence/C1/inputs/issue-001/I-05/PROGRESS.md",
+    "sha256": "31d16f94b26084f927fa091d8a9d4be2976ad864a023ec3805946b2f33ced3cc",
+    "size": 2322,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-05.validate.json",
+    "path": "evidence/C1/inputs/issue-001/I-05/validate.json",
+    "sha256": "733005c4029f1a94cf41733ded3a5ea9ad0de99f2ede75a53c6102e9e43d1a3a",
+    "size": 137,
+    "requirements": "A ledger filled from the tip's templates: every placeholder filled, the pin naming `orchestrate` with its real hash, one batch B01 in plan and PROGRESS, and a validate.json.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS no `{{` outside fenced and inline code spans in any Markdown file; PASS the pin names `orchestrate` and equals the hash recomputed independently from git's 23 blobs; PASS one batch file `02-batches-01-*.md`, a `validate.json` that parses with a `steps` array",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-06.00-READBEFORE.md",
+    "path": "evidence/C1/inputs/issue-001/I-06/00-READBEFORE.md",
+    "sha256": "3fef0b9b93b590c32d7acd3cafd224c03b6670f498fcb79826e3bd2c8c996e95",
+    "size": 63388,
+    "requirements": "I-05's contract with one hex digit of the pin changed.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS exactly one character differs from I-05's contract, and it is a hex digit of the pin",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-07.facts.json",
+    "path": "evidence/C1/inputs/issue-001/I-07/facts.json",
+    "sha256": "76883909c2313b473e34c0f8226502d7ce8673636e0bf4d3109ece75fb8aae83",
+    "size": 143,
+    "requirements": "An implementer facts file for prompt.mjs: exactly repoPath, worktreePath, scratchpadPath and guardrails (\"none\").",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS parses as JSON; its key set equals the implementer role's facts as `prompt.mjs --help` lists them",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-08.facts.json",
+    "path": "evidence/C1/inputs/issue-001/I-08/facts.json",
+    "sha256": "683727eb3cc20eefb5e64f540127226ddfab87158ea4d4203ef617337e8b98b4",
+    "size": 103,
+    "requirements": "I-07 without its worktreePath key.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS differs from I-07 by the key `worktreePath` only",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "read-only",
+    "use": "Read in place by the steps named on the page; steps write only under ../c1-scratch.",
+    "reset": "Keep the issued file unchanged; delete what a step wrote under ../c1-scratch."
+  },
+  {
+    "id": "I-09.README.md",
+    "path": "evidence/C1/inputs/issue-001/I-09/README.md",
+    "sha256": "98fb81be97913b2b77eddd68ddcf85d47cc54e0db7dc60c063ea2639013f5b17",
+    "size": 1015,
+    "requirements": "A git bundle of a two-commit fixture repository (lib.cjs `add`; one test at HEAD~1, two at HEAD), its validate spec, mutations m1 (a + b → a - b) and m2 (a comment), the absent-anchor m3, the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (run inside the fresh clone: verify needs a repository); PASS a fresh clone checks out `main` with two commits; PASS the README names both commits' SHAs; PASS the suite run directly at HEAD passes 2/2; PASS at HEAD: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the suite run directly at HEAD~1 passes 1/1; PASS at HEAD~1: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the generator script is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fixture` before step 11; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-09.fixture.bundle",
+    "path": "evidence/C1/inputs/issue-001/I-09/fixture.bundle",
+    "sha256": "ad2ed35f1981cf27fa16668620a98275e7d14a1c0089f31b852eeef71d693f57",
+    "size": 854,
+    "requirements": "A git bundle of a two-commit fixture repository (lib.cjs `add`; one test at HEAD~1, two at HEAD), its validate spec, mutations m1 (a + b → a - b) and m2 (a comment), the absent-anchor m3, the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (run inside the fresh clone: verify needs a repository); PASS a fresh clone checks out `main` with two commits; PASS the README names both commits' SHAs; PASS the suite run directly at HEAD passes 2/2; PASS at HEAD: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the suite run directly at HEAD~1 passes 1/1; PASS at HEAD~1: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the generator script is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fixture` before step 11; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-09.generate-c1-inputs.mjs",
+    "path": "evidence/C1/inputs/issue-001/I-09/generate-c1-inputs.mjs",
+    "sha256": "06fd432ceaad8de24f572f47759f8d5dcd8d65f1a117b852e3343f374edf96c1",
+    "size": 10832,
+    "requirements": "A git bundle of a two-commit fixture repository (lib.cjs `add`; one test at HEAD~1, two at HEAD), its validate spec, mutations m1 (a + b → a - b) and m2 (a comment), the absent-anchor m3, the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (run inside the fresh clone: verify needs a repository); PASS a fresh clone checks out `main` with two commits; PASS the README names both commits' SHAs; PASS the suite run directly at HEAD passes 2/2; PASS at HEAD: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the suite run directly at HEAD~1 passes 1/1; PASS at HEAD~1: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the generator script is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fixture` before step 11; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-09.muts-bad-anchor.json",
+    "path": "evidence/C1/inputs/issue-001/I-09/muts-bad-anchor.json",
+    "sha256": "028b3ee05e6098657858bf484e219f9bec841662802ef023b1b067dd3ae0bb1f",
+    "size": 128,
+    "requirements": "A git bundle of a two-commit fixture repository (lib.cjs `add`; one test at HEAD~1, two at HEAD), its validate spec, mutations m1 (a + b → a - b) and m2 (a comment), the absent-anchor m3, the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (run inside the fresh clone: verify needs a repository); PASS a fresh clone checks out `main` with two commits; PASS the README names both commits' SHAs; PASS the suite run directly at HEAD passes 2/2; PASS at HEAD: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the suite run directly at HEAD~1 passes 1/1; PASS at HEAD~1: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the generator script is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fixture` before step 11; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-09.muts.json",
+    "path": "evidence/C1/inputs/issue-001/I-09/muts.json",
+    "sha256": "1e3e31ec2dd9df563c1d9a2cb4bb53b0c38ae2890029c63b74134cca9879795b",
+    "size": 276,
+    "requirements": "A git bundle of a two-commit fixture repository (lib.cjs `add`; one test at HEAD~1, two at HEAD), its validate spec, mutations m1 (a + b → a - b) and m2 (a comment), the absent-anchor m3, the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (run inside the fresh clone: verify needs a repository); PASS a fresh clone checks out `main` with two commits; PASS the README names both commits' SHAs; PASS the suite run directly at HEAD passes 2/2; PASS at HEAD: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the suite run directly at HEAD~1 passes 1/1; PASS at HEAD~1: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the generator script is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fixture` before step 11; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fixture and clone again; the issued bundle and JSON files are never modified."
+  },
+  {
+    "id": "I-09.validate.json",
+    "path": "evidence/C1/inputs/issue-001/I-09/validate.json",
+    "sha256": "b70e02d85ab780829f7c1d7ae54a719cb8eb4c83738b3bab3919c9e4d17d0fd6",
+    "size": 193,
+    "requirements": "A git bundle of a two-commit fixture repository (lib.cjs `add`; one test at HEAD~1, two at HEAD), its validate spec, mutations m1 (a + b → a - b) and m2 (a comment), the absent-anchor m3, the generator and a README of expected lines.",
+    "validation": {
+      "path": "evidence/C1/inputs/validation-001/independent-check.md",
+      "sha256": "7b2131cd36442a0aa071d763dad34cc751d140dbff325ae9f97916ce54d3e06f",
+      "size": 4101,
+      "command": "node .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/issue-001 .agents/changes/OS-20260923-mechanical-tools/evidence/C1/inputs/validation-001",
+      "exitCode": 0,
+      "result": "PASS `git bundle verify` passes (run inside the fresh clone: verify needs a repository); PASS a fresh clone checks out `main` with two commits; PASS the README names both commits' SHAs; PASS the suite run directly at HEAD passes 2/2; PASS at HEAD: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the suite run directly at HEAD~1 passes 1/1; PASS at HEAD~1: m3's find is absent (grep exit 1); m1's and m2's each occur exactly once; PASS the generator script is issued beside the bundle, byte-identical to the committed generator",
+      "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; PowerShell 7.6.5"
+    },
+    "mode": "working-copy",
+    "use": "Clone the bundle: `git clone <this file> ../c1-scratch/c1-fixture` before step 11; the steps read the JSON files in place.",
+    "reset": "Delete ../c1-scratch/c1-fixture and clone again; the issued bundle and JSON files are never modified."
+  }
+]

@@ -1,6 +1,7 @@
 # READ BEFORE ANY BATCH — orchestration & recovery
 
 **Change**: {{CHANGE_ID}}
+**Skill**: `{{SKILL_DIR}}` · sha256 `{{SKILL_SHA256}}`
 **You are** either the ORCHESTRATOR (the main session the user told to "continue") or an
 IMPLEMENTER/REVIEWER/GATE sub-agent given one batch. Neither of you has the planning
 session's context. This file is the contract. Everything needed to drive this change lives
@@ -24,8 +25,16 @@ sessions.
    that `git worktree list` already shows; if its directory is gone, `git worktree prune`
    first — never two worktrees on one branch. Run {{WORKTREE_SETUP}} in a newly created
    integration worktree before validating in it.
-3. **Reconcile** (§Recovery below) before believing any PROGRESS row.
-4. **Resume-time validation**: run the validation commands (quiet form) on the integration
+3. **Skill pin**, before anything is reconciled: from the integration worktree root run
+   `node "{{SKILL_DIR}}/tools/check-ledger.mjs" skill --contract {{LEDGER_DIR}}/00-READBEFORE.md`.
+   `SKILL MATCH` → continue. Anything but `SKILL MATCH` (including `SKILL MISMATCH`,
+   `UNKNOWN` and a tool that does not run) → STOP and ask; continue only on the user's explicit words, recorded verbatim in the session log — an upgrade (the
+   `**Skill**` line above rewritten to the new directory and hash in the commit that
+   records those words) or
+   this contract's manual procedures (the recipe under §Validation commands, the prompt
+   list in §Session algorithm step 5, the manual fence fallback) for the rest of the change.
+4. **Reconcile** (§Recovery below) before believing any PROGRESS row.
+5. **Resume-time validation**: run the validation wrapper (§Validation commands) on the integration
    tip. Red → the first job is a repair mini-batch (§Session algorithm step 2), whatever
    PROGRESS says — unless Notes record a capped tip repair awaiting the user's verdict,
    in which case ask, never re-spawn. Green → follow §Session algorithm.
@@ -45,20 +54,28 @@ document.
   close-outs, all user communication. The ONLY role that edits version files, the
   changelog, PROGRESS or LOG.
 - **Implementer** — one per batch, in its own worktree on its own branch. Reports in the
-  fixed shape: first line `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`, then an
-  evidence block (each validation command, exit code, last ~10 lines; commit SHAs;
+  fixed shape: first line `DONE | DONE_WITH_CONCERNS | NEEDS_FENCE | BLOCKED`, second
+  line `NONCE <nonce>` (the nonce its rendered prompt ends with), then an
+  evidence block (each validation run's `validate.mjs` line and exit code; commit SHAs;
   checklist n/m), then ≤40 lines of prose. `NEEDS_FENCE` and `BLOCKED` use the mismatch
   form: Expected / Found / Why it matters / How to proceed.
 - **Reviewer** — ONE fresh read-only sub-agent per batch per round, never the implementer,
   never reused. Verdict on line 1: `SHIP` (no P0/P1; may carry ASKs) · `FIX FIRST` (a P0
   or P1 with a concrete failure scenario) · `NEEDS A CLOSER LOOK` (names what would confirm
-  it). Report capped like the implementer's. Finding classes: **P0** — wrong behavior, a
+  it), `NONCE <nonce>` on line 2. The full report goes to the ONE findings file its prompt
+  names, first line its LOG heading (`### B<NN> R<k> reviewer findings`); the final
+  message is four lines: verdict, nonce, `P0=<n> P1=<n> ASK=<n>`, the file's path.
+  Report capped like the implementer's. Finding classes: **P0** — wrong behavior, a
   violated criterion or guardrail, concrete scenario (blocking); **P1** — should fix,
   needs a production change, concrete scenario (blocking); **ASK** — in-fence, about the
   batch's OWN artifacts (its new tests' strength, smoke-step prose, comments, a doc sweep
   it owns), no production behavior change (non-blocking; closes as a polish pass).
 - **Gate agents** (read-only, run by the ORCHESTRATOR at the reviewer gate, in parallel
-  with the reviewer): {{GATE_AGENTS}}. Implementers NEVER spawn a gate agent themselves —
+  with the reviewer): {{GATE_AGENTS}}. Each writes its full report with the Write tool to
+  the findings file its prompt names — its only other writes are validation logs and
+  disposable scratch under the session scratchpad, never inside a worktree or the
+  repository — and returns four lines: its verdict, `NONCE <nonce>`,
+  `FINDINGS <n>`, the file's path. Implementers NEVER spawn a gate agent themselves —
   a self-spawned one stalls the implementer uncommitted.
 - **QA runner** — one sub-agent that executes the agent-runnable smoke steps at a
   checkpoint close-out and writes evidence. Runners available in this repo:
@@ -247,11 +264,27 @@ extensions ∪ the batch's own file — never the implementer's Files line alone
 
 {{VALIDATION_COMMANDS}}
 
-All must pass before a batch may integrate (`🟢`). Orchestrator runs use the QUIET form
-above (a totals line plus failing test NAMES, so failing sets compare by name against any
-allowlist); full output is read only on a non-zero exit. If the block above says `none`,
-the checkpoint smoke tests carry ALL verification — state that explicitly when handing
-over. Mutation runner (optional, scoped to a batch's changed files): {{MUTATION_RUNNER}}.
+All must pass before a batch may integrate (`🟢`). Every run goes through the validation
+wrapper, from the worktree root:
+
+```text
+node "{{SKILL_DIR}}/tools/validate.mjs" --spec {{LEDGER_DIR}}/validate.json --log "<session scratchpad>/<label>.log"
+```
+
+`validate.json` is the machine form of the block above, written at scaffold time. The
+wrapper's one line (`PASS …`, `FAIL … — log: <path>` or `UNKNOWN …`) is the result and its
+exit code (0/1/2) is the real one; the log is read only when the line is not PASS, and
+failing test NAMES are taken from it so failing sets compare by name against any
+allowlist. Never pipe or tail it; when it may outlast the runtime's command timeout, run it
+as a background task whose completion reports the one line and the exit code, and never
+read the log before it exits. The block above stays the human-readable
+recipe and is the manual procedure when the wrapper is unavailable, run in its QUIET form
+(a totals line plus failing test NAMES; full output only on a non-zero exit). If the
+block above says `none`, there is no `validate.json` and the checkpoint smoke tests
+carry ALL verification — state that explicitly when handing
+over. Mutation runner (optional, a sweep scoped to a batch's changed files): {{MUTATION_RUNNER}}.
+The skill's `mutate.mjs` is a different tool: the test hunter proves with it only the
+mutations it chooses itself, each on a disposable clone of the batch's commit.
 
 ## Version + changelog rule (orchestrator-only)
 
@@ -615,16 +648,25 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
    user's word; never delete unasked).
 5. Spawn ALL of the wave's implementers CONCURRENTLY (one per batch, in a single
    message, each pinned to its worktree, on the tier the batch's weight calls for).
-   Every prompt must be SELF-CONTAINED: the spec text + codebase facts from the batch
-   file, the exact file fence, acceptance criteria, the applicable guardrails, the
-   validation commands (quiet form), the conventions + prohibitions blocks above, the
+   Render each prompt first, from the integration worktree root:
+   `node "{{SKILL_DIR}}/tools/prompt.mjs" --ledger {{LEDGER_DIR}} --role implementer --batch <Bnn> --facts <facts.json> --out "<session scratchpad>/prompts"`
+   (`--help` lists each role's facts) prints `PROMPT <path> NONCE <nonce>`; spawn the
+   agent with this fixed pointer message, `<prompt file>` replaced by that path:
+   `Your complete instructions are in the file <prompt file>. Open it with the Read tool before doing anything else and follow it to its last line, which gives your report's exact line 2.`
+   Keep the nonce for the gate (step 6); it never enters the pointer. When the renderer
+   is unavailable or refuses (`UNKNOWN …`), the manual procedure is a pasted prompt with
+   no nonce line, and every such prompt must be SELF-CONTAINED: the spec text + codebase
+   facts from the batch file, the exact file fence, acceptance criteria, the applicable guardrails, the
+   validation commands (the wrapper command and its recipe), the conventions +
+   prohibitions blocks above, the
    report shape, and "tick your checklist items in the batch file as you complete them;
    run `git diff --name-status -M` against the integration branch before committing and
    revert anything outside your fence; commit on your batch branch (one commit per
    fold-in item)".
 6. Gate PER BATCH, as each implementer reports (don't wait for the wave's slowest). A
-   report without the status line + evidence block → resume the implementer for it (not
-   a round).
+   report without the status line + evidence block, or with the wrong nonce (line 2 not
+   `NONCE <the nonce the renderer printed>`: the agent did not read its prompt to the end),
+   is no report → resume the implementer for it (not a round).
    - **6a Fence check (mechanical, orchestrator).** Run the read-only helper above
      or its manual fallback. Worktree clean (`git status
      --porcelain` empty); `git diff --name-status -M {{INTEGRATION_BRANCH}}...HEAD`; every
@@ -638,8 +680,10 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      assertion failure on the named behavior proves the regression test; every test
      PASSING on the base is a P0 (the fix is unproven); a setup failure or a run that
      cannot execute is inconclusive → reviewer duty (e).
-   - **6c Reviewer + gate agents, in parallel, all fresh and read-only.** The reviewer
-     gets the batch file + the diff (`git diff {{INTEGRATION_BRANCH}}...HEAD` in the batch's
+   - **6c Reviewer + gate agents, in parallel, all fresh and read-only.** Each is
+     rendered and spawned as in step 5 (`--role reviewer`, `reviewer-round2` or
+     `test-hunter`); a gate report with the wrong nonce is no report and its agent is
+     respawned fresh. The reviewer gets the batch file + the diff (`git diff {{INTEGRATION_BRANCH}}...HEAD` in the batch's
      worktree — three-dot isolates the batch's own changes) and must (a) map every hunk
      to a batch item — unmapped hunks are scope creep → reject (the batch file's ticks are
      exempt); (b) check each acceptance criterion against the diff; (c) run the
@@ -653,8 +697,19 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      a test-only finding is an ASK. S-weight batches: one combined reviewer+gate pass.
    - **Verdicts** (each recorded in the row's Notes as `R<k> <verdict> @<sha>`, `asks=<n>`
      appended when a `SHIP` carries ASKs; the findings go to LOG.md under the row's
-     heading). `SHIP` with ASKs → polish pass: resume the implementer with the ASK
-     list; it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
+     heading: every findings file reaches LOG.md first, closed by a newline and a marker
+     line — from the integration worktree root,
+     `(cat -- "<findings file>" && echo && echo '=== end of B<NN> R<k> <role> findings ===') >> {{LEDGER_DIR}}/LOG.md`
+     in Git Bash or an equivalent
+     byte copy, never re-typed through the orchestrator's context, committed with the
+     PROGRESS update — and only then is its path forwarded; a copy lost with the scratchpad
+     is taken back out of the committed LOG.md, never re-typed — from the repository root
+     in Git Bash,
+     `git show {{INTEGRATION_BRANCH}}:./{{LEDGER_DIR}}/LOG.md | F="<findings file>" awk -v h='### B<NN> R<k> <role> findings' -v m='=== end of B<NN> R<k> <role> findings ===' '$0 == h {n++; p = 1} $0 == m {e++; d += p; p = 0; next} p {o = o s $0; s = ORS} END {if (n != 1 || e != 1 || d != 1) exit 1; printf "%s", o > ENVIRON["F"]}'`
+     exits non-zero, writing nothing, unless its heading and marker line each occur
+     exactly once, and only after a zero exit is that file forwarded). `SHIP` with ASKs → polish
+     pass: resume the implementer with the pointer to its rendered `polish` prompt (the
+     findings file by path); it appends `- [ ] polish: <ask>` items to its checklist, does them, commits;
      closes mechanically (6a + validations on the polished tip; polish commits touch only
      test/doc/prose paths — a production file touched → a fix-diff-only re-review by a
      fresh reviewer). Not a round.
@@ -669,8 +724,8 @@ reconciliation in the PROGRESS Session log (one line) and LOG.md (detail).
      the recorded authorization), then ONE revert commit spanning `@<sha>..HEAD` (never a
      reset — no history rewriting; `git diff @<sha> HEAD` must come back empty), integrate
      that reviewed tree, unclosed ASKs → {{BACKLOG_FILE}} entries; polish never
-     turns a batch `⛔`. `FIX FIRST` → resume the SAME implementer with the
-     findings verbatim, then a fresh re-review that verifies the fixes and scans only the
+     turns a batch `⛔`. `FIX FIRST` → resume the SAME implementer with the pointer to
+     its rendered `fix-round` prompt (the findings file by path), then a fresh re-review that verifies the fixes and scans only the
      fix diff. `NEEDS A CLOSER LOOK` → run the confirming check the
      reviewer named (or have the implementer add the probe) → `FIX FIRST` or `SHIP`; not a
      round. Only `FIX FIRST` rounds count; the SECOND `FIX FIRST` sets `⛔ defective` (not

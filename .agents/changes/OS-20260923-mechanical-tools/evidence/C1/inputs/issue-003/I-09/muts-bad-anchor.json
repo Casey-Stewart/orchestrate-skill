@@ -1,0 +1,10 @@
+{
+  "mutations": [
+    {
+      "id": "m3",
+      "file": "lib.cjs",
+      "find": "a * b",
+      "replace": "a / b"
+    }
+  ]
+}

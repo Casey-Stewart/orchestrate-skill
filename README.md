@@ -79,8 +79,11 @@ finished? — and resumes from the real state rather than the claimed one.
 
 - **Ledgers are closed systems.** Every repo-specific fact (validation commands, version
   files, merge policy, smoke procedure, gate agents, runners, tiers) is baked into the
-  ledger at scaffold time. A ledger never references this skill, so it stays drivable
-  without it.
+  ledger at scaffold time. A ledger references ONLY its pinned skill directory, by
+  absolute path and hash, and every step a tool performs also has a baked manual
+  procedure (the validation recipe, the pasted-prompt list, the fence's manual fallback),
+  so it stays drivable without the skill — or with a changed one: a changed skill stops
+  the ledger at its next boot and asks, and never silently changes how it runs.
 - **Statuses are claims; git is truth.** The wave-open PROGRESS commit on the
   integration branch — not any status flip — is the crash marker recovery keys on. The
   orchestrator never switches your checkout: it reads branches with `git show` and
@@ -98,9 +101,12 @@ finished? — and resumes from the real state rather than the claimed one.
 - **Conservative by default.** No pushing, no `--no-verify`, no force-push, no history
   rewriting, never a commit on the default branch, and nothing merges toward the default
   branch — unless you say so, in words that get recorded in the ledger.
-- **Rollout boundary.** A ledger's own contract outranks the skill, so a new skill
-  version changes nothing about ledgers already scaffolded; it reaches a repo through
-  the next `/orchestrate new`.
+- **Rollout boundary.** A ledger's own contract outranks the skill. It references ONLY
+  its pinned skill directory, by absolute path and hash, and stays drivable without it
+  through its baked manual procedures, so a new skill version never rewrites a ledger already
+  scaffolded: a changed skill stops the ledger at its next boot and asks, and never
+  silently changes how it runs. A new version reaches a repo through the next
+  `/orchestrate new`, or through an upgrade of a ledger's pin that you approve.
 
 ## Install
 
@@ -150,14 +156,18 @@ types fails outright (`Agent type 'implementer' not found`), so the orchestrator
 substitutes the general-purpose agent itself on every spawn and the read-only
 rules stay prose-enforced — see `orchestrate/references/protocol.md`
 §Degraded environments. And with them, the guarantee is stronger but not
-absolute — Bash can still write, so "read-only" stays partly conventional; removing
-Write/Edit closes the easy path, not every path.
+absolute — Write and Bash can still write, so "read-only" stays partly conventional;
+withholding Edit closes the easy path, not every path. Copy them again whenever you update
+the skill: the definitions change with it, and an older `reviewer` or `test-hunter` lacks
+the `Write` tool its rendered prompt needs for the findings file.
 
 Whatever branch the clone has checked out is what runs — stay on `main`. If you prefer
 a plain copy, `cp -r orchestrate-skill/orchestrate ~/.claude/skills/` works, and
 `diff -r ~/.claude/skills/orchestrate orchestrate-skill/orchestrate` tells you when it
 has drifted. For one project only, use `<project>/.claude/skills/` instead. Restart
-Claude Code and it will pick the skill up.
+Claude Code and it will pick the skill up. Update an installed copy (a `git pull` in the
+clone counts) only between ledgers: a ledger's contract pins the skill's hash, and an
+updated copy stops that ledger's next session and asks.
 
 ## Usage
 
@@ -202,6 +212,12 @@ orchestrate/
     ├── git-evidence.mjs            read-only discovery, provenance and shipment facts
     ├── check-fence.mjs             read-only mechanical gate before independent review
     ├── smoke-inputs.mjs            input declarations, retained history and raw-file checks
+    ├── validate.mjs                runs a ledger's validation spec in the foreground: one result line, the real exit code, a full log
+    ├── ledger-parse.mjs            the one parser for plan, PROGRESS and batch tables and the contract's skill pin
+    ├── check-ledger.mjs            scaffold-time ledger parse check and the skill-pin hash check
+    ├── prompt.mjs                  renders one per-batch sub-agent prompt from the ledger and a facts file, ending in the nonce its report echoes
+    ├── mutate.mjs                  proves chosen mutations on a disposable clone: control first, then KILLED or SURVIVED each, restored byte for byte
+    ├── run-at-ref.mjs              runs a validation spec on a disposable clone of any ref: one AT line, validate.mjs's exit code
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 

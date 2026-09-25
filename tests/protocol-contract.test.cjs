@@ -387,8 +387,10 @@ test('the shipped-skill domain both rule sweeps use recurses and filters no file
   // and its own size is pinned so the both-at-once edit reddens too.
   const NON_MARKDOWN = ['orchestrate/references/smoke-page-template.html',
     'orchestrate/tools/build-smoke-page.mjs', 'orchestrate/tools/check-fence.mjs',
-    'orchestrate/tools/git-evidence.mjs', 'orchestrate/tools/smoke-inputs.mjs'];
-  assert.equal(NON_MARKDOWN.length, 5, 'the pinned non-Markdown domain must not shrink to a sample');
+    'orchestrate/tools/check-ledger.mjs', 'orchestrate/tools/git-evidence.mjs',
+    'orchestrate/tools/ledger-parse.mjs', 'orchestrate/tools/mutate.mjs', 'orchestrate/tools/prompt.mjs',
+    'orchestrate/tools/run-at-ref.mjs', 'orchestrate/tools/smoke-inputs.mjs', 'orchestrate/tools/validate.mjs'];
+  assert.equal(NON_MARKDOWN.length, 11, 'the pinned non-Markdown domain must not shrink to a sample');
   assert.deepEqual(shipped.filter(file => !file.endsWith('.md')), NON_MARKDOWN,
     'the sweeps must reach every non-Markdown shipped file, not only *.md; add a new tool to this list deliberately');
   // Shape, never a pinned total: the skill grows. Only that it is bigger than either

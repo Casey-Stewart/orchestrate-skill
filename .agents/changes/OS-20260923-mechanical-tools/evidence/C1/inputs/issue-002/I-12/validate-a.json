@@ -1,0 +1,14 @@
+{
+  "steps": [
+    {
+      "name": "tests",
+      "argv": [
+        "node",
+        "--test",
+        "--test-reporter=spec",
+        "feature.test.cjs"
+      ],
+      "parser": "node"
+    }
+  ]
+}

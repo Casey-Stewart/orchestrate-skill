@@ -1,0 +1,16 @@
+{
+  "mutations": [
+    {
+      "id": "m1",
+      "file": "lib.cjs",
+      "find": "a + b",
+      "replace": "a - b"
+    },
+    {
+      "id": "m2",
+      "file": "lib.cjs",
+      "find": "// Adds two numbers.",
+      "replace": "// Returns the sum of two numbers."
+    }
+  ]
+}
