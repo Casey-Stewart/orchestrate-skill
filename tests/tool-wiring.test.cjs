@@ -1004,7 +1004,7 @@ const MUTATE_COMMAND = 'node "[SKILL_DIR]/tools/mutate.mjs" --repo "[WORKTREE_PA
 const SETUP_CLAUSE = 'adding `--setup "[WORKTREE_PATH]/[LEDGER_DIR]/setup.json"` when that file exists';
 // The two sentences that tie a verdict to skipped tests, each saying what it cannot show.
 const SKIP_SURVIVED = 'A `SURVIVED` line says nothing about a test the control skipped (`, <n> skipped` on its line), since a mutation of code only that test covers still reads `SURVIVED`.';
-const SKIP_SWAP = 'Counts are not names: a mutation that skips one test and runs one the control skipped changes no count, so its `SURVIVED` or `KILLED` line may rest on a test the control never ran — before citing either, compare the tests its run and the control ran in the log.';
+const SKIP_SWAP = 'Counts are not names: a mutation that skips one test and runs one the control skipped changes neither the total nor the skipped count, so its `SURVIVED` or `KILLED` line may rest on a test the control never ran — before citing either, compare the tests its run and the control ran in the log; where the log does not name each test, cite neither.';
 const mutateTool = () => import(require('node:url').pathToFileURL(path.join(ROOT, 'orchestrate/tools/mutate.mjs')).href);
 test('the test hunter proves each mutation with mutate.mjs on a scoped spec, and reports a proof that did not run as such', async () => {
   const hunter = collapse(HUNTER_SECTION());
@@ -1195,26 +1195,45 @@ test('no hunter text offers a line that means the proof did not run as a proof, 
   assert.equal(notRunAs(passage.replace(/\.$/, ', unless it is `CRASHED`.')).length, 1);
 });
 
-// Only the two pinned sentences tie a SURVIVED line to skipped tests, to say what it cannot show.
-// Anywhere else in the hunter's texts such a sentence could claim a skipped test as covered (R1
-// hunter: an appended "skipped ones included" sentence stayed green). Exempt by exact bytes.
-const skipAsSurvived = text => [SKIP_SURVIVED, SKIP_SWAP].reduce((t, pinned) => t.split(pinned).join(' '), collapse(text)).split(/(?<=[.!?])\s+/)
-  .filter(sentence => kindPattern('SURVIVED').test(sentence) && /\bskip(?:s|ped|ping)?\b/i.test(sentence));
-test('no hunter text ties a SURVIVED line to skipped tests, outside the two sentences saying what it cannot show', () => {
+// Only the two pinned sentences tie a result line to tests the control did not run, to say what it
+// cannot show; the cite passage pairs the results with "did not run" to say something else. Anywhere
+// else in the hunter's texts such a sentence could claim those tests as covered (R1 hunter: an
+// appended "skipped ones included" sentence stayed green; R2: "including the ones it never ran", and
+// a KILLED line said to name only tests the control ran). Every result kind the tool exports, in any
+// case: "a mutation that survived" makes the same claim as a `SURVIVED` line. Exempt by exact bytes.
+const NOT_RAN_WORDS = /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run)\b/i;
+const resultPattern = results => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i');
+const resultBesideNotRan = (text, results) => [SKIP_SURVIVED, SKIP_SWAP, CITE_PASSAGE].reduce((t, pinned) => t.split(pinned).join(' '), collapse(text))
+  .split(/(?<=[.!?])\s+/).filter(sentence => resultPattern(results).test(sentence) && NOT_RAN_WORDS.test(sentence));
+test('no hunter text ties a result line to tests the control did not run, outside the two sentences saying what it cannot show', async () => {
+  const { RESULTS } = await mutateTool();
+  assert.deepEqual(RESULTS.slice().sort(), ['KILLED', 'SURVIVED'], 'the result kinds the tool exports were really read');
+  const swept = text => resultBesideNotRan(text, RESULTS);
   const hunter = collapse(HUNTER_SECTION());
-  for (const pinned of [SKIP_SURVIVED, SKIP_SWAP]) assert.equal(hunter.split(pinned).length - 1, 1, 'pinned verbatim, once: ' + pinned);
+  for (const pinned of [SKIP_SURVIVED, SKIP_SWAP, CITE_PASSAGE]) assert.equal(hunter.split(pinned).length - 1, 1, 'pinned verbatim, once: ' + pinned);
   const specimens = ['A `SURVIVED` line covers every test in the scoped spec, skipped ones included: each ran under the control.',
     'A test the control skipped (`, <n> skipped` on its line) runs under no mutation, so no `SURVIVED` line says anything about it.',
-    'Treat SURVIVED as proof for skipped tests too.'];
-  for (const specimen of specimens) assert.equal(skipAsSurvived(specimen).length, 1, 'the sweep catches: ' + specimen);
-  for (const clean of ['Cite a `SURVIVED` line as the proof.', 'A runner may skip a named test file that does not exist.', 'A `survived` line that skipped nothing.'])
-    assert.deepEqual(skipAsSurvived(clean), [], 'not a claim about skipped tests: ' + clean);
+    'Treat SURVIVED as proof for skipped tests too.',
+    'A `SURVIVED` line also vouches for every test the control listed, including the ones it never ran.',
+    'A `SURVIVED` line covers every scoped test, including any the control did not run.',
+    'A mutation that survived proves every skipped test too.',
+    'A `KILLED` line names only tests the control ran, never one it skipped, so cite it without reading the log.',
+    'A `KILLED` line refutes a finding even for a todo test.',
+    "A `SURVIVED` line covers the tests the control didn't run.",
+    'A `KILLED` line settles tests that were not run as well.'];
+  for (const specimen of specimens) assert.equal(swept(specimen).length, 1, 'the sweep catches: ' + specimen);
+  // Each word and each result kind has a specimen caught through it.
+  for (const word of ['skip', 'todo', 'never ran', 'did not run', "didn't run", 'not run']) assert.ok(specimens.some(s => s.includes(word)), 'a specimen says ' + word);
+  for (const kind of RESULTS) assert.ok(specimens.some(s => s.includes('`' + kind + '`')), 'a specimen names ' + kind);
+  for (const clean of ['Cite a `SURVIVED` line as the proof.', 'A runner may skip a named test file that does not exist.', 'A `KILLED` line names the failing tests.'])
+    assert.deepEqual(swept(clean), [], 'not a claim about tests the control did not run: ' + clean);
   for (const text of [HUNTER_SECTION(), definitionBody('.claude/agents/test-hunter.md')]) {
-    assert.deepEqual(skipAsSurvived(text), [], 'a hunter text ties SURVIVED to skipped tests');
-    assert.equal(skipAsSurvived(text + '\n\n' + specimens[0]).length, 1, 'live control: the swept text is really read');
+    assert.deepEqual(swept(text), [], 'a hunter text ties a result line to tests the control did not run');
+    for (const plant of [specimens[0], specimens[6]]) assert.equal(swept(text + '\n\n' + plant).length, 1, 'live control: the swept text is really read');
   }
   // A qualifier inside a pinned sentence breaks its exemption rather than riding it.
-  assert.equal(skipAsSurvived(SKIP_SURVIVED.replace(/\.$/, ', unless it skipped only one.')).length, 1);
+  assert.equal(swept(SKIP_SURVIVED.replace(/\.$/, ', unless it skipped only one.')).length, 1);
+  assert.equal(swept(CITE_PASSAGE.replace(/\.$/, ', and `KILLED` covers any test the control skipped.')).length, 1);
 });
 
 test('protocol.md says, one sentence apiece, what mutate.mjs and the mutation runner do', () => {

@@ -258,9 +258,10 @@ registers nothing does not change the count and reads `SURVIVED`, so before you 
 file name. A `SURVIVED` line says nothing about a test the control skipped
 (`, <n> skipped` on its line), since a mutation of code only that test covers still
 reads `SURVIVED`. Counts are not names: a mutation that skips one test and runs one the
-control skipped changes no count, so its `SURVIVED` or `KILLED` line may rest on a test
-the control never ran — before citing either, compare the tests its run and the control
-ran in the log.
+control skipped changes neither the total nor the skipped count, so its `SURVIVED` or
+`KILLED` line may rest on a test the control never ran — before citing either, compare
+the tests its run and the control ran in the log; where the log does not name each test,
+cite neither.
 A run costs the scoped suite once for the control and once per
 mutation; when that may outlast the runtime's command timeout, run it as a background task
 whose completion reports its lines and exit code, or pass `--timeout` and split the

@@ -302,8 +302,9 @@ test('a red control, and a control that ran no tests, abort before any mutation'
 });
 
 // ===== Skips and files that run no tests: a verdict needs the control's own skipped count ==========
-// Counts are not names: a mutation that skips one test and runs one the control skipped keeps every
-// count, so these pins say what a moved count does, never that equal counts mean the same tests ran.
+// Counts are not names: a mutation that skips one test and runs one the control skipped changes
+// neither the total nor the skipped count, so these pins say what a moved skipped count does, never
+// that equal counts mean the same tests ran.
 const scoped = (fx, files, muts, log) => mutateArgs(fx, muts, log).map(a => a === fx.validate ? fx.json(log.replace(/\.log$/, '.json'), specOf(files)) : a);
 const secs = '\\(\\d+s\\)';
 test('a scoped suite whose only test is skipped is no control: CONTROL FAILED, nothing mutated; a partly skipped one runs, and its skip is no verdict', t => {
@@ -799,6 +800,13 @@ test('every invalid invocation is one UNKNOWN line with exit 2, before any check
   assert.equal(ok.code, 0, ok.lines.join('\n'));
 });
 
+// The --help sentences that define the verdicts and the control's rule, exempt from the sweep below by their exact bytes.
+const HELP_DEFINITIONS = ["KILLED: every failing step names its failing tests and no CRASHED cause below holds, so no counted step's skipped count moved.",
+  "SURVIVED: every counted step passed with the control's own passed, skipped and total counts.",
+  "CRASHED: a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a step in which no test passed, a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed without a named failing test; the log records which.",
+  'each such step must pass at least one test (one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the control.'];
+const resultBesideSkip = (text, results) => HELP_DEFINITIONS.reduce((t, pinned) => t.split(pinned).join(' '), text.replace(/\s+/g, ' ')).split(/(?<=[.!?])\s+/)
+  .filter(s => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i').test(s) && /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run)\b/i.test(s));
 test('--help documents every line kind the tool declares, and the exit codes', async () => {
   const { RESULTS, NOT_RUN } = await api();
   const r = spawnSync(NODE, [TOOLS.mutate, '--help'], { encoding: 'utf8', windowsHide: true });
@@ -808,12 +816,14 @@ test('--help documents every line kind the tool declares, and the exit codes', a
   assert.ok(r.stdout.includes('Exit 0 every mutation killed; 1 at least one survived and nothing else went wrong; 2 anything else.'));
   // What a verdict rests on and what a control must do, word for word; the old control rule is gone.
   const help = r.stdout.replace(/\s+/g, ' ');
-  for (const text of ["SURVIVED: every counted step passed with the control's own passed, skipped and total counts.",
-    "CRASHED: a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a step in which no test passed, or a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse); the log records which.",
-    'each such step must pass at least one test (one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the control.']) {
-    assert.ok(help.includes(text), '--help says: ' + text);
-  }
+  for (const text of HELP_DEFINITIONS) assert.ok(help.includes(text), '--help says: ' + text);
   assert.ok(!help.includes('must run a test'), 'the old control rule is gone');
+  // No other --help sentence ties a result to skipped tests: an appended one would contradict the
+  // pinned definitions while they stay present (R2 hunter's mutation E).
+  assert.deepEqual(resultBesideSkip(r.stdout, RESULTS), [], '--help ties a result to skipped tests outside its definitions');
+  const E = 'A step with a named failure is KILLED whatever its skipped count.';
+  assert.equal(resultBesideSkip(r.stdout + '\n' + E, RESULTS).length, 1, 'live control: an appended sentence is caught');
+  assert.equal(resultBesideSkip(HELP_DEFINITIONS[0].replace(/\.$/, ', or a todo test failed.'), RESULTS).length, 1, 'a qualified definition loses its exemption');
   const at = spawnSync(NODE, [TOOLS['run-at-ref'], '--help'], { encoding: 'utf8', windowsHide: true });
   assert.equal(at.status, 0);
   assert.ok(at.stdout.startsWith('run-at-ref.mjs --repo <repo> --ref <ref> --validate <spec.json> --log <file> [--setup <spec.json>] [--timeout <seconds>]\n'));
