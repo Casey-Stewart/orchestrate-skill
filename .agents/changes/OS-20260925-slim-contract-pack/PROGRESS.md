@@ -31,8 +31,8 @@ before believing any row (§Recovery in the contract).
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Contract slimming: one copy of the procedure | `chore/contract-slimming` | 1 | — | ⬜ | 2026-09-25 | — |
-| B02 | Tool CLIs run through any symlinked path; git env scrubbed | `fix/cli-entry-symlink` | 1 | — | ⬜ | 2026-09-25 | — |
+| B01 | Contract slimming: one copy of the procedure | `chore/contract-slimming` | 1 | — | 🔄 | 2026-09-25 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b01` |
+| B02 | Tool CLIs run through any symlinked path; git env scrubbed | `fix/cli-entry-symlink` | 1 | — | 🔄 | 2026-09-25 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b02` |
 | B03 | Conductor and agent budget rules | `feat/budget-rules` | 2 | — | ⬜ | 2026-09-25 | — |
 | B04 | Prose polish: comment-only classifier, prose ASKs, one strike | `feat/prose-polish` | 3 | — | ⬜ | 2026-09-25 | — |
 
@@ -73,3 +73,4 @@ None yet — issued at C1 close-out (inventory in [01-plan.md](01-plan.md) §Smo
 | Date | Session did | Stopped because |
 |------|-------------|-----------------|
 | 2026-09-25 | Scaffold: interview, planning census + #15 control (medium vs max), pre-flight 5 blocking fixed / 9 advisory, plan approved with 3 fold-ins; ledger committed on `chore/slim-contract-pack-ledger` from `edd2f1e` | STOP — wave 1 starts only on the user's word |
+| 2026-09-25 | continue: skill pin SKILL MATCH; reconcile — all rows ⬜, no batch branch exists (correct state); resume-time validation on `40f8182` PASS tests 510/512, 2 skipped (23s); W1 opened — wave base `40f8182bdebe5596420bda2394ed181627a03f99`, branches `chore/contract-slimming` (B01) and `fix/cli-entry-symlink` (B02) cut, worktrees `b01`/`b02` | — (running) |
