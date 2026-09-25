@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One foreground validation run: every step in order, full output to a log, ONE line out.
-// Fail closed: a step passes only on a found summary with zero failures and exit 0.
+// Fail closed: a step passes only on a found summary with zero failures, a passed test, and exit 0.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -26,15 +26,50 @@ const uniq = list => [...new Set(list)];
 const slashes = p => p.replace(/[\\/]+/g, '/');
 // The name and the location may each be relative or absolute (spec: absolute name, relative location).
 const isFileOf = (name, file) => { const n = slashes(name), f = slashes(file); return f === n || f.endsWith('/' + n) || n.endsWith('/' + f); };
-const empty = () => ({ summary: false, passed: null, failed: null, total: null, names: [], loadFailures: [] });
+// A name taken for a test file's path: a script extension, and no whitespace before its first
+// separator (an absolute path may hold a space later; a sentence ending "src/config.js" is a test name).
+const fileShaped = name => SCRIPT_FILE.test(name) && !/\s/.test(name.split(/[\\/]/, 1)[0]);
+// `skipped` counts every test in the total that neither passed nor failed.
+const empty = () => ({ summary: false, passed: null, failed: null, skipped: null, total: null, names: [], loadFailures: [], emptyFiles: [] });
+// A result with a summary; `emptyFiles` are passing entries moved to the failures.
+const found = (c, names, loadFailures, emptyFiles = []) => ({ summary: true, passed: c.passed - emptyFiles.length, failed: c.failed + emptyFiles.length,
+  skipped: c.skipped, total: c.total, names: uniq([...names, ...emptyFiles]), loadFailures: uniq([...loadFailures, ...emptyFiles]), emptyFiles: uniq(emptyFiles) });
+const missing = (names, loadFailures, emptyFiles = []) => ({ ...empty(), names: uniq([...names, ...emptyFiles]), loadFailures: uniq([...loadFailures, ...emptyFiles]), emptyFiles: uniq(emptyFiles) });
+
+// node reports a test file that registered no tests (or had every test filtered out) as ONE
+// PASSING test named after the file. It is found by shape, rejecting on doubt: a top-level
+// passing entry with no directive, no children and not a suite, whose name is file-shaped.
+function emptyFileEntries(lines) {
+  const out = [], open = new Map();
+  // Spec: a suite or a parent test opens with a top-level `▶ name` and closes with `✔ name (…ms)`.
+  for (const line of lines) {
+    const start = /^▶ (.+)$/.exec(line);
+    if (start) { open.set(start[1], (open.get(start[1]) || 0) + 1); continue; }
+    const end = /^([✔✖]) (.+) \(\d+(?:\.\d+)?ms\)$/.exec(line);
+    if (!end) continue;
+    if (open.get(end[2])) open.set(end[2], open.get(end[2]) - 1);
+    else if (end[1] === '✔' && fileShaped(end[2])) out.push(end[2]);
+  }
+  // TAP: `ok N - name` at column 0; its children print indented before it, its type after it.
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^ok \d+ - ((?:\\.|[^\\#])*)(#.*)?$/.exec(lines[i]);
+    if (!m || m[2]) continue;
+    let children = false, suite = false;
+    for (let j = i - 1; j >= 0 && !/^(?:# Subtest: |(?:not )?ok \d+ )/.test(lines[j]); j--) if (/^[ \t]+(?:# Subtest: |(?:not )?ok \d+ )/.test(lines[j])) children = true;
+    for (let j = i + 1; j < lines.length && /^[ \t]/.test(lines[j]); j++) if (/^[ \t]+type: 'suite'$/.test(lines[j])) suite = true;
+    const name = m[1].trimEnd().replace(/\\([\\#])/g, '$1');
+    if (!children && !suite && fileShaped(name)) out.push(name);
+  }
+  return out;
+}
 
 // node: spec reporter (`✖ name (1.2ms)`, `ℹ tests N`) or TAP (`not ok N - name`, `# tests N`).
 // The summary is the reporter's contiguous block, so a test printing `tests 99` is not one.
 function parseNode(text) {
   const lines = text.split('\n'), entries = [];
-  let found = 0, passed = 0, failed = 0, total = 0;
-  for (const m of text.matchAll(/^(ℹ|#) tests (\d+)\n\1 suites \d+\n\1 pass (\d+)\n\1 fail (\d+)\n\1 cancelled (\d+)\n\1 skipped \d+\n\1 todo \d+$/gm)) {
-    found++; total += +m[2]; passed += +m[3]; failed += +m[4] + +m[5];
+  const c = { found: 0, passed: 0, failed: 0, skipped: 0, total: 0 };
+  for (const m of text.matchAll(/^(ℹ|#) tests (\d+)\n\1 suites \d+\n\1 pass (\d+)\n\1 fail (\d+)\n\1 cancelled (\d+)\n\1 skipped (\d+)\n\1 todo (\d+)$/gm)) {
+    c.found++; c.total += +m[2]; c.passed += +m[3]; c.failed += +m[4] + +m[5]; c.skipped += +m[6] + +m[7];
   }
   // Spec: the trailing "failing tests" block lists each failure once, without the suites the
   // inline tree also marks; outside a block every inline `✖` line is taken.
@@ -65,17 +100,17 @@ function parseNode(text) {
   }
   // A file that fails to load is reported as one failing test named after the file.
   const loadFailures = entries.filter(e => e.location ? isFileOf(e.name, e.location) : SCRIPT_FILE.test(e.name)).map(e => e.name);
-  return found ? { summary: true, passed, failed, total, names: uniq(entries.map(e => e.name)), loadFailures: uniq(loadFailures) }
-    : { ...empty(), names: uniq(entries.map(e => e.name)), loadFailures: uniq(loadFailures) };
+  const names = entries.map(e => e.name), emptyFiles = emptyFileEntries(lines);
+  return c.found ? found(c, names, loadFailures, emptyFiles) : missing(names, loadFailures, emptyFiles);
 }
 
 function parseJest(text) {
-  let found = 0, passed = 0, failed = 0, total = 0;
+  const c = { found: 0, passed: 0, failed: 0, skipped: 0, total: 0 };
   for (const m of text.matchAll(/^Tests:[ \t]+(?:(.*?),[ \t]+)?(\d+) total$/gm)) {
     const tokens = (m[1] ? m[1].split(/,[ \t]+/) : []).map(t => /^(\d+) (failed|passed|skipped|todo|pending)$/.exec(t));
     if (tokens.some(t => !t)) continue;
-    found++; total += +m[2];
-    for (const t of tokens) { if (t[2] === 'failed') failed += +t[1]; if (t[2] === 'passed') passed += +t[1]; }
+    c.found++; c.total += +m[2];
+    for (const [, n, kind] of tokens) c[kind === 'failed' || kind === 'passed' ? kind : 'skipped'] += +n;
   }
   const names = [], loadFailures = [];
   let file = null;
@@ -89,21 +124,22 @@ function parseJest(text) {
   }
   // A suite that cannot run is outside jest's test counts; it is a failing entry here.
   const loads = uniq(loadFailures);
-  return found ? { summary: true, passed, failed: failed + loads.length, total: total + loads.length, names: uniq(names), loadFailures: loads }
-    : { ...empty(), names: uniq(names), loadFailures: loads };
+  return c.found ? found({ ...c, failed: c.failed + loads.length, total: c.total + loads.length }, names, loads) : missing(names, loads);
 }
 
 function parsePytest(text) {
-  let found = 0, passed = 0, failed = 0, total = 0;
+  const c = { found: 0, passed: 0, failed: 0, skipped: 0, total: 0 };
   for (const m of text.matchAll(/^=+ (.+?) in \d+(?:\.\d+)?s(?: \([^)]*\))? =+$/gm)) {
-    if (m[1] === 'no tests ran') { found++; continue; }
+    if (m[1] === 'no tests ran') { c.found++; continue; }
     const tokens = m[1].split(', ').map(t => /^(\d+) (passed|failed|errors?|skipped|deselected|xfailed|xpassed|warnings?|rerun)$/.exec(t));
     if (tokens.some(t => !t)) continue;
-    found++;
+    c.found++;
+    // deselected tests were never selected: outside the total, like cargo's filtered out.
     for (const [, n, kind] of tokens) {
-      if (kind === 'passed') passed += +n;
-      if (kind === 'failed' || kind.startsWith('error')) failed += +n;
-      if (['passed', 'failed', 'error', 'errors', 'skipped', 'xfailed', 'xpassed'].includes(kind)) total += +n;
+      if (kind === 'passed') c.passed += +n;
+      if (kind === 'failed' || kind.startsWith('error')) c.failed += +n;
+      if (['skipped', 'xfailed', 'xpassed'].includes(kind)) c.skipped += +n;
+      if (['passed', 'failed', 'error', 'errors', 'skipped', 'xfailed', 'xpassed'].includes(kind)) c.total += +n;
     }
   }
   const names = [], loadFailures = [];
@@ -112,18 +148,17 @@ function parsePytest(text) {
     // A collection error names a file, never a `file::test` node id.
     if (m[1] === 'ERROR' && !m[2].includes('::')) loadFailures.push(m[2]);
   }
-  return found ? { summary: true, passed, failed, total, names: uniq(names), loadFailures: uniq(loadFailures) }
-    : { ...empty(), names: uniq(names), loadFailures: uniq(loadFailures) };
+  return c.found ? found(c, names, loadFailures) : missing(names, loadFailures);
 }
 
 // cargo: one result line per test binary, summed.
 function parseCargo(text) {
-  let found = 0, passed = 0, failed = 0, total = 0;
+  const c = { found: 0, passed: 0, failed: 0, skipped: 0, total: 0 };
   for (const m of text.matchAll(/^test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; \d+ measured; \d+ filtered out(?:; finished in \d+(?:\.\d+)?s)?$/gm)) {
-    found++; passed += +m[1]; failed += +m[2]; total += +m[1] + +m[2] + +m[3];
+    c.found++; c.passed += +m[1]; c.failed += +m[2]; c.skipped += +m[3]; c.total += +m[1] + +m[2] + +m[3];
   }
-  const names = uniq([...text.matchAll(/^test (.+) \.\.\. FAILED$/gm)].map(m => m[1]));
-  return found ? { summary: true, passed, failed, total, names, loadFailures: [] } : { ...empty(), names };
+  const names = [...text.matchAll(/^test (.+) \.\.\. FAILED$/gm)].map(m => m[1]);
+  return c.found ? found(c, names, []) : missing(names, []);
 }
 
 export function parseRunnerOutput(parser, text) {
@@ -244,15 +279,20 @@ function runStep(step, { cwd, env, timeoutMs, log }) {
 
 function classify(step, run, timeoutMs) {
   const parsed = step.parser === 'none' ? empty() : parseRunnerOutput(step.parser, run.text || '');
-  const base = { name: step.name, passed: parsed.passed, failed: parsed.failed, total: parsed.total, names: parsed.names, loadFailures: parsed.loadFailures, exit: run.exit ?? null };
-  const list = parsed.names.length > MAX_NAMES ? `${parsed.names.slice(0, MAX_NAMES).join(', ')} (+${parsed.names.length - MAX_NAMES} more)` : parsed.names.join(', ');
+  const base = { name: step.name, passed: parsed.passed, failed: parsed.failed, skipped: parsed.skipped, total: parsed.total, names: parsed.names, loadFailures: parsed.loadFailures, emptyFiles: parsed.emptyFiles, exit: run.exit ?? null };
+  const shown = parsed.names.map(n => parsed.emptyFiles.includes(n) ? `${n} (ran no tests)` : n);
+  const list = shown.length > MAX_NAMES ? `${shown.slice(0, MAX_NAMES).join(', ')} (+${shown.length - MAX_NAMES} more)` : shown.join(', ');
+  // Skips show only when there are any, so a run without them keeps the plain `<passed>/<total>`.
+  const sk = parsed.skipped ? `, ${parsed.skipped} skipped` : '';
   const out = (result, text) => ({ step: { ...base, result }, text: `${step.name} ${text}` });
   if (run.error) return out('COULD-NOT-START', `COULD-NOT-START (${run.error})`);
   if (run.timedOut) return out('TIMEOUT', `TIMEOUT after ${timeoutMs / 1000}s`);
   if (step.parser === 'none') return run.exit === 0 ? out('PASS', 'ok') : out('FAIL', `exit ${run.exit}`);
-  if (parsed.summary && parsed.failed > 0) return out('FAIL', list ? `${parsed.failed} of ${parsed.total} failed: ${list}` : `${parsed.failed} of ${parsed.total} failed (names not captured)`);
-  if (parsed.summary && run.exit === 0) return out('PASS', `${parsed.passed}/${parsed.total}`);
-  if (parsed.summary) return out('FAIL', `exit ${run.exit} after ${parsed.passed}/${parsed.total} passed`);
+  if (parsed.summary && parsed.failed > 0) return out('FAIL', list ? `${parsed.failed} of ${parsed.total} failed${sk}: ${list}` : `${parsed.failed} of ${parsed.total} failed${sk} (names not captured)`);
+  if (parsed.summary && run.exit !== 0) return out('FAIL', `exit ${run.exit} after ${parsed.passed}/${parsed.total} passed${sk}`);
+  // Nothing passed (every test skipped, or none at all, 0/0 included): nothing was proved.
+  if (parsed.summary && !(parsed.passed > 0)) return out('NO-TESTS', `no test passed (${parsed.passed}/${parsed.total}${sk})`);
+  if (parsed.summary) return out('PASS', `${parsed.passed}/${parsed.total}${sk}`);
   if (run.exit !== 0) return out('CRASHED', `CRASHED before summary (exit ${run.exit})`);
   return out('NO-SUMMARY', 'NO SUMMARY (exit 0)');
 }
@@ -265,8 +305,8 @@ export function formatDuration(ms) {
 const SEPARATORS = [0x2028, 0x2029].map(c => String.fromCharCode(c));
 const oneLine = text => SEPARATORS.reduce((t, s) => t.split(s).join(' '), text.replace(/[\u0000-\u001f\u007f-\u009f]+/g, ' '));
 
-// Step `result` is PASS, FAIL, CRASHED, NO-SUMMARY, TIMEOUT or COULD-NOT-START; counts are
-// null without a summary. `status` is UNKNOWN when a step could not start or the input is invalid.
+// Step `result` is PASS, FAIL, NO-TESTS, CRASHED, NO-SUMMARY, TIMEOUT or COULD-NOT-START; counts
+// are null without a summary. `status` is UNKNOWN when a step could not start or the input is invalid.
 export async function runSpec(spec, { cwd = process.cwd(), logPath, timeoutMs } = {}) {
   const unknown = reason => ({ status: 'UNKNOWN', line: oneLine(`UNKNOWN ${reason}`), steps: [] });
   const problem = checkSpec(spec);
@@ -307,7 +347,22 @@ the step's process tree. Spec (JSON; any other key is rejected):
 name: unique, [A-Za-z0-9._-]+. Exactly one of argv (spawned without a shell) or shell + script;
 shell: pwsh | powershell | bash (bash runs with -o pipefail; on Windows the first bash on PATH
 that receives a quoted script intact, so never WSL's launcher). parser: node | jest | pytest |
-cargo | none. A parsed step passes only when its summary shows zero failures and it exits 0.
+cargo | none. A parsed step passes only when its summary shows zero failures, at least one
+passed test, and it exits 0: a run in which nothing passed (every test skipped, or no test at
+all, 0/0 included) is FAIL "no test passed (<passed>/<total>, <k> skipped)". Skips show on the
+line only when there are any: "tests 497/499, 2 skipped". skipped counts every test in the
+total that neither passed nor failed: node skipped + todo; jest skipped + todo + pending;
+pytest skipped + xfailed + xpassed; cargo ignored (pytest's deselected and cargo's filtered
+out are outside the total). node reports a test file that registered no tests, or whose every
+test a filter removed (--test-name-pattern, --test-skip-pattern, --test-only), as one passing
+test named after the file; any top-level passing entry (no directive, no subtests, not a suite)
+whose name is file-shaped (a script extension, and no whitespace before its first / or \\) is
+taken for one: counted as failed, named "(ran no tests)" and listed in loadFailures. The price
+is a false rejection of any real top-level test, or an empty describe under the spec reporter,
+whose name is file-shaped: one named like a file path ("config.test.js") or a title whose first
+word holds a slash ("I/O errors from reader.js"); rename it. Not recognised: a file that node
+names by a relative path whose first segment holds a space, whether given, globbed, ./-prefixed
+or discovered ("my file.test.js", "my dir/a.test.js").
 `;
 
 export async function validateCli(args) {

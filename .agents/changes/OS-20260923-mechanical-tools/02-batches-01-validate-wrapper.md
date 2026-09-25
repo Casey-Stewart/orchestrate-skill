@@ -5,7 +5,7 @@ Cut from the integration tip when the wave opens.
 **Wave**: 1 · **Weight**: M
 **Depends on**: none
 **Smoke gate**: machine-verifiable — covered by the final checkpoint (C1)
-**Files**: `orchestrate/tools/validate.mjs`, `tests/validate.test.cjs`, `tests/protocol-contract.test.cjs`
+**Files**: `orchestrate/tools/validate.mjs`, `tests/validate.test.cjs`, `tests/protocol-contract.test.cjs`, `orchestrate/tools/mutate.mjs`, `tests/mutate.test.cjs`
 The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 **Applicable guardrails**: a guard that SAMPLES its domain (every parser pattern owns a case no other catches) · a hand-rolled parse more permissive than the real consumer (prove the Node parser against the real reporter, not only canned text) · a branch no input reaches · a boundary pinned on one side only · the apparatus corrupts the work (no literal control bytes; live control first) · CRLF/LF equivalence asserted, never assumed
 **Spec**: [01-plan.md](01-plan.md) §B01 · **Gate**: fence check → reviewer + test-hunter
@@ -191,6 +191,10 @@ exit with a chosen code; specs point at them via `argv: [process.execPath, scrip
 - [x] polish: one-line guard covers the PASS/FAIL line via TAP names carrying each breaker and a breaker in the log path
 - [x] polish: log test pins no blank line before a header that follows newline-terminated output
 - [x] polish: corpus pins the case-insensitive TAP directive with a lowercase skip entry
+- [x] polish: --help's price sentence names the whole false-rejection class (a file-path-named test, an empty describe under spec, a title whose first word holds a slash) and its pin follows
+- [x] polish: --help's "Not recognised" sentence covers every way node names such a file (given, globbed, ./-prefixed or discovered) and its pin follows
+- [x] polish: the --help contradiction sweep splits on real sentence boundaries, takes the legitimate sentences out verbatim, widens subjects and verdicts, and proves every listed specimen red
+- [x] polish: EMPTY_NAMES pins a space in the file's own name (discovered and absolute forms), plus a live discovered emptied file whose name holds a space
 
 ## Acceptance criteria
 
