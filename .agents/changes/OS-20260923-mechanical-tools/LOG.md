@@ -1496,3 +1496,54 @@ Evidence is under `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182b
 Polish-phase FIX FIRST (never counts toward the cap): the implementer redoes the polish within prose — F1 (the CRASHED list says "a step in which no test passed or failed", HELP_DEFINITIONS follow) and F2 (name "the run did not reach its steps"; KILLED starts "a step failed, …") — then a fresh scoped re-review of the new diff. A second polish-phase FIX FIRST discards the polish (`polish discarded: @306a351`).
 
 Polish redo @`03d29bd` (same implementer; nonce verified): the CRASHED cause reads "a step in which no test passed or failed" (validate.mjs's NO-TESTS), CRASHED starts "the run did not reach its steps", KILLED starts "a step failed, …"; the comment above `classifyRun` follows; `tests/mutate.test.cjs` ties each wording to `classifyRun` (a 0-passed 1-failed step is KILLED, a NO-TESTS step CRASHED, the no-steps reason exact) — red on `466a949` and on each removal. Diff `466a949..03d29bd`: `mutate.mjs` (the comment at :208-210 and the `HELP` literal only) and the test file; range diff-check clean. A fresh second scoped re-review (strong tier, Opus) of that diff.
+
+#### B05 fix-up — second scoped re-review and integration
+
+Second scoped re-review (fresh, strong tier, Opus; polish-phase, not a round) — SHIP @`03d29bd`, verbatim (token line removed):
+
+SHIP
+
+**F1: CLOSED.** The no-pass cause at `mutate.mjs:325` now reads "a step in which no test passed or failed", which is true of the code:
+- **The no-pass check:** `classifyRun:231` fires only on validate's NO-TESTS. That result (`validate.mjs:294`) is reachable only after `:291`/`:292` have not fired, so nothing failed and the step exited 0.
+- **Non-zero exit with nothing passed or failed:** validate calls that FAIL, not NO-TESTS, but it is still CRASHED at `:230` or `:234`. The control passed at least one test, so the total or the skipped count must differ.
+- **No kill matches a listed cause through a counted step.** A kill's failing steps are FAIL with failed > 0 and names. Its passing counted steps have passed > 0 (`validate.mjs:294-295`).
+- **Live at 03d29bd:** off `CONTROL PASS PASS tests 1/1`, the run prints `KILLED k1: add sums two numbers`, with pass 0 and fail 1 in that run's counts. The NO-TESTS mutation prints `CRASHED n1: FAIL tests no test passed (0/1, 1 skipped)`, and the log gives the same reason.
+
+**F2: CLOSED.**
+- The list's first cause is the exact reason string `classifyRun:220` returns, pinned from the code at `mutate.test.cjs:841`.
+- "KILLED: a step failed, …" is false for zero steps. Whenever the run's status is not PASS, validate has a step that did not pass (`validate.mjs:332`), so the failing list at `:238` is never empty. No vacuous KILLED is left.
+- The seven CRASHED causes in `--help` match `classifyRun`'s seven CRASHED returns (`:220, 225, 229, 230, 231, 234, 239`) one to one: none missing, none extra.
+
+**Hunk map:** no scope creep.
+- The comment at `:208-210` is F1 (the optional comment edit from the last review, reflowed).
+- HELP `:322-327` is F1 plus F2. `HELP_DEFINITIONS[0]` and `[2]` are re-pinned to match.
+- The new cells are `:834-838` for F1 and `:839-842` for F2.
+
+**The new cells catch every mutation:** 10 of 10 go red in a shared clone, scoped to the `--help` test. The clone was restored from saved bytes, checked against HEAD, and is clean.
+- Removing " or failed", the zero-step cause or "a step failed, " from HELP alone fails at L819.
+- Removing each from HELP and HELP_DEFINITIONS together fails at L838, L841 and L842.
+- Re-adding the old clause as its own sentence fails at L838.
+- Three code mutations: renaming the zero-step reason fails at L841, a no-pass check on `passed === 0` at L834, and removing the zero-step guard at L840.
+
+**No behaviour change:** with the HELP literal and `//` lines stripped, mutate.mjs is byte-identical to 466a949 and to 306a351. `classifyRun`'s source is identical.
+
+**Validation:** EXIT=0, 512 tests: 510 pass, 0 fail, 2 skipped (the Windows-only bash tests, validate.log:518-519). `git diff --check` is clean on the range, and the worktree is clean.
+
+**Findings**
+
+**ASK-1 (optional; predates 03d29bd; same class as the last review's F2 vacuity).**
+- **Where:** `orchestrate/tools/mutate.mjs:325`, pinned at `tests/mutate.test.cjs:806,838`. The no-pass cause says "a step", not "a counted step".
+- **Scenario:** read literally, a passing parser-none step is "a step in which no test passed or failed", because it counts no tests. KILLED requires "no CRASHED cause below holds", so the text rules out KILLED for any spec with a parser-none step. Live run B (`tests` plus a parser-none `lint` step) prints `KILLED k1` beside `lint ok`.
+- **Age:** the old "no test passed" wording had the same subject, and 03d29bd re-pins it word for word.
+- **Fix:** "a counted step in which no test passed or failed", the word KILLED and SURVIVED already use. That makes line 325 119 columns, so reflow `:325-327` to 113 and update `HELP_DEFINITIONS[2]` and the string at `:838`.
+
+**Out of scope, pre-existing (register rather than fold in):** the SURVIVED sentence has had the same wording since e7f1a8b, and unlike KILLED it has no "no CRASHED cause holds" clause. Live run l1 has tests identical at 1/1 and a failing parser-none step. The code prints `CRASHED l1 … a step failed without a named failing test`, while the SURVIVED sentence, taken literally, also holds.
+
+Evidence is in `/tmp/claude-1000/-home-timetotilt-projects-shipping-app/0182bb45-990d-40f6-a9b6-0b595973253b/scratchpad/gate-b05f/rev4/`:
+- `validate.log`
+- `live/work/{a,b,c}.log`
+- `muts/run.cjs` and `muts/m*.tap`
+- `samecode.cjs`
+- `clone/` (restored, clean)
+
+Its optional ASK-1 ("a counted step" in the no-pass cause) and the pre-existing SURVIVED-sentence note are wording residuals for BACKLOG at close-out. Integration: dry run clean (tree `7f0df46`), merged `--no-ff` as `8712d87` (same tree); tip validation (pwsh) 512 / 510 / 0 fail / 2 skipped, `git diff --check HEAD^1 HEAD` clean → B05 🧪. Worktree `b05f` removed. Fix-up metrics: rounds=1, asks=5, gate = 16 findings (R1 3 + 4, R2 2 + 3, scoped 2 + 2 counted with their optional notes as 2), 1 needing a production change (the P1).
