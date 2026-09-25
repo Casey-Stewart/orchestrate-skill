@@ -205,16 +205,15 @@ function anchor(dir, realDir, m, originals) {
 // nothing about the tests: a test step with no parsed summary; a test file that failed to load
 // (node reports one as a failing test named after the file, WITH a summary, so it would otherwise
 // read as KILLED) or ran no tests (node counts one as a passing test, so the total holds); a test
-// count unlike the control's; a step in which no test passed; a step with no failing test whose
-// passed or skipped count moved (a mutation that flips a skip condition changes which tests run,
-// not how many). KILLED needs every failing step to count failed tests and name them, which a
-// parser-none step never does: it counts nothing.
+// count unlike the control's; a step in which no test passed; a step whose skipped count moved,
+// failing tests or not (a mutation that flips a skip condition changes which tests run, not how
+// many, and a test the control skipped proves nothing by failing). KILLED needs every failing step
+// to count failed tests and name them, which a parser-none step never does: it counts nothing.
 const tests = n => `${n} test${n === 1 ? '' : 's'}`;
 function moved(s, c) {
   const more = s.skipped - c.skipped;
   if (more > 0) return `${tests(more)} skipped that ran in the control`;
-  if (more < 0) return `${tests(-more)} ran that the control skipped`;
-  return `${s.passed} passed, the control ${c.passed}`;
+  return `${tests(-more)} ran that the control skipped`;
 }
 export function classifyRun(control, run, parsers) {
   const steps = run.steps;
@@ -230,7 +229,9 @@ export function classifyRun(control, run, parsers) {
     if (files.length) return { kind: 'CRASHED', reason: `step ${s.name}: ${files.join('; ')}` };
     if (s.total !== c.total) return { kind: 'CRASHED', reason: `step ${s.name} ran ${s.total} tests, the control ${c.total}` };
     if (s.result === 'NO-TESTS') return { kind: 'CRASHED', reason: `step ${s.name}: no test passed (${s.passed}/${s.total}${s.skipped ? `, ${s.skipped} skipped` : ''})` };
-    if (s.failed === 0 && (s.passed !== c.passed || s.skipped !== c.skipped)) return { kind: 'CRASHED', reason: `step ${s.name}: ${moved(s, c)}` };
+    // Every parser's total is passed + failed + skipped (validate.mjs), the totals are equal here and
+    // the control failed nothing: an equal skipped count leaves only failures to move a passed count.
+    if (s.skipped !== c.skipped) return { kind: 'CRASHED', reason: `step ${s.name}: ${moved(s, c)}` };
   }
   if (run.status === 'PASS') return { kind: 'SURVIVED' };
   const failing = steps.filter(s => s.result !== 'PASS');
@@ -320,8 +321,8 @@ then MUTATE <k> killed, <s> survived, <u> other. An abort prints only its own li
 Exit 0 every mutation killed; 1 at least one survived and nothing else went wrong; 2 anything else.
 SURVIVED: every counted step passed with the control's own passed, skipped and total counts. CRASHED: a test
 step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's,
-a step in which no test passed, or a step with no failing test whose passed or skipped count differs from the
-control's (a test skipped that ran in the control, or the reverse); the log records which.
+a step in which no test passed, or a step whose skipped count differs from the control's, failing tests or not
+(a test skipped that ran in the control, or the reverse); the log records which.
 NOT-APPLIED: the mutated bytes did not read back, or equal the file's own (in a CRLF file, a replace that differs
 from find only in its line breaks). A mutation's line is printed only once its restore holds; RESTORE-FAILED
 replaces it. Git's repository variables (git rev-parse --local-env-vars) are dropped from the environment first.
@@ -331,8 +332,9 @@ id: unique, [A-Za-z0-9._-]+. file: repository-relative with forward slashes, a r
 exactly once in the file; in a CRLF file the line breaks of find and replace are matched and written as CRLF.
 --validate and --setup are validate.mjs specs (see its --help), run from the checkout root. --validate needs
 a step whose parser counts tests (node, jest, pytest, cargo), and each such step must pass at least one test
-in the control: one in which none passed (all skipped or todo, or none at all) is CONTROL FAILED. --log is written fresh by each
-invocation, every run appending to it, and must lie outside the repository. --timeout (whole seconds, at most ${MAX_TIMEOUT_S}) applies per step of every run.`;
+(one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the
+control. --log is written fresh by each invocation, every run appending to it, and must lie outside the
+repository. --timeout (whole seconds, at most ${MAX_TIMEOUT_S}) applies per step of every run.`;
 
 export async function mutateCli(args, emit = () => {}) {
   if (args.length === 1 && args[0] === '--help') { emit(HELP); return { code: 0, lines: [HELP] }; }
