@@ -194,3 +194,141 @@ Killed (non-vacuous): m2 `real === fs.realpathSync(self)` → `real === self` (b
   `PASS tests 532/534, 2 skipped (23s)` → 🟢. Worktree `b02` removed.
 - Carried to C1: the refusal test's Windows branch assumes Windows refuses a directory name
   holding a newline and accepts any error there — first exercised by the laptop step.
+
+### B01 — gate, round 1
+
+- Implementer DONE_WITH_CONCERNS, nonce matched: `95f8338`; 8/8 ticked; `PASS tests 513/515,
+  2 skipped` plain and under `FORCE_COLOR=1`. Concerns: the moved-sentence test freezes
+  protocol.md's wording of every moved sentence (B03's fence lacks `tests/protocol-contract.test.cjs`);
+  the old template step 8 `<pre><code>` proofing sentence mapped to smoke-page.md; one clause
+  added to protocol §Severity (mapped by the reviewer to item 1 — the template's step-6 sentence
+  moved).
+- 6a `check-fence.mjs`: PASS, integration `acd1754`, batch `95f8338`, merge base `40f8182`,
+  violations [], unknowns []. 6b n/a (chore).
+- 6c reviewer (strong tier, opus) SHIP, P0=0 P1=0 ASK=3; test-hunter (default tier) FINDINGS 5,
+  all test-only. Reviewer ASK 1 = hunter F5 (the circular superset check). Reviewer ASK 3 needs
+  no B01 change — the orchestrator carries it to W2 (B03 inserts rather than rewords moved
+  protocol sentences, or reports `NEEDS_FENCE` for `tests/protocol-contract.test.cjs`, which
+  passes §Fence changes' test trivially with B03 alone in its wave). Polish carries 6 unique
+  ASKs → `R1 SHIP @95f8338 asks=6`, gate=5/0. Reviewer ASK 2 edits `orchestrate/SKILL.md`
+  (skill source under this repo's conventions) → the polish close takes a fix-diff-only
+  re-review by a fresh reviewer.
+
+### B01 R1 reviewer findings
+SHIP
+
+Reviewed `git diff chore/slim-contract-pack-ledger...HEAD` in /home/timetotilt/worktrees/os925/b01, one commit (95f8338). I read every changed file in full.
+
+**Findings**
+
+1. **ASK** — tests/tool-wiring.test.cjs:376-383 and :441-442. Guardrail: a sweep built to catch reversals is blind to an edit that NARROWS its scope (AC5, "superset" half). The superset check is circular. `OLD_CLAIMS` is built by spreading `PRE_PIN_CLAIMS`, so `OLD_CLAIMS.some(p => p.source === source)` can only fail if someone deletes the spread line. Nothing ties `PRE_PIN_CLAIMS` to the family it replaced.
+   *Scenario (probed on a scratch clone, anchor checked, control run 28/28 green):* narrow `PRE_PIN_CLAIMS[4]` from `(?:ledgers|a ledger)` to `ledgers`. tool-wiring.test.cjs stays 28/28 green, and "changes nothing about a ledger already scaffolded" is no longer banned anywhere.
+   *Fix:* bind the family to the base the way `SLIM_BASE` does. Read `git show edd2f1e:tests/tool-wiring.test.cjs`, extract its `OLD_CLAIMS` regex sources, and `deepEqual` them with `PRE_PIN_CLAIMS`. Failing that, add a specimen for every alternation branch.
+   (The sources are byte-identical to the base family today. I checked, so AC5 holds at this commit.)
+
+2. **ASK** — orchestrate/SKILL.md:211-215. Guardrails: stale-copy contamination, and positive-only prose.
+   - The problem: in Mode: continue, step 2 reads the pinned `references/protocol.md` beside the contract, and only step 3 verifies the pin. That is the reverse of the template's boot order: pin (3), then Procedure (4), then Reconcile (5). tests/tool-wiring.test.cjs pins the template's order.
+   - *Scenario:* the installed skill is updated in place, then "continue". The conductor loads the changed protocol.md at step 2. At step 3 the pin check prints SKILL MISMATCH and the session stops. The user says "restore", and the session resumes with the newer procedure still in context.
+   - *Fix:* move the clause into step 3, after the pin check: "on `SKILL MATCH`, its pinned `references/protocol.md` beside the contract".
+
+3. **ASK** — tests/protocol-contract.test.cjs:108-247 (the implementer's concern 1, confirmed).
+   - The problem: the moved-sentence test permanently freezes, against edd2f1e, the protocol.md wording of every sentence the template lost. Additions stay green; any rewording goes red unless someone adds a `REWORDED` entry.
+   - *Scenario:* B03 (W2) puts its compaction rule into protocol.md §Session algorithm at wave close, and B03's fence lacks tests/protocol-contract.test.cjs. If it rewords step 8's "Otherwise: go to step 4 …" sentence instead of inserting beside it, the suite goes red and B03 bounces as NEEDS_FENCE.
+   - *Fix:* none needed in B01. Tell B03 in its prompt to insert sentences rather than reword moved ones, or record `fence +tests/protocol-contract.test.cjs` for B03 up front. B03 is alone in W2, so that path is disjoint. B04's fence already has the file.
+
+**Acceptance criteria, verified against the diff**
+- AC1: the template no longer carries the helper block, §Fence changes, Complete checkpoint inputs, §Recovery, §Session algorithm (with the capped table), Delivery, Verdicts or the close-out procedure. The new test checks every sentence of the edd2f1e template by content: carried verbatim, or through a named `REWORDED`/`RETIRED` mapping whose carrier must exist. It has two live controls: a planted sentence, and a damaged protocol.md sentence. I also ran the same splitter over the OLD protocol.md. The 82 units it no longer carries verbatim are all replaced by the template's wording or by the pin rewrite; no fact is lost. Concern 2 checks out: the "read each `<pre><code>` block" rule is still at smoke-page.md:154-155, the file protocol.md:745 points to.
+- AC2: both hashes and `normalize` are unchanged. The two decision tables in protocol.md are byte-identical to the base (row diff); only the file-table row and the legacy table changed.
+- AC3: the new prompt.test.cjs case fills every template placeholder and renders every role through the unmodified prompt.mjs, each against the oracle. The implementer render names the integration branch and the setup. A fixture ledger built from it gets `PARSE OK 1 batches`. A control rewords the Git-model line and the render refuses with exit 2. `**Skill source**` does not match ledger-parse's pin filter `^\s*\*\*skill\*\*`.
+- AC4: the registry test passes in both directions. `grep -rn "EVIDENCE_TOOL\|FENCE_TOOL" orchestrate/` returns nothing (exit 1).
+- AC5: the old claims are gone from orchestrate/, README.md and CLAUDE.md, which the sweep now includes. Superset: see ASK 1.
+- AC6: every `node … tools/…mjs` line in protocol.md and smoke-page.md now uses `node "<skill-dir>/tools/<tool>.mjs"`, and no `node orchestrate/tools` or `node tools/` lines remain. All 7 recipes still run as published, with `<skill-dir>` resolved to the checkout's `orchestrate/`. `KNOWN_TOOL_PATH_FAULTS` is held at `{}`.
+- AC7: the template went from 63,095 to 15,295 bytes.
+- AC8: the template's boot step 3, protocol.md step 1 and README's Rollout boundary each name the user's words, upgrade, and restore from `**Skill source**` with a byte-for-byte rebuild and a pin re-check. None names the old manual procedures. The PINNED rows and the new MISMATCH_CARRIERS test cover this; `UNDO` is unchanged and green.
+
+**Validation (wrapper, pinned copy)**
+- Plain run: `PASS tests 513/515, 2 skipped (23s)`, exit 0 (base 510/512). The 2 skips are the expected Windows-only cases.
+- `FORCE_COLOR=1`: same result, exit 0.
+- `git diff --check` over the batch range: clean.
+- No file changed its line endings; every changed file is LF at both base and tip.
+- Logs: /tmp/claude-1000/-home-timetotilt-projects-orchestrate-skill/30346af3-7332-4e1a-b96e-3cbe367061c2/scratchpad/b01-rev/validate-plain.log and validate-forcecolor.log.
+
+**Hunk mapping.** Every hunk maps to a checklist item or note, so there is no scope creep:
+- protocol.md's rewrites of its own concise text into the template's wording: item 1 ("move every sentence protocol.md lacks").
+- The §Severity polish-pointer clause (concern 3): item 1, since it is the template's step-6 sentence moved, not new scope.
+- The new "Full contract" legacy row: note 8.
+- SKILL.md's check-fence "whenever the ledger's procedure names it": note 6. The old "when the contract enables it" would have gone false once the helper block left.
+- contract-prompt-authority.test.cjs changes comments and messages only: item 6.
+
+All note-6 census passages were rewritten in the same commit. The exceptions are protocol.md:424 and scaffolding.md:311-314, which are unchanged and still true. §-pointers in the template all resolve to protocol.md headings. Tools and `.claude/agents/` hold no pointer into the removed sections.
+
+**Failing-on-base:** does not apply. This is a chore batch.
+
+**Design observation (not a finding; note 7a prescribes it).** The pinned `{{SKILL_DIR}}` is normally the shared installed skill, so "restore" rewrites it for every ledger and scaffold. Other ledgers pinned to the newer hash then stop at their next boot. That is loud, not silent. With `{{SKILL_SOURCE}}` = `unknown` only upgrade remains. The mismatch question could say both; this is a candidate backlog entry.
+
+=== end of B01 R1 reviewer findings ===
+### B01 R1 test-hunter findings
+FINDINGS 5
+
+Worktree /home/timetotilt/worktrees/os925/b01 @ 95f8338. Harness: mutate.mjs on a scoped spec (the four test files the batch changed:
+contract-prompt-authority, prompt, protocol-contract, tool-wiring; no setup.json exists). Log: scratchpad/b01-hunt/r1.log.
+`CONTROL PASS PASS tests 62/62 (3s)`: 0 skipped, all four files' tests named. Every SURVIVED run ran the same 62 test names as the
+control, all passing; no scoped file was reported under its own file name. Two live controls were KILLED (below), so the harness catches a real break.
+
+**F1 (highest risk) — tests/protocol-contract.test.cjs:190-191 (REWORDED entry used by the test at :246), NEW CLASS (nearest: a guard that SAMPLES what it claims to sweep)**
+The shape: a rewording-map entry claims a whole lost unit by its prefix, but its excerpt covers only the unit's tail. The unit starts
+"a conflict → STOP AND INVESTIGATE … then git commit-tree <tree> -p <tip> -m trial, check that commit out in a temporary worktree …".
+The excerpt starts at "a stale wt-trial …". So the trial-merge procedure, which now exists only in protocol.md, is unguarded.
+Mutation m4, protocol.md:616: `then \`git commit-tree <tree> -p <tip> -m trial\`, check that` → `then merge the branch for real, check that`
+(this merges before the trial validates) → `SURVIVED m4-trial-merge`.
+Assertion to add: each excerpt must carry the whole unit apart from its placeholder slot. For example, split the lost unit at
+`{{WORKTREE_SETUP}}` and require every side to be found in flat(protocol), or add the head as a second excerpt. The same check applies to every
+REWORDED entry. Test-only → ASK.
+
+**F2 — tests/tool-wiring.test.cjs:756-760 (with the REWORDED entry at tests/protocol-contract.test.cjs:192-193), catalog: rewrite of a guard not a superset of the old**
+At edd2f1e, tests/tool-wiring.test.cjs:678 pinned protocol step 5's "a pasted prompt with no nonce line". The rewrite reads protocol.md, but its
+needle stops at "…the manual procedure is a pasted prompt". The REWORDED excerpt covers only "the validation commands … the report shape".
+Mutation m5, protocol.md:650: `   no nonce line, and every such prompt` → `   its nonce line, and every such prompt` → `SURVIVED m5-pasted-nonce`.
+After this change the manual procedure hands out the nonce, which contradicts §Spawning rules.
+Assertion to add: extend the :760 needle to `… is a pasted prompt with no nonce line` (collapsed). Test-only → ASK.
+
+**F3 — tests/tool-wiring.test.cjs:185, :202, catalog: positive-only assertions on prose**
+The new boot step 4 (**Procedure**) is held only by its position and by `steps[procedure].text.includes('protocol.md')`. PINNED covers step 3 and ends where step 4 starts.
+Mutation m1, templates/00-READBEFORE.md:42: `… pinned directory, now governs` → `… pinned directory, never governs` → `SURVIVED m1-boot-procedure`.
+Assertion to add: pin step 4 verbatim, as a PINNED entry `[TEMPLATE, '4. **Procedure**', '\n5. **Reconcile**', …]`, bumping the PINNED length. Test-only → ASK.
+
+**F4 — tests/tool-wiring.test.cjs:442-445, :447-456 (README carrier), catalog: positive-only assertions on prose**
+PINNED holds the template and protocol.md carriers by equality. The README carrier is checked only for the presence of single words
+(/\bwords\b/, /upgrade/, /restore/, …).
+Mutation m2, README.md:110: `Your recorded words then pick one of two ways on:` → `The session then picks one of two ways on by itself, no words needed:`
+→ `SURVIVED m2-readme-words`.
+Assertion to add: pin README's Rollout-boundary mismatch sentences by equality (a PINNED entry from `- **Rollout boundary.**` to
+`## Install`). Test-only → ASK.
+
+**F5 (lowest) — tests/tool-wiring.test.cjs:372-379, :425-426, catalog: "delete a member and both sides shrink" (both sides built from one literal)**
+The superset check compares PRE_PIN_CLAIMS with OLD_CLAIMS. OLD_CLAIMS is built by spreading PRE_PIN_CLAIMS, so the check can fail only if
+that spread is removed. Editing the "old" family narrows both sides at once.
+Mutation m3, tests/tool-wiring.test.cjs:373: `\bnever\s+references?\s+(?:this|the)\s+skill\b` → `\bnever\s+references\s+this\s+skill\b` → `SURVIVED m3-prepin-narrowed`.
+(After this change "never reference the skill" is no longer banned.)
+Assertion to add: read the old family from the checkout (`git show edd2f1e:tests/tool-wiring.test.cjs`, OLD_CLAIMS sources, the way
+SLIM_BASE reads the template), assert it is non-empty, and require every source it contains among OLD_CLAIMS. Test-only → ASK.
+
+Checked, not findings:
+- Live controls KILLED: c1 deleted a moved sentence from protocol.md (`KILLED c1-moved-sentence: every sentence the slimmed template dropped is carried by protocol.md`).
+  c2 changed the shipment passage's "does not" (`KILLED c2-shipment-does-not: Recovery and capped-verdict tables …, every sentence …`).
+- tests/protocol-contract.test.cjs:356 `protocol.includes('does not')` cannot fail: the phrase occurs 8 times in protocol.md. Its intended subject is covered by
+  the SHIPMENT_PASSAGE pin (c2 KILLED), so it is redundant rather than a hole. Deleting it loses nothing.
+- Classifier sweep: in memory I found 538 base units. 132 are kept in the template and 362 are carried by protocol.md; every carried unit that only B01 added
+  matches exactly once, so deleting any of them reddens. I read each of the 44 REWORDED and RETIRED claims: F1 and F2 are the claims whose uncovered head carries a rule
+  that exists only once; the other partial ones restate text protocol.md states elsewhere. The table SHA pins and count==1 were checked; the template's
+  absence of the tables, the close-out, the step-5/6/6a copies and the LOG commands was checked; the placeholder retirement sweep was checked; the 7 recipes executed; the
+  INVOCATION form in protocol.md and smoke-page.md was checked; KNOWN_TOOL_PATH_FAULTS is held at {}; PINNED step 3, protocol step 1 and the baking rule were checked; and the Skill-source line position was checked.
+  The Skill-source line position is proven by the real parser: skillPin matches `**skill**` only.
+- tests/prompt.test.cjs:239 is sound: every role's render is compared against the oracle, with a reworded Integration-branch control. Its parse half never reads
+  00-READBEFORE.md (check-ledger.mjs:128-133 parses the plan, PROGRESS and batch files), so criterion 3's parse half does not depend on the
+  contract template. It is carried by the 01-plan and PROGRESS templates.
+- Outside the per-test question, and not counted: no test asserts note 7's precedence rule. Mutation m6, protocol.md:4:
+  `contract file outranks this document` → `contract file is outranked by this document` → `SURVIVED m6-precedence`. The template preamble
+  (00-READBEFORE.md:9-11) is likewise unasserted.
+
+=== end of B01 R1 test-hunter findings ===

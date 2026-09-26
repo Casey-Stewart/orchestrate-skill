@@ -31,7 +31,7 @@ before believing any row (§Recovery in the contract).
 
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
-| B01 | Contract slimming: one copy of the procedure | `chore/contract-slimming` | 1 | — | 🔄 | 2026-09-25 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b01` |
+| B01 | Contract slimming: one copy of the procedure | `chore/contract-slimming` | 1 | — | 🔄 | 2026-09-26 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b01`; implementer DONE_WITH_CONCERNS @95f8338 (513/515, 2 skipped); fence PASS; 6b n/a (chore); R1 SHIP @95f8338 asks=6 (reviewer strong/opus 3 ASK, one for W2; hunter 5, one shared — LOG §B01 — gate, round 1) |
 | B02 | Tool CLIs run through any symlinked path; git env scrubbed | `fix/cli-entry-symlink` | 1 | — | 🟢 | 2026-09-26 | merged `0090173`: implementer DONE @665549f (532/534, 2 skipped) → fence PASS → 6b PROVEN (23 of 152 fail on `40f8182`) → R1 SHIP @665549f asks=4 (reviewer 2 ASK, hunter 3, one shared) → polish @c780338 (test-only; fence PASS; 532/534, 2 skipped); tip `0090173` PASS tests 532/534, 2 skipped (23s); tier default (implementer, reviewer, hunter); residuals: `mutate.mjs:204` comment and the CRASHED list still say "a step" (outside BL-041), the Windows newline-directory branch of the refusal test first runs at C1, BL-028 doc half is B01 — LOG §B02 · m: rounds=0 asks=4 fence-bounces=0 gate=3/0 tip-red=0 |
 | B03 | Conductor and agent budget rules | `feat/budget-rules` | 2 | — | ⬜ | 2026-09-25 | — |
 | B04 | Prose polish: comment-only classifier, prose ASKs, one strike | `feat/prose-polish` | 3 | — | ⬜ | 2026-09-25 | — |
