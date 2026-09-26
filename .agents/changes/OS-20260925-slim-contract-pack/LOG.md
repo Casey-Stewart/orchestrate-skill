@@ -1148,3 +1148,130 @@ global and system config (`GIT_CONFIG_NOSYSTEM`, an empty `GIT_CONFIG_GLOBAL`), 
 `core.fsmonitor=true` cannot start daemons in its repositories; tests that run a tool with the ambient
 environment are the remaining place it could. Residual candidate for `BACKLOG.md` at close-out whatever the
 user's answer: the suite's spawn volume (batch fixture construction, share fixture repositories).
+
+### B04 C1 fix-up — R4
+
+- R4 reviewer (fresh, default tier) SHIP, P0=0 P1=0 ASK=2: F1 the new fixture's comment claims more than the
+  shim proves (a `git add --all` route passes it on Linux; Git for Windows' `mktree` unprobed); F2 B04's
+  smoke step 4 and the page's Step 2 still expect the residual (`PROSE-ONLY`, exit 0) — the orchestrator's
+  to re-author at the re-issue, with Runner agent, since the four named scenarios leave nothing to accept.
+- R4 test-hunter (fresh after the first was lost with the old process, default tier) FINDINGS 2, both
+  test-only: #1 skipcq pinned by one form (`SURVIVED p1-skipcq-needs-colon` — a bare ` // skipcq` appended
+  would read PROSE-ONLY); #2 the shim covers two argv routes and its control the easy one
+  (`SURVIVED t1-fixture-worktree-add-all`, `t2-…-index-info-stdin`, `t4-shim-add-never-refused`) — assert
+  on the domain instead: no `ls-files -z` entry and no work-tree name below U+0020. Reviewer F1 and hunter
+  #2 are one gap → one polish item (the domain assertion, and the comment narrowed to what it then proves).
+  → `R4 SHIP @afba68d asks=3` (F1≡#2, #1; F2 is the orchestrator's), gate=2/0.
+- Hunter housekeeping note: a stray clone `/tmp/mut-y4h9fL` from before its run (a mutate run killed with
+  the old process leaves its clone).
+- The maintenance experiment (the user asked to try the change locally): in a throwaway worktree at
+  `afba68d`, `tests/support/git-fixture.cjs:27` writing `[maintenance] auto = false` and `[gc] auto = 0`
+  into the fixture's global config keeps the suite green (`PASS tests 562/564, 2 skipped`) and drops the
+  detached `git maintenance run --auto --detach` runs from 708 to 7 (the rest from tests that build
+  repositories without the helper); total processes 74,890 → 74,189. Steps for the laptop given to the
+  user: count `git` processes, run `tests/check-fence.test.cjs` (229 detached runs) unmodified and edited,
+  compare, `git restore` before the real Step 1.
+### B04 R4 reviewer findings
+SHIP
+
+F1 — ASK — tests/prose-only-diff.test.cjs:612-616 (and e94f0c9's message, "A fixture moved back to the index fails on Linux too")
+- Guardrail: run a live control through your own harness; the apparatus that verifies the work can look right either way. The comment claims more than the shim proves.
+- Scenario: a later edit simplifies the fixture to `repo.write(BROKEN, 'x = 1;\n'); const c1 = repo.commit('c1');` (the working tree, then `git add --all`). The shim sees only arguments, so it never sees the path. My mutation M5 of exactly this edit: 16/16 green on Linux. Only the Windows run would go red again, yet the comment says "a fixture back on the index fails everywhere". Two more claims are stated as fact but unverified: that Git for Windows' `add` prints "Invalid path" (on Windows the name cannot exist in the working tree, so `add` fails earlier and differently), and that "a tree object holds it on every platform" (Git for Windows' `mktree` has not been probed).
+- Minimal fix: narrow the comment to what is proven. For example: "a fixture that hands the path to update-index or add as an argument fails everywhere; one staged by add --all or read from stdin is caught on Windows only". Mark the Windows `mktree` behaviour as expected, pending the laptop re-run.
+
+F2 — ASK — .agents/changes/OS-20260925-slim-contract-pack/02-batches-04-prose-polish.md:167-174 (smoke step 4) and smoke-c1.json section 2, Step 2 (the published page)
+- Guardrail: vacuous-until-later documentation; an issued input derived from the tree goes stale when a repair changes the tree.
+- Scenario: at the C1 re-issue the user runs Step 2 on the new build. I-04 now prints `CODE lib/token.mjs`, exit 1 (verified here from the issued bundle). The step's Pass still requires `PROSE-ONLY 1 file(s)`, exit 0, "the residual, reproduced". So the step must be marked failed, which is a spurious C1 failure.
+- Minimal fix (orchestrator; the implementer may not edit the batch file): re-author step 4 and page Step 2 to Pass on `CODE lib/token.mjs`, exit 1, with Runner agent (CLI), since the four named scenarios leave no residual to accept. Then rebuild and re-validate the page from the new build. At close-out, narrow BACKLOG's BL-046 row to the class fix only.
+
+Hunk map (every hunk mapped; no scope creep):
+- e94f0c9 (test only; `:612-658`): BROKEN/TAB, the index-refusing shim, the live control, and c1 built with `ls-tree -z` + `mktree -z` + `commit-tree`. This maps to the C1 failure report. The false comment "made in the index so any platform can commit it" is gone.
+- afba68d, tool: `:38` skipcq, `:58` VERBS, `:64` rule-id `[/.:_-]`. This is BL-046's minimal fix exactly as the row words it. The second `_` sits inside a class that already has `\w`, so it is redundant but specified.
+- afba68d, test: `:320`, `:331`, `:352`, `:355`, pins `:361/:363/:389`, and the CLI test `:477-498`. These are the owned entries and near-misses. `checkov:skip` is the real-comment witness that the verb check at `:402-405` requires for `skip`.
+- Two separate commits, with the required message forms.
+
+Acceptance, checked rather than taken on trust:
+- The four named scenarios read `CODE` through the published CLI (test `:480`, plus my own per-cell run).
+- I-04 reads `CODE lib/token.mjs`, exit 1. Live control: the pre-fix tool (e3af462) reads the same bundle as `PROSE-ONLY 1 file(s)`, exit 0.
+- I-01 is unchanged (`PROSE-ONLY 1 file(s)` 0 / `CODE invoice.mjs` 1). The BL-042 grep prints nothing and exits 1.
+- All 30 PROSE_COMMENTS entries read prose via `keptBy` (`:381`) and also through the published CLI on real commits: 30/30 PROSE-ONLY. My directive controls: 5/5 CODE.
+- Ownership: removing each element on its own flips exactly its own scenario and reddens the test file. allow, allowlist and skip each give 3 fails; skipcq and `_` give 2 each, through the family and CLI tests as well as the pins.
+- The fix only adds alternatives and widens one class, so no listed directive can regress to prose.
+- B04 AC1-6 are untouched by the fix-up; the SHA pins and the REINSTATE and WRITE_LICENCES sweeps are green.
+- AC2 holds for the listed vocabularies. The open-ended class is the accepted BL-046 residual, not a new finding.
+- Side effect, fails closed (cost, not a finding): prose such as `// Parsers skip line comments.`, `// TODO: allow retries.` and `// We allow all origins here.` now reads as a shape, so rewording it triggers the scoped re-review.
+
+Validation (worktree at afba68d, pinned wrapper):
+- Plain: `PASS tests 562/564, 2 skipped (23s)`, exit 0.
+- `FORCE_COLOR=1`: `PASS tests 562/564, 2 skipped (23s)`, exit 0.
+- That is B04's 561/563 plus the one new test, with the Linux baseline's 2 skips. Logs: `b04c1-rev/plain.log`, `b04c1-rev/force-color.log`.
+- `git diff --check` is clean, both files are LF at base and head, and the worktree is clean.
+
+Failing-on-base: consistent with the diff, and reproduced independently.
+- (B) afba68d's test file on e3af462's tree: 3 of 16 fail, at `:361` (size pin), `:388` (verb equality) and `:496` "gitleaks:allow appended (I-04)". Per cell, all five CODE scenarios read PROSE-ONLY before the fix and CODE after; the three near-misses read PROSE-ONLY both times.
+- (A) Under the in-suite shim, the pre-repair fixture (M4) and the index route with the live control kept (M1) both go red with the laptop's line and blob: "Fixture command failed … update-index --add --cacheinfo 100644,198b8f89…,line", `128 !== 0`. With the shim removed (M2) or neutered (M3), the live control goes red (`0 !== 128`), so the control is live. This is proven as an emulation only.
+
+Implementer concerns weighed:
+- Git for Windows `mktree` cannot be checked here. In git's source, mktree refuses only a `/` in a name and never reaches the index-path check (`verify_path` → `is_valid_win32_path`). commit-tree, diff and cat-file never create a file by that name. So I expect the laptop to pass; if mktree does refuse, the test fails loudly at `:656`, never silently.
+- The shim also refuses DEL (Git for Windows accepts it) and does not refuse `<>:"|?*` (Git for Windows does). Neither matters for the two names this test stages.
+- tests/check-fence.test.cjs:64-74 predates this ledger (b3ce33e, 2026-09-18). It never stages the name on Windows and is green there. It is a weaker, platform-conditional case with no refusal asserted, not the reported defect: a BACKLOG candidate, not a finding against this diff.
+
+=== end of B04 R4 reviewer findings ===
+### B04 R4 test-hunter findings
+FINDINGS 2
+
+Scope: `git diff chore/slim-contract-pack-ledger...HEAD` at afba68d (worktree /home/timetotilt/worktrees/os925/b04-c1). Tests: tests/prose-only-diff.test.cjs, where :359 and :386 had their pins and corpus changed, :480 is new, and :643 got a rebuilt fixture plus its shim at :612-641. Code they cover: orchestrate/tools/prose-only-diff.mjs:38, :58 and :64, and for the shim, the fixture itself. No setup.json exists.
+Harness: mutate.mjs with the scoped spec /tmp/claude-1000/-home-timetotilt-projects-orchestrate-skill/30346af3-7332-4e1a-b96e-3cbe367061c2/scratchpad/b04c1-hunt/scoped-spec.json. It runs only that test file, in pwsh as validate.json does, and keeps `git diff --check`. Mutations are in .../b04c1-hunt/mutations.json and the log is .../b04c1-hunt/run1.log.
+- Result: `CONTROL PASS PASS tests 16/16 (7s)` with 0 skipped, which is the file's 16 tests. `MUTATE 8 killed, 6 survived, 0 other`.
+- Every run's test names match the control's as a set (compared section by section in the log).
+- Every SURVIVED run shows 16 pass, 0 fail, 0 skipped, and no file reported under its own name.
+- run-at-ref: `AT afba68d PASS tests 16/16 (7s)`.
+Verdict: the production change is correct and only widens: it can keep more comments, never fewer. Both findings need only test changes. Ranked by risk.
+
+**1. ASK: skipcq is pinned by one form only, so narrowing the pattern to that form stays green.**
+- Test: tests/prose-only-diff.test.cjs:320 holds the only skipcq comment (`// skipcq: JS-0002`). The keep sweep is at :366-370 and the CLI row at :488.
+- Code: orchestrate/tools/prose-only-diff.mjs:38 `/(?<![\w-])skipcq(?![\w-])/i`.
+- Class: a guard that SAMPLES the domain it claims to sweep. The ownership sweep tests each directive against one real form, so it cannot see an edit that NARROWS a pattern down to that form. skipcq is a listed name, so this is not the accepted residual about unlisted vocabulary.
+- Mutation: `SURVIVED p1-skipcq-needs-colon` (:38 → `/(?<![\w-])skipcq:/i`).
+- Consequence: at afba68d, `keptBy('// skipcq')` and `keptBy('/* skipcq */')` both return `['directive']` and nothing else (checked read-only). So under p1, no family keeps the bare form, which DeepSource uses to skip every issue on the line.
+- Result: ` // skipcq` appended to a code line is stripped along with its leading spaces (remainder, :246) and reads PROSE-ONLY. That is BL-046's I-04 shape again. At HEAD the same edit reads CODE.
+- Add:
+  - `'// skipcq'` to DIRECTIVE_COMMENTS, moving the :363 pin from 46 to 47; :370 then goes red under p1.
+  - A row in :485-492: `['a bare skipcq appended', text(header, code), text(header, code + ' // skipcq'), 'CODE']`.
+- Route: test-only → ASK.
+
+**2. ASK: the index-refusing shim covers two argument routes; the fixture's own idiom, put back on the index, stays green off Windows.**
+- Test: tests/prose-only-diff.test.cjs:615-616 claims "so a fixture back on the index fails everywhere".
+  - The shim at :618-641 reads only argv (:622-626).
+  - The live control at :648-652 probes only `update-index --cacheinfo`.
+- Guarded code: the fixture at :653-657; no tool code is involved. Git can receive the path from argv, from stdin, or from the work tree (repo.commit() runs `git add --all`, tests/support/git-fixture.cjs:69-72).
+- Class: a guard that SAMPLES the domain it claims to sweep: it covers two argv routes, and its control tests only the easy one. Also a branch no input reaches: the `add` refusal.
+- Mutations:
+  - `SURVIVED t1-fixture-worktree-add-all`: :654-657 → `repo.write(BROKEN, 'x = 1;\n'); const c1 = repo.commit('c1');`. This is the idiom the rest of the file uses. On Windows the write fails, because the file name holds U+000A. That repeats C1's escape: green on every Linux gate, red on the laptop.
+  - `SURVIVED t2-fixture-index-info-stdin`: the same entry staged by `update-index -z --index-info` on stdin. Git for Windows refuses this in add_cacheinfo/verify_path, just as it refuses --cacheinfo.
+  - `SURVIVED t4-shim-add-never-refused`: `|add` dropped at :626.
+  - Control: `KILLED t3-control-fixture-original-index-route` ("Invalid path"). The shim is live on the one route it covers.
+- Add: once c1 exists, assert on the domain rather than the route. No `git ls-files -z` entry and no file name in repo.cwd may hold a code point below 0x20 (compare by code point, per :20-21). t1, t2 and t3 then go red on Linux, whatever route staged the path.
+- Overlap: the R4 reviewer's F1 is the same scenario (their M5 ≡ t1) and proposes narrowing the comment instead. This assertion closes the gap rather than narrowing the claim.
+- Route: test-only → ASK.
+
+Checked and holding:
+- Dropping any new verb is KILLED by :359, :386 and :480 (p3 allow, p4 allowlist, p5 skip).
+- Dropping skipcq (p6) is KILLED by :359 (the size pin) and by :480's row "a skipcq rule id edited".
+- Removing `_` from the first separator class (p7) is KILLED by :359 and by :480's row "a coverity event edited".
+- The near-misses are live:
+  - Making `allow` a bare directive name, the over-broad fix (p9), is KILLED by :359 and by :480's row "allow in prose appended".
+  - Admitting a letter as a rule-id separator (p10) is KILLED by :359 and by :480's row "a bracketed index in prose edited".
+- :388 and :393 bind VERBS, SCOPES and both list-built shapes to SHAPE_GRAMMAR.
+- By trace, not run: the witness loop at :402-405 needs :62's `(?!\w)` to tell allow from allowlist, since only `pragma: allowlist` witnesses allowlist.
+- :480's first row is I-04 byte for byte (evidence/C1/inputs/generate-c1-inputs.mjs:123-124), run through the published CLI on real commits.
+- By trace: the fix keeps more comments, which sets `lines` (:267) more often and preserves line structure, so there is no new PROSE-ONLY path.
+- :643's CLI assertion at :658 is unchanged. oneLine's hidden set is pinned at tests/check-ledger.test.cjs:922-924.
+Survived, not counted:
+- p8 (`_` dropped from the second class `[\w/.:_-]`): an equivalent mutant, because `\w` already includes `_`.
+- p2 (skipcq's `i` flag dropped): there is no documented upper-case DeepSource form.
+- Loosening skipcq's lookarounds (not run): that keeps more comments, the conservative direction.
+Wrote only scoped-spec.json and mutations.json under b04c1-hunt; the harness wrote run1.log and at-head.log there.
+- Housekeeping: there is a stray clone at /tmp/mut-y4h9fL, dated 07:33. It predates my run, so it is not mine, and I left it alone. A run killed by a timeout does not clean up its clone.
+
+=== end of B04 R4 test-hunter findings ===
