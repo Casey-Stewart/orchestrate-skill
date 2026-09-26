@@ -783,3 +783,28 @@ FINDINGS 7
 - the CLI, git-level, precedence, UTF-8 and raw-reader tests.
 
 === end of B04 R2 test-hunter findings ===
+
+### B04 — third round (fix again)
+
+The user's verdict, given in this session after the STOP, is recorded verbatim in the verdict log:
+"Yup, run it again. Fresh implementer, I moved this session up to max as well to help." Consumed
+here: row → 🔄, `verdict 2026-09-26 fix again spent → third round on feat/prose-polish @18b6c86`.
+The worktree `b04` is clean at `18b6c86`, not an ancestor of the integration branch.
+
+Tier: the strong tier is the most capable model the session can spawn. Fable 5.1 is priced at
+$10/$50 per MTok against Opus 5.5's $4/$20 (the user's memory note on token accounting), so this
+round's fresh implementer runs on Fable 5.1, and so does the round-3 re-reviewer (a reviewer never
+runs below the implementer's tier). B01's strong-tier reviews in this ledger ran on opus.
+
+Procedure (`subagent-prompts.md` §Authorized third round): the fresh implementer is spawned with
+the pointer to its rendered implementer prompt, which makes the batch its own; once that report's
+nonce checks, it is resumed with the pointer to a `fix-round` prompt rendered with `round` 3 and
+both rounds' findings joined into one file (R1 reviewer + R1 hunter + R2 reviewer + R2 hunter,
+byte copies of the scratch files whose LOG copies are above), followed by an orchestrator
+direction: both rounds' blocking findings are one class — an enumerated list of the unsafe cases
+where the safe cases are the smaller provable set (R1 F1 then R2 F5 for regex-or-division; R1 F3
+then R2 F6 for directive comments) — so the round fixes the class: every ECMAScript reserved word
+and contextual keyword, written by hand in the test, is placed in exactly one of the certain-end,
+certain-start and doubt sets, asserted as a partition; directive comments are kept by structure as
+well as by name, each alternative owning a corpus comment; every R2 finding closed and every R1
+finding kept closed.
