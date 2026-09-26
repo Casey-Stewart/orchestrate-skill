@@ -171,11 +171,11 @@ the merge.
 3. **Do**: [BL-042] `grep -n "validate.test.cjs:[0-9]" tests/tool-wiring.test.cjs`.
    **Pass**: no output, exit 1.
    **Runner**: agent (CLI).
-4. **Do** (the shipped residual `BL-046`, authored after the merge by the user's ship-with-the-residual
-   verdict, 2026-09-26): `git clone <I-04 bundle> ../c1-scratch/i04` — two commits, `c1` appends
-   ` // gitleaks:allow` to a code line — then
+4. **Do** (`BL-046`, re-authored at C1 issue 2: the C1 fix-up folded in its minimal fix by the user's words,
+   2026-09-26): `git clone <I-04 bundle> ../c1-scratch/i04` — two commits, `c1` appends ` // gitleaks:allow`
+   to a code line — then
    `node orchestrate/tools/prose-only-diff.mjs --repo ../c1-scratch/i04 --base <c0> --head <c1>`
    (SHAs from the step's issued input record). Reset: `rm -rf ../c1-scratch/i04`.
-   **Pass**: it prints `PROSE-ONLY 1 file(s)`, exit 0 — the residual, reproduced — and you accept
-   B04 shipping with it until `BL-046` lands; mark it failed if you do not.
-   **Runner**: human (a judgement: accepting a known residual).
+   **Pass**: it prints `CODE lib/token.mjs`, exit 1 — the appended directive keeps the comment as code
+   (revision 1 expected `PROSE-ONLY 1 file(s)`, exit 0: the residual as shipped).
+   **Runner**: agent (CLI).

@@ -1295,3 +1295,45 @@ Wrote only scoped-spec.json and mutations.json under b04c1-hunt; the harness wro
   2 skipped (23s)`.
 - Integrated: `git merge-tree --write-tree` clean (`10039bd`), `--no-ff` merge `c83ec7d`, tip `PASS tests
   562/564, 2 skipped (23s)` → B04 🧪. Worktree `b04-c1` removed.
+
+### The maintenance experiment — the user's result
+
+The user, verbatim: "Maintenance experiment on check-fence.test.cjs: 7 conhost before and after, no git/sh/bash
+left over, both unmodified and with the edit. Times: ___ s unmodified, ___ s edited. Edit reverted."
+
+Reading: `tests/check-fence.test.cjs` starts the most detached `git maintenance run --auto --detach` jobs of any
+file (229 here), yet on the laptop nothing outlived the run with or without the edit (the 7 `conhost` are the
+user's own consoles, unchanged). The detached maintenance is therefore not a leak there; the maintenance change
+is NOT folded into this change (it fixes nothing measurable) and stays part of the process-volume residual for
+`BACKLOG.md`. The report of "40+ thousand processes" reads as volume — the suite executes ~75k processes per run
+here, likely 2–3× that on Windows, with test files running in parallel — not as survivors; the user is asked for
+one `Get-Process | Group-Object Name` count after the Step 1 re-run to settle it. BL-029 (a timed-out validation
+step's grandchild left running on Windows) remains the one known Windows survivor, bounded to a few processes.
+
+### C1 issue 2 — QA re-verification
+
+QA runner (default tier, hand-filled skeleton, nonce matched) on the build `c83ec7d`: steps 2, 6, 12, 13 (all
+revision 2) PASS — step 2 `CODE lib/token.mjs`, exit 1 (BL-046's fix); step 6 eleven `SAME`, lengths as issue 1;
+step 12 `PROSE-ONLY 1 file(s)`, 0; step 13 `CODE invoice.mjs`, 1. Evidence `evidence/C1/issue-2/step-02.md`,
+`-06`, `-12`, `-13`; inputs I-01 and I-04 re-hashed, unchanged; resets proven; the blocks for 6, 12 and 13
+byte-identical to issue 1's. B04's smoke step 4 re-authored in its batch file to match page Step 2 revision 2
+(Runner agent: the four named directives fixed, nothing left for the user to accept; the open class stays in
+BACKLOG).
+
+### C1 issue 2 — page and proof
+
+- `smoke-c1.json` re-issued by editing the issued issue-1 sidecar (a snapshot taken from `f6b4224`): steps keep
+  their numbers and order; revisions raised — Step 1 (its suite changed), Step 2 (re-authored: verifies BL-046's
+  fix, Runner agent), steps 6, 12, 13 (their covered `prose-only-diff.mjs` changed); fresh pre-verification on
+  2, 6, 12, 13 (`evidence/C1/issue-2/`); the other nine carry issue 1's evidence (same revisions, labelled
+  carried over); the gate names the new build and a canary that tells it from issue 1's build (I-04: `CODE
+  lib/token.mjs`, exit 1; issue 1 printed `PROSE-ONLY 1 file(s)`). Built by the pinned `build-smoke-page.mjs`
+  with `--previous` the issued sidecar (77272 bytes, every slot filled). Page diff against issue 1 reviewed:
+  only the intended sidecar edits.
+- Proof (`evidence/C1/issue-2/artifact-proof.md`): rendered-DOM read COULD-NOT-RUN as for issue 1; substitute —
+  19 blocks via `html.parser`, no backslash or control character, every agent block byte-identical to its QA
+  run's bytes, 5 gate + 13 agent blocks run as published from a fresh clone (tip `321b2be`), each as its Pass
+  states. Harness slip caught: the extractor labelled Step 2 human by its number; its block was then compared
+  and run separately.
+- Rows stay 🧪; C1 row → 🧪 (issue 2); State AT-CHECKPOINT C1. The artifact is republished to the same URL
+  and the branch pushed per the user's preauthorization (verdict log).

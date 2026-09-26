@@ -3,11 +3,11 @@
 **Identifier**: OS-20260925-slim-contract-pack
 **Started**: 2026-09-25 · **Base**: edd2f1e522b592258911e83f0fdd9c1920883049 (the default-branch commit the ledger
 branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
-**State**: ACTIVE
+**State**: AT-CHECKPOINT C1
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
-**Smoke page**: https://claude.ai/artifact/YQnp8Pgc1ePNd64YGBsXKX (hosted, private, `db` store; C1 issue 1, build `f770be1`, 2026-09-26) · committed copy `smoke-c1.html` beside its sidecar `smoke-c1.json`
+**Smoke page**: https://claude.ai/artifact/YQnp8Pgc1ePNd64YGBsXKX (hosted, private, `db` store; C1 issue 2, build `c83ec7d`, 2026-09-26; issue 1 was build `f770be1`) · committed copy `smoke-c1.html` beside its sidecar `smoke-c1.json`
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
 before believing any row (§Recovery in the contract).
 
@@ -40,7 +40,7 @@ before believing any row (§Recovery in the contract).
 
 | Checkpoint | After wave | Covers | Why here | Status | Verdict |
 |------------|------------|--------|----------|--------|---------|
-| C1 | 3 | B01, B02, B03, B04 | mandatory final; no batch is hands-on | ❌ | fail (issue 1, 2026-09-26) — Step 1 → B04 (a Windows-only test fixture); Step 2 not yet given; build `f770be1`, page https://claude.ai/artifact/YQnp8Pgc1ePNd64YGBsXKX · m: pre-smoke=12/2 human-smoke-min=— escaped=1 |
+| C1 | 3 | B01, B02, B03, B04 | mandatory final; no batch is hands-on | 🧪 | issue 2 awaiting the user's verdict — build `c83ec7d`, the same page; issue 1 (build `f770be1`) failed on Step 1 → B04, repaired by `fix/B04-c1-followup` (with BL-046's minimal fix, by the user's words) · m: pre-smoke=13/1 human-smoke-min=— escaped=1 |
 
 ## Issued checkpoint inputs
 
@@ -90,4 +90,4 @@ Issue 001, 2026-09-26, build `f770be1` — `evidence/C1/inputs/issue-001/`, gene
 | 2026-09-26 | continue (same session): the user verdict on B04, fix again, recorded verbatim and consumed — B04 → 🔄, third round on `feat/prose-polish` @18b6c86: a FRESH implementer on the strong tier (Fable 5.1), then a fresh re-review | STOP — B04 ⛔ green, residual finding open (P1) after the authorized third round (R3 FIX FIRST @2cf7d9e); verdict needed: ship with the residual / drop; C1 close-out waits on it |
 | 2026-09-26 | continue (same session): the user's ship-with-the-residual verdict consumed — B04 merged `bf055ce`, BL-046 filed (BACKLOG.md repaired forward, `220ad6c`); W3 closed. C1 close-out: inputs I-01–I-04 issued and independently validated (`f770be1`); tip PASS tests 561/563, 2 skipped; QA runner pre-smoke 12/12 PASS on `f770be1`; page built and published (https://claude.ai/artifact/YQnp8Pgc1ePNd64YGBsXKX); artifact proof COULD-NOT-RUN (the rendered DOM unreachable) with a labelled substitute, 16/16 blocks run as published; rows → 🧪; checkpoint integration SHA `f770be1` | STOP — C1 awaiting the user's verdict (2 human steps); the push of the integration branch to `origin` for the Windows step asked |
 | 2026-09-26 | close: the user's Windows run of Step 1 (pasted) recorded verbatim — fail, triaged to B04 (a test fixture Git for Windows refuses to index); B04 → ❌, fix-up pending: fix/B04-c1-followup; B01–B03 stay 🧪; Step 2 still awaited | — (running: the fix-up) |
-| 2026-09-26 | continue (resumed after the Claude Code process restarted): boot SKILL MATCH; reconcile — B04 ❌, `fix/B04-c1-followup` @afba68d ahead, R4 reviewer SHIP (asks=2) in scratch, the R4 test-hunter lost with the old process → respawned fresh; resume-time validation on `57da24e` PASS tests 561/563, 2 skipped; the user's report of 40k+ processes on Windows measured (60,697 → 74,890 per suite run; none survive on Linux) | — (running) |
+| 2026-09-26 | continue (resumed after the Claude Code process restarted): boot SKILL MATCH; reconcile — B04 ❌, `fix/B04-c1-followup` @afba68d ahead, R4 reviewer SHIP (asks=2) in scratch, the R4 test-hunter lost with the old process → respawned fresh; resume-time validation on `57da24e` PASS tests 561/563, 2 skipped; the user's report of 40k+ processes on Windows measured (60,697 → 74,890 per suite run; none survive on Linux) | STOP — C1 issue 2 issued (build `c83ec7d`: the fix-up merged, pre-smoke 13/13 with 4 re-run, page republished to the same URL, substitute proof 18/18 as published); push to `origin` per the recorded preauthorization follows this commit; awaiting the user's Step 1 re-run on Windows |
