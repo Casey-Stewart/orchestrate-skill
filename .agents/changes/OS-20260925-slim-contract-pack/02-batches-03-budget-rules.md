@@ -89,7 +89,7 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 - [x] Explore thoroughness default (medium) at `SKILL.md:180` and `scaffolding.md:19`
 - [x] Scaffold-at-high ask in the scaffolding procedure
 - [x] Compaction-at-boundaries rule and the practices in `protocol.md`
-- [ ] [BL-034] `qa-runner.md:11` reworded
+- [x] [BL-034] `qa-runner.md:11` reworded
 - [x] Tests pinning each new rule sentence in its carrier, plus a sweep for contradicting directives elsewhere
 
 ## Acceptance criteria

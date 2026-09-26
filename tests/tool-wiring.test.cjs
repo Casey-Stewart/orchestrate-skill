@@ -1753,6 +1753,46 @@ test('no agent definition sets an effort or a model, read more strictly than the
   for (const file of files) assert.deepEqual(tierKeyFaults(file, read(file)), [], file + ': sets an effort or a model');
 });
 
+// [BL-034] The gate pair holds a scoped Write; no text may say it lacks one. README's sentence
+// about a stale installed copy is true, and is removed as its exact text, never by its clause.
+const GATE_PAIR = String.raw`\b(?:reviewer|test[- ]hunter|read-only pair|gate pair)s?\b`;
+const LACKS_WRITE = [
+  ['Write and Edit, unlike the gate pair', new RegExp(String.raw`\bWrite\b[^.;:]*\bEdit\b[^.;:]*\bunlike\b[^.;:]*` + GATE_PAIR, 'i'),
+    'This role keeps `Write` and `Edit` on purpose, unlike the reviewer and the test hunter.'],
+  ['unlike the gate pair, Write', new RegExp(String.raw`\bunlike\b[^.;:]*` + GATE_PAIR + String.raw`[^.;:]*\bWrite\b`, 'i'),
+    'Unlike the reviewer and the test hunter, this role keeps Write and Edit.'],
+  ['the gate pair without Write', new RegExp(GATE_PAIR + String.raw`[^.;:]*\b(?:lacks?|lacking|without|has no|have no|holds? no|gets? no)\s+(?:the\s+)?Write\b`, 'i'),
+    'The reviewer and the test hunter have no Write tool.'],
+];
+const QA_RUNNER_WRITES = ['.claude/agents/qa-runner.md', 'This role keeps', '\n\n`mcp__Claude_Browser__*`',
+  'This role keeps `Write` and `Edit` on purpose; the reviewer and the test hunter hold no `Edit`, and their `Write` reaches only their findings file and scratchpad scratch. The QA-runner skeleton in `orchestrate/references/subagent-prompts.md` has it "write [LEDGER_DIR]/evidence/C[N]/step-[NN].md" for every step, and "Modify only disposable working copies and prove reset". Stripping Write/Edit here would leave a checkpoint with no evidence to close on — do not "correct" this to match the read-only pair.'];
+const STALE_COPY = 'an older reviewer or test-hunter lacks the Write tool its rendered prompt needs for the findings file';
+const lacksWrite = text => clauses(collapse(unticked(text)).split(STALE_COPY).join(' '))
+  .flatMap(c => LACKS_WRITE.filter(([, p]) => p.test(c)).map(([name]) => name + ' — ' + c));
+test('[BL-034] no text says the reviewer and the test hunter lack Write', () => {
+  assert.equal(new Set(LACKS_WRITE.map(l => l[0])).size, LACKS_WRITE.length);
+  for (const [name, , specimen] of LACKS_WRITE) {
+    assert.deepEqual(LACKS_WRITE.filter(([, p]) => p.test(unticked(specimen))).map(l => l[0]), [name], name + ': its specimen must be caught by it alone');
+    assert.equal(lacksWrite(specimen).length, 1, name + ': the sweep reports its specimen');
+  }
+  for (const planted of ['The read-only pair lacks Write, so this role keeps it.', 'The reviewer, lacking the `Write` tool, keeps no evidence.',
+    'Only this role has Write; the test hunter gets no Write at all.']) {
+    assert.ok(lacksWrite(planted).length >= 1, 'must be reported: ' + planted);
+  }
+  // The reworded paragraph, pinned whole: its directive to keep Write and Edit stands.
+  const [qaFile, from, to, expected] = QA_RUNNER_WRITES, qa = read(qaFile);
+  assert.equal(qa.split(from).length - 1, 1, qaFile + ': the anchor must occur exactly once');
+  assert.equal(collapse(section(qa, from, to)).trim(), expected, qaFile + ': the pinned paragraph changed; update QA_RUNNER_WRITES only on purpose');
+  assert.notEqual(collapse(section(qa.replace(from, from + ' Skip it when in a hurry.'), from, to)).trim(), expected, 'a planted sentence must redden the pin');
+  assert.deepEqual(lacksWrite(expected), [], 'the reworded paragraph is not the old claim');
+  // The exemption is live: README carries the sentence, and only the exemption keeps it unreported.
+  assert.ok(collapse(unticked(read('README.md'))).includes(STALE_COPY), 'README still carries the stale-copy sentence this exemption names');
+  assert.ok(LACKS_WRITE.some(([, p]) => p.test(STALE_COPY)), 'the exempt sentence would otherwise be reported');
+  const files = [...documents(), ...definitionListing()];
+  assert.ok(files.includes('.claude/agents/qa-runner.md') && files.includes('README.md'));
+  for (const file of files) assert.deepEqual(lacksWrite(read(file)), [], file + ': says the gate pair lacks Write');
+});
+
 // The undo sweep stays unweakened: B03 writes rules beside it and reuses its reader. Its domain,
 // its negation reader and its test are byte-for-byte what they were at FAMILY_BASE, and UNDO may
 // grow but never lose or narrow an entry. Changing any of them is a deliberate edit here.
