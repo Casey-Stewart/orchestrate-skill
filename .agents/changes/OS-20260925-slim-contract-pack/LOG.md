@@ -413,3 +413,77 @@ The SKILL.md hunk is a faithful prose fix. It moves the existing clause from ste
 **Not counted: upgrade path.** Under upgrade, the carriers never re-run the pin check, while SKILL.md takes up protocol.md "only on SKILL MATCH". After the pin line is rewritten, a re-run prints SKILL MATCH, so this costs one extra command and produces no wrong outcome.
 
 === end of B01 R2 reviewer findings ===
+
+## 2026-09-26 — continue (W2)
+
+W2 opened at `6d2492b` (PROGRESS `682dc4f`): `feat/budget-rules` → `/home/timetotilt/worktrees/os925/b03`;
+implementer spawned on the default tier.
+
+### B03 — gate, round 1
+
+- Implementer DONE, nonce matched: `0102b2a` (feature) + `9863cc5` (BL-034); 6/6 ticked;
+  `PASS tests 541/543, 2 skipped` plain and under `FORCE_COLOR=1`; additions only — no moved
+  protocol.md sentence reworded, so no `NEEDS_FENCE` for `tests/protocol-contract.test.cjs`.
+- 6a `check-fence.mjs`: PASS, integration `682dc4f`, batch `9863cc5`, merge base `6d2492b`,
+  violations [], unknowns []. 6b n/a (feature).
+- 6c combined reviewer+gate pass (S weight, default tier): SHIP, P0=0 P1=0 ASK=2 — the POLL sweep
+  misses "wait/check until a sub-agent lands" (two proven survivors); the BOUND_WORDS guard makes
+  "effort"/"explore" false rejections across code and HTML (a README "however much effort" line
+  reddens it). Orchestrator direction for the polish: ASK 2 takes the reviewer's option (a) —
+  narrow the effort/explore families and POLL's poll/sleep to the `.md` files under `orchestrate/`
+  plus README, assert the narrowed domain is a superset of the carriers — so B04 does not inherit
+  the trap. → `R1 SHIP @9863cc5 asks=2`.
+- Residuals for `BACKLOG.md` (reviewer, not blocking): the compaction STOP does not say what it
+  asks of the user (`/compact`, or `continue` in a fresh session); the "after any compaction"
+  duty lives only in step 8, so a conductor auto-compacted mid-wave meets it only on re-reading
+  protocol.md.
+
+### B03 R1 reviewer findings
+SHIP
+
+Findings
+
+1. tests/tool-wiring.test.cjs:1685-1693 (POLL, the polling sweep): positive-only assertions on prose / a guard that samples its domain. ASK.
+   Scenario: I added "Before ending a turn, wait until every implementer of the wave has reported." to protocol.md step 6, or changed SKILL.md Mode continue to "spawn ALL of the wave's implementers concurrently, then check each one's output until it lands". Either one reverses the rule "when the only remaining work waits on sub-agents it ends the turn", and the full suite stays green. mutate.mjs on a disposable clone of 9863cc5 against the ledger's validate.json: `SURVIVED poll-wait-protocol`, `SURVIVED poll-check-until-skill`.
+   The five families catch the words poll, sleep, ReadNotifications, "keep checking" and "check … every N / periodically", but not the plainest ways to say it: wait or check UNTIL a sub-agent lands, or hold the turn rather than end it.
+   Fix: add one owned family for holding the turn on a sub-agent. For example, a wait/check/look verb, "until", and an agent noun (implementer|reviewer|sub-agent|agent|wave) in the same clause, plus "before/instead of/rather than ending the turn". Give it a specimen and add both survivors above to the planted list. Keep smoke-page-template.html:1425 ("A page update is waiting until you finish editing this note.") as a must-pass control, because a verb+until pattern with no agent noun would reject it.
+
+2. tests/tool-wiring.test.cjs:1650-1656 (BOUND_WORDS) with 1657-1683: a disproportionate guard. It turns ordinary words into false rejections. ASK.
+   Scenario: B04 (wave 3) owns README.md, SKILL.md, protocol.md and execution-models.md and adds orchestrate/tools/prose-only-diff.mjs. If it writes "effort", "explore", "thorough" or "compact" anywhere in that tree, including a code comment such as "best-effort", the test goes red with the message "states the rule again or contradicts it". Proven: README "a change too big for one session, however much effort it gets." gives `KILLED readme-effort-word: each budget rule's key word appears nowhere but inside its pinned carriers`. The POLL sweep has the same reach: a future "poll"/"sleep" in a .mjs or in the smoke page's JS would be read as a conductor directive.
+   Judgement (orchestrator question 1): the domain really is the enumerated directory. documents() walks orchestrate/ recursively, every file type, plus README, and each word is armed with a plant just outside every passage. The guard is proportionate for `ReadNotifications`, a tool name. It is tolerable for compact/thorough in prose. For "effort" and "explore" across code and HTML it is a false-rejection trap. The failure is loud and local, and B04 owns this test file, so B04 can recover in-fence, but only by editing B03's guard.
+   Fix (either): (a) limit the "effort" and "explore" families (and POLL's sleep/poll) to the .md files under orchestrate/ plus README, where conductor directives live. Keep ReadNotifications/compact/thorough on the whole tree. State the narrowing in the comment and assert the new domain is a superset of the carriers. (b) Keep the guard as is and have B04's prompt name it: which words, and that a hit means rewording or a deliberate BOUND_WORDS edit.
+
+Hunk map: every hunk is mapped. The batch file has ticks only (exempt). qa-runner.md is item 5 [BL-034]. SKILL.md: cadence + no-poll is items 1 and 4; explore is item 2. protocol.md: Orchestrator bullet is item 1; step 8 + Session practices is item 4. scaffolding.md: Precondition 4 is item 3; Plan step is item 2. The execution-models.md step-5 qualifier is item 4: without it, "open the next wave immediately, same session" contradicts the new early stop. The tool-wiring.test.cjs append is item 6, plus AC5 (tier-key test), item 1 (UNDO guard) and item 5 (BL-034 sweep). No scope creep.
+
+Acceptance criteria, checked against the diff:
+- AC1 met. The rule is at protocol.md:50-52 and SKILL.md:157-159. Smoke 1 has two hits, both the rule. My grep for wait…until / ending-the-turn across orchestrate/ and README finds no directive to poll.
+- AC2 met. The rule sits inside step 8 (wave close), and the step-8 test holds that position: `KILLED compaction-out-of-step8`. It re-asks "a merge, push or third-round authorization that exists only in a summary".
+- AC3 met at SKILL.md:190 and scaffolding.md:22.
+- AC4 met: scaffolding.md:13-15 Precondition 4 ends "Never change the setting yourself."
+- AC5 met. The protocol.md hunks are at :47 and :723 only, so neither SHA-pinned table moved, and protocol-contract is green. Smoke 2 exits 1.
+- AC6 met. Smoke 3 exits 1, and the directive to keep Write and Edit stands (pinned whole).
+- Doc sweeps: BL-034 is its own commit, 9863cc5, carrying the id with its pin and sweep. The feature commit 0102b2a carries the rule pins and sweeps.
+
+Validation (wrapper, worktree root):
+- Plain: `PASS tests 541/543, 2 skipped (23s)`, exit 0.
+- FORCE_COLOR=1: `PASS tests 541/543, 2 skipped (23s)`, exit 0.
+- The 2 skipped are the expected Windows-only pair. git diff --check is clean, the EOL is LF as before, and there are no emptied code spans.
+- Logs are in the session scratchpad at b03-rev/validate-plain.log and validate-forcecolor.log, and mutate.log with muts.json.
+- Live control: the mutate run's own CONTROL PASS, and 4 of 6 mutations KILLED.
+
+Guardrails:
+- effort: key: TIER_KEY is key-presence, so values inside, above (999999, ultra) and below (0, -1, none) all reject. Missing or unclosed frontmatter is rejected on doubt, and `effort-frontmatter` is KILLED. Alone it is not "stricter than the loader": `? effort` / `: max` and `"\x65ffort": max` pass tierKeyFaults. But agent-definitions.test.cjs parses every line of the four definitions as a strict `key: value` and whitelists the directory, so at suite level both are rejected.
+- Agents directory: it is walked recursively, dotted directories included, and the walk has a depth control.
+- UNDO: it is byte-identical to edd2f1e in all three regions and has 17 entries. The new guard is live: `KILLED undo-narrowed` (dropping "completion" from one entry, which the old sweep alone let through).
+
+Mutations each new test survives:
+- Pins, key-word exclusivity and POLL: both proven survivors above.
+- Tier-key test: none at suite level for frontmatter.
+- BL-034 sweep: "Neither the reviewer nor the test hunter carries Write." placed outside qa-runner.md (by inspection: no verb in its list, no "unlike").
+- UNDO guard: n/a for production, since it reads only the test file.
+
+Orchestrator question 2 (compaction wording): the rule is actionable. A Claude Code conductor has no way to run /compact, but "ends the session" is always available and the text makes it an early STOP. The "after any compaction, an automatic one included" half covers the compaction branch whichever way it happens. The rule does not say what the STOP asks of the user (/compact, or `continue` in a fresh session). That is a production wording change, it follows the spec's verbatim text, and it is not blocking; worth a backlog line. Related: the "after any compaction" duty lives only in step 8, so a conductor auto-compacted mid-wave meets it only on re-reading protocol.md.
+
+Orchestrator question 3: yes, the implementer re-derived the pointers. At the ledger base the carriers were SKILL.md:186 and scaffolding.md:19, and UNDO was at 581-668. The implementer anchored every pin and region by text, not by the batch file's stale :180 / :465-483. The only stale numbers left are in the checklist tick text, which is exempt.
+
+=== end of B03 R1 reviewer findings ===
