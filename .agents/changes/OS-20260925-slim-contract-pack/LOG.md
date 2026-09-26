@@ -1115,3 +1115,36 @@ BL-046 sign-off) is not yet given. B04 → ❌, fix-up pending: `fix/B04-c1-foll
   — `:359` pinned list sizes, `:386` verb set equality, `:480` "gitleaks:allow appended (I-04)". PROVEN.
 - The fix-up's reviews continue B04's numbering (R4, R5) so each LOG heading stays unique; the fix-up cap
   (two `FIX FIRST`) counts from R4. R4 reviewer and test-hunter spawned (default tier, the implementer's).
+
+## 2026-09-26 — continue (resumed after the Claude Code process restarted)
+
+Boot: skill pin `SKILL MATCH 354f4dd…`; no reboot since 2026-09-21, so the session scratchpad survived
+(the R4 reviewer's findings file intact). Reconcile: B04 ❌ with `fix/B04-c1-followup` at `afba68d`, ahead,
+not integrated, worktree clean — the fix-up's R4 reviewer had returned SHIP (not yet recorded) and the R4
+test-hunter was lost with the old process (no findings file) → a fresh R4 test-hunter spawned (new nonce).
+Resume-time validation on the integration tip `57da24e`: `PASS tests 561/563, 2 skipped (23s)`.
+
+### The user's report: the suite's process count on Windows
+
+The user, verbatim: "So what do I do to test? Assuming we are ready? Also, the testing suite is opening 40+
+THOUSAND individual processes on my laptop and leaking them. Thoughts on that?"
+
+Measured on the Linux workstation (each test file run alone under `strace -f -e trace=execve`):
+
+| Tree | Processes executed by the whole suite | of which `git` |
+|---|---|---|
+| ledger base `edd2f1e` | 60,697 | 58,893 |
+| the fix-up `afba68d` (this change + the fix-up) | 74,890 | 72,785 |
+
+Largest at the fix-up: `check-fence` 28,490 (base 28,334), `git-contract` 13,877 (base 10,489; B02's decoy
+tests), `check-ledger` 11,662 (11,338), `prose-only-diff` 9,867 (new, B04), `mutate` 8,323 (8,022). The
+count is a pre-existing property of the suite — fixtures and tools spawn one `git` per operation — and this
+change raised it by 23 %. On Linux no process outlives the run (only kernel workers were alive from the run's
+window afterwards). Leaking on Windows is not reproducible here: Git for Windows' `cmd\git.exe` launcher
+starts a second `git.exe`, and each console process may get a `conhost.exe`, so one call is 2–3 Windows
+processes (hence >100k process creations and the 13–20-minute laptop runs); whether any stay alive after the
+suite exits is the question put to the user, with a read-only PowerShell count. The fixture helper isolates
+global and system config (`GIT_CONFIG_NOSYSTEM`, an empty `GIT_CONFIG_GLOBAL`), so a global
+`core.fsmonitor=true` cannot start daemons in its repositories; tests that run a tool with the ambient
+environment are the remaining place it could. Residual candidate for `BACKLOG.md` at close-out whatever the
+user's answer: the suite's spawn volume (batch fixture construction, share fixture repositories).
