@@ -4,8 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { pathToFileURL } from 'node:url';
-import { decode, parseFlags, validFullRef, validId, validPath } from './git-evidence.mjs';
+import { decode, parseFlags, validFullRef, validId, validPath, isMain } from './git-evidence.mjs';
 import { linesOf, exactPaths, table, oneRow, branchCell, extensions, skillPin } from './ledger-parse.mjs';
 
 const PLAN = '01-plan.md', PROGRESS = 'PROGRESS.md';
@@ -209,6 +208,6 @@ export function ledgerCli(args) {
 const hidden = n => n < 32 || (n >= 127 && n <= 159) || n === 0x2028 || n === 0x2029;
 export const oneLine = text => [...text].map(c => hidden(c.codePointAt(0)) ? '?' : c).join('');
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   const output = ledgerCli(process.argv.slice(2)); process.stdout.write(oneLine(output.line) + '\n'); process.exitCode = output.code;
 }

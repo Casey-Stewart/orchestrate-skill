@@ -3,9 +3,7 @@
 // not touch a worktree can see a suite at another commit: ONE line, `AT <short sha> <validate.mjs
 // line>`, and validate.mjs's own exit code. The checkout is mutate.mjs's, removed afterwards.
 import fs from 'node:fs';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { parseFlags } from './git-evidence.mjs';
+import { parseFlags, isMain } from './git-evidence.mjs';
 import { oneLine } from './check-ledger.mjs';
 import { Unknown, CleanupFailed, withDisposableCheckout, openLog, runLogged, readJson, checkedSpec, topLevel, inside, timeoutOf, scrubLocalGitEnv } from './mutate.mjs';
 
@@ -16,8 +14,8 @@ export async function runAtRef({ repo, ref, validate, setup = null, logPath, tim
   let log;
   try { log = openLog(logPath); } catch (e) { return { code: 2, line: `UNKNOWN ${e.message}` }; }
   try {
-    return await withDisposableCheckout(repo, ref, async ({ dir, short, scratch }) => {
-      const run = (label, spec) => runLogged(spec, { cwd: dir, log, label, scratch, timeoutMs });
+    return await withDisposableCheckout(repo, ref, async ({ dir, short, scratch, env }) => {
+      const run = (label, spec) => runLogged(spec, { cwd: dir, log, label, scratch, timeoutMs, env });
       if (setup) {
         const done = await run('setup', setup);
         if (done.status !== 'PASS') return { code: 2, line: `AT ${short} UNKNOWN setup ${done.line}` };
@@ -57,7 +55,7 @@ export async function runAtRefCli(args) {
   } catch (e) { return { code: 2, line: `UNKNOWN ${e instanceof Unknown ? e.message : `internal error: ${e.message}`}` }; }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMain(import.meta.url)) {
   // Exit 1 reads as "the suite failed", so a crash never ends with it: UNKNOWN, exit 2.
   process.on('uncaughtException', e => { fs.writeSync(1, oneLine(`UNKNOWN internal error: ${e?.message ?? e}`) + '\n'); process.exit(2); });
   const output = await runAtRefCli(process.argv.slice(2));

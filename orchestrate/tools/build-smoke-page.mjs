@@ -11,9 +11,10 @@
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 import { declareInputs, compareInputHistory, validateInputFiles, sectionsWithInputs } from "./smoke-inputs.mjs";
+import { isMain } from "./git-evidence.mjs";
 
 const DEFAULT_TEMPLATE = resolve(
   dirname(fileURLToPath(import.meta.url)), "../references/smoke-page-template.html");
@@ -322,8 +323,7 @@ function sameFile(left, right) {
   return a.dev === b.dev && a.ino === b.ino;
 }
 
-// `file://` + a Windows path is not the URL Node reports, so compare through the URL API.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
   let args;
   try {
     args = parseArgs({ allowPositionals: true, options: {
