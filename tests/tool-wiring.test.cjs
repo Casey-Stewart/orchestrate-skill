@@ -1423,11 +1423,19 @@ function bashEnv(env) {
 }
 // [BL-042] The comment above names the validate.test.cjs test it leans on by its title, never
 // by a line range: the range it used to name went stale as that file grew.
-test('[BL-042] the Git-bash pointer names a tests/validate.test.cjs test that exists, by title', () => {
+test('[BL-042] the Git-bash pointer names, by title, the tests/validate.test.cjs test that runs the shells', () => {
   const source = read('tests/tool-wiring.test.cjs');
   const named = /tests\/validate\.test\.cjs runs its test\n\/\/ '([^'\n]+)'/.exec(source);
   assert.ok(named, 'the pointer names the test by its title');
-  assert.ok(read('tests/validate.test.cjs').includes("test('" + named[1] + "'"), 'no test of that title in tests/validate.test.cjs: ' + named[1]);
+  // Each top-level test of that file with its body, up to the next: the named one must be the
+  // one that runs the shells, not merely a title that exists.
+  const tests = read('tests/validate.test.cjs').split(/^(?=test\()/m).filter(t => t.startsWith('test('));
+  const target = tests.filter(t => t.startsWith("test('" + named[1] + "'"));
+  assert.equal(target.length, 1, 'no test of that title in tests/validate.test.cjs: ' + named[1]);
+  const shells = /\b(?:GIT_BASH|SHELLS)\b/;
+  assert.match(target[0], shells, 'the named test does not run the shells: ' + named[1]);
+  // The check can fail: another test in that file does not run the shells.
+  assert.ok(tests.some(t => !shells.test(t)), 'a test that does not run the shells exists in tests/validate.test.cjs');
   assert.doesNotMatch(source, new RegExp('validate' + '\\.test\\.cjs:' + '[0-9]'), 'a line-range pointer into tests/validate.test.cjs');
 });
 // The published text with its placeholders filled: every one of them, and nothing else.
