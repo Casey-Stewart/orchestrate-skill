@@ -181,3 +181,16 @@ Logs: b02-hunt/run-a.log (mutations-a.json), b02-hunt/run-b.log (mutations-b.jso
 Killed (non-vacuous): m2 `real === fs.realpathSync(self)` → `real === self` (by the --preserve-symlinks-main leg, cli-entry :84 — node does keep the link there); k4 loud branch → `return false`; k5 realpath try/catch removed (:110); k6 build-smoke-page back to an unresolved guard; k7 git() unscrubbed; k8 config names dropped too; k10 API env = `{ ...process.env }`; k12 runSpec ignores `env`; k14 "a slash" only; k15 "a step"; k16 empty list accepted; k17 SURVIVED clause dropped; k18 runLogged drops `env`; k19 mutate's localGitVars throws a plain Error. Read, not mutated: the domain test (:58-68; partition backed by CLI_STATE, lower bound 8), the `ran` roll-call (:114), the three git-contract tests (each has a live control: plant live, fake git answers), the validate sweep's new specimens (each owned by one new VERDICT alternative).
 
 === end of B02 R1 test-hunter findings ===
+
+### B02 — polish and integration
+
+- Polish (same implementer, nonce matched) @`c780338`: 4 `polish:` lines ticked (the shared
+  reviewer/hunter ASK on one line); test-only — `tests/cli-entry.test.cjs`,
+  `tests/git-contract.test.cjs`, `tests/mutate.test.cjs` plus the batch file. The implementer's
+  scratch mutations m1, m1b, m3, m13, k11, m9 all killed after the polish.
+- Mechanical close: fence PASS (integration `acd1754`, batch `c780338`), worktree validation
+  `PASS tests 532/534, 2 skipped (23s)`; no production path touched → no re-review.
+- Integrated: `git merge-tree --write-tree` clean (`e010f81`), `--no-ff` merge `0090173`, tip
+  `PASS tests 532/534, 2 skipped (23s)` → 🟢. Worktree `b02` removed.
+- Carried to C1: the refusal test's Windows branch assumes Windows refuses a directory name
+  holding a newline and accepts any error there — first exercised by the laptop step.
