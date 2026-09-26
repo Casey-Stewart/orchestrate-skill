@@ -1024,3 +1024,62 @@ condition holds, and the verdict is consumed as *ship with the residual*.
   bytes from a fresh clone at `f770be1`: 16/16 as each Pass states. One screenshot confirmed the
   hosted page renders (tally pre-verified 12 · unmarked 2 · of 14).
 - Rows → 🧪; State AT-CHECKPOINT C1. The hand-over asks for the push the Windows step needs.
+
+## 2026-09-26 — C1 issue 1: Step 1 fail (the Windows run)
+
+The user's message, verbatim — the pasted tail of the README PowerShell recipe on the Windows laptop,
+build `f770be1` at branch tip `2cb1289` (Step 0 had passed on the laptop):
+
+```text
+✖ failing tests:
+
+test at tests\prose-only-diff.test.cjs:587:1
+✖ one line whatever a path holds, usage refused, --help documents the flags the published command uses (2017.9739ms)
+  AssertionError [ERR_ASSERTION]: Fixture command failed in C:\Users\fatbo\AppData\Local\Temp\orchestrate-git-F2pQPi\repo: git update-index --add --cacheinfo 100644,198b8f89e758aee0adce3806353120c3b674937d,line
+  break.mjs
+  error: Invalid path 'line
+  break.mjs'
+  fatal: git update-index: --cacheinfo cannot add line
+  break.mjs
+
+  128 !== 0
+
+      at Object.git (C:\Users\fatbo\OneDrive\Desktop\Claude Testing\orchestrate-skill\tests\support\git-fixture.cjs:60:14)
+      at TestContext.<anonymous> (C:\Users\fatbo\OneDrive\Desktop\Claude Testing\orchestrate-skill\tests\prose-only-diff.test.cjs:592:8)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 128,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+PS C:\Users\fatbo\OneDrive\Desktop\Claude Testing\orchestrate-skill> if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }
+Node test suite failed
+At line:1 char:28
++ if ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Node test suite failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : Node test suite failed
+
+PS C:\Users\fatbo\OneDrive\Desktop\Claude Testing\orchestrate-skill> git diff --check
+PS C:\Users\fatbo\OneDrive\Desktop\Claude Testing\orchestrate-skill> if ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }
+PS C:\Users\fatbo\OneDrive\Desktop\Claude Testing\orchestrate-skill>
+```
+
+Triage: B04. Its new `tests/prose-only-diff.test.cjs:587` test stages, through the index
+(`git update-index --add --cacheinfo`, via `tests/support/git-fixture.cjs`'s `git()`), a fixture path
+holding a newline to prove the classifier's one output line whatever a path holds. Git for Windows
+refuses such a path at the index ("Invalid path"; its own win32 path check — on Linux,
+`core.protectNTFS=true` does not reproduce it, probed with git 2.53.0), so the fixture command exits 128
+before the tool runs. The product is not implicated; the Windows validation gate is red. No gate caught
+it: every gate ran on Linux, where the path is legal (escaped defect 1 of C1). A tree object may hold
+such a name on any platform (`git mktree -z` accepts it here), so the property the test guards stays
+real on Windows. Only one failing test was pasted; the totals were above the pasted tail. Step 2 (the
+BL-046 sign-off) is not yet given. B04 → ❌, fix-up pending: `fix/B04-c1-followup`; B01–B03 stay 🧪
+(not explicitly passed).
