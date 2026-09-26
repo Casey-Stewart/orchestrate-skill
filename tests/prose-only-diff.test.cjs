@@ -68,6 +68,9 @@ const RULES = [
   ['a line break before ++ makes it a prefix', 'CODE',
     ['x = count\n++/[//]a/.lastIndex;\n', 'x = count\n++/[//]b/.lastIndex;\n'],
     ['x = count ++/[//]a/.lastIndex;\n', 'x = count ++/[//]b/.lastIndex;\n']],
+  ['a block comment between two words keeps them apart', 'CODE',
+    ['const t = typeof/* the */value;\n', 'const t = typeofvalue;\n'],
+    ['const t = typeof/* the */value;\n', 'const t = typeof/* its */value;\n']],
   ['a hashbang is code', 'CODE',
     ['#!/usr/bin/env node\nrun();\n', '#!/usr/bin/env -S node\nrun();\n'],
     ['// usr/bin/env node\nrun();\n', '// usr/bin/env -S node\nrun();\n']],
@@ -97,7 +100,7 @@ const RULES = [
     ['export const t = `open ${x}`; // a\n', 'export const t = `open ${x}`; // b\n']],
 ];
 // Pinned by hand, so a rule dropped from the corpus goes red here rather than shrinking every loop.
-const RULE_COUNTS = { CODE: 16, UNKNOWN: 8 };
+const RULE_COUNTS = { CODE: 17, UNKNOWN: 8 };
 // Edits a polish makes, and code the reader must not mistake for doubt: each must read PROSE-ONLY.
 const PROSE = [
   ['a line comment reworded', '// Adds two numbers.\nexport const add = (a, b) => a + b;\n', '// Adds two numbers together.\nexport const add = (a, b) => a + b;\n'],
@@ -110,7 +113,11 @@ const PROSE = [
   ['a / after a postfix ++ divides', 'count++ / 2; // a\n', 'count++ / 2; // b\n'],
   ['a keyword after a dot is a property name', 'export const half = options.return / 2; // a\n', 'export const half = options.return / 2; // b\n'],
   ['a / after } with no second / on its line divides', 'x = {} / 2;\n// a\n', 'x = {} / 2;\n// b\n'],
-  ['a regular expression holding a quote and a backtick', 'const q = /[\'"`]/; // a\n', 'const q = /[\'"`]/; // b\n'],
+  ['a regular expression holding a slash, quotes and a backtick in a class', 'const q = /[/\'"`]/; // a\n', 'const q = /[/\'"`]/; // b\n'],
+  ['a / after ] divides', 'const half = sizes[0] / 2; // a\n', 'const half = sizes[0] / 2; // b\n'],
+  ['a / after a number ending in a dot divides', 'const r = 1. / 3; // a\n', 'const r = 1. / 3; // b\n'],
+  ['a / after a string divides', "const n = '10' / 2; // a\n", "const n = '10' / 2; // b\n"],
+  ['a hashbang holding a quote', "#!/usr/bin/env -S node --title=it's\n// a\nrun();\n", "#!/usr/bin/env -S node --title=it's\n// b\nrun();\n"],
   ['a string holding an escaped quote and //', "const s = 'it\\'s // no comment'; // a\n", "const s = 'it\\'s // no comment'; // b\n"],
   ['a line continuation inside a string', "const s = 'one \\\ntwo'; // a\n", "const s = 'one \\\ntwo'; // b\n"],
   ['a shift is not JSX', 'const v = (a << 2) | (b <= c); // a\n', 'const v = (a << 2) | (b <= c); // b\n'],
@@ -124,7 +131,7 @@ test('the corpus is the one written above: its size and its rules, pinned', () =
   assert.equal(new Set(names).size, RULES.length, 'every rule once');
   assert.equal(RULES.length, RULE_COUNTS.CODE + RULE_COUNTS.UNKNOWN);
   for (const [verdict, count] of Object.entries(RULE_COUNTS)) assert.equal(RULES.filter(r => r[1] === verdict).length, count, verdict + ' rules');
-  assert.equal(PROSE.length, 15, 'the prose-only corpus');
+  assert.equal(PROSE.length, 19, 'the prose-only corpus');
   // A twin that equals its case would prove nothing: each pair differs, and so does each twin.
   for (const [rule, , [a, b], [c, d]] of RULES) assert.ok(a !== b && c !== d && (a !== c || b !== d), rule);
 });
@@ -193,15 +200,15 @@ const DIRECTIVE_COMMENTS = [
   '/* webpackChunkName: "editor" */', '// falls through to the default branch',
 ];
 const MARKER_COMMENTS = ['//# sourceMappingURL=run.js.map', '/*! Licensed MIT; see LICENSE */', '/// <reference types="node" />', '/* global fetch, Response */',
-  '/* exported main */', '//@ sourceURL=eval-1.js'];
+  '/* exported main */', '/* globals describe, it */', '//@ sourceURL=eval-1.js'];
 const TAG_COMMENTS = ['/** @returns {number} the sum */', '/** Parses a flag list; see {@link parseFlags}. */', '/**\n * Old entry point.\n * @deprecated since 2.0\n */'];
 const PROSE_COMMENTS = ['// Adds two numbers.', '// Mail the maintainers at team@example.com.', '// polish discarded: @<sha> marks the reviewed tree.',
   '/* Falls back to the default when unset. */', '/** Adds two numbers. */', '// the abc8 codec', '// the v8-compat shim', '// istanbul-lib-coverage reads this',
-  '// A path like a/b/c.'];
+  '// A path like a/b/c.', '// a c80 checksum'];
 test('each directive, and each comment family, owns a real comment; prose that only looks like one is prose', async () => {
   const { DIRECTIVES, keptBy } = await api;
   assert.equal(DIRECTIVES.length, 12, 'the directive list is pinned by size');
-  assert.deepEqual([DIRECTIVE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, PROSE_COMMENTS.length], [12, 6, 3, 9]);
+  assert.deepEqual([DIRECTIVE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, PROSE_COMMENTS.length], [12, 7, 3, 10]);
   // The five the feature names are in the list, by name.
   for (const named of ['eslint', 'istanbul', 'c8', '@ts-', 'prettier']) assert.ok(DIRECTIVES.some(([name]) => name === named), named);
   for (const [name] of DIRECTIVES) {
@@ -281,7 +288,7 @@ test('a comment-only commit of both forms reads PROSE-ONLY and a one-character c
 });
 
 // Git-level rules: what the diff is, rather than what a file says.
-test('an added, deleted, renamed, re-moded, linked or submodule JavaScript path is CODE; its twin reads PROSE-ONLY', t => {
+test('an added, deleted, renamed, re-moded, linked or submodule JavaScript path, or a BOM added, is CODE; its twin reads PROSE-ONLY', t => {
   const repo = makeRepo(t);
   const body = '// a\nexport const a = 1;\n', edited = '// b\nexport const a = 1;\n';
   repo.write('keep.mjs', body); repo.write('gone.cjs', body); repo.write('old.js', body); repo.write('mode.mjs', body); repo.write('link.mjs', body);
@@ -303,6 +310,8 @@ test('an added, deleted, renamed, re-moded, linked or submodule JavaScript path 
   step('renamed', () => { repo.git('mv', 'old.js', 'renamed.js'); }, { status: 1, line: 'CODE old.js' });
   step('made executable, its text reworded too', () => { repo.write('mode.mjs', edited); repo.git('add', 'mode.mjs'); repo.git('update-index', '--chmod=+x', 'mode.mjs'); },
     { status: 1, line: 'CODE mode.mjs' });
+  step('a byte-order mark added', () => { repo.write('keep.mjs', Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(edited)])); repo.git('add', 'keep.mjs'); },
+    { status: 1, line: 'CODE keep.mjs' });
   step('turned into a link', () => { repo.git('update-index', '--cacheinfo', '120000,' + blob + ',link.mjs'); }, { status: 1, line: 'CODE link.mjs' });
   step('a submodule moved', () => { repo.git('update-index', '--cacheinfo', '160000,' + c0 + ',sub.mjs'); }, { status: 1, line: 'CODE sub.mjs' });
 });
