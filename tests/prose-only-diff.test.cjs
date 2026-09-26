@@ -317,7 +317,7 @@ const DIRECTIVE_COMMENTS = [
   '// prettier-ignore', '/* v8 ignore next */', '/* jshint esversion: 11 */', '/*jslint node:true, es6 */',
   '// biome-ignore lint/suspicious/noExplicitAny: legacy data', '// deno-lint-ignore no-explicit-any', '// deno-lint-ignore-file', '// oxlint-disable-next-line no-unused-vars',
   '/* webpackChunkName: "editor" */', '/* turbopackIgnore: true */', '/* node:coverage ignore next */', '/* node:coverage disable */',
-  '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props', '// LCOV_EXCL_LINE', '// deepcode ignore HardcodedSecret: a test fixture', '// skipcq: JS-0002',
+  '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props', '// LCOV_EXCL_LINE', '// deepcode ignore HardcodedSecret: a test fixture', '// skipcq: JS-0002', '// skipcq',
   '// Stryker disable next-line all', '// Stryker disable all', '// Stryker restore all', '// Stryker restore EqualityOperator',
   '// nosemgrep: javascript.lang.security.audit.path-traversal', '// nosemgrep', '// lgtm[js/xss]', '// lgtm', '// codeql[js/unused-local-variable]',
   '// cSpell:words xyzzy plugh', '// spell-checker: disable', '// noinspection JSUnusedGlobalSymbols', '// keep-sorted start', '// clang-format off', '// spotless:off',
@@ -360,7 +360,7 @@ test('each directive, and each comment family, owns a real comment; prose that o
   const { DIRECTIVES, SHAPES, keptBy } = await api;
   assert.deepEqual([DIRECTIVES.length, SHAPES.length], [29, 4], 'the directive and shape lists are pinned by size');
   assert.deepEqual([DIRECTIVE_COMMENTS.length, SHAPE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, SHARED_COMMENTS.length, PROSE_COMMENTS.length],
-    [46, 21, 7, 3, 8, 30]);
+    [47, 21, 7, 3, 8, 30]);
   // The five the feature names are in the list, by name.
   for (const named of ['eslint', 'istanbul', 'c8', '@ts-', 'prettier']) assert.ok(DIRECTIVES.some(([name]) => name === named), named);
   for (const [name] of DIRECTIVES) {
@@ -486,6 +486,7 @@ test('an allow, allowlist, skip, skipcq or underscored rule-id directive appende
     ['pragma: allowlist secret appended', text(header, code), text(header, code + ' // pragma: allowlist secret'), 'CODE'],
     ['checkov:skip appended', text(header, code), text(header, code + ' // checkov:skip=CKV_AWS_18: the audit bucket keeps these logs'), 'CODE'],
     ['a skipcq rule id edited', text(header, code + ' // skipcq: JS-0002'), text(header, code + ' // skipcq: JS-0003'), 'CODE'],
+    ['a bare skipcq appended', text(header, code), text(header, code + ' // skipcq'), 'CODE'],
     ['a coverity event edited', text('// coverity[tainted_data]', code), text('// coverity[tainted_data_return]', code), 'CODE'],
     ['allow in prose appended', text(header, code), text(header, code + ' // allow one retry'), 'PROSE-ONLY'],
     ['skip in prose appended', text(header, code), text(header, code + ' // skip the cache'), 'PROSE-ONLY'],
@@ -609,25 +610,40 @@ test('the raw diff reader refuses every record it cannot read, and the verdict r
   assert.deepEqual(classifyRaw(ROOT, [record('M'), 'README.md', ''].join(NUL)), { code: 2, line: 'UNKNOWN no JavaScript file changed; 1 other path(s) left to the path rule' });
 });
 
-// A path holding a line break. Git for Windows refuses one at the index (`update-index` and `add`
-// print "Invalid path" and exit 128) and git elsewhere takes one; a tree object holds it on every
-// platform, and the classifier reads commits, so the fixture builds its commit from tree objects.
-// Off Windows the fixture's PATH starts with a git that refuses as Git for Windows does and hands
-// every other command to the git found after it, so a fixture back on the index fails everywhere.
+// A path holding a line break. Git for Windows refuses one at the index (`update-index --cacheinfo`
+// prints "Invalid path" and exits 128) and git elsewhere takes one. The classifier reads commits, so
+// the fixture builds its commit from tree objects, which never pass the index; Git for Windows is
+// expected to take the name in a tree too (its mktree refuses only a `/`), pending a Windows run.
+// Off Windows the fixture's PATH starts with a git that answers an update-index whose arguments
+// hold a control character with that refusal, and hands every other command to the git found after
+// it. It reads arguments only, so once c1 exists the test also asserts on the domain: no name in the
+// index or under the work tree holds a code point below U+0020. A fixture that stages the name from
+// an argument, from stdin or through the work tree goes red off Windows too.
 const BROKEN = 'line' + String.fromCharCode(10) + 'break.mjs', TAB = String.fromCharCode(9);
 const indexRefusingGit = real => `#!/bin/sh
-# Refuses an update-index or add of a path holding a control character, as Git for Windows does.
+# An update-index whose arguments hold a control character gets Git for Windows' --cacheinfo
+# refusal; every other command goes to the real git.
 sub= skip=
 for arg do
   if [ -n "$sub" ]; then
     case $arg in *[[:cntrl:]]*) echo "error: Invalid path '$arg'" >&2; exit 128 ;; esac
   elif [ -n "$skip" ]; then skip=
   else
-    case $arg in -c|-C|--git-dir|--work-tree|--namespace|--config-env) skip=1 ;; -*) ;; update-index|add) sub=$arg ;; *) break ;; esac
+    case $arg in -c|-C|--git-dir|--work-tree|--namespace|--config-env) skip=1 ;; -*) ;; update-index) sub=$arg ;; *) break ;; esac
   fi
 done
 exec '${real}' "$@"
 `;
+// Every name holding a code point below U+0020, compared by code point, in git's index (read raw:
+// the fixture's git() trims its output) or anywhere under the work tree.
+function controlNames(repo) {
+  const held = name => [...name].some(c => c.codePointAt(0) < 0x20);
+  const index = spawnSync('git', ['ls-files', '-z'], { cwd: repo.cwd, env: repo.env, encoding: 'utf8', windowsHide: true, timeout: 15000 });
+  assert.ifError(index.error); assert.equal(index.status, 0, index.stderr);
+  const walk = (dir, prefix) => fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => !prefix && entry.name === '.git' ? []
+    : [prefix + entry.name, ...(entry.isDirectory() ? walk(path.join(dir, entry.name), prefix + entry.name + '/') : [])]);
+  return [...index.stdout.split(NUL).filter(held).map(name => 'index: ' + name), ...walk(repo.cwd, '').sort().filter(held).map(name => 'work tree: ' + name)];
+}
 function refuseAtTheIndexAsGitForWindows(repo) {
   if (process.platform === 'win32') return;
   const key = Object.keys(repo.env).find(name => name.toUpperCase() === 'PATH');
@@ -645,16 +661,18 @@ test('one line whatever a path holds, usage refused, --help documents the flags 
   refuseAtTheIndexAsGitForWindows(repo);
   repo.write('a.mjs', 'x = 1;\n'); const c0 = repo.commit('c0');
   const blob = repo.git('hash-object', '-w', 'a.mjs');
-  // The live control: the index refuses the path, and takes the same entry under a plain name.
+  // The live control: the index refuses the path, and takes the same entry under a name holding
+  // U+0020, which stays in the index for the domain assertion below.
   const refused = repo.probe('update-index', '--add', '--cacheinfo', '100644,' + blob + ',' + BROKEN);
   assert.equal(refused.status, 128, 'the index refuses a path holding a line break: ' + refused.stderr);
   assert.match(refused.stderr, /Invalid path '/);
-  assert.equal(repo.probe('update-index', '--add', '--cacheinfo', '100644,' + blob + ',plain.mjs').status, 0, 'the index takes a plain path');
+  assert.equal(repo.probe('update-index', '--add', '--cacheinfo', '100644,' + blob + ',plain name.mjs').status, 0, 'the index takes a name holding a space');
   // So c1 is c0's tree entries and the new one, made a tree by mktree and a commit by commit-tree.
   const tree = spawnSync('git', ['mktree', '-z'], { cwd: repo.cwd, env: repo.env, input: repo.git('ls-tree', '-z', c0) + '100644 blob ' + blob + TAB + BROKEN + NUL,
     encoding: 'utf8', windowsHide: true, timeout: 15000 });
   assert.ifError(tree.error); assert.equal(tree.status, 0, tree.stderr);
   const c1 = repo.git('commit-tree', tree.stdout.trim(), '-p', c0, '-m', 'c1');
+  assert.deepEqual(controlNames(repo), [], 'the name never reached the index or the work tree');
   assert.deepEqual(cli(repo, c0, c1), { status: 1, line: 'CODE line?break.mjs' });
   const run = args => spawnSync(process.execPath, [TOOL, ...args], { cwd: repo.cwd, env: repo.env, encoding: 'utf8', windowsHide: true, timeout: 60000 });
   for (const args of [[], ['--repo', repo.cwd], ['--repo', repo.cwd, '--base', c0, '--head', c1, '--extra', 'x'], ['--repo', repo.cwd, '--base', c0, '--base', c1]]) {
@@ -667,4 +685,18 @@ test('one line whatever a path holds, usage refused, --help documents the flags 
   const flags = [...publishedCommand().matchAll(/(--[a-z]+) </g)].map(m => m[1]);
   assert.deepEqual(flags, ['--repo', '--base', '--head']);
   for (const flag of flags) assert.ok(synopsis.includes(flag + ' <'), '--help documents ' + flag);
+  // The domain assertion's live control: names staged from stdin, which the git above never sees,
+  // and written to the work tree — the fixture's own, one holding only U+001F (in a directory, so
+  // the walk recurses) and one opening with a tab (which the fixture's git() would trim). Off
+  // Windows each is reported from both; Windows refuses them all, so none is held.
+  const names = [TAB + 'lead.mjs', 'lib/unit' + String.fromCharCode(0x1f) + 'separator.mjs', BROKEN];
+  const staged = spawnSync('git', ['update-index', '-z', '--index-info'], { cwd: repo.cwd, env: repo.env, input: names.map(name => '100644 blob ' + blob + TAB + name + NUL).join(''),
+    encoding: 'utf8', windowsHide: true, timeout: 15000 });
+  assert.ifError(staged.error);
+  for (const name of names) {
+    try { repo.write(name, 'x = 1;\n'); }
+    catch (e) { assert.equal(process.platform, 'win32', 'a file named with a control character failed off Windows: ' + e.code); }
+  }
+  const held = process.platform === 'win32' ? [] : [...names.map(name => 'index: ' + name), ...names.map(name => 'work tree: ' + name)];
+  assert.deepEqual(controlNames(repo), held, staged.stderr);
 });
