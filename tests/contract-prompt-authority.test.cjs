@@ -15,7 +15,7 @@ const NEW_BOOT_MARKER = 'your spawn prompt is authoritative';
 const template = read(TEMPLATE);
 // Anchor every claim to the implementer paragraph itself — it sits between the
 // orchestrator's boot sequence and the roles section — so a coincidental match
-// elsewhere in the 56KB contract cannot satisfy these assertions. Whitespace is
+// elsewhere in the contract cannot satisfy these assertions. Whitespace is
 // flattened because the paragraph is hard-wrapped.
 const paragraphStart = template.indexOf('Implementer sub-agents:');
 const paragraphEnd = template.indexOf('## Roles, gates, tiers');
@@ -26,8 +26,8 @@ const implementerParagraph = template.slice(paragraphStart, paragraphEnd).replac
 // Positive substring matches cannot catch an ADDITION: one appended sentence — "Even so,
 // skim this contract end to end before you start." — satisfies every assertion below
 // while destroying the ~20k-per-implementer saving this change exists to deliver. The
-// repo already pins load-bearing contract text for exactly this reason
-// (tests/protocol-contract.test.cjs:70-74 sha256-pins the decision tables). Rewording the
+// repo already pins load-bearing procedure text for exactly this reason
+// (tests/protocol-contract.test.cjs sha256-pins protocol.md's decision tables). Rewording the
 // paragraph on purpose means updating this constant; that is the intent, not brittleness.
 const EXPECTED_PARAGRAPH = [
   'Implementer sub-agents: **your spawn prompt is authoritative.** It is self-contained —',
@@ -68,7 +68,7 @@ function ledgerContracts() {
 
 test('the contract no longer sends implementers to read the contract at boot', () => {
   assert.ok(!template.includes(OLD_BOOT_INSTRUCTION),
-    TEMPLATE + ' must not tell implementers to "' + OLD_BOOT_INSTRUCTION + '" — the contract is ~20k tokens');
+    TEMPLATE + ' must not tell implementers to "' + OLD_BOOT_INSTRUCTION + '" — their prompt carries every excerpt that binds them');
 });
 
 test('the implementer paragraph makes the spawn prompt authoritative and the contract on-demand', () => {
@@ -106,7 +106,7 @@ test('the implementer paragraph is pinned verbatim, so additions are production 
 
 test('no other passage sends a sub-agent through the contract in full', () => {
   // The pin above guards the paragraph. It cannot see a directive added ELSEWHERE in the
-  // 56KB file — "Sub-agents: read this whole file first." two lines from the top would
+  // file — "Sub-agents: read this whole file first." two lines from the top would
   // reinstate the boot read while every other assertion here still passed.
   const rest = template.slice(0, paragraphStart) + template.slice(paragraphEnd);
   for (const directive of [

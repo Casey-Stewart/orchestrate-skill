@@ -18,10 +18,10 @@ not prose. `.agents/changes/` holds live ledgers; `.agents/archive/` holds close
   discovery, `node --test --test-reporter=spec`, then `git diff --check`. `node --test`
   bare from the repository root is the portable equivalent. `node --test tests/` is **not**:
   Node's directory-argument discovery differs and the suite fails.
-- `protocol.md` and the contract template mirror each other, pinned by
-  `tests/protocol-contract.test.cjs`: edit both in the same change, and treat removal as riskier
-  than addition. Its two decision tables are SHA-256-pinned: even a coordinated edit reddens, by
-  design — never regenerate the hash to make it pass.
+- `protocol.md` is the single copy of the ledger procedure; the contract template carries repo
+  facts only and points at it. Treat removal from `protocol.md` as riskier than addition. Its
+  two decision tables are SHA-256-pinned by `tests/protocol-contract.test.cjs`: any edit reddens,
+  by design — never regenerate the hash to make it pass.
 - **Never rewrite a completed ledger.** `.agents/archive/**` and any ledger whose PROGRESS
   says COMPLETE are historical records. Read them freely; write to neither.
 - **Line endings**: `.gitattributes` pins specific fixture files and `git diff --check` is
@@ -157,7 +157,8 @@ diff against the ones its fence can actually violate.
 ## Orchestration
 
 Multi-batch work runs from a ledger under `.agents/changes/`; the ledger's own
-`00-READBEFORE.md` is the contract and outranks the skill's reference docs. Statuses are
+`00-READBEFORE.md` is the contract and outranks the skill's reference docs (a pinned contract
+through its repo facts; its pinned `references/protocol.md` governs where it is silent). Statuses are
 claims, git is truth. Never commit to `main`, never push, and never merge toward `main`
 without the user's explicit words in the session that acts on them.
 

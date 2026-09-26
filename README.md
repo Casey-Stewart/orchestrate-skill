@@ -2,7 +2,7 @@
 
 A [Claude Code](https://claude.com/claude-code) skill for running multi-batch code
 changes off a **file-based ledger** that lives in the repo, survives crashes, and can be
-driven by any future session — including one that has never seen this skill.
+driven by any future session from the ledger and the skill directory it pins.
 
 The problem it solves: a change too big for one session. Context runs out, the session
 dies, a new one picks up with no memory of what was done, and status notes in chat lie
@@ -17,7 +17,7 @@ Every change gets one directory, committed to the repo:
 ```
 .agents/changes/<PREFIX>-YYYYMMDD-<slug>/
 ├── 00-request.md        the user's verbatim ask + decisions (incl. accepted backlog fold-ins) + item→batch map
-├── 00-READBEFORE.md     the contract: boot, roles/gates/tiers, git model, fence changes, checkpoints, recovery, algorithm
+├── 00-READBEFORE.md     the contract: repo facts — skill pin, boot, roles/gates/tiers, git model, validation, smoke — run by the pinned protocol.md
 ├── 01-plan.md           locked scope: batch table (weight, wave, fence), wave map + checkpoints, pre-flight verdict, per-batch specs
 ├── 02-batches-NN-*.md   one per batch: fence, applicable guardrails, spec, checklist, acceptance, tagged smoke steps
 ├── PROGRESS.md          one-line State, status + checkpoint tables, verdicts, coverage audit, one-line session log
@@ -80,9 +80,9 @@ finished? — and resumes from the real state rather than the claimed one.
 - **Ledgers are closed systems.** Every repo-specific fact (validation commands, version
   files, merge policy, smoke procedure, gate agents, runners, tiers) is baked into the
   ledger at scaffold time. A ledger references ONLY its pinned skill directory, by
-  absolute path and hash, and every step a tool performs also has a baked manual
-  procedure (the validation recipe, the pasted-prompt list, the fence's manual fallback),
-  so it stays drivable without the skill — or with a changed one: a changed skill stops
+  absolute path and hash; its procedure is that directory's `references/protocol.md`,
+  frozen by the hash, and every step a tool performs also has its manual procedure there,
+  so a session drives it from the ledger plus its pinned directory. A changed skill stops
   the ledger at its next boot and asks, and never silently changes how it runs.
 - **Statuses are claims; git is truth.** The wave-open PROGRESS commit on the
   integration branch — not any status flip — is the crash marker recovery keys on. The
@@ -101,12 +101,17 @@ finished? — and resumes from the real state rather than the claimed one.
 - **Conservative by default.** No pushing, no `--no-verify`, no force-push, no history
   rewriting, never a commit on the default branch, and nothing merges toward the default
   branch — unless you say so, in words that get recorded in the ledger.
-- **Rollout boundary.** A ledger's own contract outranks the skill. It references ONLY
-  its pinned skill directory, by absolute path and hash, and stays drivable without it
-  through its baked manual procedures, so a new skill version never rewrites a ledger already
-  scaffolded: a changed skill stops the ledger at its next boot and asks, and never
-  silently changes how it runs. A new version reaches a repo through the next
-  `/orchestrate new`, or through an upgrade of a ledger's pin that you approve.
+- **Rollout boundary.** A ledger's own contract outranks the skill through its repo
+  facts. It references ONLY its pinned skill directory, by absolute path and hash; its
+  procedure is that directory's `references/protocol.md`, frozen by the hash, and every
+  step a tool performs also has its manual procedure there, so a session drives it from
+  the ledger plus its pinned directory and a new skill version never rewrites a ledger
+  already scaffolded: a changed skill stops the ledger at its next boot and asks, and
+  never silently changes how it runs. Your recorded words then pick one of two ways on:
+  upgrade — the pin rewritten to the new version, the ledger continuing under its
+  `protocol.md` — or restore — the pinned directory rebuilt byte-for-byte from the
+  contract's `**Skill source**` line and the pin re-checked. A new version reaches a repo
+  through the next `/orchestrate new`, or through such an upgrade.
 
 ## Install
 
@@ -189,11 +194,11 @@ sidebar doesn't open", "continue" — and it routes to the right mode.
   aren't required — without them the orchestrator implements a wave's batches one at a
   time in the main checkout and still runs the review as a separate adversarial pass per
   batch. Checkpoint placement is unchanged.
-- Generated ledger contracts use runtime-neutral smoke delivery: reuse the committed
+- Generated ledgers use runtime-neutral smoke delivery: reuse the committed
   HTML through available preview/file/publishing tools, or deliver the full script as
   plain text. Cloud verdict storage is optional. Claude artifact publishing instructions
   stay in the skill reference; another agent runtime can follow the ledger's contract
-  without Claude APIs. Local HTML or plain text works without publishing a hosted page.
+  and its pinned `references/protocol.md` without Claude APIs. Local HTML or plain text works without publishing a hosted page.
 
 ## What's in here
 
@@ -221,10 +226,11 @@ orchestrate/
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 
-The Markdown ledger remains the workflow authority. Read-only Git helpers collect
-evidence, and the smoke builder checks actual delivered input bytes before writing
-the page. Existing ledgers keep their frozen rules; unsupported helper shapes use
-the contract's manual read-only fallback. A mechanical PASS never replaces review.
+The Markdown ledger and its pinned skill directory remain the workflow authority.
+Read-only Git helpers collect evidence, and the smoke builder checks actual delivered
+input bytes before writing the page. Existing ledgers keep their frozen rules;
+unsupported helper shapes use the manual read-only fallback in the pinned
+`references/protocol.md`. A mechanical PASS never replaces review.
 
 Run all repository suites from the root with this PowerShell validation recipe:
 

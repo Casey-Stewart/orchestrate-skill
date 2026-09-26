@@ -19,7 +19,8 @@ read/hash the files, execute independent semantic validation, browser-check file
 and modify only disposable working copies. Never call missing dependencies pre-verified
 or claim Excel-app execution from hashes; leave native-app steps human if no runner.
 On reissue check retained issue paths/history and every affected revision. Existing
-ledger contracts keep their own rules; tool diagnostics never authorize state changes.
+ledgers keep their own rules (a pinned ledger, its pinned directory's protocol.md); tool
+diagnostics never authorize state changes.
 
 ## Implementer
 

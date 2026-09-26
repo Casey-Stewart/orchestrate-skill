@@ -1,7 +1,7 @@
 # Execution model — the waved stack
 
-One model, structured at scaffold time and recorded in the ledger's READBEFORE (git
-model section) and PROGRESS preamble: batches are grouped into **waves** that run
+One model, structured at scaffold time and recorded as facts in the ledger's READBEFORE
+(git model section) and PROGRESS preamble, run by its pinned `references/protocol.md`: batches are grouped into **waves** that run
 concurrently, waves stack serially onto an **integration branch**, and the user
 smoke-tests only at planned **checkpoints**. Strict one-at-a-time sequencing is just
 the degenerate case (every wave width 1) — it is not a separate model.
@@ -9,10 +9,11 @@ the degenerate case (every wave width 1) — it is not a separate model.
 ## Evidence and required inputs
 
 Discovery and shipment probes use the read-only git-evidence helper under the owning
-contract. After each implementer report, the contract's mechanical fence gate captures
+contract. After each implementer report, the mechanical fence gate captures
 refs/SHAs before fresh independent semantic review; check-fence PASS is mechanical
 only, VIOLATION/UNKNOWN never authorize extensions or merges. Unsupported authority
-uses the baked manual fallback. Existing ledgers retain their frozen gate rules.
+uses protocol.md's manual fallback. Existing ledgers retain their frozen gate rules — a
+pinned ledger those of its pinned directory's protocol.md.
 
 Planning inventories inputs per step; checkpoint close-out generates reproducible
 synthetic files, independently validates requirements, and delivers exact linked

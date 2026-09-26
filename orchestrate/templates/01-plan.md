@@ -3,7 +3,8 @@
 <!-- 2–4 sentences of context: what this change is, what prompted it, intended outcome. -->
 
 **Orchestration**: this change runs under [00-READBEFORE.md](00-READBEFORE.md) — that
-file is the contract; this one only locks scope, waves, and checkpoints.
+file is the contract of repo facts, run by its pinned skill directory's
+`references/protocol.md`; this one only locks scope, waves, and checkpoints.
 
 ## Batch table
 
