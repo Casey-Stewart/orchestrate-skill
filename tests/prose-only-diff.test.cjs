@@ -584,14 +584,52 @@ test('the raw diff reader refuses every record it cannot read, and the verdict r
   assert.deepEqual(classifyRaw(ROOT, [record('M'), 'README.md', ''].join(NUL)), { code: 2, line: 'UNKNOWN no JavaScript file changed; 1 other path(s) left to the path rule' });
 });
 
+// A path holding a line break. Git for Windows refuses one at the index (`update-index` and `add`
+// print "Invalid path" and exit 128) and git elsewhere takes one; a tree object holds it on every
+// platform, and the classifier reads commits, so the fixture builds its commit from tree objects.
+// Off Windows the fixture's PATH starts with a git that refuses as Git for Windows does and hands
+// every other command to the git found after it, so a fixture back on the index fails everywhere.
+const BROKEN = 'line' + String.fromCharCode(10) + 'break.mjs', TAB = String.fromCharCode(9);
+const indexRefusingGit = real => `#!/bin/sh
+# Refuses an update-index or add of a path holding a control character, as Git for Windows does.
+sub= skip=
+for arg do
+  if [ -n "$sub" ]; then
+    case $arg in *[[:cntrl:]]*) echo "error: Invalid path '$arg'" >&2; exit 128 ;; esac
+  elif [ -n "$skip" ]; then skip=
+  else
+    case $arg in -c|-C|--git-dir|--work-tree|--namespace|--config-env) skip=1 ;; -*) ;; update-index|add) sub=$arg ;; *) break ;; esac
+  fi
+done
+exec '${real}' "$@"
+`;
+function refuseAtTheIndexAsGitForWindows(repo) {
+  if (process.platform === 'win32') return;
+  const key = Object.keys(repo.env).find(name => name.toUpperCase() === 'PATH');
+  const runnable = file => { try { fs.accessSync(file, fs.constants.X_OK); return fs.statSync(file).isFile(); } catch { return false; } };
+  const real = repo.env[key].split(path.delimiter).filter(dir => path.isAbsolute(dir)).map(dir => path.join(dir, 'git')).find(runnable);
+  assert.ok(real && !real.includes("'"), 'a git on PATH the script can name: ' + real);
+  const bin = path.join(repo.root, 'windows-git');
+  fs.mkdirSync(bin);
+  fs.writeFileSync(path.join(bin, 'git'), indexRefusingGit(real), { mode: 0o755 });
+  repo.env[key] = bin + path.delimiter + repo.env[key];
+}
+
 test('one line whatever a path holds, usage refused, --help documents the flags the published command uses', t => {
   const repo = makeRepo(t);
+  refuseAtTheIndexAsGitForWindows(repo);
   repo.write('a.mjs', 'x = 1;\n'); const c0 = repo.commit('c0');
-  // A path holding a line break, made in the index so any platform can commit it.
   const blob = repo.git('hash-object', '-w', 'a.mjs');
-  repo.git('update-index', '--add', '--cacheinfo', '100644,' + blob + ',line\nbreak.mjs');
-  repo.git('commit', '-m', 'c1');
-  const c1 = repo.git('rev-parse', 'HEAD');
+  // The live control: the index refuses the path, and takes the same entry under a plain name.
+  const refused = repo.probe('update-index', '--add', '--cacheinfo', '100644,' + blob + ',' + BROKEN);
+  assert.equal(refused.status, 128, 'the index refuses a path holding a line break: ' + refused.stderr);
+  assert.match(refused.stderr, /Invalid path '/);
+  assert.equal(repo.probe('update-index', '--add', '--cacheinfo', '100644,' + blob + ',plain.mjs').status, 0, 'the index takes a plain path');
+  // So c1 is c0's tree entries and the new one, made a tree by mktree and a commit by commit-tree.
+  const tree = spawnSync('git', ['mktree', '-z'], { cwd: repo.cwd, env: repo.env, input: repo.git('ls-tree', '-z', c0) + '100644 blob ' + blob + TAB + BROKEN + NUL,
+    encoding: 'utf8', windowsHide: true, timeout: 15000 });
+  assert.ifError(tree.error); assert.equal(tree.status, 0, tree.stderr);
+  const c1 = repo.git('commit-tree', tree.stdout.trim(), '-p', c0, '-m', 'c1');
   assert.deepEqual(cli(repo, c0, c1), { status: 1, line: 'CODE line?break.mjs' });
   const run = args => spawnSync(process.execPath, [TOOL, ...args], { cwd: repo.cwd, env: repo.env, encoding: 'utf8', windowsHide: true, timeout: 60000 });
   for (const args of [[], ['--repo', repo.cwd], ['--repo', repo.cwd, '--base', c0, '--head', c1, '--extra', 'x'], ['--repo', repo.cwd, '--base', c0, '--base', c1]]) {
