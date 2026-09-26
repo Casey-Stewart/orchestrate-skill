@@ -832,3 +832,129 @@ finding kept closed.
   sweep caught it. Candidate guardrail at close-out.
 - Round-3 re-review spawned: a fresh reviewer (`reviewer-round2` role, round 3, Fable 5.1) over
   `git diff 18b6c86..HEAD` with both rounds' findings, and a fresh test-hunter (Fable 5.1).
+
+### B04 — gate, round 3 (the authorized third round)
+
+- Round-3 reviewer (fresh, Fable 5.1) FIX FIRST, P0=0 P1=1 ASK=0 — every R1 and R2 finding FIX
+  VERIFIED through the published CLI, and the direction verified beyond the instances (the
+  hand-written 54-word specification list, partitioned 16/11/27, checked placement by placement
+  against the grammar; four shapes each owning a comment no other shape catches). F8 P1: the
+  direction's own verb list is a sample — `allow`, `allowlist` and `skip` are directive verbs it
+  lacks, `skipcq` is no listed name, and the rule-id shape needs one of `/.:-` inside the id:
+  ` // gitleaks:allow` appended beside a hardcoded key, ` // pragma: allowlist secret` appended,
+  `// skipcq: JS-0002` → `JS-0003`, `// coverity[tainted_data]` → `[tainted_data_return]` each
+  print `PROSE-ONLY 1 file(s)`, exit 0 (two real commits each, the command protocol.md publishes,
+  live controls in the same harness). Its minimal fix: VERBS gains `allow`, `allowlist`, `skip`;
+  DIRECTIVES gains `skipcq`; the rule-id shape admits `_` (`[/.:_-]`); every PROSE_COMMENTS entry
+  stays prose (checked in scratch, the tool untouched).
+- Round-3 test-hunter (fresh, Fable 5.1) FINDINGS 5, all test-only ASKs, the code correct in
+  every case: U+2029 never exercised by the line-end loop; `\p{Zs}` members beyond NBSP have no
+  fixture; three reversal phrasings pass the sweep; the crash handler is a branch no input
+  reaches; the NUL reason text is unpinned.
+- Third-round `FIX FIRST` → `⛔ green, residual finding open (P1)` (validations green; F8 open);
+  out of integration. After a spent *fix again* the re-ask offers only ship with the residual /
+  drop — no fourth round. W3 has no other member: the session STOPs for that verdict; the C1
+  close-out waits on it. Worktree `b04` kept at `2cf7d9e`.
+
+### B04 R3 reviewer findings
+FIX FIRST
+
+F8. orchestrate/tools/prose-only-diff.mjs:57 (VERBS), :63 (the `word[rule-id]` shape), :19-49 (DIRECTIVES). Violates AC2 ("a tool-directive … comment edit is never PROSE-ONLY") and the guardrail "a guard that SAMPLES the domain": the direction's verb list, taken as the specification, is itself a sample — `allow` and `skip` are directive verbs it lacks — and the rule-id shape requires one of `/.:-` inside the id, so an id with only `_` is prose.
+  Scenarios, each two real commits classified by the command protocol.md publishes (harness b04-rev3/harness.cjs, output b04-rev3/harness.out, 40 scenarios):
+  - `export const KEY = 'AKIAIOSFODNN7EXAMPLE';` → the same line with ` // gitleaks:allow` appended prints `PROSE-ONLY 1 file(s)`, exit 0. A polish adds a secret-scanner allowlist to a hardcoded key and integrates with no review.
+  - The same with ` // pragma: allowlist secret` (detect-secrets) appended: `PROSE-ONLY 1 file(s)`, exit 0.
+  - `// skipcq: JS-0002` → `// skipcq: JS-0003` (DeepSource): `PROSE-ONLY 1 file(s)`, exit 0.
+  - `// coverity[tainted_data]` → `// coverity[tainted_data_return]`: `PROSE-ONLY 1 file(s)`, exit 0.
+  - Live controls in the same harness: ` // eslint-disable-line no-eval` appended → `CODE lib/k.mjs`; `// @ts-ignore` inserted → `CODE lib/k.mjs`; a comment reworded → `PROSE-ONLY 1 file(s)`; a one-character code change → `CODE lib/a.mjs`; an open template literal → `UNKNOWN … (base)`.
+  Fix (minimal, class-shaped): VERBS gains `allow`, `allowlist`, `skip`; DIRECTIVES gains `skipcq` (`/(?<![\w-])skipcq(?![\w-])/i`); the rule-id shape admits `_` as the separator (`[/.:_-]` in both places). Checked in scratch (b04-rev3/fixshape.mjs, the candidate patterns built there, the tool untouched): the three changes catch all four comments, and every one of the 28 PROSE_COMMENTS stays prose; `// fast-skip the cache`, `// note: allow` and `// items[max_len] is the last` become over-rejections, the accepted side. Add each caught comment to the corpus as an owned entry, with a near-miss on the other side (`// allow one retry`, `// skip the cache`, `// values[key] are cached.`).
+  Class: P1.
+
+Weighing it: the round-3 direction's floor is fully met — its seven verbs, its scope words, the bracketed and NO-marker shapes, the names nosemgrep, lgtm, codeql and Stryker — and the implementer read each alternative off the tool and gave it a witness. F8 is the floor's own verb list proving a sample, the same class the direction named, and the fix is three list edits with owned cases. If the user prefers ship-with-the-residual, the backlog entry should carry the fix above verbatim.
+
+Round-1 and round-2 findings, checked against the current diff (18b6c86..HEAD) and through the published CLI:
+- R1 F1 (private names, spread): FIX VERIFIED — `this.#default / pick('/') + pick('//x')` → `//xxxxxx` prints `CODE lib/meter.mjs`; `[...typeof /[//]a/].length` → `+ 1` prints CODE.
+- R1 F2 (`<` in doubt): FIX VERIFIED — `yield <li>//{x.a}</li>` → `{x.b}` prints `UNKNOWN …: a < where an expression may start (JSX?) (base)`, exit 2.
+- R1 F3 (directive sample): FIX VERIFIED — `/* node:coverage ignore next */` → `next 3` prints CODE.
+- R1 F4 (unreachable catch): FIX VERIFIED — classifyRaw is the CLI's function and each unreadable record reaches the UNKNOWN line (test :572-585).
+- R1 hunter 1-8: FIX VERIFIED — as round 2 recorded; round 3 keeps each (RULES :83-100, :104-106, :169-171; AGAIN one list, :1948; the `(base)` label, :543).
+- R2 F5 (break, continue, debugger, label): FIX VERIFIED — links.mjs with `continue`, `break` and `debugger` and `out.push` → `out.unshift` or the call deleted prints `CODE lib/links.mjs`; with `continue outer` prints `UNKNOWN …: a / that may open a regular expression or divide (base)`; the `continue;` control prints CODE. KEYWORDS.start holds all three (:84), a same-line label reads doubt (:201, :95).
+- R2 F6 (directive structure): FIX VERIFIED — `Stryker disable next-line all` → `Stryker disable all`, `Stryker restore all` → `restore EqualityOperator`, `nosemgrep: <rule>` → `nosemgrep`, `lgtm[js/xss]` → `lgtm` all print CODE; VERBS/SCOPES pinned both ways (test :352-355, :386-391).
+- R2 F7 (family case and `without`): FIX VERIFIED — `anyCase('prose-only')` and `(?:no|without)` (:1967-1969); both planted sentences are must-report (:2003) and the suite is green.
+- R2 hunter #1: FIX VERIFIED — the eslint inline-config comment (:314), alternatives read off each shape and set-compared (:391), each with a witness (:400-403), near-misses on the far side (:406-409).
+- #2: FIX VERIFIED — RULES :154-159, and remainder now owns an empty line inside a removed comment (:231-233; my probes: an empty line inside a comment → PROSE-ONLY, an empty line added after it → CODE).
+- #3: FIX VERIFIED — RULES :160-165; LINE_ENDS runs LF, CRLF and U+2028 (:204-207, :221).
+- #4: FIX VERIFIED — AGAIN gains the count-less re-runs (:1948), family 11 (PROSE-ONLY over the whole diff, :1971), LESSER gains the backlog severities (:1954); d1-d3 planted (:2004-2008).
+- #5: FIX VERIFIED — `if (f(x)) /[//]a/` with the twin `g(f(x))` (:166-168).
+- #6: FIX VERIFIED — the string and the regular expression close on a later line (:238, :240).
+- #7: FIX VERIFIED — the named test's body must run the shells and a body that does not exists (:1426-1437), in its own commit 677bc10 carrying BL-042.
+- Direction item 3: the implementer replayed all 57 mutations at HEAD (b04-r3/replay.out): the no-op control SURVIVED, every other one KILLED.
+
+Direction, verified beyond the instances: item 1 — SPEC (:269-275) is written by hand and matches the ReservedWord production (38), the strict-mode words (8) and the contextual keywords (8); PLACED (:276-282) partitions it (set equality with the tool's sets, every word once, sizes 16/11/27 pinned, :286-292); I checked each placement against the grammar: every `start` word is one after which a `/` can only open a regular expression or is a syntax error, every `end` word a value or a name the grammar never puts before a `/` as a keyword, the rest doubt. Item 2 — four shapes, each owning a pool comment no other shape catches (:370-373), SHARED_COMMENTS pinned to exact families (:378). Hunk mapping of the round-3 diff: the tool hunks map to checklist item 1 and direction items 1-2 (the nested-class refusal and the empty-comment-line rule are fail-closed and twin fixes); the test file to item 2; tool-wiring :1426-1437 to item 8 (own commit) and :1946-2008 to the item 3-5 sweeps. No scope creep; the batch file is unchanged since round 1.
+
+Acceptance criteria: AC1 holds (every corpus rejection reads CODE or UNKNOWN with an owned twin; my 26 tokenizer probes, valid JavaScript from do-while regexes to unicode-escaped identifiers, read as expected; one probe of mine, `/[[a-z]--[/]]/v`, was my error — both readings close at the same `/`, so PROSE-ONLY is right). AC2 fails for the four forms in F8; every named, listed and floor form holds. AC3 holds (protocol.md :119-145; the "SECOND `FIX FIRST`" at :153, subagent-prompts :216 and execution-models :121 is the review-round cap, not the polish rule). AC4 holds (:108-111, subagent-prompts :177-181, reviewer.md:12). AC5 holds: round 3 does not touch protocol.md, the three-dot tool-wiring hunks begin at :1410 so REINSTATE (:937) and WRITE_LICENCES (:1015) are byte-identical to the base, and the SHA pins are green. AC6 holds: `grep -n "validate.test.cjs:[0-9]" tests/tool-wiring.test.cjs` prints nothing, exit 1.
+
+Validation (wrapper, from the worktree root): plain `PASS tests 561/563, 2 skipped (23s)`, exit 0 (b04-rev3/plain.log); FORCE_COLOR=1 `PASS tests 561/563, 2 skipped (23s)`, exit 0 (b04-rev3/forcecolor.log). The two skips are the Windows-only cases. `git diff --check` is inside validate.json and is also clean on the three-dot diff.
+Duty 5: n/a (feature batch); the direction is implemented as above. Duty 6: the tool's header and SHAPES comments changed in the same commits; `git grep` finds no tracked file naming OPERAND_KEYWORDS, CONTEXTUAL or GRAMMAR; no document names the directive families beyond `--help`'s "and others".
+Scratch: b04-rev3/harness.cjs, harness.out, repos/, fixshape.mjs, plain.log, forcecolor.log.
+
+=== end of B04 R3 reviewer findings ===
+### B04 R3 test-hunter findings
+FINDINGS 5
+
+Scope: every test in `git diff chore/slim-contract-pack-ledger...HEAD` at 2cf7d9e (tests/check-fence.test.cjs, tests/prose-only-diff.test.cjs, tests/protocol-contract.test.cjs, tests/tool-wiring.test.cjs) and the code each covers: orchestrate/tools/prose-only-diff.mjs, the polish rules' carriers, orchestrate/templates/02-batch.md. Worktree /home/timetotilt/worktrees/os925/b04. No setup.json exists.
+Harness: mutate.mjs with the scoped spec /tmp/claude-1000/-home-timetotilt-projects-orchestrate-skill/30346af3-7332-4e1a-b96e-3cbe367061c2/scratchpad/b04-hunt3/scoped-spec.json (the four files), mutations .../b04-hunt3/mutations.json, log .../b04-hunt3/run1.log. `CONTROL PASS PASS tests 159/159 (7s)`, 0 skipped. Every SURVIVED run below names the same 159 tests as the control (sorted names compared: no difference), 159 pass, 0 fail, 0 skipped; no scoped file ran as a self-named test.
+Live controls in the same run: `KILLED k1-control-doubt-slash-opens-regex` (prose-only-diff.mjs:170 `starts = false` → `true`; killed by the corpus test and the CLI corpus test) and `KILLED k2-control-second-strike-reinstated` ("A SECOND polish-phase FIX FIRST discards the polish." planted after "ASKs close as a polish pass." in orchestrate/SKILL.md:147; killed by the reversal sweep). So the harness detects a tool change and a document change, at the same anchor the plants below use.
+Disclosure: besides the three named files I wrote eight derived name lists (names-*.txt) under b04-hunt3 for the name comparison above; disposable scratch, nowhere near any worktree.
+
+Verdict: the code under test is correct in every case below; every fix is test-only. Ranked by risk.
+
+**1. ASK — the line-end loop samples the reader's terminator set: U+2029 (PS) is never exercised.**
+- Test: tests/prose-only-diff.test.cjs:204-207 (`LINE_ENDS = [identity, crlf, ls]`, its comment claiming "every line end the reader knows"), :221 (`assert.equal(LINE_ENDS.length, 3)` pins the sample, not the domain), the loop :219-231, the LS rule :160-162.
+- Code: orchestrate/tools/prose-only-diff.mjs:73 `TERMINATOR = /[\n\r  ]/`, read by :75 isTerminator, :141 endOfLine, :160 and :228.
+- Class: a guard that SAMPLES the domain it claims to sweep. Residual of R2 finding 3: the fix added one more sample (LS) instead of binding the corpus to the set.
+- Mutation: `SURVIVED m1-terminator-no-ps` — ` ` dropped from TERMINATOR. Under it `// note<U+2029>process.exit(1);` → `exit(0)` reads PROSE-ONLY: the line comment at :155 runs on to the `\n`, so the code after the PS is stripped from both sides — the shape :160 pins for LS, and PS is a JavaScript LineTerminator exactly as LS is. `\r` alone is absent from LINE_ENDS too, though by trace its removal is killed through CRLF (the twin at :138 turns CODE).
+- Add: one variant per terminator the reader names — LF, CR, CRLF, LS, PS — pinned at 5 (or derived from :73's own class), so the :219 loop runs every pair under PS; and a PS twin of the :160 rule.
+- Route: test-only → ASK.
+
+**2. ASK — the whitespace class is exercised by the ASCII space and NBSP only; `\p{Zs}` has no fixture.**
+- Test: tests/prose-only-diff.test.cjs:163-165 (the NBSP rule: one member of the class).
+- Code: prose-only-diff.mjs:74 `SPACE = /[\t\v\f  ﻿\p{Zs}]/u`; :76 wordChar makes any non-ASCII character outside SPACE a word character.
+- Class: a guard that SAMPLES the domain (residual of R2 finding 3).
+- Mutation: `SURVIVED m2-space-no-zs` — `\p{Zs}` dropped. Under it `x = typeof<U+3000>/[//]a/.test(s);` → `b` reads PROSE-ONLY: U+3000 joins `typeof` into one word, :95 has a name divide, `[` follows, and `//]a/.test(s);` becomes a comment. The same for U+1680, U+2000–U+200A, U+202F and U+205F, all whitespace to JavaScript.
+- Add: run the :163 rule over every `\p{Zs}` code point (a hand-written list of the 17, pinned by size and asserted to match the category) plus `\t`, `\v`, `\f` and `﻿`.
+- Route: test-only → ASK.
+
+**3. ASK — the reversal sweep passes three plausible reversals of the batch's own rules.**
+- Test: tests/tool-wiring.test.cjs:1958-1985 (POLISH_REVERSALS), :1987 the test, :2029 the sweep over documents() and definitionListing(); the planted must-report list :1995-2013.
+- Class: a guard that SAMPLES the domain (phrasings); positive-only assertions on prose. Third-round residual: a regex sweep never closes every phrasing, so weigh a further family against stopping here.
+- Mutations, each one sentence appended after "ASKs close as a polish pass." in orchestrate/SKILL.md:147, a document the sweep reads (control k2 at the same anchor is KILLED):
+  - `SURVIVED p1-scoped-re-review-skipped-for-code`: "The scoped re-review may be skipped when the verdict is CODE." Family 9 (:1974) wants the verdict word before the verb, and `skips?`, never `skipped`.
+  - `SURVIVED p2-outside-fence-does-not-block`: "A criterion violation whose fix sits outside the fence does not block the batch." Family 5 (:1965) needs a LESSER word (:1954); "does not block" is the downgrade said as a verb.
+  - `SURVIVED p3-fix-commit-and-a-re-review`: "A polish-phase FIX FIRST is followed by a fix commit and a re-review." Family 11 (:1980) needs "scoped re-review", family 3 (:1962) needs implementer or fix round, and AGAIN (:1948) has no bare re-review.
+- Add: the three sentences to the planted list; family 9 read in either order and in the passive (`skipped|exempted|spared`); a LESSER alternative (or a family of its own) for `(?:does|do|need)\s+not\s+block|not\s+(?:a\s+)?blocker|never\s+blocks?`; family 11 taking `(?:then|followed by|and)\s+(?:a\s+)?(?:fresh\s+|new\s+)?(?:scoped\s+)?re-review`. Each with a specimen it alone catches.
+- Route: test-only → ASK.
+
+**4. ASK — the crash handler is a branch no input reaches.**
+- Test: none of the four scoped files plants a crash; the repository's only such test is tests/mutate.test.cjs:886, whose TOOLS (:17) are mutate.mjs and run-at-ref.mjs.
+- Code: prose-only-diff.mjs:344 `process.on('uncaughtException', …)` → `UNKNOWN internal error: …`, exit 2 (the comment at :343 names the hazard: exit 1 reads as CODE).
+- Class: a branch no input reaches.
+- Mutation: `SURVIVED m3-uncaught-handler-never-registered` (the event name changed, so the handler never registers). Under it a crash ends with Node's exit 1 and a stack trace on stderr where the one line should be. Risk low: exit 1 is CODE, which keeps the path rule — a re-review, the conservative direction.
+- Add: mutate.test.cjs:886's plant (`--import data:text/javascript,…`, throwing once a listener is registered) against `prose-only-diff.mjs --help`, expecting exit 2 and `UNKNOWN internal error: planted crash` as stdout's last line.
+- Route: test-only → ASK.
+
+**5. ASK (cosmetic) — the NUL reason text is pinned nowhere.**
+- Test: tests/prose-only-diff.test.cjs:128-130 asserts the verdict only; :447 matches the CLI line by the prefix `UNKNOWN <file>: `.
+- Code: prose-only-diff.mjs:257.
+- Class: a boundary pinned on one side (verdict and exit pinned, the published reason not).
+- Mutation: `SURVIVED m4-nul-reason-unpinned` (`'a NUL byte (binary)'` → `'unreadable'`).
+- Add: in the CLI corpus test or the :219 loop, expect the whole line `UNKNOWN r<i>-case.mjs: a NUL byte (binary) (base)`.
+- Route: test-only → ASK.
+
+Checked and holding (by trace; R1's and R2's mutations were not re-run):
+- tests/prose-only-diff.test.cjs: KEYWORDS and CONTROL are set-equal to a hand-written specification list that the three placements partition exactly (:283-306); REFUSALS is bound to the tool's own `fail('…')` calls, each with a twin; every directive, shape, marker and tag family owns a comment, and every shape verb and scope has a real witness; the postfix/prefix, label, spread, private-name, paren-depth, `<`-in-doubt and escaped quote/backtick branches each have a CODE case with a PROSE-ONLY twin; the CLI runs as protocol.md publishes it — one line, nothing on stderr, exit codes pinned; add, delete, rename, re-mode, link, submodule and BOM, precedence, other-path counting, both failure sides `(base)`/`(head)`, the raw reader's refusals with a readable control, usage and --help are pinned. Traced as killed: dropping `--no-abbrev`, `-z` or `--no-renames`; `lines` forced either way; the mode checks removed; the inline block-comment space; the trailing-space strip; the empty-line-inside-a-comment rule. `sides.some` → `every` at :266 is verdict-equivalent, not a finding.
+- tests/check-fence.test.cjs:227-249: both shown items and the header count are governed; each item alone and both together must parse.
+- tests/protocol-contract.test.cjs:236-251 and :274-292: each RETIRED entry must claim exactly one lost sentence and its successor must be present; :636-645 NON_MARKDOWN is deepEqual to the listing at 12.
+- tests/tool-wiring.test.cjs:1928-1941: the ten POLISH_RULES passages are pinned whole, anchor once, with a planted-sentence control each; the rules occur once per carrier. :1427-1441 the BL-042 test requires the named test's body to reference the shells, with a can-fail control.
+- Not counted: retargeting the BL-042 pointer to another shell-running test (validate.test.cjs:929) would survive but is an equally true pointer; loosening a directive's leading `(?<![\w-])` for eslint, prettier and the rest (by trace, not run) only makes the tool keep more comments, the conservative direction; `--no-relative` and the `?.`-before-digit check at :210 are unobservable by any fixture.
+
+=== end of B04 R3 test-hunter findings ===
