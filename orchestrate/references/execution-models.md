@@ -1,7 +1,7 @@
 # Execution model — the waved stack
 
-One model, structured at scaffold time and recorded in the ledger's READBEFORE (git
-model section) and PROGRESS preamble: batches are grouped into **waves** that run
+One model, structured at scaffold time and recorded as facts in the ledger's READBEFORE
+(git model section) and PROGRESS preamble, run by its pinned `references/protocol.md`: batches are grouped into **waves** that run
 concurrently, waves stack serially onto an **integration branch**, and the user
 smoke-tests only at planned **checkpoints**. Strict one-at-a-time sequencing is just
 the degenerate case (every wave width 1) — it is not a separate model.
@@ -9,10 +9,11 @@ the degenerate case (every wave width 1) — it is not a separate model.
 ## Evidence and required inputs
 
 Discovery and shipment probes use the read-only git-evidence helper under the owning
-contract. After each implementer report, the contract's mechanical fence gate captures
+contract. After each implementer report, the mechanical fence gate captures
 refs/SHAs before fresh independent semantic review; check-fence PASS is mechanical
 only, VIOLATION/UNKNOWN never authorize extensions or merges. Unsupported authority
-uses the baked manual fallback. Existing ledgers retain their frozen gate rules.
+uses protocol.md's manual fallback. Existing ledgers retain their frozen gate rules — a
+pinned ledger those of its pinned directory's protocol.md.
 
 Planning inventories inputs per step; checkpoint close-out generates reproducible
 synthetic files, independently validates requirements, and delivers exact linked
@@ -113,7 +114,10 @@ batch or per wave by default.
    the integration branch; every path in plan fence ∪ recorded extensions ∪ own batch
    file) → failing-on-base for `fix` batches → ONE fresh read-only reviewer plus the
    contract's gate agents in parallel; don't wait for the wave's slowest batch. `SHIP`
-   with ASKs → polish pass (not a round); `FIX FIRST` → round 1 resumes the implementer;
+   with ASKs → polish pass (not a round; a prose ASK's replacement text the orchestrator
+   applies itself, `prose-only-diff.mjs` classifies the polish diff, and a polish-phase
+   `FIX FIRST` discards the polish at once — protocol.md §Severity and round
+   accounting); `FIX FIRST` → round 1 resumes the implementer;
    the second `FIX FIRST` → ⛔, and once the wave's other members are gated and
    integrated the session STOPs instead of opening the next wave; a user-authorized
    third round is a fresh implementer on the strong tier.
@@ -131,7 +135,8 @@ batch or per wave by default.
    per-checkpoint close-out (tip validation, QA-runner pre-smoke of the agent-tagged
    steps with `evidence/C<n>/`, covered rows 🟢 → 🧪, `**State**: AT-CHECKPOINT`), STOP
    with the combined smoke script, delivered as the smoke page (`smoke-page.md`).
-   Otherwise → open the next wave immediately, same session.
+   Otherwise → open the next wave immediately, same session, unless protocol.md
+   §Session algorithm step 8 compacts or ends it at this boundary for context.
 
 **Every `continue` starts with resume-time validation** on the integration tip (quiet
 form); a red tip is repaired before any wave opens, whatever PROGRESS claims — unless a

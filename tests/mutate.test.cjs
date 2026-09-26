@@ -624,17 +624,17 @@ test('a git that lists no repository variable, or a name that is not one, is UNK
   }
 });
 
+// A step that passes only where its environment holds none of git's variables, in any case,
+// and git finds the clone's own repository.
+const whereStep = names => ({ name: 'where', argv: [NODE, '-e', "const names = new Set(JSON.parse(process.argv[1])); if (Object.keys(process.env).some(key => names.has(key.toUpperCase()))) process.exit(2); "
+  + "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);", JSON.stringify(names)], parser: 'none' });
 test("git's repository variables in the caller's environment — a GIT_DIR, a GIT_INDEX_FILE, every one git lists — never reach the repository, the clone or a validate step, for both tools", async t => {
   const fx = fixture(t);
   // The user has a change staged: an index a stray checkout would rewrite.
   fx.repo.write('sub/keep.txt', 'staged\n');
   fx.repo.git('add', 'sub/keep.txt');
-  // A step that passes only where its environment holds none of git's variables, in any case,
-  // and git finds the clone's own repository.
   const names = gitListed();
-  const where = { name: 'where', argv: [NODE, '-e', "const names = new Set(JSON.parse(process.argv[1])); if (Object.keys(process.env).some(key => names.has(key.toUpperCase()))) process.exit(2); "
-    + "const top = require('path').join(process.cwd(), '.git'), dir = require('child_process').execFileSync('git', ['rev-parse', '--absolute-git-dir'], { encoding: 'utf8' }).trim(); process.exit(require('fs').realpathSync(dir) === require('fs').realpathSync(top) ? 0 : 1);", JSON.stringify(names)], parser: 'none' };
-  const spec = fx.json('where.json', { steps: [...specOf().steps, where] });
+  const spec = fx.json('where.json', { steps: [...specOf().steps, whereStep(names)] });
   const gitDir = path.join(fx.repo.cwd, '.git');
   // Every name git lists, planted at once through the CLIs: each must be scrubbed, or the step sees it.
   const every = Object.fromEntries(names.map(name => [name, 'planted']));
@@ -658,6 +658,41 @@ test("git's repository variables in the caller's environment — a GIT_DIR, a GI
     assert.deepEqual(state(fx.repo), before, name + ': the repository is untouched in process too');
     assert.deepEqual(leftUnder(tmp), []);
   }
+});
+
+// The exported API drops them itself, for a caller that never scrubbed its process: the ref lookup
+// names the repository's commit and every validate step runs without them. The caller's
+// process.env keeps them. The decoy has one commit, so HEAD~1 names nothing there. Every name git
+// lists is planted, not only the two git-evidence.mjs's probes drop themselves: the config ones
+// (malformed here, so any git that sees one fails) are this layer's alone to drop.
+test("a direct caller of withDisposableCheckout, mutate() or runAtRef() with every variable git lists planted — a decoy GIT_DIR and GIT_INDEX_FILE among them — gets lookups, a clone and validate steps that never see them, and keeps its own process.env", async t => {
+  const fx = fixture(t), decoy = makeRepo(t), decoyGit = path.join(decoy.cwd, '.git');
+  const names = gitListed(), spec = { steps: [...specOf().steps, whereStep(names)] };
+  const plant = Object.fromEntries(names.map(name => [name, 'planted']));
+  Object.assign(plant, { GIT_DIR: decoyGit, GIT_INDEX_FILE: path.join(decoyGit, 'index'), GIT_WORK_TREE: decoy.cwd, GIT_COMMON_DIR: decoyGit, GIT_OBJECT_DIRECTORY: path.join(decoyGit, 'objects') });
+  const { withDisposableCheckout, mutate } = await api(), { runAtRef } = await atRefApi();
+  const tmp = fs.mkdtempSync(path.join(fx.repo.root, 'tmp-')), before = state(fx.repo);
+  const atLog = path.join(fx.work, 'api-at.log'), mutateLog = path.join(fx.work, 'api-mutate.log');
+  await isolated(fx, () => withEnv(plant, async () => {
+    const caller = { ...process.env };
+    // Live controls: git given the planted GIT_DIR alone reads the decoy, and git given every plant
+    // cannot run at all.
+    const only = keep => Object.fromEntries(Object.entries(process.env).filter(([key]) => keep.includes(key) || !names.includes(key.toUpperCase())));
+    const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: fx.repo.cwd, env: only(['GIT_DIR']), encoding: 'utf8', windowsHide: true });
+    assert.deepEqual([head.status, head.stdout.trim()], [0, decoy.base], 'the GIT_DIR plant is live');
+    const every = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: fx.repo.cwd, encoding: 'utf8', windowsHide: true });
+    assert.notEqual(every.status, 0, 'the config plants are live: ' + every.stdout);
+    const seen = await withDisposableCheckout(fx.repo.cwd, 'HEAD~1', ({ sha, env }) => ({ sha, seen: Object.keys(env).filter(key => names.includes(key.toUpperCase())) }), { tmpRoot: tmp });
+    assert.deepEqual(seen, { sha: fx.red, seen: [] }, 'the lookup names the repository\'s commit, and fn is handed none of them');
+    assert.deepEqual(await runAtRef({ repo: fx.repo.cwd, ref: 'HEAD~1', validate: spec, logPath: atLog, tmpRoot: tmp }),
+      { code: 1, line: `AT ${fx.short(fx.red)} FAIL tests 1 of 5 failed: extra two runs; where ok — log: ${atLog}` });
+    const m = await mutate({ repo: fx.repo.cwd, ref: 'HEAD', mutations: [M.m1], validate: spec, logPath: mutateLog, tmpRoot: tmp });
+    assert.match(m.lines[0], /^CONTROL PASS PASS tests 5\/5; where ok \(\d+s\)$/, m.lines.join(' | '));
+    assert.deepEqual([m.lines.slice(1), m.code], [['KILLED m1: add sums two numbers', 'MUTATE 1 killed, 0 survived, 0 other'], 0]);
+    assert.deepEqual({ ...process.env }, caller, "the caller's process.env is unchanged");
+  }));
+  assert.deepEqual(state(fx.repo), before);
+  assert.deepEqual(leftUnder(tmp), []);
 });
 
 // ===== The classification rows, each fed directly ===================================================
@@ -802,8 +837,8 @@ test('every invalid invocation is one UNKNOWN line with exit 2, before any check
 
 // The --help sentences that define the verdicts and the control's rule, exempt from the sweep below by their exact bytes.
 const HELP_DEFINITIONS = ["KILLED: a step failed, every failing step names its failing tests and no CRASHED cause below holds, so no counted step's skipped count moved.",
-  "SURVIVED: every counted step passed with the control's own passed, skipped and total counts.",
-  "CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a step in which no test passed or failed, a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed without a named failing test; the log records which.",
+  "SURVIVED: every counted step passed with the control's own passed, skipped and total counts, and no CRASHED cause below holds.",
+  "CRASHED: the run did not reach its steps, a test step with no parsed summary, a test file that failed to load or ran no tests, a test count unlike the control's, a counted step in which no test passed or failed, a step whose skipped count differs from the control's, failing tests or not (a test skipped that ran in the control, or the reverse), or a step that failed without a named failing test; the log records which.",
   'each such step must pass at least one test (one in which none passed, all skipped or todo or none at all, is CONTROL FAILED) in the control.'];
 const resultBesideSkip = (text, results) => HELP_DEFINITIONS.reduce((t, pinned) => t.split(pinned).join(' '), text.replace(/\s+/g, ' ')).split(/(?<=[.!?])\s+/)
   .filter(s => new RegExp('(?<![\\w-])(?:' + results.join('|') + ')(?![\\w-])', 'i').test(s) && /\b(?:skip(?:s|ped|ping)?|todo|never\s+ran|did\s+not\s+run|didn['’]t\s+run|not\s+run|control\s+ran|ran\s+(?:under|in)\s+the\s+control)\b/i.test(s));
@@ -826,7 +861,7 @@ test('--help documents every line kind the tool declares, and the exit codes', a
   assert.equal(resultBesideSkip(HELP_DEFINITIONS[0].replace(/\.$/, ', or a todo test failed.'), RESULTS).length, 1, 'a qualified definition loses its exemption');
   // The definitions against what classifyRun does. A one-test kill passes nothing (the live
   // data.test.cjs cell prints `KILLED m1: add 2 and 3` off a 1/1 control): its step failed, so it is
-  // no "step in which no test passed or failed" — that cause is validate.mjs's NO-TESTS, which fails
+  // no "counted step in which no test passed or failed" — that cause is validate.mjs's NO-TESTS, which fails
   // nothing. A run that reached no steps is a listed CRASHED cause, never a kill with nothing failing.
   const { classifyRun } = await api();
   const one = over => ({ name: 'tests', result: 'PASS', passed: 1, failed: 0, skipped: 0, total: 1, names: [], loadFailures: [], emptyFiles: [], exit: 0, ...over });
@@ -835,7 +870,7 @@ test('--help documents every line kind the tool declares, and the exit codes', a
     { kind: 'KILLED', names: ['the one test'] }, 'a one-test kill passes nothing and is KILLED');
   const noTests = classifyRun(control, { status: 'FAIL', steps: [one({ result: 'NO-TESTS', passed: 0, skipped: 1 })] }, ['node']);
   assert.deepEqual([noTests.kind, /no test passed/.test(noTests.reason)], ['CRASHED', true], 'the no-pass cause is NO-TESTS: nothing passed and nothing failed');
-  assert.ok(HELP_DEFINITIONS[2].includes(', a step in which no test passed or failed, ') && !help.includes('no test passed,'), '--help\'s no-pass cause leaves out a step whose test failed');
+  assert.ok(HELP_DEFINITIONS[2].includes(', a counted step in which no test passed or failed, ') && !help.includes('no test passed,'), '--help\'s no-pass cause leaves out a step whose test failed, and a parser-none step');
   const zero = classifyRun(control, { status: 'UNKNOWN', steps: [] }, ['node']);
   assert.equal(zero.kind, 'CRASHED');
   assert.ok(HELP_DEFINITIONS[2].startsWith('CRASHED: ' + zero.reason + ', '), 'the zero-step reason is a listed cause: ' + zero.reason);

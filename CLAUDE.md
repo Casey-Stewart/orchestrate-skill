@@ -18,10 +18,10 @@ not prose. `.agents/changes/` holds live ledgers; `.agents/archive/` holds close
   discovery, `node --test --test-reporter=spec`, then `git diff --check`. `node --test`
   bare from the repository root is the portable equivalent. `node --test tests/` is **not**:
   Node's directory-argument discovery differs and the suite fails.
-- `protocol.md` and the contract template mirror each other, pinned by
-  `tests/protocol-contract.test.cjs`: edit both in the same change, and treat removal as riskier
-  than addition. Its two decision tables are SHA-256-pinned: even a coordinated edit reddens, by
-  design — never regenerate the hash to make it pass.
+- `protocol.md` is the single copy of the ledger procedure; the contract template carries repo
+  facts only and points at it. Treat removal from `protocol.md` as riskier than addition. Its
+  two decision tables are SHA-256-pinned by `tests/protocol-contract.test.cjs`: any edit reddens,
+  by design — never regenerate the hash to make it pass.
 - **Never rewrite a completed ledger.** `.agents/archive/**` and any ledger whose PROGRESS
   says COMPLETE are historical records. Read them freely; write to neither.
 - **Line endings**: `.gitattributes` pins specific fixture files and `git diff --check` is
@@ -53,19 +53,7 @@ diff against the ones its fence can actually violate.
 - **A guard that SAMPLES the domain it claims to sweep** — this repository's most productive
   class, caught only by gates that MUTATE a fix, never by ones that read it. Ask of any guard:
   **is its subject the domain or one sample of it, and does its control exercise the tight case
-  or the comfortable one?** Greppable shapes, no understanding of the code required:
-  - two literals partitioning one collection with nothing relating them — for every array
-    literal used as a loop domain, assert on the DOMAIN (size, set-equality, a count over
-    results), not its members;
-  - `new Set([...a, ...b]).size === a.length + b.length` — a uniqueness check, not a size check
-    (delete a member and both sides shrink);
-  - `indexOf` without a loop — only the FIRST occurrence is governed;
-  - a fixed ±N window per occurrence — occurrences closer than N share markers, and a
-    generously spaced arming control never exercises the overlap;
-  - a corpus whose every entry sits inside the pattern's own bound (derived from it, whatever
-    the comment says) — write it as prose first, pin its size and set, and require each pattern
-    to own an entry no other catches;
-  - an out-parameter passed inline as a fresh literal and never bound.
+  or the comfortable one?** Six greppable shapes are listed in `docs/guardrail-receipts.md`.
   On any rewrite of a guard, assert the new family is a superset of the old. Prefer binding a
   domain to the checkout over hand-writing it. *(BL-004 polish, BL-016 round 2)*
 - **A branch no input reaches.** Recursion proven at depth one; an error path no fixture
@@ -95,14 +83,20 @@ diff against the ones its fence can actually violate.
 - **A guard whose verdict depends on the checkout rather than the code.** CRLF/LF
   behaviour that passes only because this machine happens to check out one way. Assert the
   equivalence explicitly. *(BL-004, polish)*
+- **A fixture legal only on the gate's platform.** Linux git indexes a file name holding a control
+  character; Git for Windows refuses it, so a test green on every Linux gate failed the Windows
+  checkpoint. Build such fixtures from tree objects, assert on the domain, never skip by platform.
+  *(OS-20260925 C1 issue 1; `tests/prose-only-diff.test.cjs`'s line-break fixture)*
 - **A sweep built to catch reversals of a rule is blind to an edit that NARROWS its scope.**
   When a fix replaces prose with an enumeration, ask what the enumeration excludes that the
   old text allowed. *(BL-016 round 1)*
-- **A test that reads a child's raw output has a verdict that depends on the terminal.** Run from
-  a colour terminal, node's runner hands `FORCE_COLOR=1` to test files, and a child's reporter
-  lines arrive painted; strip ANSI before matching them, and run the suite under
-  `FORCE_COLOR=1` as well as plain — every agent run here writes to a file, never a TTY.
-  *(`tests/validate.test.cjs`, the forced-colour loop; OS-20260923 C1 issue 2)*
+- **A test that reads a child's raw output has a verdict that depends on the terminal.** Strip
+  ANSI before matching a child's reporter lines, and run the suite under `FORCE_COLOR=1` as well
+  as plain. *(`tests/validate.test.cjs`, the forced-colour loop; OS-20260923 C1 issue 2)*
+- **A fail-closed guard over an open domain that lists the unsafe members.** Every review round
+  finds the next unlisted one. Place each member of a closed specification list, or name what is
+  provably safe, and read the rest as doubt. *(OS-20260925 B04: three rounds, then BL-046;
+  `prose-only-diff.mjs`'s KEYWORDS partition)*
 
 ### Documents as code
 
@@ -144,9 +138,11 @@ diff against the ones its fence can actually violate.
   or it is self-fulfilling and its absence elsewhere means nothing; every mutation script must
   abort loudly when its anchor is absent, and say so in its report — "I mutated it and nothing
   reddened" is a claim to verify. Restore-by-checkout is only safe once the real edit is
-  committed. Write Markdown through the file tools or a single-quoted script — a double-quoted
-  shell string command-substitutes its backticks — and sweep the result for emptied code spans
-  (a doubled space where a name was) rather than rereading the line. *(BL-003 polish)*
+  committed; how to write Markdown safely is in `docs/guardrail-receipts.md`. *(BL-003 polish)*
+- **Text tools that transform what they write.** `String.replace`'s string form expands `` $` ``
+  and `$&` (it spliced BACKLOG.md), and the Write and Edit tools decode a typed `\uXXXX`: insert
+  text by index or a function replacement, build invisible characters with `String.fromCharCode`.
+  *(OS-20260925 close-out LOG; the invisible-character sweep)*
 - **"No test can verify this" is not "no agent can verify this."** A step is human only on the
   grounds `protocol.md`'s Runner rule lists, pinned by `tests/protocol-contract.test.cjs`; a
   checkpoint asks the user for a verdict, not for labour. *(BL-016)*
@@ -157,7 +153,8 @@ diff against the ones its fence can actually violate.
 ## Orchestration
 
 Multi-batch work runs from a ledger under `.agents/changes/`; the ledger's own
-`00-READBEFORE.md` is the contract and outranks the skill's reference docs. Statuses are
+`00-READBEFORE.md` is the contract and outranks the skill's reference docs (a pinned contract
+through its repo facts; its pinned `references/protocol.md` governs where it is silent). Statuses are
 claims, git is truth. Never commit to `main`, never push, and never merge toward `main`
 without the user's explicit words in the session that acts on them.
 

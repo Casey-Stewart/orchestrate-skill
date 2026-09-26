@@ -1,0 +1,10 @@
+{
+  "steps": [
+    {
+      "name": "tests",
+      "shell": "pwsh",
+      "script": "$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)\nif ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }\nnode --test --test-reporter=spec @testFiles\nif ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }\ngit diff --check\nif ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }\n",
+      "parser": "node"
+    }
+  ]
+}

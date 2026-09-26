@@ -12,10 +12,11 @@ locked plan with a wave map and smoke checkpoints, one file per batch, a binding
 contract (`00-READBEFORE.md`), a live `PROGRESS.md` where statuses are claims and
 **git is truth**, and an append-only `LOG.md` for narrative. Ledgers are CLOSED SYSTEMS:
 every repo fact is baked in at scaffold time, a ledger references ONLY its pinned skill
-directory, by absolute path and hash, and every step a tool performs also has a baked
-manual procedure, so any session — with or without this skill, or with a changed one —
-can drive one by reading the ledger alone. A changed skill stops the ledger at its next
-boot and asks, and never silently changes how it runs. Full spec:
+directory, by absolute path and hash, its procedure is that directory's
+`references/protocol.md`, frozen by the hash, and every step a tool performs also has its
+manual procedure there, so any session drives one from the ledger plus its pinned
+directory. A changed skill stops the ledger at its next boot and asks, and never silently
+changes how it runs. Full spec:
 [references/protocol.md](references/protocol.md).
 
 **Arguments**: `$ARGUMENTS`
@@ -40,7 +41,8 @@ the directory holding this `SKILL.md`, the base directory the skill loader repor
 repeatable read-only inventory and provenance probes; helper recipes and manual
 fallback are in protocol.md. Inspect completeness/diagnostics; unknown never means
 absent. The rules below still decide ownership, targets and ledger state. Existing
-ledgers keep their frozen contract and gates even when this skill changes.
+ledgers keep their frozen contract and gates even when this skill changes — a pinned
+ledger's gates are its pinned directory's, and a changed directory stops it at boot.
 
 1. Find ledgers in the WORKING TREE: glob `**/PROGRESS.md` rooted at
    `<repo>/.agents/changes/` — dot-dirs often escape repo-root globs, so root the search
@@ -77,7 +79,8 @@ ledgers keep their frozen contract and gates even when this skill changes.
    old target values do not create a new ambiguity. Unresolved ownership or target
    conflicts, divergent local/remote integration refs, or conflicting working-tree
    ledger edits are AMBIGUOUS.
-   Resolve the owning contract's shipment target per its §Recovery, then inspect only
+   Resolve the owning contract's shipment target per §Recovery (its pinned
+   `references/protocol.md`'s, or a legacy contract's own), then inspect only
    this candidate's id there: an explicit COMPLETE marker in `.agents/changes/<id>/`
    or its presence in `.agents/archive/<id>/` supersedes proven older ledger copies.
    If the integration branch was deleted, use the candidate's recorded target for
@@ -149,14 +152,21 @@ ledgers keep their frozen contract and gates even when this skill changes.
   commit on the integration branch.
 - Default session cadence: run autonomously to the next checkpoint — waves in
   sequence, no stopping between batches — halting early only at ⛔ or an unplanned
-  user gate.
+  user gate, or ending the session at a wave close for context (protocol.md §Session
+  algorithm step 8).
+- The orchestrator never polls: it never calls `ReadNotifications` to wait for a sub-agent
+  and never sleeps; when the only remaining work waits on sub-agents it ends the turn, and
+  the task notification resumes it.
 - No `--no-verify`, no force-push, no history rewriting.
-- The ledger's own contract outranks this skill's reference docs.
+- The ledger's own contract outranks this skill's reference docs — a pinned contract
+  through its repo facts, its pinned `references/protocol.md` governing wherever it is
+  silent (protocol.md's precedence rule).
 
 ## Evidence and smoke-input responsibilities
 
 After the implementer report, use the read-only `check-fence.mjs` mechanical gate
-before fresh semantic review when the ledger's own contract enables it (commands,
+before fresh semantic review whenever the ledger's procedure names it — a pinned
+ledger's always does (commands,
 authority grammar and manual fallback in protocol.md). PASS does not grant scope or
 approve a merge; UNKNOWN never passes. Capture both refs/SHAs and both diagnostic
 arrays. Continue to map every hunk independently under the same cap and verdict rules.
@@ -177,7 +187,7 @@ Read [references/scaffolding.md](references/scaffolding.md) and the files in
 [templates/](templates/), then: preconditions (git repo; tree state) → detect repo
 facts (validation commands and their quiet form, versioning, gate agents, runners,
 backlog id scheme) → interview (back-to-back AskUserQuestion calls, as many as
-the gaps need) → plan the batches (explore; batch
+the gaps need) → plan the batches (explore, at medium thoroughness by default and "very thorough" only when the interview needs an inventory and the prompt names what it is for; batch
 table with weights and file fences; item→batch coverage) → structure for throughput per
 [references/execution-models.md](references/execution-models.md): reshape fences for
 disjointness, build the wave map (widest safe waves), classify each batch hands-on vs
@@ -205,7 +215,10 @@ scaffolding.md) → scaffold commit on
 2. Read the ledger's OWN contract (`00-READBEFORE.md`; legacy names per protocol.md;
    contract absent → protocol.md fills the gaps, ask before acting on ambiguity).
 3. Boot (a pinned contract verifies its skill pin first) + reconcile + resume-time
-   validation per the contract, then run its §Session
+   validation per the contract's boot sequence — a pinned contract takes up its pinned
+   skill directory's `references/protocol.md`, the procedure its repo facts plug into,
+   only on `SKILL MATCH` — then run the pinned protocol.md's (or a
+   legacy contract's own) §Session
    algorithm: repairs (❌ / red tip) first as mini-batches → unanswered 🧪 checkpoint →
    open the next wave (cut branches + worktrees, spawn ALL of the wave's implementers
    concurrently) → per batch as each lands: fence check → failing-on-base → reviewer +
@@ -221,7 +234,7 @@ scaffolding.md) → scaffold commit on
 ## Mode: status
 
 Strictly read-only (no edits, no branch changes, no checkout switch): discovery →
-reconcile every row that is not ✅/👤/⛔ (dropped) against git per the contract's §Recovery table → print a
+reconcile every row that is not ✅/👤/⛔ (dropped) against git per the §Recovery table (the pinned protocol.md's, or a legacy contract's own) → print a
 claim-vs-git-vs-verdict table, the checkpoint(s) awaiting the user, branch-only ledgers,
 and the recommended next action. Drift corrections happen in `continue`, not here.
 
@@ -242,7 +255,7 @@ and the recommended next action. Drift corrections happen in `continue`, not her
    a ⛔ batch or a capped repair (fix again / ship with the residual / drop) are recorded
    the same way, verbatim, in the verdict log (Checkpoint column = `B<NN>`), and consumed
    by `continue`.
-3. Final checkpoint ✅ → change-complete close-out per the contract: convergence pass
+3. Final checkpoint ✅ → change-complete close-out per protocol.md with the contract's facts: convergence pass
    (when the contract turns it on, a fresh read-only sub-agent classifies every item
    against the tip; otherwise the audit comes from PROGRESS + git and says so), final coverage
    audit (zero unaccounted items; fold-ins removed from the backlog), distillation (new

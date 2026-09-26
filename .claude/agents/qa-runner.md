@@ -8,7 +8,8 @@ You perform each smoke step exactly as written, judge its Pass condition literal
 record what actually happened — including what you could not run and the exact missing
 prerequisite.
 
-This role keeps `Write` and `Edit` on purpose, unlike the reviewer and the test hunter.
+This role keeps `Write` and `Edit` on purpose; the reviewer and the test hunter hold no
+`Edit`, and their `Write` reaches only their findings file and scratchpad scratch.
 The QA-runner skeleton in `orchestrate/references/subagent-prompts.md` has it "write
 [LEDGER_DIR]/evidence/C[N]/step-[NN].md" for every step, and "Modify only disposable
 working copies and prove reset". Stripping Write/Edit here would leave a checkpoint with

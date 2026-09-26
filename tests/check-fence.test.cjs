@@ -224,18 +224,28 @@ test('a checkbox is excluded from the polish continuation, and only a checkbox i
     if (rejected) assert.ok(found.every(d => d.code === 'batch-content' && d.path === BATCHFILE), JSON.stringify(found));
   }
 });
-test('the batch template SHOWS the wrapped polish form, in the exact bytes the validator accepts', async () => {
-  // Read from the shipped template, never a copy: the form shown to implementers and the
-  // form the mechanical gate accepts cannot drift apart. Either checkout style parses.
+test('the batch template SHOWS the wrapped polish form, unticked and ticked, in the exact bytes the validator accepts', async () => {
+  // Read from the shipped template, never a copy: the forms shown to implementers and to the
+  // orchestrator (whose prose-ASK commit appends its item already ticked) and the form the
+  // mechanical gate accepts cannot drift apart. Either checkout style parses. Every shown item is
+  // governed, not the first alone.
   const template = fs.readFileSync(path.join(__dirname, '..', 'orchestrate', 'templates', '02-batch.md'), 'utf8').replace(/\r\n?/g, '\n');
-  const shown = /^- \[[ x]\] polish: .+(?:\n +\S[^\n]*)+/m.exec(template);
-  assert.ok(shown, 'orchestrate/templates/02-batch.md must SHOW a wrapped polish item, not only describe one');
-  const block = shown[0].split('\n');
-  // The space indent the validator itself requires, so this parse cannot admit a form it rejects.
-  assert.ok(block.length >= 2 && block.slice(1).every(l => /^ +\S/.test(l)), JSON.stringify(block));
-  const baseline = makeBatch(['allowed.txt']), proposed = baseline.replace('\n\n## Acceptance', () => `\n${shown[0]}\n\n## Acceptance`);
-  assert.notEqual(proposed, baseline);
-  assert.deepEqual((await api).validateBatchEdit(baseline, proposed, ['allowed.txt'], [], BATCHFILE), []);
+  const shown = [...template.matchAll(/^- \[([ x])\] polish: .+(?:\n +\S[^\n]*)+/gm)];
+  assert.deepEqual(shown.map(m => m[1]), [' ', 'x'],
+    'orchestrate/templates/02-batch.md must SHOW a wrapped unticked polish item and a wrapped ticked one, not only describe them');
+  assert.equal([...template.matchAll(/^- \[[ xX]\] polish:/gm)].length, shown.length, 'every polish header the template holds is a shown wrapped item');
+  const baseline = makeBatch(['allowed.txt']);
+  // Each item alone, then both in order: the implementer's pass and the orchestrator's item together.
+  for (const items of [...shown.map(m => [m[0]]), shown.map(m => m[0])]) {
+    for (const item of items) {
+      const block = item.split('\n');
+      // The space indent the validator itself requires, so this parse cannot admit a form it rejects.
+      assert.ok(block.length >= 2 && block.slice(1).every(l => /^ +\S/.test(l)), JSON.stringify(block));
+    }
+    const proposed = baseline.replace('\n\n## Acceptance', () => `\n${items.join('\n')}\n\n## Acceptance`);
+    assert.notEqual(proposed, baseline);
+    assert.deepEqual((await api).validateBatchEdit(baseline, proposed, ['allowed.txt'], [], BATCHFILE), [], items.join('\n'));
+  }
 });
 test('own batch rejects every forbidden structural edit with line diagnostics', async t => {
   const edits = {

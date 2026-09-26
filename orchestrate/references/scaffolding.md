@@ -10,13 +10,16 @@
 3. An ACTIVE ledger already in `.agents/changes/` or on any branch (Discovery in
    SKILL.md) → ask whether to finish it first. Two concurrent ledgers are allowed only as
    the user's explicit choice.
+4. **Effort.** A session running at max effort → before scaffolding, ask the user to set it
+   to high, with the reason in one sentence: at max, one measured scaffold spent 54% of its
+   output on thinking. Never change the setting yourself.
 
 ## Procedure
 
 1. **Detect** repo facts (heuristics below) — read-only.
 2. **Interview** — back-to-back AskUserQuestion calls, as many as the open gaps need,
    covering only the gaps and the confirmations listed below.
-3. **Plan** — explore the codebase (sub-agents as needed), draft the batch table with
+3. **Plan** — explore the codebase (sub-agents as needed, at medium thoroughness by default; "very thorough" only when the interview needs an inventory and the prompt names what it is for), draft the batch table with
    file fences and a weight per batch (S / M / L), and map every request item to a
    batch. Then structure for throughput per `execution-models.md`: reshape fences for
    disjointness (seam batches, splits, merges), build the wave map (widest safe waves —
@@ -92,8 +95,9 @@
    array is invalid) and say so in LOG.md. When `{{WORKTREE_SETUP}}` is not `n/a`, also
    write `setup.json`, a `validate.mjs` spec holding the setup command(s), so a disposable
    checkout can be set up exactly like a worktree.
-   Keep the generated delivery contract runtime-neutral: use the committed smoke HTML
-   and capability-based HTML/text hand-over; publisher API mechanics stay in the skill.
+   Keep the generated contract's smoke facts runtime-neutral: its delivery procedure is
+   the pinned `references/protocol.md`'s (the committed smoke HTML and capability-based
+   HTML/text hand-over); publisher API mechanics stay in the skill.
 9. **Self-check** — grep the new ledger directory for `{{` and `<!--`, and its `*.md`
    for `<title>` (a deleted marker can leave an example row behind): **zero hits**
    outside fenced and inline code spans. A hit inside a code span is not an unfilled
@@ -119,15 +123,16 @@
 ## Evidence and input baking
 
 Capture read-only discovery/shipment evidence with the protocol's helper recipes;
-the conductor still resolves owner/target ambiguity. Bake resolved EVIDENCE_TOOL and
-FENCE_TOOL paths plus the full manual fallback, three outcomes, captured-ref authority
-and supported grammar into new contracts. Never silently adopt changed gates for an
+the conductor still resolves owner/target ambiguity. New contracts carry no helper
+paths, manual fallback, outcomes or fence grammar of their own: those live in the pinned
+directory's `references/protocol.md`, whose recipes run the helpers from that directory.
+Never silently adopt changed gates for an
 existing ledger. Use exact Branch and Files lines in batch files and exact backtick
 paths in plan tables; unsupported shapes use manual checks, not inferred authority.
 Bake `{{SKILL_DIR}}` and `{{SKILL_SHA256}}` too: `validate.mjs`, `check-ledger.mjs` and
 every later skill tool a contract names run as `node "{{SKILL_DIR}}/tools/<tool>.mjs"`,
-located by the pin rather than by a resolved path. EVIDENCE_TOOL and FENCE_TOOL keep the
-resolved-path rule above until they move under the pinned directory.
+located by the pin rather than by a resolved path. Bake `{{SKILL_SOURCE}}` beside them:
+how that directory was produced, so a pin mismatch can be restored byte-for-byte.
 
 At hand-over preserve generated files and independent validation reports under
 evidence/Cn/inputs/issue-NNN; use raw-byte copies and validate the delivered checkout.
@@ -179,17 +184,16 @@ appear in the templates — check both directions when editing either.
 | `{{CHANGELOG_RULE}}` | template (READBEFORE) | interview #2 — path, ordering (append bottom vs prepend), heading format, voice, or `none` |
 | `{{SMOKE_PROCEDURE}}` | template (READBEFORE) | interview #3 — always asked |
 | `{{AGENT_RUNNERS}}` | template (READBEFORE) | interview #3 — which runners an agent may use in THIS environment (`none` / CLI / HTTP / browser / screenshot), the disposable data environment if any, and the prohibitions that apply (e.g. "never launch the headed app") |
-| `{{EVIDENCE_TOOL}}` | template (READBEFORE) | resolved path to git-evidence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
-| `{{FENCE_TOOL}}` | template (READBEFORE) | resolved path to check-fence.mjs; quote for the user shell, or record unavailable and use the baked manual fallback |
 | `{{SKILL_DIR}}` | template (READBEFORE) | the absolute path of the directory holding the skill's `SKILL.md` (the base directory the skill loader reports), forward slashes, stored RAW between the pin line's backticks — never quoted there; every command that uses it quotes it. Never relative or `~`: the pin check reads it from the working directory |
 | `{{SKILL_SHA256}}` | template (READBEFORE) | the hex field of `node "<SKILL_DIR>/tools/check-ledger.mjs" skill --dir "<SKILL_DIR>"`, run at fill time |
+| `{{SKILL_SOURCE}}` | template (READBEFORE) | filled at fill time next to `{{SKILL_SHA256}}`: how the pinned directory was produced — e.g. ``git archive <commit> orchestrate`` of `<clone path>`, a copy of `<path>` at `<commit>`, or `unknown`; a restore after a pin mismatch rebuilds the directory byte-for-byte from it |
 | `{{WORKTREE_SETUP}}` | template (READBEFORE) | detected install/build step (`npm install`, `cargo fetch`, …) or `n/a` |
 | `{{REPO_CONVENTIONS}}` | template (READBEFORE) | distilled from the project CLAUDE.md/docs — the BINDING subset, ≤25 lines, plus a pointer to the source doc; never a wholesale copy |
 | `{{EXTRA_PROHIBITIONS}}` | template (READBEFORE) | interview #7 / CLAUDE.md — repo-specific never-touch items; `(none beyond the above)` if empty |
-| `{{GUARDRAILS_REF}}` | template (READBEFORE, several) | detected guardrails section (e.g. `` `CLAUDE.md` §Bug-Class Guardrails ``) or `the project guardrails doc (none yet — create a CLAUDE.md guardrails section at first distill)` |
+| `{{GUARDRAILS_REF}}` | template (READBEFORE) | detected guardrails section (e.g. `` `CLAUDE.md` §Bug-Class Guardrails ``) or `the project guardrails doc (none yet — create a CLAUDE.md guardrails section at first distill)` |
 | `{{GATE_AGENTS}}` | template (READBEFORE) | interview #7 — the read-only gate agents this ledger runs beside the reviewer (repo-local `.claude/agents/*.md` such as a test hunter, or the skill's generic test-hunter skeleton), with the testing guide / catalog each must read first; `reviewer only` when none |
 | `{{ROLE_TIERS}}` | template (READBEFORE) | interview #7 — model-agnostic wording per role, e.g. "implementers and gate agents: default; reviewer: at least the implementer's tier, most capable available for L batches and the fresh implementer of an authorized third round" |
-| `{{BACKLOG_FILE}}` | template (READBEFORE, several) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
+| `{{BACKLOG_FILE}}` | template (READBEFORE) | detected (`BACKLOG.md`, `TODO.md`, issue tracker) or `` `BACKLOG.md` (create on first residual) `` |
 | `{{BACKLOG_ID_PREFIX}}` | template (READBEFORE) | detected id scheme in the backlog files (`SCAN-6`, `#3.5`, `BL-017` …) or `BL-` when none; only accepted fold-ins and new residual entries receive ids |
 | `{{RELEASE_COMMAND}}` | template (READBEFORE) | detected build/release script or `none` |
 | `{{BATCH_NUM}}` | template (batch file) | per batch, two digits |
@@ -324,11 +328,11 @@ Fold-in picks are NOT interview questions — they ride plan approval (procedure
 
 Interview answers are written INTO the generated `00-READBEFORE.md` — never left as a
 pointer into this skill's reference docs. A ledger references ONLY its pinned skill
-directory, by absolute path and hash, and every step a tool performs also has a baked
-manual procedure (the recipe block for validation, the pasted-prompt list for spawning,
-the fence's manual fallback); a changed skill stops the ledger at its next boot and asks,
-and never silently changes how it runs. The skill's references exist for the skill's
-benefit; each ledger must be drivable by a session that has never seen this skill — or
-has a changed one: State line, LOG.md,
-`NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are all explained
-inside the ledger's own files.
+directory, by absolute path and hash; its procedure is that directory's
+`references/protocol.md`, frozen by the hash, and every step a tool performs also has its
+manual procedure there; a changed skill stops the ledger at its next boot and asks,
+and never silently changes how it runs. The contract carries repo facts only, never a
+copy of that procedure; the recipe block for validation stays in it. Each ledger must
+be drivable by a session from the ledger plus its pinned directory: State line, LOG.md,
+`NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are explained
+between the ledger's own files and that directory's `references/protocol.md`.

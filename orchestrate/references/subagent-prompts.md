@@ -19,7 +19,8 @@ read/hash the files, execute independent semantic validation, browser-check file
 and modify only disposable working copies. Never call missing dependencies pre-verified
 or claim Excel-app execution from hashes; leave native-app steps human if no runner.
 On reissue check retained issue paths/history and every affected revision. Existing
-ledger contracts keep their own rules; tool diagnostics never authorize state changes.
+ledgers keep their own rules (a pinned ledger, its pinned directory's protocol.md); tool
+diagnostics never authorize state changes.
 
 ## Implementer
 
@@ -61,7 +62,9 @@ complete them; run the validation commands; before committing run
 revert anything outside your fence; commit on your batch branch with a conventional
 message ("[TYPE]: <summary> (batch [NN])") — one separate commit per backlog fold-in item,
 its message carrying the item's id.
-RULES: read a file before you edit it. Chain a command and its check with `&&` (in bash,
+RULES: read a file before you edit it. A comment states what the code beneath it does and
+why, and points at a neighbour by path and symbol; it never describes how the neighbour
+behaves. Chain a command and its check with `&&` (in bash,
 after `set -o pipefail`), never `;`. Run the validation from the worktree root as
 `node "[SKILL_DIR]/tools/validate.mjs" --spec [LEDGER_DIR]/validate.json --log "[SCRATCHPAD_PATH]/<label>.log"`:
 its one line is the result and its exit code the real one. Never pipe or tail it; when it
@@ -90,8 +93,9 @@ no such edit, so this variant is always the manual procedure (§Spawning rules).
 ```prompt:polish
 Your batch reviewed SHIP with ASKs (in-fence, no production behavior change); the
 findings file [FINDINGS_FILE] lists them.
-First append one `- [ ] polish: <ask>` checklist line per ask to your batch file, then do
-them, tick them, run the validation commands, commit ("polish: batch [NN] — <summary>").
+First append one `- [ ] polish: <ask>` checklist line per ask your batch file does not list
+yet (an orchestrator that applied a prose ask listed every ask: those it applied ticked, yours
+unticked), then do them, tick them, run the validation commands, commit ("polish: batch [NN] — <summary>").
 Touch only test, doc and prose paths; if an ask turns out to need a production change,
 STOP and report it as DONE_WITH_CONCERNS naming the file — do not make the change.
 Same REPORT shape.
@@ -170,6 +174,11 @@ CONCRETE failure scenario (inputs → wrong outcome), a minimal suggested fix, a
   ASK — in-fence, about the batch's OWN artifacts (its tests' strength, smoke-step prose,
         comments, a doc sweep), no production behavior change (non-blocking; rides under
         SHIP)
+  Severity is about behaviour, never the fence: a violated criterion whose fix sits
+  outside the batch's files is still P0 or P1 — the fence decides only the route
+  (NEEDS_FENCE), never the class. Prose that is a contract (channel payload docs, exported
+  API comments, ARCHITECTURE rows, USER-GUIDE claims) is never an ASK: wrong, it is P0 or
+  P1. An ASK on other prose carries its replacement text, whose fact you verified.
 SHIP = no P0/P1 (ASKs allowed). FIX FIRST = at least one P0/P1. NEEDS A CLOSER LOOK =
 suspected but unconfirmed — say exactly what check would confirm it. At most 40 lines
 of prose beyond the findings. Never pad: one real bug named precisely outweighs a page
@@ -195,14 +204,14 @@ verify the fix in the current diff and mark it FIX VERIFIED or NOT FIXED. Then r
 only what changed since round 1 (`git diff [ROUND1_SHA]..HEAD`).
 ```
 
-**Scoped re-review** (a polish commit touched a production file): a fresh reviewer given
+**Scoped re-review** (a polish commit touched a production file that `prose-only-diff.mjs`
+did not read as prose-only): a fresh reviewer given
 only `git diff [PRE_POLISH_SHA]..HEAD`, the ASK list, and duties 1, 2 and 4. Not a round.
 Its verdict is recorded like any other (`R<k> <verdict> @<sha>`) and never counts toward
-the cap. `FIX FIRST` → the implementer reverts the offending production hunks or redoes
-the polish within test/doc/prose, then a fresh scoped re-review of the new diff; a SECOND
-polish-phase `FIX FIRST` discards the polish — the orchestrator writes `polish discarded:
-@[PRE_POLISH_SHA]` into the row's Notes, reverts back to that reviewed tree in ONE commit
-(never a reset), and integrates it; unclosed ASKs → backlog.
+the cap. One strike: its `FIX FIRST` discards the polish at once — the orchestrator
+writes `polish discarded: @[PRE_POLISH_SHA]` into the row's Notes, reverts back to that
+reviewed tree in ONE commit (never a reset), and integrates it; unclosed ASKs → backlog,
+each with its wording attached.
 
 Only `FIX FIRST` rounds count toward the cap of two. The SECOND `FIX FIRST` makes the
 orchestrator set `⛔ defective` or `⛔ green, residual finding open (<severity>)`, record
