@@ -1410,7 +1410,9 @@ test('recovery, respawn and later rounds work from rendered files and LOG.md, ne
 // each with exit 0. So the append, recovery and join commands are taken out of the documents
 // as published, only their placeholders filled, and run by Git for Windows' own bash: the
 // contract validates from PowerShell, whose PATH reaches WSL's launcher for `bash` and holds no
-// awk (tests/validate.test.cjs:611-623). Every outcome is judged on whole bytes.
+// awk (the Git for Windows bash set-up under which tests/validate.test.cjs runs its test
+// 'shell steps run the script as one argument and propagate its exit code'). Every outcome is
+// judged on whole bytes.
 const GIT_BASH = process.platform !== 'win32' ? 'bash'
   : path.resolve(spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim(), '..', '..', '..', 'usr', 'bin', 'bash.exe');
 function bashEnv(env) {
@@ -1419,6 +1421,15 @@ function bashEnv(env) {
   for (const key of keys) delete out[key];
   return { ...out, PATH: [path.dirname(GIT_BASH), current].join(';') };
 }
+// [BL-042] The comment above names the validate.test.cjs test it leans on by its title, never
+// by a line range: the range it used to name went stale as that file grew.
+test('[BL-042] the Git-bash pointer names a tests/validate.test.cjs test that exists, by title', () => {
+  const source = read('tests/tool-wiring.test.cjs');
+  const named = /tests\/validate\.test\.cjs runs its test\n\/\/ '([^'\n]+)'/.exec(source);
+  assert.ok(named, 'the pointer names the test by its title');
+  assert.ok(read('tests/validate.test.cjs').includes("test('" + named[1] + "'"), 'no test of that title in tests/validate.test.cjs: ' + named[1]);
+  assert.doesNotMatch(source, new RegExp('validate' + '\\.test\\.cjs:' + '[0-9]'), 'a line-range pointer into tests/validate.test.cjs');
+});
 // The published text with its placeholders filled: every one of them, and nothing else.
 function filledCommand(command, values) {
   const tokens = [...new Set([...command.matchAll(/<[A-Za-z][A-Za-z -]*>/g)].map(m => m[0]))].sort();
