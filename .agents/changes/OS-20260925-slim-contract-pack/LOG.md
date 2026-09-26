@@ -973,3 +973,10 @@ add or edit an unlisted tool-directive comment (`// gitleaks:allow`, `// skipcq:
 scoped re-review; code cannot change under it, the fence check and validations still run, and
 nothing in this ledger uses the tool (its contract predates it). Not a breaking bug: the
 condition holds, and the verdict is consumed as *ship with the residual*.
+- Consumed: `git merge-tree --write-tree` clean (`183a92f`), `--no-ff` merge `bf055ce`, tip
+  `PASS tests 561/563, 2 skipped (23s)` → 🟢. Residual F8 → `BACKLOG.md` `BL-046` (high), carrying
+  the round-3 reviewer's minimal fix verbatim and the class fix (invert the directive rule). One
+  `Runner: human` smoke step (step 4) authored into B04's batch file on the integration branch,
+  reproducing the residual on the issued fixture `I-04` (`c1` appends ` // gitleaks:allow` to a
+  code line; checked on the tip: `PROSE-ONLY 1 file(s)`, exit 0). The round-3 hunter's five
+  test-only ASKs go to `BACKLOG.md` at close-out. Worktree `b04` removed.
