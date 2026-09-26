@@ -91,6 +91,8 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 - [x] Compaction-at-boundaries rule and the practices in `protocol.md`
 - [x] [BL-034] `qa-runner.md:11` reworded
 - [x] Tests pinning each new rule sentence in its carrier, plus a sweep for contradicting directives elsewhere
+- [x] polish: POLL gains an owned family for holding the turn on a sub-agent (wait/check until an agent lands, not ending the turn); both R1 survivors planted, the smoke page's "waiting until you finish editing" kept as a must-pass control
+- [x] polish: the "effort" and "explore" key-word families and POLL's poll/sleep families read only the Markdown under orchestrate/ plus README; ReadNotifications, compact and thorough stay on the whole tree; narrowing stated and the narrowed domain asserted a superset of the carriers
 
 ## Acceptance criteria
 

@@ -1647,22 +1647,35 @@ function strayMentions(file, text, pattern, allowed) {
     .filter(m => !ranges.some(([s, e]) => m.index >= s && m.index + m[0].length <= e))
     .map(m => file + ': …' + collapse(text.slice(Math.max(0, m.index - 50), m.index + m[0].length + 50)) + '…');
 }
+// Where conductor directives live: the Markdown under orchestrate/ plus README (B03 R1). Code and
+// the page template use "effort", "explore", "poll" and "sleep" as ordinary words — a
+// "best-effort" comment directs no one — so those families read only this domain. The rarer
+// ReadNotifications, compact and thorough stay bound across the whole tree, code included.
+const proseDocuments = () => documents().filter(f => f.endsWith('.md'));
 const BOUND_WORDS = [
-  ['the no-polling rule', /ReadNotifications/, ['pollSkill', 'pollProtocol']],
-  ['the compaction rule', /compact/i, ['compaction', 'nextWave']],
-  ['the Explore thoroughness default', /thorough/i, ['exploreSkill', 'exploreScaffold']],
-  ['a fact-finding carrier', /\bexplor(?:e|es|ed|ing)\b/i, ['exploreSkill', 'exploreScaffold']],
-  ['the scaffold effort ask', /\beffort\b/i, ['effort']],
+  ['the no-polling rule', /ReadNotifications/, ['pollSkill', 'pollProtocol'], 'tree'],
+  ['the compaction rule', /compact/i, ['compaction', 'nextWave'], 'tree'],
+  ['the Explore thoroughness default', /thorough/i, ['exploreSkill', 'exploreScaffold'], 'tree'],
+  ['a fact-finding carrier', /\bexplor(?:e|es|ed|ing)\b/i, ['exploreSkill', 'exploreScaffold'], 'prose'],
+  ['the scaffold effort ask', /\beffort\b/i, ['effort'], 'prose'],
 ];
 test('each budget rule\'s key word appears nowhere but inside its pinned carriers', () => {
-  const files = documents();
+  const files = documents(), prose = proseDocuments();
   assert.ok(files.includes('README.md') && files.includes('orchestrate/references/scaffolding.md') && files.some(f => f.endsWith('.mjs')),
     'the domain is the whole shipped tree, code included, plus README');
+  assert.ok(prose.includes('README.md') && prose.includes('orchestrate/references/protocol.md') && prose.length < files.length
+    && prose.every(f => files.includes(f) && f.endsWith('.md')), 'the prose domain is every Markdown file of that tree, and README');
   assert.equal(new Set(BOUND_WORDS.map(b => b[0])).size, BOUND_WORDS.length);
-  for (const [what, pattern, allowed] of BOUND_WORDS) {
+  // The narrowing is exactly the two ordinary words; widening back is free, narrowing more is an edit here.
+  assert.deepEqual(BOUND_WORDS.filter(b => b[3] !== 'tree').map(b => b[0]), ['a fact-finding carrier', 'the scaffold effort ask'],
+    'only the explore and effort families read the prose domain alone');
+  for (const [what, pattern, allowed, domain] of BOUND_WORDS) {
+    assert.ok(domain === 'tree' || domain === 'prose', what + ': names its domain');
+    const swept = domain === 'tree' ? files : prose;
     const carriers = [...new Set(allowed.map(key => BUDGET[key][0]))].sort();
+    assert.ok(carriers.every(c => swept.includes(c)), what + ': its domain must be a superset of its carriers');
     const mentioning = [], stray = [];
-    for (const file of files) {
+    for (const file of swept) {
       const text = read(file);
       if (pattern.test(text)) mentioning.push(file);
       stray.push(...strayMentions(file, text, pattern, allowed));
@@ -1682,15 +1695,30 @@ test('each budget rule\'s key word appears nowhere but inside its pinned carrier
 // through the undo sweep's reader. Code spans are read as their text, so the rule's own
 // "never calls `ReadNotifications`" is governed by its negator like any other word.
 const unticked = text => text.replace(/`([^`\n]*)`/g, '$1');
+// Holding the turn on a sub-agent (B03 R1): a wait/check/look/watch verb, "until" and an agent
+// noun in one clause, in any of the six orders, or the turn held rather than ended. The agent
+// noun is required: the smoke page's own "A page update is waiting until you finish editing
+// this note." directs no conductor. Verb forms only: "checklist" is not "check", nor is the noun
+// in "fence check → … reviewer … → next wave, repeating until a checkpoint" (SKILL.md).
+const AGENT_NOUN = String.raw`\b(?:implementers?|reviewers?|sub-agents?|agents?|waves?|test[- ]hunters?|QA runners?)\b`;
+const WAIT_VERB = String.raw`(?:\b(?:wait|look|watch)(?:s|es|ed|ing)?\b|(?<!\b(?:fence|pin|skill|containment|mechanical|the|a|an|this|that|its|each|every|one)\s)\bcheck(?:s|ed|ing)?\b)`;
+const UNTIL = String.raw`\buntil\b`;
+const ANY_ORDER = [[WAIT_VERB, UNTIL, AGENT_NOUN], [WAIT_VERB, AGENT_NOUN, UNTIL], [UNTIL, WAIT_VERB, AGENT_NOUN],
+  [UNTIL, AGENT_NOUN, WAIT_VERB], [AGENT_NOUN, WAIT_VERB, UNTIL], [AGENT_NOUN, UNTIL, WAIT_VERB]].map(order => order.join('[^.;:]*'));
+const TURN = String.raw`\s+(?:the|a|its|your)\s+turn\b`;
+const HOLD_TURN = new RegExp([...ANY_ORDER, String.raw`\b(?:before|instead of|rather than)\s+end(?:s|ing)?` + TURN,
+  String.raw`\b(?:hold|keep)(?:s|ing)?` + TURN, String.raw`\b(?:never|not|don['’]t)\s+end(?:s|ing)?` + TURN].join('|'), 'i');
+const PAGE_WAITING = 'A page update is waiting until you finish editing this note.';
 const POLL = [
-  ['a notifications call', /\bReadNotifications\b/, 'Call ReadNotifications until every implementer has reported'],
-  ['polling', /\bpoll(?:s|ed|ing)?\b/i, 'Poll the wave until each implementer reports'],
-  ['sleeping', /\b(?:sleep(?:s|ing)?|Start-Sleep)\b/i, 'Sleep for a minute between spawns'],
-  ['checking again and again', /\bkeep\s+(?:check|look|ask|query)ing\b/i, 'Keep checking the task list until the reviewer is done'],
+  ['a notifications call', /\bReadNotifications\b/, 'Call ReadNotifications until every implementer has reported', 'tree'],
+  ['polling', /\bpoll(?:s|ed|ing)?\b/i, 'Poll the wave until each implementer reports', 'prose'],
+  ['sleeping', /\b(?:sleep(?:s|ing)?|Start-Sleep)\b/i, 'Sleep for a minute between spawns', 'prose'],
+  ['checking again and again', /\bkeep\s+(?:check|look|ask|query)ing\b/i, 'Keep checking the task list for new output', 'tree'],
   ['checking at intervals', /\b(?:check|look|query)\w*\b[^.;:]*\b(?:every\s+(?:few\s+)?(?:\d+\s+)?(?:seconds?|minutes?)|periodically|at intervals|repeatedly)\b/i,
-    'Check the agent output every few minutes'],
+    'Check the agent output every few minutes', 'tree'],
+  ['holding the turn on a sub-agent', HOLD_TURN, 'Hold the turn until every implementer has reported', 'tree'],
 ];
-const polling = text => clauses(unticked(text)).flatMap(c => POLL.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
+const polling = (text, families = POLL) => clauses(unticked(text)).flatMap(c => families.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
 test('no shipped document tells the orchestrator to poll, sleep or call ReadNotifications while it waits', () => {
   assert.equal(new Set(POLL.map(p => p[0])).size, POLL.length);
   for (const [name, pattern, specimen] of POLL) {
@@ -1705,14 +1733,33 @@ test('no shipped document tells the orchestrator to poll, sleep or call ReadNoti
     'Never spawn a second reviewer; poll the first until it reports.', 'Do not end the turn — sleep, then look at the wave.',
     'Run Start-Sleep 60 between checks on the wave.', 'Keep looking at the task output until the implementer lands.',
     'Look at the agent transcripts periodically while the wave runs.', 'Why not poll the implementers while they work?',
-    'Never skip polling the wave.']) {
+    'Never skip polling the wave.',
+    // The R1 reviewer's two survivors, and the turn held in other words.
+    'Before ending a turn, wait until every implementer of the wave has reported.',
+    "Spawn ALL of the wave's implementers concurrently, then check each one's output until it lands.",
+    'Watch the reviewer transcript until it prints its verdict.', 'Do not end the turn while the reviewers run.',
+    'Keep the turn open until the QA runner reports.', 'Rather than ending the turn, look at the sub-agents again.']) {
     assert.ok(polling(planted).length >= 1, 'must be reported: ' + planted);
   }
-  assert.deepEqual(polling(NO_POLL + ' Never poll a sub-agent. Do not call `ReadNotifications`. Don\'t sleep while a wave runs. ' + BACKGROUND_RULE), [],
-    'the rule itself, its negations and the approved background task are not directives to poll');
-  const files = documents();
-  assert.ok(files.includes('orchestrate/SKILL.md') && files.includes('orchestrate/references/protocol.md') && files.includes('README.md'));
-  for (const file of files) assert.deepEqual(polling(read(file)), [], file + ': a directive to poll, sleep or call ReadNotifications while waiting');
+  assert.ok(read('orchestrate/references/smoke-page-template.html').includes(PAGE_WAITING), 'the page template still says what the must-pass control quotes');
+  assert.deepEqual(polling(NO_POLL + ' Never poll a sub-agent. Do not call `ReadNotifications`. Don\'t sleep while a wave runs. ' + BACKGROUND_RULE + ' ' + PAGE_WAITING
+    + ' Never wait until every implementer has reported. Gate PER BATCH, as each implementer reports (don\'t wait for the wave\'s slowest).'
+    + ' Per batch as each lands: fence check → failing-on-base → reviewer + gate agents → next wave, repeating until a checkpoint.'), [],
+    'the rule itself, its negations, the approved background task and a page note are not directives to poll');
+  // poll and sleep read the prose domain only (see proseDocuments); every other family, the whole tree.
+  assert.deepEqual(POLL.filter(p => p[3] !== 'tree').map(p => p[0]), ['polling', 'sleeping'], 'only poll and sleep are narrowed to the prose domain');
+  assert.ok(POLL.every(p => p[3] === 'tree' || p[3] === 'prose'));
+  const treeOnly = POLL.filter(p => p[3] === 'tree');
+  assert.deepEqual(polling('Sleep a minute, then poll the wave.', treeOnly), [], 'outside the prose domain poll and sleep are not read');
+  assert.equal(polling('Sleep a minute, then poll the wave.').length, 2, 'inside it they are');
+  const files = documents(), prose = new Set(proseDocuments());
+  assert.ok(files.includes('orchestrate/SKILL.md') && files.includes('orchestrate/references/protocol.md') && files.includes('README.md')
+    && files.includes('orchestrate/references/smoke-page-template.html'));
+  assert.ok(['orchestrate/SKILL.md', 'orchestrate/references/protocol.md', 'README.md'].every(f => prose.has(f)),
+    'the prose domain is a superset of the no-polling rule\'s carriers');
+  for (const file of files) {
+    assert.deepEqual(polling(read(file), prose.has(file) ? POLL : treeOnly), [], file + ': a directive to poll, sleep or call ReadNotifications while waiting');
+  }
 });
 
 // No definition sets `effort:` (the loader takes low | medium | high | max | an integer) or
