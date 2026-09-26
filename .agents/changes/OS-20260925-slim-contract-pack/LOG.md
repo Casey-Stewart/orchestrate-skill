@@ -958,3 +958,18 @@ Checked and holding (by trace; R1's and R2's mutations were not re-run):
 - Not counted: retargeting the BL-042 pointer to another shell-running test (validate.test.cjs:929) would survive but is an equally true pointer; loosening a directive's leading `(?<![\w-])` for eslint, prettier and the rest (by trace, not run) only makes the tool keep more comments, the conservative direction; `--no-relative` and the `?.`-before-digit check at :210 are unobservable by any fixture.
 
 === end of B04 R3 test-hunter findings ===
+
+### B04 — ship with the residual
+
+The user's verdict, recorded verbatim in the verdict log: "As long as the residual isn't a
+fundamentally breaking bug that sounds fine." The condition was checked, not assumed: B04's
+protocol.md (§Severity, the polish close, `feat/prose-polish` @2cf7d9e lines 128-134) uses the
+classifier in one place — after a polish lands, `PROSE-ONLY` exempts the JavaScript files it
+counts from the fix-diff-only re-review; `CODE`/`UNKNOWN` keep the path rule; §Recovery keeps the
+path rule regardless. A `PROSE-ONLY` requires every changed JavaScript file's comment-stripped
+remainder to be byte-identical, and the round-3 reviewer verified the tokenizer class (R1 F1,
+R2 F5) closed through the published CLI. So the residual P1 (F8) can at worst let a future polish
+add or edit an unlisted tool-directive comment (`// gitleaks:allow`, `// skipcq: …`) without the
+scoped re-review; code cannot change under it, the fence check and validations still run, and
+nothing in this ledger uses the tool (its contract predates it). Not a breaking bug: the
+condition holds, and the verdict is consumed as *ship with the residual*.

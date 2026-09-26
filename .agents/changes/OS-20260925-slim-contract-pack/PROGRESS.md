@@ -51,6 +51,7 @@ None yet — issued at C1 close-out (inventory in [01-plan.md](01-plan.md) §Smo
 | Date | Checkpoint | Verdict | User notes |
 |------|------------|---------|------------|
 | 2026-09-26 | B04 | fix again | "Yup, run it again. Fresh implementer, I moved this session up to max as well to help." |
+| 2026-09-26 | B04 | ship with the residual | "As long as the residual isn't a fundamentally breaking bug that sounds fine." |
 
 ## Item → batch coverage audit
 
