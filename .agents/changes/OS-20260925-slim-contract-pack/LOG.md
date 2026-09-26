@@ -487,3 +487,19 @@ Orchestrator question 2 (compaction wording): the rule is actionable. A Claude C
 Orchestrator question 3: yes, the implementer re-derived the pointers. At the ledger base the carriers were SKILL.md:186 and scaffolding.md:19, and UNDO was at 581-668. The implementer anchored every pin and region by text, not by the batch file's stale :180 / :465-483. The only stale numbers left are in the checklist tick text, which is exempt.
 
 === end of B03 R1 reviewer findings ===
+
+### B03 — polish and integration
+
+- Polish (same implementer, nonce matched) @`62f4be5`: 2 `polish:` lines ticked (8/8); test-only —
+  `tests/tool-wiring.test.cjs` plus the batch file. POLL gains the "holding the turn on a
+  sub-agent" family (both R1 survivors now killed); effort/explore and poll/sleep read only the
+  `.md` prose domain (option (a)), narrowed sets pinned, superset of carriers asserted. The
+  implementer's proofs: kill set 6/6 killed, false-rejection set 2/2 survived as intended, the
+  original 19 mutations still killed.
+- Mechanical close: fence PASS (integration `547e701`, batch `62f4be5`), worktree validation
+  `PASS tests 541/543, 2 skipped (23s)`; no production path touched → no re-review.
+- Integrated: `git merge-tree --write-tree` clean (`27da8d6`), `--no-ff` merge `66ce0f5`, tip
+  `PASS tests 541/543, 2 skipped (23s)` → 🟢. Worktree `b03` removed. W2 closed, no checkpoint.
+- For B04: `tests/tool-wiring.test.cjs` now fails on "ReadNotifications", "compact" or "thorough"
+  anywhere under `orchestrate/` (code included) outside the pinned passages, and on
+  "effort"/"explore"/"poll"/"sleep" in any `.md` there or README outside them.
