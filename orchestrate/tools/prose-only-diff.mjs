@@ -33,7 +33,8 @@ export const DIRECTIVES = [
   ['node:coverage', /(?<![\w-])node:coverage(?![\w-])/i],
   ['tslint', /(?<![\w-])tslint/i],
   ['$Flow', /\$Flow[A-Z]\w*/],
-  ['NOSONAR', /(?<![\w-])NOSONAR(?![\w-])/i],
+  ['LCOV_EXCL', /(?<![\w-])LCOV_EXCL_/],
+  ['deepcode', /(?<![\w-])deepcode(?![\w-])/i],
   ['Stryker', /(?<![\w-])stryker(?![\w-])/i],
   ['nosemgrep', /(?<![\w-])nosemgrep(?![\w-])/i],
   ['lgtm', /(?<![\w-])lgtm(?![\w-])/i],
@@ -46,16 +47,21 @@ export const DIRECTIVES = [
   // ESLint's no-fallthrough reads this comment as the intent to fall through.
   ['falls through', /(?<![\w-])falls?\s?through(?![\w-])/i],
 ];
-// The verbs and scopes a directive is shaped from, whatever tool it names: a tool joined to a
-// verb (`cspell:disable`, `stylelint-disable-next-line`), or a tool, a verb and a scope set
-// apart (`bun:coverage ignore next`, `Stryker disable all`). Exported so the corpus pins them.
-export const JOINED_VERBS = ['disable', 'enable', 'ignore', 'expect-error', 'nocheck'];
-export const SPACED_VERBS = ['ignore', 'disable', 'restore'];
-export const SCOPES = ['next-line', 'next', 'start', 'stop', 'if', 'else', 'file', 'all'];
+// A directive's shape, whatever tool it names: the verbs and scopes directives are built from,
+// exported so the corpus pins them, and four forms — a tool joined to a verb, with a scope joined
+// after it or not (`cspell:disable`, `stylelint-disable-next-line`, `jscpd:ignore-end`); a tool, a
+// verb and a scope set apart (`istanbul ignore next`, `Stryker disable all`); a rule id in brackets
+// after a word (`lgtm[js/xss]`, `$FlowFixMe[incompatible-call]`); and a shouted NO-marker
+// (`NOSONAR`, `NOLINT`, `NOQA`, `NOCOMMIT`), whose second letter may not begin an English word
+// (NOT, NOTE, NOW, NONE, NORMAL stay prose).
+export const VERBS = ['disable', 'enable', 'ignore', 'restore', 'suppress', 'expect-error', 'nocheck'];
+export const SCOPES = ['next-line', 'next', 'line', 'file', 'all', 'start', 'stop', 'end', 'if', 'else'];
 const oneOf = words => '(?:' + words.join('|') + ')';
 export const SHAPES = [
-  ['tool:verb', new RegExp('[A-Za-z][\\w@./]*[:-]\\s?' + oneOf(JOINED_VERBS) + '(?!\\w)', 'i')],
-  ['tool verb scope', new RegExp('[A-Za-z][\\w:.-]*\\s+' + oneOf(SPACED_VERBS) + '\\s+' + oneOf(SCOPES) + '(?![\\w-])', 'i')],
+  ['tool:verb', new RegExp('[A-Za-z][\\w@./]*[:-]\\s?' + oneOf(VERBS) + '(?:[:-]' + oneOf(SCOPES) + ')?(?!\\w)', 'i')],
+  ['tool verb scope', new RegExp('[A-Za-z][\\w:.-]*\\s+' + oneOf(VERBS) + '\\s+' + oneOf(SCOPES) + '(?![\\w-])', 'i')],
+  ['word[rule-id]', /(?<![\w$-])[A-Za-z$]\w*\s?\[[A-Za-z][\w-]*[/.:-][\w/.:-]*\]/],
+  ['NO-marker', /(?<![\w-])NO[CFLQS][A-Z]+(?![\w-])/],
 ];
 const MARKER = /^\/[/*]\s*(?:[/!#@]|globals?(?![\w-])|exported(?![\w-]))/;
 const TAG = /(?<![\w@.-])@[A-Za-z_$]/;
@@ -68,18 +74,25 @@ const TERMINATOR = /[\n\r\u2028\u2029]/;
 const SPACE = /[\t\v\f \u00a0\ufeff\p{Zs}]/u;
 const isTerminator = c => c !== undefined && TERMINATOR.test(c);
 const wordChar = c => c !== undefined && !TERMINATOR.test(c) && !SPACE.test(c) && (/[\w$\\]/.test(c) || c > '\u007f');
-// After these words a `/` opens a regular expression (after `break`, `continue` and `debugger`
-// the statement has ended, so one on the next line does too); after any other word it divides.
-export const OPERAND_KEYWORDS = new Set(['return', 'typeof', 'instanceof', 'in', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'extends', 'default',
-  'break', 'continue', 'debugger']);
-// A keyword or a plain name depending on context, so a `/` after one is in doubt.
-export const CONTEXTUAL = new Set(['of', 'yield', 'await']);
+// Every reserved word and contextual keyword of the language, placed by what a `/` (or a `<`)
+// right after it means. `start`: an expression starts, so a regular expression opens (after
+// `break`, `continue` and `debugger` the statement has ended, so one on the next line does too).
+// `end`: an operand ended, so it divides — a value, or a name the grammar never reserves where a
+// `/` can follow. `doubt`: either may — a keyword or a name by mode or position, or a word no
+// valid program puts before a `/`. A word on no list is a name and divides.
+export const KEYWORDS = {
+  start: new Set(['break', 'case', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'extends', 'in', 'instanceof', 'new', 'return', 'throw', 'typeof', 'void']),
+  end: new Set(['as', 'async', 'false', 'from', 'get', 'meta', 'null', 'set', 'target', 'this', 'true']),
+  doubt: new Set(['await', 'catch', 'class', 'const', 'enum', 'export', 'finally', 'for', 'function', 'if', 'implements', 'import', 'interface', 'let', 'of',
+    'package', 'private', 'protected', 'public', 'static', 'super', 'switch', 'try', 'var', 'while', 'with', 'yield']),
+};
+// After `if (…)`, `while (…)`, `for (…)` and `with (…)` a statement starts; after any other `)` an operand ended.
 export const CONTROL = new Set(['if', 'while', 'for', 'with']);
 // true: an expression starts here; false: an operator does; 'doubt': either may.
 function expressionStarts(prev) {
   if (!prev) return true;
   if (prev.type === 'value') return false;
-  if (prev.type === 'word') return prev.property ? false : prev.label ? 'doubt' : OPERAND_KEYWORDS.has(prev.text) ? true : CONTEXTUAL.has(prev.text) ? 'doubt' : false;
+  if (prev.type === 'word') return prev.property ? false : prev.label || KEYWORDS.doubt.has(prev.text) ? 'doubt' : KEYWORDS.start.has(prev.text);
   if (prev.text === ')') return prev.control;
   if (prev.text === ']' || prev.text === '.') return false;
   if (prev.text === '++' || prev.text === '--') return prev.postfix === 'doubt' ? 'doubt' : !prev.postfix;
@@ -191,7 +204,7 @@ export function scan(source) {
       // Postfix when an operand ends the same line just before it; otherwise it prefixes what
       // follows. After a keyword-or-name either may hold, so a `/` after it is in doubt.
       const operand = !prev ? false : prev.type === 'value' || prev.text === ']' || (prev.text === ')' && !prev.control) ? true
-        : prev.type !== 'word' ? false : prev.property ? true : OPERAND_KEYWORDS.has(prev.text) ? false : CONTEXTUAL.has(prev.text) ? 'doubt' : true;
+        : prev.type !== 'word' ? false : prev.property ? true : KEYWORDS.start.has(prev.text) ? false : KEYWORDS.doubt.has(prev.text) ? 'doubt' : true;
       token('punct', c + c, { postfix: lineHasCode ? operand : false }); i += 2;
     }
     else if (c === '?' && next === '.' && !/[0-9]/.test(source[i + 2] ?? '')) { token('punct', '?.'); i += 2; }
