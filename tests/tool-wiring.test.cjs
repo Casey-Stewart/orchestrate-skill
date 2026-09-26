@@ -1883,8 +1883,9 @@ test('the undo sweep, its reader and its domain are unweakened since ' + FAMILY_
 // ===== Prose polish (B04 of OS-20260925) =================================================
 // The rules B04 wrote, each pinned whole in every carrier (as PINNED and BUDGET are), and each
 // guarded by a sweep over every document for the reversal a later edit would write: a
-// polish-phase FIX FIRST discards the polish at once, never after a second try; prose that is a
-// contract is never an ASK; and severity is about behaviour, never the fence (BL-044).
+// polish-phase FIX FIRST discards the polish at once, never after a second try; only PROSE-ONLY
+// exempts files from the re-review; a comment never describes how its neighbour behaves; prose
+// that is a contract is never an ASK; and severity is about behaviour, never the fence (BL-044).
 const SEVERITY = "Severity is about behaviour, never the fence: a violated criterion whose fix sits outside the batch's files is still P0 or P1";
 const COMMENT_RULE = 'A comment states what the code beneath it does and why, and points at a neighbour by path and symbol; it never describes how the neighbour behaves.';
 const CLASSIFY = '`node "<skill-dir>/tools/prose-only-diff.mjs" --repo <batch worktree> --base <pre-polish sha> --head <polish tip>`';
@@ -1934,6 +1935,8 @@ test('each prose-polish rule reads exactly as pinned in every carrier', () => {
 // The reversals, clause by clause through the undo sweep's negation-aware reader. Each family
 // owns a specimen no other catches; the planted prose below is written as a reversal would be.
 const POLISH_TRIES = String.raw`\b(?:polish(?:-phase)?|scoped re-review)\b`;
+// One list of the words that grant a second try, read before the polish and after its FIX FIRST alike.
+const AGAIN = String.raw`\b(?:second|2nd|another|two|again|twice|once more)\b`;
 const PLACE = String.raw`(?:\b(?:outside|beyond|past)\s+(?:the\s+|its\s+|this\s+)?(?:batch's\s+)?(?:fence|files?)\b|\bout-of-fence\b)`;
 const OUTSIDE = String.raw`(?:` + PLACE + String.raw`|\bNEEDS_FENCE\b)`;
 // NEEDS_FENCE is a route, and a list may name it beside ASK: only a verb between them makes one the other.
@@ -1941,8 +1944,8 @@ const ROUTED = String.raw`\bNEEDS_FENCE\b[^.;:]*\b(?:is|are|becomes?|stays?|ride
 const LESSER = String.raw`\b(?:ASKs?|nits?|non-blocking|advisory)\b`;
 const CONTRACT = String.raw`\b(?:channel payload|exported API|ARCHITECTURE|USER-GUIDE)\b`;
 const POLISH_REVERSALS = [
-  ['a second polish-phase FIX FIRST', new RegExp(String.raw`\b(?:second|2nd|another|two)\b[^.;:]*` + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b|`
-    + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b[^.;:]*\b(?:again|twice|second)\b`, 'i'), 'A SECOND polish-phase FIX FIRST discards the polish'],
+  ['a second polish-phase FIX FIRST', new RegExp(AGAIN + String.raw`[^.;:]*` + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b|`
+    + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b[^.;:]*` + AGAIN, 'i'), 'A SECOND polish-phase FIX FIRST discards the polish'],
   ['the polish redone', /\bredo(?:es|ne|ing)?\b[^.;:]*\bpolish\b|\bpolish\b[^.;:]*\bredo(?:es|ne|ing)?\b/i, 'The implementer redoes the polish within test/doc/prose'],
   ['the implementer sent back after a polish-phase FIX FIRST', new RegExp(POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b[^.;:]*\b(?:implementer|fix[- ]round)\b`, 'i'),
     'After a polish-phase FIX FIRST the implementer reverts its production hunks'],
@@ -1954,11 +1957,18 @@ const POLISH_REVERSALS = [
   ['the fence sets the class', /\bfence\b[^.;:]*\b(?:decides|sets|determines|picks|lowers)\s+(?:the\s+|its\s+)?(?:class|severity)\b/i, 'The fence decides the class of a finding'],
   ['contract prose as an ASK', new RegExp(String.raw`(?<=` + CONTRACT + String.raw`[^.;:]*)\b(?:is|are|stays?|becomes?|counts?\s+as|goes|go|rides?\s+as)\s+(?:an?\s+)?(?:ASKs?|nits?|non-blocking)\b|`
     + String.raw`\btreat\w*\b[^.;:]*` + CONTRACT + String.raw`[^.;:]*\bas\s+(?:an?\s+)?(?:ASKs?|nits?)\b`, 'i'), 'A wrong exported API comment is an ASK'],
+  // The classifier's rule: only PROSE-ONLY exempts. The verdict words are matched in capitals.
+  ['a CODE or UNKNOWN verdict read as prose-only', new RegExp(String.raw`\b(?:CODE|UNKNOWN)\b[^.;:]*(?:\b[Ee]xempts?\b|\b[Ss]kips?\b|\b[Ss]pares?\b|`
+    + String.raw`\b(?:counts?|reads?|passes|treated)\s+as\s+(?:a\s+)?PROSE-ONLY\b|\bno\s+(?:scoped\s+|fix-diff-only\s+)?re-review\b)`),
+    'A classifier UNKNOWN exempts the JavaScript files as PROSE-ONLY does'],
+  // The implementer's comment rule: a comment never describes how its neighbour behaves.
+  ['a comment that describes its neighbour', /\b(?:describ|explain|narrat|restat|summari[sz])\w*\s+how\s+(?:its|the|a|that|each)\s+neighbou?rs?\b/i,
+    'A comment may describe how its neighbour behaves'],
 ];
 const polishReversals = text => clauses(unticked(text)).flatMap(c => POLISH_REVERSALS.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
-test('no document reverses one strike, lets the fence lower a finding, or makes contract prose an ASK', () => {
+test('no document reverses one strike, the classifier or comment rule, lets the fence lower a finding, or makes contract prose an ASK', () => {
   assert.equal(new Set(POLISH_REVERSALS.map(r => r[0])).size, POLISH_REVERSALS.length);
-  assert.equal(POLISH_REVERSALS.length, 8, 'eight families; one dropped would shrink the sweep to a sample');
+  assert.equal(POLISH_REVERSALS.length, 10, 'ten families; one dropped would shrink the sweep to a sample');
   for (const [name, pattern, specimen] of POLISH_REVERSALS) {
     assert.deepEqual(POLISH_REVERSALS.filter(([, p]) => p.test(specimen)).map(r => r[0]), [name], name + ': its specimen must be caught by it alone');
     assert.equal(polishReversals(specimen + '.').length, 1, name + ': the clause reader must report the specimen');
@@ -1969,16 +1979,21 @@ test('no document reverses one strike, lets the fence lower a finding, or makes 
     'The polish is discarded only when the scoped re-review returns FIX FIRST twice.', 'A scoped re-review FIX FIRST sends the implementer back to fix the polish.',
     'When the fix needs a file outside the fence, record the finding as an ASK.', 'An out-of-fence fix makes a criterion violation a nit.',
     'Lower the severity of any finding routed to NEEDS_FENCE.', 'A finding sent down the NEEDS_FENCE route becomes an ASK.', 'The fence decides the severity of each finding.',
-    'USER-GUIDE claims ride as ASKs.', 'Treat ARCHITECTURE rows as ASKs.']) {
+    'USER-GUIDE claims ride as ASKs.', 'Treat ARCHITECTURE rows as ASKs.',
+    // Round 1's survivors: a verdict other than PROSE-ONLY exempting, the comment rule reversed, a second pass granted.
+    'A classifier UNKNOWN exempts the JavaScript files as PROSE-ONLY does.', 'A comment may describe how its neighbour behaves.',
+    'ASKs close as a polish pass, and a polish-phase FIX FIRST earns another polish pass.', 'A CODE verdict means no scoped re-review for those files.']) {
     assert.ok(polishReversals(planted).length >= 1, 'must be reported: ' + planted);
   }
   // The rules themselves, and their negations, are not reversals.
   assert.deepEqual(polishReversals(Object.values(POLISH_RULES).map(entry => entry[3]).join(' ')
     + ' Never lower a finding because its fix sits outside the fence. A NEEDS_FENCE finding is never an ASK.'), [], 'the rules are not their own reversals');
-  // Armed on real carriers: protocol.md with the old SECOND rule put back, reviewer.md with its
-  // severity rule reversed. Each is reported once.
+  // Armed on real carriers: protocol.md with the old SECOND rule put back and with CODE or UNKNOWN
+  // exempting, reviewer.md with its severity rule reversed, implementer.md with its comment rule
+  // reversed. Each is reported once.
   for (const [file, from, to] of [['orchestrate/references/protocol.md', ONE_STRIKE, 'A SECOND polish-phase `FIX FIRST` discards the polish'],
-    ['.claude/agents/reviewer.md', 'is still P0 or P1', 'is an ASK']]) {
+    ['orchestrate/references/protocol.md', '`CODE` or `UNKNOWN` keeps the path rule for the whole diff', '`CODE` or `UNKNOWN` exempts them too'],
+    ['.claude/agents/reviewer.md', 'is still P0 or P1', 'is an ASK'], ['.claude/agents/implementer.md', 'it never describes how', 'it may describe how']]) {
     const text = collapse(read(file)), reverted = text.replace(from, to);
     assert.notEqual(reverted, text, file + ': the control must find its sentence');
     assert.equal(polishReversals(reverted).length, 1, file + ': the reversal put back is reported');

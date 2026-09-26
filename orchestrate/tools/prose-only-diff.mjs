@@ -12,9 +12,10 @@ const REGULAR = /^100(?:644|755)$/;
 // The BOM is kept as text, so adding or dropping one is a change like any other.
 const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 
-// A comment that steers a tool is code: rewording it changes what the tool does. Three families,
-// each catching comments the other two miss: a tool named anywhere in the comment, a marker
-// opening it (`//#`, `//@`, `/*!`, `///`, `/* global`, `/* exported`), and a JSDoc tag.
+// A comment that steers a tool is code: rewording it changes what the tool does. Four families,
+// each catching comments the other three miss: a tool named anywhere in the comment, a comment
+// shaped like a directive whatever tool it names, a marker opening it (`//#`, `//@`, `/*!`,
+// `///`, `/* global`, `/* exported`), and a JSDoc tag.
 export const DIRECTIVES = [
   ['eslint', /(?<![\w-])eslint/i],
   ['istanbul', /(?<![\w-])istanbul(?![\w-])/i],
@@ -27,13 +28,24 @@ export const DIRECTIVES = [
   ['deno-lint', /(?<![\w-])deno-lint/i],
   ['oxlint', /(?<![\w-])oxlint/i],
   ['webpack', /(?<![\w-])webpack/i],
+  ['node:coverage', /(?<![\w-])node:coverage(?![\w-])/i],
+  ['tslint', /(?<![\w-])tslint/i],
+  ['$Flow', /\$Flow[A-Z]\w*/],
+  ['NOSONAR', /(?<![\w-])NOSONAR(?![\w-])/i],
   // ESLint's no-fallthrough reads this comment as the intent to fall through.
   ['falls through', /(?<![\w-])falls?\s?through(?![\w-])/i],
+];
+// A tool joined to a directive verb (`cspell:disable`, `stylelint-disable-next-line`), or a tool
+// followed by `ignore next`, `ignore start` and the like (`bun:coverage ignore next`).
+export const SHAPES = [
+  ['tool:verb', /[A-Za-z][\w@./]*[:-]\s?(?:disable|enable|ignore|expect-error|nocheck)(?!\w)/i],
+  ['tool ignore next', /[A-Za-z][\w:.-]*\s+ignore\s+(?:next|start|stop|end|else|if|file|line)(?![\w-])/i],
 ];
 const MARKER = /^\/[/*]\s*(?:[/!#@]|globals?(?![\w-])|exported(?![\w-]))/;
 const TAG = /(?<![\w@.-])@[A-Za-z_$]/;
 export function keptBy(comment) {
-  return [DIRECTIVES.some(([, pattern]) => pattern.test(comment)) && 'directive', MARKER.test(comment) && 'marker', TAG.test(comment) && 'tag'].filter(Boolean);
+  return [DIRECTIVES.some(([, pattern]) => pattern.test(comment)) && 'directive', SHAPES.some(([, pattern]) => pattern.test(comment)) && 'shape',
+    MARKER.test(comment) && 'marker', TAG.test(comment) && 'tag'].filter(Boolean);
 }
 
 const TERMINATOR = /[\n\r\u2028\u2029]/;
@@ -120,7 +132,7 @@ export function scan(source) {
         token('value', c); i = end;
       } else { token('punct', c); i++; }
     } else if (c === '<' && source.startsWith('<!--', i)) return fail('an HTML-like comment <!--');
-    else if (c === '<' && expressionStarts(prev) === true) return fail('a < where an expression starts (JSX?)');
+    else if (c === '<' && expressionStarts(prev) !== false) return fail('a < where an expression may start (JSX?)');
     else if (c === '<') { const op = /^<<?=?/.exec(source.slice(i, i + 3))[0]; token('punct', op); i += op.length; }
     else if (c === '-' && source.startsWith('-->', i) && !lineHasCode) return fail('an HTML-like comment -->');
     else if (c === '{') { braces.push(c); token('punct', c); i++; }
@@ -138,13 +150,15 @@ export function scan(source) {
     } else if (wordChar(c)) {
       let end = i + 1;
       while (end < n && wordChar(source[end])) end++;
-      token('word', source.slice(i, end), { property: prev?.text === '.' || prev?.text === '?.', after: prev?.text }); i = end;
+      // A name after `.`, `?.` or `#` (a private name) is never a keyword, however it is spelled.
+      token('word', source.slice(i, end), { property: prev?.text === '.' || prev?.text === '?.' || prev?.text === '#', after: prev?.text }); i = end;
     } else if ((c === '+' || c === '-') && next === c) {
       // Postfix when an operand ends the same line just before it; otherwise it prefixes what follows.
       const operand = prev && (prev.type === 'value' || (prev.type === 'word' && (prev.property || !OPERAND_KEYWORDS.has(prev.text))) || prev.text === ']' || (prev.text === ')' && !prev.control));
       token('punct', c + c, { postfix: Boolean(lineHasCode && operand) }); i += 2;
     }
     else if (c === '?' && next === '.' && !/[0-9]/.test(source[i + 2] ?? '')) { token('punct', '?.'); i += 2; }
+    else if (source.startsWith('...', i)) { token('punct', '...'); i += 3; }
     else { token('punct', c); i++; }
   }
   if (template) return fail('an unterminated template literal');
@@ -219,14 +233,18 @@ function blobText(repo, sha, options) {
   return { text: utf8.decode(r.bytes) };
 }
 
+const unknown = reason => ({ code: 2, line: `UNKNOWN ${reason}` });
 export function proseOnlyDiff({ repo, base, head, ...options }) {
-  const unknown = reason => ({ code: 2, line: `UNKNOWN ${reason}` });
   const diagnostics = [], from = capture(repo, base, diagnostics, options), to = capture(repo, head, diagnostics, options);
   if (!from || !to) return unknown(`cannot resolve ${from ? '--head' : '--base'} to a commit in ${repo}`);
   const diff = git(repo, ['diff', '--raw', '-z', '--no-abbrev', '--no-renames', '--no-relative', '--no-ext-diff', '--no-textconv', '--no-color', from, to, '--'], options);
   if (!diff.ok) return unknown('git diff did not run');
+  return classifyRaw(repo, diff.text, options);
+}
+// The verdict for one `git diff --raw -z` output; blobs are read from `repo`.
+export function classifyRaw(repo, raw, options = {}) {
   let changes;
-  try { changes = rawChanges(diff.text); } catch { return unknown('git diff output this tool cannot read'); }
+  try { changes = rawChanges(raw); } catch { return unknown('git diff output this tool cannot read'); }
   const code = [], doubts = [];
   let prose = 0, other = 0;
   for (const change of changes) {
@@ -255,8 +273,8 @@ compared with its prose comments stripped from both sides; every other path is c
 path rule. Prints ONE line: PROSE-ONLY <n> file(s), with "; <m> other path(s) left to the path rule" when
 there are any, exits 0 when every JavaScript remainder is byte-identical; CODE <path>, the first
 JavaScript file whose remainder differs, exits 1; UNKNOWN <reason> exits 2. UNKNOWN outranks CODE, and
-CODE outranks PROSE-ONLY. Fails closed: a comment naming a tool directive (eslint, istanbul, c8, @ts-,
-prettier and others) or carrying a JSDoc tag is code, and so is an added, deleted or re-moded file; a
+CODE outranks PROSE-ONLY. Fails closed: a comment naming or shaped like a tool directive (eslint, istanbul,
+c8, @ts-, prettier, node:coverage and others) or carrying a JSDoc tag is code, and so is an added, deleted or re-moded file; a
 string, template literal or regular expression it cannot delimit with certainty, JSX, a binary, and a
 diff with no JavaScript file are UNKNOWN. Read-only: it reads git objects and writes nothing.`;
 

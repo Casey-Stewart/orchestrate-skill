@@ -71,6 +71,30 @@ const RULES = [
   ['a block comment between two words keeps them apart', 'CODE',
     ['const t = typeof/* the */value;\n', 'const t = typeofvalue;\n'],
     ['const t = typeof/* the */value;\n', 'const t = typeof/* its */value;\n']],
+  ['a word after # is a private name, never a keyword', 'CODE',
+    ["half() { return this.#default / pick('/') + pick('//x'); }\n", "half() { return this.#default / pick('/') + pick('//y'); }\n"],
+    ["half() { return this.#default / pick('/') + pick(''); } // x\n", "half() { return this.#default / pick('/') + pick(''); } // y\n"]],
+  ['a keyword after a spread opens an expression', 'CODE',
+    ['x = [...typeof /[//]a/].length;\n', 'x = [...typeof /[//]a/].length + 1;\n'],
+    ['x = [...typeof /[/]/].length; // a\n', 'x = [...typeof /[/]/].length; // b\n']],
+  ['an escaped backtick stays inside its template literal', 'CODE',
+    ['const t = `it\\`s // one`;\n', 'const t = `it\\`s // two`;\n'],
+    ['const t = `its`; // one\n', 'const t = `its`; // two\n']],
+  ['an escaped quote stays inside its string', 'CODE',
+    ["const s = 'it\\'s // one';\n", "const s = 'it\\'s // two';\n"],
+    ["const s = 'it\\'s // no comment'; // a\n", "const s = 'it\\'s // no comment'; // b\n"]],
+  ['a ++ after an operand keyword is a prefix', 'CODE',
+    ['x = typeof ++/[//]a/.lastIndex;\n', 'x = typeof ++/[//]b/.lastIndex;\n'],
+    ['x = typeOf ++/[//]a/.lastIndex;\n', 'x = typeOf ++/[//]b/.lastIndex;\n']],
+  ["a ++ after a control statement's ) is a prefix", 'CODE',
+    ['if (ok) ++/[//]a/.lastIndex;\n', 'if (ok) ++/[//]b/.lastIndex;\n'],
+    ['f(ok) ++/[//]a/.lastIndex;\n', 'f(ok) ++/[//]b/.lastIndex;\n']],
+  ['a / after a prefix -- opens a regular expression', 'CODE',
+    ['x = --/[//]a/.lastIndex;\n', 'x = --/[//]b/.lastIndex;\n'],
+    ['x = count--/[//]a/.lastIndex;\n', 'x = count--/[//]b/.lastIndex;\n']],
+  ['a / first in a file opens a regular expression', 'CODE',
+    ['/[//]a/.test(s);\n', '/[//]b/.test(s);\n'],
+    ['s /[//]a/.test(s);\n', 's /[//]b/.test(s);\n']],
   ['a hashbang is code', 'CODE',
     ['#!/usr/bin/env node\nrun();\n', '#!/usr/bin/env -S node\nrun();\n'],
     ['// usr/bin/env node\nrun();\n', '// usr/bin/env -S node\nrun();\n']],
@@ -83,6 +107,12 @@ const RULES = [
   ['a < where an expression starts is JSX', 'UNKNOWN',
     ['const view = <b>https://example.com</b>;\n// a\n', 'const view = <b>https://example.com</b>;\n// b\n'],
     ['const view = a <b;\n// a\n', 'const view = a <b;\n// b\n']],
+  ['a < after } is in doubt', 'UNKNOWN',
+    ['if (a) {}\n<b>https://example.com</b>;\n', 'if (a) {}\n<b>https://example.org</b>;\n'],
+    ['if (a) {}\nx <b>https://example.com</b>;\n', 'if (a) {}\nx <b>https://example.org</b>;\n']],
+  ['a < after a keyword-or-name is in doubt', 'UNKNOWN',
+    ['for (const x of xs) yield <li>//{x.a}</li>;\n', 'for (const x of xs) yield <li>//{x.b}</li>;\n'],
+    ['for (const x of xs) yield x <li>//{x.a}</li>;\n', 'for (const x of xs) yield x <li>//{x.b}</li>;\n']],
   ['<!-- opens an HTML-like comment', 'UNKNOWN',
     ['x = y <!--z;\n// a\n', 'x = y <!--z;\n// b\n'],
     ['x = y < !--z;\n// a\n', 'x = y < !--z;\n// b\n']],
@@ -100,7 +130,7 @@ const RULES = [
     ['export const t = `open ${x}`; // a\n', 'export const t = `open ${x}`; // b\n']],
 ];
 // Pinned by hand, so a rule dropped from the corpus goes red here rather than shrinking every loop.
-const RULE_COUNTS = { CODE: 17, UNKNOWN: 8 };
+const RULE_COUNTS = { CODE: 25, UNKNOWN: 10 };
 // Edits a polish makes, and code the reader must not mistake for doubt: each must read PROSE-ONLY.
 const PROSE = [
   ['a line comment reworded', '// Adds two numbers.\nexport const add = (a, b) => a + b;\n', '// Adds two numbers together.\nexport const add = (a, b) => a + b;\n'],
@@ -118,7 +148,6 @@ const PROSE = [
   ['a / after a number ending in a dot divides', 'const r = 1. / 3; // a\n', 'const r = 1. / 3; // b\n'],
   ['a / after a string divides', "const n = '10' / 2; // a\n", "const n = '10' / 2; // b\n"],
   ['a hashbang holding a quote', "#!/usr/bin/env -S node --title=it's\n// a\nrun();\n", "#!/usr/bin/env -S node --title=it's\n// b\nrun();\n"],
-  ['a string holding an escaped quote and //', "const s = 'it\\'s // no comment'; // a\n", "const s = 'it\\'s // no comment'; // b\n"],
   ['a line continuation inside a string', "const s = 'one \\\ntwo'; // a\n", "const s = 'one \\\ntwo'; // b\n"],
   ['a shift is not JSX', 'const v = (a << 2) | (b <= c); // a\n', 'const v = (a << 2) | (b <= c); // b\n'],
   ['a comment beside a hashbang', '#!/usr/bin/env node\n// a\nrun();\n', '#!/usr/bin/env node\n// b\nrun();\n'],
@@ -131,7 +160,7 @@ test('the corpus is the one written above: its size and its rules, pinned', () =
   assert.equal(new Set(names).size, RULES.length, 'every rule once');
   assert.equal(RULES.length, RULE_COUNTS.CODE + RULE_COUNTS.UNKNOWN);
   for (const [verdict, count] of Object.entries(RULE_COUNTS)) assert.equal(RULES.filter(r => r[1] === verdict).length, count, verdict + ' rules');
-  assert.equal(PROSE.length, 19, 'the prose-only corpus');
+  assert.equal(PROSE.length, 18, 'the prose-only corpus');
   // A twin that equals its case would prove nothing: each pair differs, and so does each twin.
   for (const [rule, , [a, b], [c, d]] of RULES) assert.ok(a !== b && c !== d && (a !== c || b !== d), rule);
 });
@@ -156,7 +185,7 @@ const REFUSALS = [
   ['a / that may open a regular expression or divide', 'if (a) { b(); }\n/[/]/.test(c);\n', 'if (a) { b(); }\n;/[/]/.test(c);\n'],
   ['an unterminated regular expression', 'const r = /[/;\n', 'const r = /[/]/;\n'],
   ['an HTML-like comment <!--', 'x <!-- y\n', 'x < !-- y\n'],
-  ['a < where an expression starts (JSX?)', 'return <div/>;\n', 'return a <div;\n'],
+  ['a < where an expression may start (JSX?)', 'return <div/>;\n', 'return a <div;\n'],
   ['an HTML-like comment -->', '--> y\n', 'x --> y\n'],
   ['an unmatched }', 'f(); }\n', 'f(); {}\n'],
   ['an unmatched )', 'f());\n', 'f(());\n'],
@@ -174,41 +203,52 @@ test('each refusal of the reader has a fixture, and a twin one edit away that it
   }
 });
 
-// The regular-expression reading after a word, bound to the tool's own word lists. `/[//]a/` is a
-// pattern only where an expression starts: after a plain name it divides, and `//]a/` is a comment.
+// The regular-expression reading after a word. The word lists are written here from the grammar,
+// never read off the tool, so a misspelt member is a difference, not a case exercised as misspelt.
+// `/[//]a/` is a pattern only where an expression starts: after a plain name it divides, and
+// `//]a/` is a comment.
+const GRAMMAR = {
+  operand: ['case', 'default', 'delete', 'do', 'else', 'extends', 'in', 'instanceof', 'new', 'return', 'throw', 'typeof', 'void'],
+  contextual: ['await', 'of', 'yield'],
+  control: ['for', 'if', 'while', 'with'],
+};
 test('after each keyword a / opens a regular expression, after a keyword-or-name it is in doubt, after a name it divides', async () => {
   const { compareSources, OPERAND_KEYWORDS, CONTEXTUAL, CONTROL } = await api;
-  assert.deepEqual([OPERAND_KEYWORDS.size, CONTEXTUAL.size, CONTROL.size], [13, 3, 4], 'the lists are pinned by size');
+  assert.deepEqual([[...OPERAND_KEYWORDS].sort(), [...CONTEXTUAL].sort(), [...CONTROL].sort()], [GRAMMAR.operand, GRAMMAR.contextual, GRAMMAR.control]);
+  assert.deepEqual([GRAMMAR.operand.length, GRAMMAR.contextual.length, GRAMMAR.control.length], [13, 3, 4], 'the lists written here, pinned by size');
   const pair = lead => [lead + ' /[//]a/.test(s);\n', lead + ' /[//]b/.test(s);\n'];
-  for (const word of OPERAND_KEYWORDS) assert.equal(compareSources(...pair('x = ' + word)).verdict, 'CODE', word);
-  for (const word of CONTEXTUAL) assert.equal(compareSources(...pair('x = ' + word)).verdict, 'UNKNOWN', word);
-  for (const word of CONTROL) assert.equal(compareSources(...pair(word + ' (ok)')).verdict, 'CODE', word);
+  for (const word of GRAMMAR.operand) assert.equal(compareSources(...pair('x = ' + word)).verdict, 'CODE', word);
+  for (const word of GRAMMAR.contextual) assert.equal(compareSources(...pair('x = ' + word)).verdict, 'UNKNOWN', word);
+  for (const word of GRAMMAR.control) assert.equal(compareSources(...pair(word + ' (ok)')).verdict, 'CODE', word);
   // The other side of each boundary: a plain name, a property named like a keyword, a call's `)`.
-  for (const lead of ['x = value', 'x = options.return', 'x = run(ok)', 'x = run(ok)?.typeof']) {
+  for (const lead of ['x = value', 'x = options.return', 'x = run(ok)', 'x = run(ok)?.typeof', 'x = this.#return', 'x = this?.#in']) {
     assert.equal(compareSources(...pair(lead)).verdict, 'PROSE-ONLY', lead);
   }
 });
 
 // ---- The comment families -------------------------------------------------------------------
 // Comments as they are written in real code, not read off the patterns: each directive the tool
-// lists owns one no other directive catches, each family owns one the other two miss, and prose
+// lists owns one no other directive catches, each family owns one the other three miss, and prose
 // that only looks like a directive or a tag is left prose.
 const DIRECTIVE_COMMENTS = [
   '// eslint-disable-next-line no-console -- the CLI prints its result', '/* istanbul ignore next: a platform guard */', '/* c8 ignore next 3 */',
   '// @ts-expect-error: the legacy caller passes a string', '// prettier-ignore', '/* v8 ignore next */', '/* jshint esversion: 11 */',
   '// biome-ignore lint/suspicious/noExplicitAny: legacy data', '// deno-lint-ignore no-explicit-any', '// oxlint-disable-next-line no-unused-vars',
-  '/* webpackChunkName: "editor" */', '// falls through to the default branch',
+  '/* webpackChunkName: "editor" */', '/* node:coverage ignore next */', '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props',
+  '// NOSONAR: the pattern is vetted', '// falls through to the default branch',
 ];
+const SHAPE_COMMENTS = ['// cspell:disable-next-line', '/* stylelint-disable-next-line selector-max-id */', '// jscs:disable requireCamelCaseOrUpperCaseIdentifiers',
+  '/* bun:coverage ignore next */'];
 const MARKER_COMMENTS = ['//# sourceMappingURL=run.js.map', '/*! Licensed MIT; see LICENSE */', '/// <reference types="node" />', '/* global fetch, Response */',
   '/* exported main */', '/* globals describe, it */', '//@ sourceURL=eval-1.js'];
 const TAG_COMMENTS = ['/** @returns {number} the sum */', '/** Parses a flag list; see {@link parseFlags}. */', '/**\n * Old entry point.\n * @deprecated since 2.0\n */'];
 const PROSE_COMMENTS = ['// Adds two numbers.', '// Mail the maintainers at team@example.com.', '// polish discarded: @<sha> marks the reviewed tree.',
   '/* Falls back to the default when unset. */', '/** Adds two numbers. */', '// the abc8 codec', '// the v8-compat shim', '// istanbul-lib-coverage reads this',
-  '// A path like a/b/c.', '// a c80 checksum'];
+  '// A path like a/b/c.', '// a c80 checksum', '// Blank lines are ignored.', '// A self-disabled switch.', '// Callers ignore next-gen flags.'];
 test('each directive, and each comment family, owns a real comment; prose that only looks like one is prose', async () => {
-  const { DIRECTIVES, keptBy } = await api;
-  assert.equal(DIRECTIVES.length, 12, 'the directive list is pinned by size');
-  assert.deepEqual([DIRECTIVE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, PROSE_COMMENTS.length], [12, 7, 3, 10]);
+  const { DIRECTIVES, SHAPES, keptBy } = await api;
+  assert.deepEqual([DIRECTIVES.length, SHAPES.length], [16, 2], 'the directive and shape lists are pinned by size');
+  assert.deepEqual([DIRECTIVE_COMMENTS.length, SHAPE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, PROSE_COMMENTS.length], [16, 4, 7, 3, 13]);
   // The five the feature names are in the list, by name.
   for (const named of ['eslint', 'istanbul', 'c8', '@ts-', 'prettier']) assert.ok(DIRECTIVES.some(([name]) => name === named), named);
   for (const [name] of DIRECTIVES) {
@@ -216,11 +256,15 @@ test('each directive, and each comment family, owns a real comment; prose that o
     assert.ok(owned.length >= 1, name + ' owns no comment of the corpus');
   }
   for (const comment of DIRECTIVE_COMMENTS) assert.ok(keptBy(comment).includes('directive'), comment);
+  for (const [name] of SHAPES) {
+    const owned = SHAPE_COMMENTS.filter(c => SHAPES.filter(([, p]) => p.test(c)).map(([n]) => n).join() === name);
+    assert.ok(owned.length >= 1, name + ' owns no comment of the corpus');
+  }
   // Family by family: a comment that family alone keeps.
   const alone = (list, family) => list.filter(c => keptBy(c).join() === family);
-  assert.ok(alone(DIRECTIVE_COMMENTS, 'directive').length >= 1 && alone(MARKER_COMMENTS, 'marker').length === MARKER_COMMENTS.length
-    && alone(TAG_COMMENTS, 'tag').length === TAG_COMMENTS.length, 'each family owns its comments');
-  assert.deepEqual(keptBy('// @ts-expect-error: the legacy caller passes a string'), ['directive', 'marker', 'tag']);
+  assert.ok(alone(DIRECTIVE_COMMENTS, 'directive').length >= 1 && alone(SHAPE_COMMENTS, 'shape').length === SHAPE_COMMENTS.length
+    && alone(MARKER_COMMENTS, 'marker').length === MARKER_COMMENTS.length && alone(TAG_COMMENTS, 'tag').length === TAG_COMMENTS.length, 'each family owns its comments');
+  assert.deepEqual(keptBy('// @ts-expect-error: the legacy caller passes a string'), ['directive', 'shape', 'marker', 'tag']);
   for (const comment of PROSE_COMMENTS) assert.deepEqual(keptBy(comment), [], comment);
 });
 
@@ -330,9 +374,11 @@ test('precedence: UNKNOWN over CODE over PROSE-ONLY, the first CODE in path orde
   const r = cli(repo, code, doubt);
   assert.equal(r.status, 2);
   assert.equal(r.line, 'UNKNOWN d.mjs: an unterminated template literal (head)');
+  const fixed = at({ 'd.mjs': 'x = `shut ${y}`;\n' });
+  assert.deepEqual(cli(repo, doubt, fixed), { status: 2, line: 'UNKNOWN d.mjs: an unterminated template literal (base)' });
   // No JavaScript file: other paths alone never make PROSE-ONLY. An empty diff is no evidence either.
   const docs = at({ 'README.md': 'three\n' });
-  assert.deepEqual(cli(repo, doubt, docs), { status: 2, line: 'UNKNOWN no JavaScript file changed; 1 other path(s) left to the path rule' });
+  assert.deepEqual(cli(repo, fixed, docs), { status: 2, line: 'UNKNOWN no JavaScript file changed; 1 other path(s) left to the path rule' });
   assert.deepEqual(cli(repo, docs, docs), { status: 2, line: 'UNKNOWN no JavaScript file changed' });
 });
 
@@ -358,8 +404,8 @@ test('text git cannot hand over as UTF-8, a blob git cannot read, and a ref or a
   assert.deepEqual(proseOnlyDiff({ repo: repo.cwd, base: c0, head: c1, env: repo.env }), { code: 2, line: 'UNKNOWN latin.mjs: text that is not UTF-8 (base)' }, 'the control: without the setting the diff runs');
 });
 
-test('the raw diff reader refuses every record it cannot read, and sorts what it reads by path', async () => {
-  const { rawChanges } = await api;
+test('the raw diff reader refuses every record it cannot read, and the verdict reads a refusal as UNKNOWN', async () => {
+  const { rawChanges, classifyRaw } = await api;
   const sha = 'a'.repeat(40), other = 'b'.repeat(40), record = status => ':100644 100644 ' + sha + ' ' + other + ' ' + status;
   assert.deepEqual(rawChanges(''), []);
   assert.deepEqual(rawChanges([record('M'), 'b.mjs', record('A'), 'a.mjs', ''].join(NUL)).map(c => [c.path, c.status]), [['a.mjs', 'A'], ['b.mjs', 'M']]);
@@ -367,7 +413,10 @@ test('the raw diff reader refuses every record it cannot read, and sorts what it
     ['a record with no path', [record('M'), '', ''].join(NUL)], ['an odd field count', [record('M'), ''].join(NUL)],
     ['a short object name', [':100644 100644 abc def M', 'a.mjs', ''].join(NUL)], ['no final NUL', [record('M'), 'a.mjs'].join(NUL)]]) {
     assert.throws(() => rawChanges(text), label);
+    assert.deepEqual(classifyRaw(ROOT, text), { code: 2, line: 'UNKNOWN git diff output this tool cannot read' }, label);
   }
+  // The control: a record it reads reaches the verdict (a path that is not JavaScript needs no blob).
+  assert.deepEqual(classifyRaw(ROOT, [record('M'), 'README.md', ''].join(NUL)), { code: 2, line: 'UNKNOWN no JavaScript file changed; 1 other path(s) left to the path rule' });
 });
 
 test('one line whatever a path holds, usage refused, --help documents the flags the published command uses', t => {
