@@ -10,13 +10,16 @@
 3. An ACTIVE ledger already in `.agents/changes/` or on any branch (Discovery in
    SKILL.md) → ask whether to finish it first. Two concurrent ledgers are allowed only as
    the user's explicit choice.
+4. **Effort.** A session running at max effort → before scaffolding, ask the user to set it
+   to high, with the reason in one sentence: at max, one measured scaffold spent 54% of its
+   output on thinking. Never change the setting yourself.
 
 ## Procedure
 
 1. **Detect** repo facts (heuristics below) — read-only.
 2. **Interview** — back-to-back AskUserQuestion calls, as many as the open gaps need,
    covering only the gaps and the confirmations listed below.
-3. **Plan** — explore the codebase (sub-agents as needed), draft the batch table with
+3. **Plan** — explore the codebase (sub-agents as needed, at medium thoroughness by default; "very thorough" only when the interview needs an inventory and the prompt names what it is for), draft the batch table with
    file fences and a weight per batch (S / M / L), and map every request item to a
    batch. Then structure for throughput per `execution-models.md`: reshape fences for
    disjointness (seam batches, splits, merges), build the wave map (widest safe waves —

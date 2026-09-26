@@ -132,7 +132,8 @@ batch or per wave by default.
    per-checkpoint close-out (tip validation, QA-runner pre-smoke of the agent-tagged
    steps with `evidence/C<n>/`, covered rows 🟢 → 🧪, `**State**: AT-CHECKPOINT`), STOP
    with the combined smoke script, delivered as the smoke page (`smoke-page.md`).
-   Otherwise → open the next wave immediately, same session.
+   Otherwise → open the next wave immediately, same session, unless protocol.md
+   §Session algorithm step 8 compacts or ends it at this boundary for context.
 
 **Every `continue` starts with resume-time validation** on the integration tip (quiet
 form); a red tip is repaired before any wave opens, whatever PROGRESS claims — unless a
