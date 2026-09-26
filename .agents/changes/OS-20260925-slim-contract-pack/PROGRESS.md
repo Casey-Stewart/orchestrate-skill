@@ -3,7 +3,7 @@
 **Identifier**: OS-20260925-slim-contract-pack
 **Started**: 2026-09-25 · **Base**: edd2f1e522b592258911e83f0fdd9c1920883049 (the default-branch commit the ledger
 branch was cut from — the "since" point for the first checkpoint's diff and for convergence)
-**State**: AT-CHECKPOINT C1
+**State**: COMPLETE
 **Work list**: [01-plan.md](01-plan.md) (see [00-request.md](00-request.md))
 **Contract**: [00-READBEFORE.md](00-READBEFORE.md) · **Narrative**: [LOG.md](LOG.md)
 (read on demand by heading, never at boot)
@@ -67,18 +67,21 @@ Issue 001, 2026-09-26, build `f770be1` — `evidence/C1/inputs/issue-001/`, gene
 
 | Request item | Source | Batch | Version | Status |
 |--------------|--------|-------|---------|--------|
-| R1 — #14 contract slimming, SHA pin kept on the single copy | request | B01 | — | 🧪 |
-| R2 — the EVIDENCE_TOOL/FENCE_TOOL placeholder move | request | B01 | — | 🧪 |
-| R3 — BL-028's doc half | request | B01 | — | 🧪 |
-| R4 — BL-028 code fix, checkout-enumerating symlink test | request | B02 | — | 🧪 |
-| R5 — BL-036 | request | B02 | — | 🧪 |
-| R6 — BL-037 | request | B02 | — | 🧪 |
-| R7 — #15 budget rules (effort clause dropped by the control) | request | B03 | — | 🧪 |
-| R8 — #8 prose half | request | B04 | — | 🧪 |
-| R9 — BL-044 | request | B04 | — | 🧪 |
-| BL-041 | backlog BL-041 | B02 | — | 🧪 |
-| BL-034 | backlog BL-034 | B03 | — | 🧪 |
-| BL-042 | backlog BL-042 | B04 | — | 🧪 |
+| R1 — #14 contract slimming, SHA pin kept on the single copy | request | B01 | — | ✅ merged `613c608` |
+| R2 — the EVIDENCE_TOOL/FENCE_TOOL placeholder move | request | B01 | — | ✅ merged `613c608` |
+| R3 — BL-028's doc half | request | B01 | — | ✅ merged `613c608` |
+| R4 — BL-028 code fix, checkout-enumerating symlink test | request | B02 | — | ✅ merged `0090173` |
+| R5 — BL-036 | request | B02 | — | ✅ merged `0090173` |
+| R6 — BL-037 | request | B02 | — | ✅ merged `0090173` |
+| R7 — #15 budget rules (effort clause dropped by the control) | request | B03 | — | ✅ merged `66ce0f5` |
+| R8 — #8 prose half | request | B04 | — | ✅ merged `bf055ce` (C1 fix-up `c83ec7d`) |
+| R9 — BL-044 | request | B04 | — | ✅ merged `bf055ce` (C1 fix-up `c83ec7d`) |
+| BL-041 | backlog BL-041 | B02 | — | ✅ merged `0090173` |
+| BL-034 | backlog BL-034 | B03 | — | ✅ merged `66ce0f5` |
+| BL-042 | backlog BL-042 | B04 | — | ✅ merged `bf055ce` (C1 fix-up `c83ec7d`) |
+| BL-046 minimal fix — the user's C1 scope addition (verdict log, 2026-09-26) | request (C1) | B04 fix-up | — | ✅ merged `c83ec7d`; the class fix stays open as BL-046 |
+
+Final audit, 2026-09-26 (convergence off — built from PROGRESS rows and git): 13 items, every one merged; zero unaccounted. Fold-ins BL-041, BL-034 and BL-042 moved to BACKLOG.md's Closed table with BL-028, BL-036, BL-037 and BL-044; BL-046 narrowed in place to its class fix; residuals filed as BL-047 to BL-053. Named exclusions: [01-plan.md](01-plan.md) §Coverage audit.
 
 ## Session log
 
@@ -92,3 +95,4 @@ Issue 001, 2026-09-26, build `f770be1` — `evidence/C1/inputs/issue-001/`, gene
 | 2026-09-26 | continue (same session): the user's ship-with-the-residual verdict consumed — B04 merged `bf055ce`, BL-046 filed (BACKLOG.md repaired forward, `220ad6c`); W3 closed. C1 close-out: inputs I-01–I-04 issued and independently validated (`f770be1`); tip PASS tests 561/563, 2 skipped; QA runner pre-smoke 12/12 PASS on `f770be1`; page built and published (https://claude.ai/artifact/YQnp8Pgc1ePNd64YGBsXKX); artifact proof COULD-NOT-RUN (the rendered DOM unreachable) with a labelled substitute, 16/16 blocks run as published; rows → 🧪; checkpoint integration SHA `f770be1` | STOP — C1 awaiting the user's verdict (2 human steps); the push of the integration branch to `origin` for the Windows step asked |
 | 2026-09-26 | close: the user's Windows run of Step 1 (pasted) recorded verbatim — fail, triaged to B04 (a test fixture Git for Windows refuses to index); B04 → ❌, fix-up pending: fix/B04-c1-followup; B01–B03 stay 🧪; Step 2 still awaited | — (running: the fix-up) |
 | 2026-09-26 | continue (resumed after the Claude Code process restarted): boot SKILL MATCH; reconcile — B04 ❌, `fix/B04-c1-followup` @afba68d ahead, R4 reviewer SHIP (asks=2) in scratch, the R4 test-hunter lost with the old process → respawned fresh; resume-time validation on `57da24e` PASS tests 561/563, 2 skipped; the user's report of 40k+ processes on Windows measured (60,697 → 74,890 per suite run; none survive on Linux) | STOP — C1 issue 2 issued (build `c83ec7d`: the fix-up merged, pre-smoke 13/13 with 4 re-run, page republished to the same URL, substitute proof 18/18 as published); push to `origin` per the recorded preauthorization follows this commit; awaiting the user's Step 1 re-run on Windows |
+| 2026-09-26 | close: the C1 pass (issue 2) recorded verbatim; change-complete close-out — coverage audit 13/13 merged, zero unaccounted (convergence off: PROGRESS rows + git); BACKLOG.md: 7 closed, BL-046 narrowed, BL-047–BL-053 filed; 3 guardrails distilled into CLAUDE.md (the section 134 lines / 9.8 KB — retirements proposed, none made); learnings harvested; release step none. **Change COMPLETE** | COMPLETE — merging to `main`, pushing, deleting the merged branches and archiving this ledger await the user's words |

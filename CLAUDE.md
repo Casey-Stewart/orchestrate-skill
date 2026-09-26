@@ -95,6 +95,10 @@ diff against the ones its fence can actually violate.
 - **A guard whose verdict depends on the checkout rather than the code.** CRLF/LF
   behaviour that passes only because this machine happens to check out one way. Assert the
   equivalence explicitly. *(BL-004, polish)*
+- **A fixture legal only on the gate's platform.** Linux git indexes a file name holding a control
+  character; Git for Windows refuses it, so a test green on every Linux gate failed the Windows
+  checkpoint. Build such fixtures from tree objects, assert on the domain, never skip by platform.
+  *(OS-20260925 C1 issue 1; `tests/prose-only-diff.test.cjs`'s line-break fixture)*
 - **A sweep built to catch reversals of a rule is blind to an edit that NARROWS its scope.**
   When a fix replaces prose with an enumeration, ask what the enumeration excludes that the
   old text allowed. *(BL-016 round 1)*
@@ -103,6 +107,10 @@ diff against the ones its fence can actually violate.
   lines arrive painted; strip ANSI before matching them, and run the suite under
   `FORCE_COLOR=1` as well as plain — every agent run here writes to a file, never a TTY.
   *(`tests/validate.test.cjs`, the forced-colour loop; OS-20260923 C1 issue 2)*
+- **A fail-closed guard over an open domain that lists the unsafe members.** Every review round
+  finds the next unlisted one. Place each member of a closed specification list, or name what is
+  provably safe, and read the rest as doubt. *(OS-20260925 B04: three rounds, then BL-046;
+  `prose-only-diff.mjs`'s KEYWORDS partition)*
 
 ### Documents as code
 
@@ -147,6 +155,10 @@ diff against the ones its fence can actually violate.
   committed. Write Markdown through the file tools or a single-quoted script — a double-quoted
   shell string command-substitutes its backticks — and sweep the result for emptied code spans
   (a doubled space where a name was) rather than rereading the line. *(BL-003 polish)*
+- **Text tools that transform what they write.** `String.replace`'s string form expands `` $` ``
+  and `$&` (it spliced BACKLOG.md), and the Write and Edit tools decode a typed `\uXXXX`: insert
+  text by index or a function replacement, build invisible characters with `String.fromCharCode`.
+  *(OS-20260925 close-out LOG; the invisible-character sweep)*
 - **"No test can verify this" is not "no agent can verify this."** A step is human only on the
   grounds `protocol.md`'s Runner rule lists, pinned by `tests/protocol-contract.test.cjs`; a
   checkpoint asks the user for a verdict, not for labour. *(BL-016)*

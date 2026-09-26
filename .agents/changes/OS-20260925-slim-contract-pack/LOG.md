@@ -15,6 +15,19 @@ heading per session (date), one `###` per batch or event. Never edit an earlier 
   noisy, and max is not ground truth either: the pre-flight found a pin (`tests/git-contract.test.cjs:173`)
   that neither census listed for the batch that breaks it.
 
+- Git for Windows refuses a file name holding a control character at the index ("Invalid path"); Linux git
+  accepts it, `core.protectNTFS=true` does not reproduce the refusal there, and `git mktree -z` writes such a name
+  into a tree. A gate that runs only on Linux cannot see this class (C1 issue 1).
+- The suite executes about 75,000 processes per run (60,700 at the base), 97 % `git`, 708 of them git's detached
+  auto-maintenance; none survive a run on Linux or, by the user's count, on Windows. A native run on an idle Windows
+  laptop takes about 4 minutes; `OS-20260923`'s 10–33-minute figures were agent runs under concurrent load.
+- A hosted artifact renders inside a cross-origin sandboxed iframe that the Chrome extension's DOM, text and
+  accessibility readers cannot enter, so the rendered-DOM proof needs a browser on this machine.
+- An authorized third round's fresh implementer, given its implementer prompt first, found the earlier rounds'
+  findings itself and fixed the instances; the class fix came only with the fix-round prompt's direction.
+- Background agents die with the Claude Code process. With no reboot the scratchpad (tmpfs) survived, so reconcile
+  kept the finished reviewer's findings file and respawned only the lost test-hunter.
+
 ## 2026-09-25 — scaffold
 
 ### Environment and baseline
@@ -1372,3 +1385,25 @@ branch, B02's junction and file-link cases and the two Windows-only tests all ra
 the change out, and with steps 2–14 pre-verified on this build, C1 passes. No `git`, `conhost`, `sh` or `node` in
 the top eight after the run: the "40+ thousand" was volume, not survivors. The run took 245 s (earlier Windows runs
 of this suite, 13–20 minutes).
+
+## 2026-09-26 — change-complete close-out
+
+- Correction to §C1 issue 2: pass — "earlier Windows runs of this suite, 13–20 minutes" compared unlike runs. Those
+  were `OS-20260923`'s agent-run validations on the laptop, mostly under concurrent gate load (18–33 minutes; 10–18
+  through a PowerShell-PATH helper); the user's 245 s is a native run on an idle laptop. Nothing in this change sped
+  the suite up — it added about 23 % more processes.
+- Convergence: off — the coverage audit is built from PROGRESS rows and git: 13 items (R1–R9, the fold-ins BL-041,
+  BL-034, BL-042, and the C1 scope addition, BL-046's minimal fix), every one merged; zero unaccounted.
+- `BACKLOG.md`: BL-028, BL-034, BL-036, BL-037, BL-041, BL-042 and BL-044 moved to Closed with their merges; BL-046
+  narrowed in place to its class fix; filed BL-047 (the suite's process volume), BL-048 and BL-049 (B01's test and
+  design residuals), BL-050 (B03's compaction STOP), BL-051 (B04's test residuals and the check-fence sibling),
+  BL-052 (small CLI and test residuals), BL-053 (skill process: the hosted-artifact proof route, the third round's
+  two prompts, fix-up review numbering).
+- Distilled into `CLAUDE.md` §Bug-class guardrails, three bullets: a fixture legal only on the gate's platform; a
+  fail-closed guard over an open domain that lists the unsafe members; text tools that transform what they write.
+  The section is now 134 lines / 9.8 KB, past the ~120-line / ~8 KB mark: retirements proposed to the user, none
+  made.
+- Learnings harvested into §Learnings. Release step: none. **Change COMPLETE**; State COMPLETE. Proposed to the user:
+  merging `chore/slim-contract-pack-ledger` into `main` and pushing (their words required), deleting the merged batch
+  branches, archiving this ledger (`git mv` to `.agents/archive/`), and — after the merge — refreshing the installed
+  skill, which is theirs to do.
