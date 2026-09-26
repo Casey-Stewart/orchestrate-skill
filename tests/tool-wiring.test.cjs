@@ -1589,3 +1589,282 @@ test('every LOG.md command a document states is the published one, counted per f
   }
   assert.deepEqual(counts, LOG_COMMAND_COUNTS, 'the LOG.md commands each document states, counted');
 });
+
+// ===== Conductor and agent budget rules (B03 of OS-20260925) ===========================
+// Each rule is pinned as whole text in every carrier the batch enumerated, as PINNED is above,
+// and each rule's key word is bound to those carriers across the whole document domain: a
+// mention anywhere else is a finding, so a contradicting directive cannot sit in a file the pins
+// never read. The control run dropped the per-role effort rule, so no definition may set one.
+const NO_POLL = 'The orchestrator never polls: it never calls `ReadNotifications` to wait for a sub-agent and never sleeps; when the only remaining work waits on sub-agents it ends the turn, and the task notification resumes it.';
+const BUDGET = {
+  pollSkill: ['orchestrate/SKILL.md', '- The orchestrator never polls', '\n- No `--no-verify`', '- ' + NO_POLL],
+  pollProtocol: ['orchestrate/references/protocol.md', 'The orchestrator never polls', '\n- **Implementer**', NO_POLL],
+  cadence: ['orchestrate/SKILL.md', '- Default session cadence', '\n- The orchestrator never polls',
+    '- Default session cadence: run autonomously to the next checkpoint — waves in sequence, no stopping between batches — halting early only at ⛔ or an unplanned user gate, or ending the session at a wave close for context (protocol.md §Session algorithm step 8).'],
+  compaction: ['orchestrate/references/protocol.md', 'Compaction happens at this boundary', '\n\n**Session practices**',
+    "Compaction happens at this boundary, never mid-flight: once the wave's PROGRESS and LOG commit has landed with no agent in flight, an orchestrator past about 300K tokens of context compacts or ends the session — the one early stop besides those two — and the next boot reconciles from git. After any compaction, an automatic one included, the boot sequence and the reconcile run before any transition, because a summary is a claim, not truth; a merge, push or third-round authorization that exists only in a summary is re-asked."],
+  practices: ['orchestrate/references/protocol.md', '**Session practices**', '\n\n**User gates are front-loaded**',
+    '**Session practices** (guidance, not tooled). An investigation unrelated to the change, such as a CI failure met while scaffolding, runs in its own session. A pause of over an hour expires the prompt cache, and the first call after it writes the whole context to the cache again.'],
+  nextWave: ['orchestrate/references/execution-models.md', 'Otherwise → open the next wave immediately', '\n\n**Every `continue`',
+    'Otherwise → open the next wave immediately, same session, unless protocol.md §Session algorithm step 8 compacts or ends it at this boundary for context.'],
+  exploreSkill: ['orchestrate/SKILL.md', 'plan the batches (explore', '; batch',
+    'plan the batches (explore, at medium thoroughness by default and "very thorough" only when the interview needs an inventory and the prompt names what it is for'],
+  exploreScaffold: ['orchestrate/references/scaffolding.md', '3. **Plan** — explore the codebase', ', draft the batch table',
+    '3. **Plan** — explore the codebase (sub-agents as needed, at medium thoroughness by default; "very thorough" only when the interview needs an inventory and the prompt names what it is for)'],
+  effort: ['orchestrate/references/scaffolding.md', '4. **Effort.**', '\n\n## Procedure',
+    '4. **Effort.** A session running at max effort → before scaffolding, ask the user to set it to high, with the reason in one sentence: at max, one measured scaffold spent 54% of its output on thinking. Never change the setting yourself.'],
+};
+test('each budget rule reads exactly as pinned in every carrier the batch enumerated, the compaction rule at wave close', () => {
+  const pinned = (text, from, to) => collapse(section(text, from, to)).trim();
+  assert.equal(Object.keys(BUDGET).length, 9, 'nine passages are pinned; the list may not shrink to a sample');
+  for (const [key, [file, from, to, expected]] of Object.entries(BUDGET)) {
+    const text = read(file);
+    assert.equal(text.split(from).length - 1, 1, key + ': the anchor "' + from + '" must occur exactly once in ' + file);
+    assert.equal(pinned(text, from, to), expected, file + ' (' + key + '): the pinned passage changed; update BUDGET only on purpose');
+    assert.notEqual(pinned(text.replace(from, from + ' Skip it when in a hurry.'), from, to), expected, key + ': a planted sentence must redden the pin');
+  }
+  // One rule, one wording, once in each of its two carriers.
+  for (const file of ['orchestrate/SKILL.md', 'orchestrate/references/protocol.md']) {
+    assert.equal(collapse(read(file)).split(NO_POLL).length - 1, 1, file + ': states the no-polling rule once, verbatim');
+  }
+  // Wave close is step 8, the session algorithm's last step; the compaction rule sits inside it.
+  const protocol = read('orchestrate/references/protocol.md');
+  const s0 = protocol.indexOf('\n8. Wave closed.', protocol.indexOf('## §Session algorithm')), s1 = protocol.indexOf('\n\n', s0 + 1);
+  assert.ok(s0 > protocol.indexOf('## §Session algorithm') && !/\n9\. /.test(section(protocol, '\n8. Wave closed.', '\n## Two distinct close-outs')),
+    'step 8 is the wave close and the last step of §Session algorithm');
+  const c0 = protocol.indexOf(BUDGET.compaction[1]), c1 = protocol.indexOf(BUDGET.compaction[2], c0);
+  assert.ok(s0 < c0 && c1 <= s1, 'the compaction rule must sit inside step 8, the wave close');
+});
+
+// Every match of `pattern` in `text` that none of `file`'s allowed passages contains.
+function strayMentions(file, text, pattern, allowed) {
+  const ranges = allowed.map(key => BUDGET[key]).filter(([f]) => f === file).map(([, from, to]) => {
+    const start = text.indexOf(from), end = text.indexOf(to, start + 1);
+    assert.ok(start !== -1 && end > start, file + ': passage bounds must resolve: ' + from + ' .. ' + to);
+    return [start, end];
+  });
+  return [...text.matchAll(new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, '') + 'g'))]
+    .filter(m => !ranges.some(([s, e]) => m.index >= s && m.index + m[0].length <= e))
+    .map(m => file + ': …' + collapse(text.slice(Math.max(0, m.index - 50), m.index + m[0].length + 50)) + '…');
+}
+// Where conductor directives live: the Markdown under orchestrate/ plus README (B03 R1). Code and
+// the page template use "effort", "explore", "poll" and "sleep" as ordinary words — a
+// "best-effort" comment directs no one — so those families read only this domain. The rarer
+// ReadNotifications, compact and thorough stay bound across the whole tree, code included.
+const proseDocuments = () => documents().filter(f => f.endsWith('.md'));
+const BOUND_WORDS = [
+  ['the no-polling rule', /ReadNotifications/, ['pollSkill', 'pollProtocol'], 'tree'],
+  ['the compaction rule', /compact/i, ['compaction', 'nextWave'], 'tree'],
+  ['the Explore thoroughness default', /thorough/i, ['exploreSkill', 'exploreScaffold'], 'tree'],
+  ['a fact-finding carrier', /\bexplor(?:e|es|ed|ing)\b/i, ['exploreSkill', 'exploreScaffold'], 'prose'],
+  ['the scaffold effort ask', /\beffort\b/i, ['effort'], 'prose'],
+];
+test('each budget rule\'s key word appears nowhere but inside its pinned carriers', () => {
+  const files = documents(), prose = proseDocuments();
+  assert.ok(files.includes('README.md') && files.includes('orchestrate/references/scaffolding.md') && files.some(f => f.endsWith('.mjs')),
+    'the domain is the whole shipped tree, code included, plus README');
+  assert.ok(prose.includes('README.md') && prose.includes('orchestrate/references/protocol.md') && prose.length < files.length
+    && prose.every(f => files.includes(f) && f.endsWith('.md')), 'the prose domain is every Markdown file of that tree, and README');
+  assert.equal(new Set(BOUND_WORDS.map(b => b[0])).size, BOUND_WORDS.length);
+  // The narrowing is exactly the two ordinary words; widening back is free, narrowing more is an edit here.
+  assert.deepEqual(BOUND_WORDS.filter(b => b[3] !== 'tree').map(b => b[0]), ['a fact-finding carrier', 'the scaffold effort ask'],
+    'only the explore and effort families read the prose domain alone');
+  for (const [what, pattern, allowed, domain] of BOUND_WORDS) {
+    assert.ok(domain === 'tree' || domain === 'prose', what + ': names its domain');
+    const swept = domain === 'tree' ? files : prose;
+    const carriers = [...new Set(allowed.map(key => BUDGET[key][0]))].sort();
+    assert.ok(carriers.every(c => swept.includes(c)), what + ': its domain must be a superset of its carriers');
+    const mentioning = [], stray = [];
+    for (const file of swept) {
+      const text = read(file);
+      if (pattern.test(text)) mentioning.push(file);
+      stray.push(...strayMentions(file, text, pattern, allowed));
+    }
+    assert.deepEqual(stray, [], what + ': a mention outside its pinned carriers states the rule again or contradicts it');
+    assert.deepEqual(mentioning.sort(), carriers, what + ': exactly its enumerated carriers mention it');
+    // Armed: in every carrier, one mention planted just outside the passage is reported.
+    for (const key of allowed) {
+      const [file, from] = BUDGET[key], text = read(file);
+      const planted = text.replace(from, 'Planted ' + pattern.exec(text)[0] + ' here.\n' + from);
+      assert.equal(strayMentions(file, planted, pattern, allowed).length, 1, what + ' (' + key + '): a planted stray mention must be reported');
+    }
+  }
+});
+
+// No polling, sleeping or notification calls while waiting: clause-level and negation-aware,
+// through the undo sweep's reader. Code spans are read as their text, so the rule's own
+// "never calls `ReadNotifications`" is governed by its negator like any other word.
+const unticked = text => text.replace(/`([^`\n]*)`/g, '$1');
+// Holding the turn on a sub-agent (B03 R1): a wait/check/look/watch verb, "until" and an agent
+// noun in one clause, in any of the six orders, or the turn held rather than ended. The agent
+// noun is required: the smoke page's own "A page update is waiting until you finish editing
+// this note." directs no conductor. Verb forms only: "checklist" is not "check", nor is the noun
+// in "fence check → … reviewer … → next wave, repeating until a checkpoint" (SKILL.md).
+const AGENT_NOUN = String.raw`\b(?:implementers?|reviewers?|sub-agents?|agents?|waves?|test[- ]hunters?|QA runners?)\b`;
+const WAIT_VERB = String.raw`(?:\b(?:wait|look|watch)(?:s|es|ed|ing)?\b|(?<!\b(?:fence|pin|skill|containment|mechanical|the|a|an|this|that|its|each|every|one)\s)\bcheck(?:s|ed|ing)?\b)`;
+const UNTIL = String.raw`\buntil\b`;
+const ANY_ORDER = [[WAIT_VERB, UNTIL, AGENT_NOUN], [WAIT_VERB, AGENT_NOUN, UNTIL], [UNTIL, WAIT_VERB, AGENT_NOUN],
+  [UNTIL, AGENT_NOUN, WAIT_VERB], [AGENT_NOUN, WAIT_VERB, UNTIL], [AGENT_NOUN, UNTIL, WAIT_VERB]].map(order => order.join('[^.;:]*'));
+const TURN = String.raw`\s+(?:the|a|its|your)\s+turn\b`;
+const HOLD_TURN = new RegExp([...ANY_ORDER, String.raw`\b(?:before|instead of|rather than)\s+end(?:s|ing)?` + TURN,
+  String.raw`\b(?:hold|keep)(?:s|ing)?` + TURN, String.raw`\b(?:never|not|don['’]t)\s+end(?:s|ing)?` + TURN].join('|'), 'i');
+const PAGE_WAITING = 'A page update is waiting until you finish editing this note.';
+const POLL = [
+  ['a notifications call', /\bReadNotifications\b/, 'Call ReadNotifications until every implementer has reported', 'tree'],
+  ['polling', /\bpoll(?:s|ed|ing)?\b/i, 'Poll the wave until each implementer reports', 'prose'],
+  ['sleeping', /\b(?:sleep(?:s|ing)?|Start-Sleep)\b/i, 'Sleep for a minute between spawns', 'prose'],
+  ['checking again and again', /\bkeep\s+(?:check|look|ask|query)ing\b/i, 'Keep checking the task list for new output', 'tree'],
+  ['checking at intervals', /\b(?:check|look|query)\w*\b[^.;:]*\b(?:every\s+(?:few\s+)?(?:\d+\s+)?(?:seconds?|minutes?)|periodically|at intervals|repeatedly)\b/i,
+    'Check the agent output every few minutes', 'tree'],
+  ['holding the turn on a sub-agent', HOLD_TURN, 'Hold the turn until every implementer has reported', 'tree'],
+];
+const polling = (text, families = POLL) => clauses(unticked(text)).flatMap(c => families.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
+test('no shipped document tells the orchestrator to poll, sleep or call ReadNotifications while it waits', () => {
+  assert.equal(new Set(POLL.map(p => p[0])).size, POLL.length);
+  for (const [name, pattern, specimen] of POLL) {
+    assert.deepEqual(POLL.filter(([, p]) => p.test(specimen)).map(p => p[0]), [name], name + ': its specimen must be caught by it alone');
+    assert.equal(polling(specimen + '.').length, 1, name + ': the clause reader must report the specimen');
+  }
+  // Written as prose, not read off the patterns: the rule reversed in its own words, a negated verb
+  // earlier in the clause, a suggestion, and a double negative.
+  for (const planted of ['While the reviewers run, call `ReadNotifications` to see whether any has finished.',
+    'The orchestrator never polls: it calls ReadNotifications to wait for a sub-agent.',
+    'When the only remaining work waits on sub-agents, poll them instead of ending the turn.',
+    'Never spawn a second reviewer; poll the first until it reports.', 'Do not end the turn — sleep, then look at the wave.',
+    'Run Start-Sleep 60 between checks on the wave.', 'Keep looking at the task output until the implementer lands.',
+    'Look at the agent transcripts periodically while the wave runs.', 'Why not poll the implementers while they work?',
+    'Never skip polling the wave.',
+    // The R1 reviewer's two survivors, and the turn held in other words.
+    'Before ending a turn, wait until every implementer of the wave has reported.',
+    "Spawn ALL of the wave's implementers concurrently, then check each one's output until it lands.",
+    'Watch the reviewer transcript until it prints its verdict.', 'Do not end the turn while the reviewers run.',
+    'Keep the turn open until the QA runner reports.', 'Rather than ending the turn, look at the sub-agents again.']) {
+    assert.ok(polling(planted).length >= 1, 'must be reported: ' + planted);
+  }
+  assert.ok(read('orchestrate/references/smoke-page-template.html').includes(PAGE_WAITING), 'the page template still says what the must-pass control quotes');
+  assert.deepEqual(polling(NO_POLL + ' Never poll a sub-agent. Do not call `ReadNotifications`. Don\'t sleep while a wave runs. ' + BACKGROUND_RULE + ' ' + PAGE_WAITING
+    + ' Never wait until every implementer has reported. Gate PER BATCH, as each implementer reports (don\'t wait for the wave\'s slowest).'
+    + ' Per batch as each lands: fence check → failing-on-base → reviewer + gate agents → next wave, repeating until a checkpoint.'), [],
+    'the rule itself, its negations, the approved background task and a page note are not directives to poll');
+  // poll and sleep read the prose domain only (see proseDocuments); every other family, the whole tree.
+  assert.deepEqual(POLL.filter(p => p[3] !== 'tree').map(p => p[0]), ['polling', 'sleeping'], 'only poll and sleep are narrowed to the prose domain');
+  assert.ok(POLL.every(p => p[3] === 'tree' || p[3] === 'prose'));
+  const treeOnly = POLL.filter(p => p[3] === 'tree');
+  assert.deepEqual(polling('Sleep a minute, then poll the wave.', treeOnly), [], 'outside the prose domain poll and sleep are not read');
+  assert.equal(polling('Sleep a minute, then poll the wave.').length, 2, 'inside it they are');
+  const files = documents(), prose = new Set(proseDocuments());
+  assert.ok(files.includes('orchestrate/SKILL.md') && files.includes('orchestrate/references/protocol.md') && files.includes('README.md')
+    && files.includes('orchestrate/references/smoke-page-template.html'));
+  assert.ok(['orchestrate/SKILL.md', 'orchestrate/references/protocol.md', 'README.md'].every(f => prose.has(f)),
+    'the prose domain is a superset of the no-polling rule\'s carriers');
+  for (const file of files) {
+    assert.deepEqual(polling(read(file), prose.has(file) ? POLL : treeOnly), [], file + ': a directive to poll, sleep or call ReadNotifications while waiting');
+  }
+});
+
+// No definition sets `effort:` (the loader takes low | medium | high | max | an integer) or
+// `model:`. Stricter than the loader on purpose: any frontmatter key naming either, however
+// quoted, cased, indented or spaced, and a frontmatter block that cannot be found, is a finding.
+const TIER_KEY = /(?:effort|model)[\w-]*["']?\s*:/i;
+function tierKeyFaults(file, text) {
+  const m = /^---\n([\s\S]*?)\n---(?:\n|$)/.exec(text);
+  if (!m) return [file + ': no frontmatter block to read — rejected on doubt'];
+  return m[1].split('\n').filter(line => TIER_KEY.test(line)).map(line => file + ': ' + line.trim());
+}
+const definitionListing = () => walk(path.join(ROOT, '.claude/agents')).filter(rel => rel.endsWith('.md')).map(rel => '.claude/agents/' + rel);
+test('no agent definition sets an effort or a model, read more strictly than the loader reads it', t => {
+  const def = line => '---\nname: x\ndescription: y\n' + line + '\ntools: Read\n---\n\nbody\n';
+  // Every value the loader accepts, and values past both ends of that set.
+  for (const key of ['effort', 'model']) {
+    for (const value of ['low', 'medium', 'high', 'max', '32000', 'none', '0', '-1', 'ultra', '999999', '"high"', 'opus', 'inherit']) {
+      assert.equal(tierKeyFaults('x.md', def(key + ': ' + value)).length, 1, 'must be caught: ' + key + ': ' + value);
+    }
+  }
+  for (const spelling of ['  effort: max', 'EFFORT: max', 'Model: opus', '"effort": max', "'model': opus", 'effort : max', 'effort:max',
+    '{effort: max}', 'reasoning_effort: high', 'model_id: x']) {
+    assert.equal(tierKeyFaults('x.md', def(spelling)).length, 1, 'must be caught: ' + spelling);
+  }
+  assert.equal(tierKeyFaults('x.md', 'effort: max\n').length, 1, 'no frontmatter at all is rejected on doubt');
+  assert.equal(tierKeyFaults('x.md', '---\nname: x\neffort: max\n').length, 1, 'an unclosed frontmatter is rejected on doubt');
+  assert.deepEqual(tierKeyFaults('x.md', def('tools: Read, Write')), [], 'a definition with neither key passes');
+  // The domain is the directory, walked at any depth, dotted directories included.
+  const temp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'budget-walk-'));
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 }));
+  fs.mkdirSync(path.join(temp, '.hidden', 'deeper'), { recursive: true });
+  fs.writeFileSync(path.join(temp, 'top.md'), '');
+  fs.writeFileSync(path.join(temp, '.hidden', 'deeper', 'nested.md'), '');
+  assert.deepEqual(walk(temp), ['.hidden/deeper/nested.md', 'top.md'], 'the walk must reach a definition two directories down');
+  const files = definitionListing();
+  assert.ok(['implementer', 'reviewer', 'test-hunter', 'qa-runner'].every(n => files.includes('.claude/agents/' + n + '.md')),
+    'the listing reads the shipped definitions: ' + files.join(', '));
+  for (const file of files) assert.deepEqual(tierKeyFaults(file, read(file)), [], file + ': sets an effort or a model');
+});
+
+// [BL-034] The gate pair holds a scoped Write; no text may say it lacks one. README's sentence
+// about a stale installed copy is true, and is removed as its exact text, never by its clause.
+const GATE_PAIR = String.raw`\b(?:reviewer|test[- ]hunter|read-only pair|gate pair)s?\b`;
+const LACKS_WRITE = [
+  ['Write and Edit, unlike the gate pair', new RegExp(String.raw`\bWrite\b[^.;:]*\bEdit\b[^.;:]*\bunlike\b[^.;:]*` + GATE_PAIR, 'i'),
+    'This role keeps `Write` and `Edit` on purpose, unlike the reviewer and the test hunter.'],
+  ['unlike the gate pair, Write', new RegExp(String.raw`\bunlike\b[^.;:]*` + GATE_PAIR + String.raw`[^.;:]*\bWrite\b`, 'i'),
+    'Unlike the reviewer and the test hunter, this role keeps Write and Edit.'],
+  ['the gate pair without Write', new RegExp(GATE_PAIR + String.raw`[^.;:]*\b(?:lacks?|lacking|without|has no|have no|holds? no|gets? no)\s+(?:the\s+)?Write\b`, 'i'),
+    'The reviewer and the test hunter have no Write tool.'],
+];
+const QA_RUNNER_WRITES = ['.claude/agents/qa-runner.md', 'This role keeps', '\n\n`mcp__Claude_Browser__*`',
+  'This role keeps `Write` and `Edit` on purpose; the reviewer and the test hunter hold no `Edit`, and their `Write` reaches only their findings file and scratchpad scratch. The QA-runner skeleton in `orchestrate/references/subagent-prompts.md` has it "write [LEDGER_DIR]/evidence/C[N]/step-[NN].md" for every step, and "Modify only disposable working copies and prove reset". Stripping Write/Edit here would leave a checkpoint with no evidence to close on — do not "correct" this to match the read-only pair.'];
+const STALE_COPY = 'an older reviewer or test-hunter lacks the Write tool its rendered prompt needs for the findings file';
+const lacksWrite = text => clauses(collapse(unticked(text)).split(STALE_COPY).join(' '))
+  .flatMap(c => LACKS_WRITE.filter(([, p]) => p.test(c)).map(([name]) => name + ' — ' + c));
+test('[BL-034] no text says the reviewer and the test hunter lack Write', () => {
+  assert.equal(new Set(LACKS_WRITE.map(l => l[0])).size, LACKS_WRITE.length);
+  for (const [name, , specimen] of LACKS_WRITE) {
+    assert.deepEqual(LACKS_WRITE.filter(([, p]) => p.test(unticked(specimen))).map(l => l[0]), [name], name + ': its specimen must be caught by it alone');
+    assert.equal(lacksWrite(specimen).length, 1, name + ': the sweep reports its specimen');
+  }
+  for (const planted of ['The read-only pair lacks Write, so this role keeps it.', 'The reviewer, lacking the `Write` tool, keeps no evidence.',
+    'Only this role has Write; the test hunter gets no Write at all.']) {
+    assert.ok(lacksWrite(planted).length >= 1, 'must be reported: ' + planted);
+  }
+  // The reworded paragraph, pinned whole: its directive to keep Write and Edit stands.
+  const [qaFile, from, to, expected] = QA_RUNNER_WRITES, qa = read(qaFile);
+  assert.equal(qa.split(from).length - 1, 1, qaFile + ': the anchor must occur exactly once');
+  assert.equal(collapse(section(qa, from, to)).trim(), expected, qaFile + ': the pinned paragraph changed; update QA_RUNNER_WRITES only on purpose');
+  assert.notEqual(collapse(section(qa.replace(from, from + ' Skip it when in a hurry.'), from, to)).trim(), expected, 'a planted sentence must redden the pin');
+  assert.deepEqual(lacksWrite(expected), [], 'the reworded paragraph is not the old claim');
+  // The exemption is live: README carries the sentence, and only the exemption keeps it unreported.
+  assert.ok(collapse(unticked(read('README.md'))).includes(STALE_COPY), 'README still carries the stale-copy sentence this exemption names');
+  assert.ok(LACKS_WRITE.some(([, p]) => p.test(STALE_COPY)), 'the exempt sentence would otherwise be reported');
+  const files = [...documents(), ...definitionListing()];
+  assert.ok(files.includes('.claude/agents/qa-runner.md') && files.includes('README.md'));
+  for (const file of files) assert.deepEqual(lacksWrite(read(file)), [], file + ': says the gate pair lacks Write');
+});
+
+// The undo sweep stays unweakened: B03 writes rules beside it and reuses its reader. Its domain,
+// its negation reader and its test are byte-for-byte what they were at FAMILY_BASE, and UNDO may
+// grow but never lose or narrow an entry. Changing any of them is a deliberate edit here.
+test('the undo sweep, its reader and its domain are unweakened since ' + FAMILY_BASE, () => {
+  const blob = spawnSync('git', ['-C', ROOT, 'show', FAMILY_BASE + ':tests/tool-wiring.test.cjs'], { encoding: 'utf8', windowsHide: true });
+  assert.ifError(blob.error); assert.equal(blob.status, 0, 'the undo sweep at ' + FAMILY_BASE + ' must be readable: ' + blob.stderr);
+  const base = blob.stdout.replace(/\r\n/g, '\n'), now = read('tests/tool-wiring.test.cjs');
+  const region = (text, from, to) => {
+    const s = text.indexOf(from), e = text.indexOf(to, s + 1);
+    assert.ok(s !== -1 && e > s, 'region bounds must resolve: ' + from);
+    return text.slice(s, e + to.length);
+  };
+  for (const [from, to] of [
+    ['// The domain every sweep below walks', "const documents = () => [...shipped(), 'README.md'];"],
+    ['const NEGATOR = ', "const undoing = text => clauses(text).flatMap(c => UNDO.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));"],
+    ["test('no shipped passage tells a reader to pipe", "a directive undoes the validation or pin rule');\n});"],
+  ]) {
+    assert.equal(region(now, from, to), region(base, from, to), 'changed since ' + FAMILY_BASE + ': ' + from);
+  }
+  const s = base.indexOf('const UNDO = [\n'), e = base.indexOf('\n];', s);
+  assert.ok(s !== -1 && e > s, FAMILY_BASE + ': no UNDO literal to read');
+  const baseUndo = new Function('return ' + base.slice(s + 'const UNDO = '.length, e + 3))();
+  assert.equal(baseUndo.length, 17, FAMILY_BASE + ' held seventeen undo patterns');
+  for (const [name, pattern, specimen] of baseUndo) {
+    assert.ok(UNDO.some(([n, p, sp]) => n === name && p.source === pattern.source && p.flags === pattern.flags && sp === specimen),
+      'UNDO lost or narrowed: ' + name);
+  }
+});

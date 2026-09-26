@@ -85,12 +85,14 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 
 ## Checklist
 
-- [ ] No-polling rule in `protocol.md` and `SKILL.md`; `UNDO` sweep still green and unweakened
-- [ ] Explore thoroughness default (medium) at `SKILL.md:180` and `scaffolding.md:19`
-- [ ] Scaffold-at-high ask in the scaffolding procedure
-- [ ] Compaction-at-boundaries rule and the practices in `protocol.md`
-- [ ] [BL-034] `qa-runner.md:11` reworded
-- [ ] Tests pinning each new rule sentence in its carrier, plus a sweep for contradicting directives elsewhere
+- [x] No-polling rule in `protocol.md` and `SKILL.md`; `UNDO` sweep still green and unweakened
+- [x] Explore thoroughness default (medium) at `SKILL.md:180` and `scaffolding.md:19`
+- [x] Scaffold-at-high ask in the scaffolding procedure
+- [x] Compaction-at-boundaries rule and the practices in `protocol.md`
+- [x] [BL-034] `qa-runner.md:11` reworded
+- [x] Tests pinning each new rule sentence in its carrier, plus a sweep for contradicting directives elsewhere
+- [x] polish: POLL gains an owned family for holding the turn on a sub-agent (wait/check until an agent lands, not ending the turn); both R1 survivors planted, the smoke page's "waiting until you finish editing" kept as a must-pass control
+- [x] polish: the "effort" and "explore" key-word families and POLL's poll/sleep families read only the Markdown under orchestrate/ plus README; ReadNotifications, compact and thorough stay on the whole tree; narrowing stated and the narrowed domain asserted a superset of the carriers
 
 ## Acceptance criteria
 

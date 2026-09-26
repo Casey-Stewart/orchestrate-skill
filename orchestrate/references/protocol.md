@@ -47,6 +47,9 @@ ledgers may be parked in a sibling `.agents/archive/` directory; discovery never
   on Windows mangles `branch:path`; run it from the repo or worktree root), writes through
   an integration worktree under the session scratchpad — reusing one `git worktree list`
   already shows, pruning first if its directory is gone.
+  The orchestrator never polls: it never calls `ReadNotifications` to wait for a sub-agent
+  and never sleeps; when the only remaining work waits on sub-agents it ends the turn, and
+  the task notification resumes it.
 - **Implementer** — a sub-agent given one batch. Codes inside the file fence in the
   batch's isolated worktree, ticks the batch checklist, commits on the batch branch (one
   commit per fold-in item). Wave siblings run concurrently. Reports in the fixed shape:
@@ -723,6 +726,18 @@ reconciliation: one line in the PROGRESS Session log, detail in LOG.md.
    → STOP, delivering the checkpoint's COMBINED smoke script per §Smoke checkpoints. Otherwise: go to step 4 and open the next wave in this SAME
    session. Default cadence: run until the next checkpoint — stop early only at `⛔` or
    an unplanned user gate.
+   Compaction happens at this boundary, never mid-flight: once the wave's PROGRESS and LOG
+   commit has landed with no agent in flight, an orchestrator past about 300K tokens of
+   context compacts or ends the session — the one early stop besides those two — and the
+   next boot reconciles from git. After any compaction, an automatic one included, the boot
+   sequence and the reconcile run before any transition, because a summary is a claim, not
+   truth; a merge, push or third-round authorization that exists only in a summary is
+   re-asked.
+
+**Session practices** (guidance, not tooled). An investigation unrelated to the change, such
+as a CI failure met while scaffolding, runs in its own session. A pause of over an hour
+expires the prompt cache, and the first call after it writes the whole context to the cache
+again.
 
 **User gates are front-loaded**: design/UX approvals the plan can foresee are resolved
 at planning time (mockup shown, pick recorded, approved design baked into the batch

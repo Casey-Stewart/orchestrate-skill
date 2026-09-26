@@ -152,7 +152,11 @@ ledger's gates are its pinned directory's, and a changed directory stops it at b
   commit on the integration branch.
 - Default session cadence: run autonomously to the next checkpoint — waves in
   sequence, no stopping between batches — halting early only at ⛔ or an unplanned
-  user gate.
+  user gate, or ending the session at a wave close for context (protocol.md §Session
+  algorithm step 8).
+- The orchestrator never polls: it never calls `ReadNotifications` to wait for a sub-agent
+  and never sleeps; when the only remaining work waits on sub-agents it ends the turn, and
+  the task notification resumes it.
 - No `--no-verify`, no force-push, no history rewriting.
 - The ledger's own contract outranks this skill's reference docs — a pinned contract
   through its repo facts, its pinned `references/protocol.md` governing wherever it is
@@ -183,7 +187,7 @@ Read [references/scaffolding.md](references/scaffolding.md) and the files in
 [templates/](templates/), then: preconditions (git repo; tree state) → detect repo
 facts (validation commands and their quiet form, versioning, gate agents, runners,
 backlog id scheme) → interview (back-to-back AskUserQuestion calls, as many as
-the gaps need) → plan the batches (explore; batch
+the gaps need) → plan the batches (explore, at medium thoroughness by default and "very thorough" only when the interview needs an inventory and the prompt names what it is for; batch
 table with weights and file fences; item→batch coverage) → structure for throughput per
 [references/execution-models.md](references/execution-models.md): reshape fences for
 disjointness, build the wave map (widest safe waves), classify each batch hands-on vs
