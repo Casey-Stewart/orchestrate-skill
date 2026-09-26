@@ -332,3 +332,84 @@ Checked, not findings:
   (00-READBEFORE.md:9-11) is likewise unasserted.
 
 === end of B01 R1 test-hunter findings ===
+
+### B01 — polish and integration
+
+- Polish (same implementer, nonce matched) @`bb56dc7`: 7 `polish:` lines ticked (15/15);
+  touched `orchestrate/SKILL.md` (reviewer ASK 2 — protocol.md taken up only on `SKILL MATCH`),
+  `tests/tool-wiring.test.cjs`, `tests/protocol-contract.test.cjs` and the batch file. The
+  implementer replayed all 8 surviving R1 mutations against the polished guards: all killed.
+  Not done (not an ASK): hunter's uncounted m6 — nothing asserts note 7's precedence rule.
+- Mechanical close: fence PASS (integration `4318ac0`, batch `bb56dc7`), worktree validation
+  `PASS tests 513/515, 2 skipped (23s)`. `SKILL.md` is skill source → fix-diff-only re-review.
+- R2 scoped polish re-review (fresh, strong tier opus): SHIP, P0=0 P1=0 ASK=1 — every R1 finding
+  FIX VERIFIED by mutation; the one new ASK (the Mode-continue pin-order assertion governs only
+  the spelling `references/protocol.md`) is polish-phase and closes as a residual for
+  `BACKLOG.md` at close-out, as OS-20260923 did with its second scoped re-review's residuals.
+- Integrated: `git merge-tree --write-tree` clean (`33782b6`), `--no-ff` merge `613c608` (on top
+  of B02's `0090173`), tip `PASS tests 535/537, 2 skipped (23s)` → 🟢. Worktree `b01` removed.
+- Residuals for `BACKLOG.md` at close-out: the R2 ASK above; `red → no merge` in the moved
+  procedure is matched only inside the SHA-pinned capped table, so "red → merge anyway" survives
+  (pre-existing at `edd2f1e`); note 7's precedence rule and the template preamble unasserted
+  (hunter m6); "restore" rewrites the shared installed skill, stopping other ledgers pinned to
+  the newer hash (reviewer R1 design observation); protocol.md §Complete checkpoint inputs names
+  clone-relative `tests/fixtures/smoke-inputs/*.py` (implementer, pre-existing).
+
+### B01 R2 reviewer findings
+SHIP
+
+Scoped re-review (fix-diff-only) of `git diff 95f8338..HEAD` in /home/timetotilt/worktrees/os925/b01, one polish commit (bb56dc7) over 4 files: the batch file, orchestrate/SKILL.md, tests/protocol-contract.test.cjs and tests/tool-wiring.test.cjs.
+
+**Findings**
+
+1. **ASK** — tests/tool-wiring.test.cjs:225. Guardrail: a guard that SAMPLES its domain (here, one spelling of "the pinned protocol.md").
+   - The problem: the new "not before the pin check" assertion is `cont.indexOf('references/protocol.md') > pinAt`, so it governs only the spelling `references/protocol.md`.
+   - *Scenario (probed on a scratch clone):* SKILL.md step 2 gains "— for a pinned contract, beside its pinned skill directory's protocol.md, the procedure its repo facts plug into". That puts back exactly the pre-pin read that R1 ASK 2 removed, spelled without `references/`. The full suite stays green: `SURVIVED r1-skill-step2-bare pass=513 fail=0`.
+   - *Fix:* bound every `protocol.md` before `pinAt` instead of one spelling. For example, `assert.equal(cont.slice(0, pinAt).split('protocol.md').length - 1, 2)`: the two expected occurrences are the "legacy names per protocol.md" clause and the "contract absent → protocol.md fills the gaps" clause. Alternatively, pin steps 1-2 of Mode: continue verbatim in `PINNED`.
+
+**R1 findings, each re-verified with a mutation on a scratch clone at bb56dc7 (anchors checked, unmutated control 42/42 green)**
+- R1 reviewer ASK 1 = hunter F5 (superset check was circular): **FIX VERIFIED**.
+  - `baseFamily()` reads the `OLD_CLAIMS` literal from `git show edd2f1e:tests/tool-wiring.test.cjs` and pins 6 entries. It then `deepEqual`s their sources with `PRE_PIN_CLAIMS` and requires each source and its flags to be in `OLD_CLAIMS`.
+  - The parse matches the base literal: six lines, each `/…/i,`.
+  - m3 (narrow `references?`/`(?:this|the)`) was KILLED, and so was m3b (narrow `(?:ledgers|a ledger)` to `ledgers`).
+- R1 reviewer ASK 2 (SKILL.md read protocol.md before the pin): **FIX VERIFIED**.
+  - Step 2 no longer names the pinned protocol.md. Step 3 takes it up "only on `SKILL MATCH`", which agrees with protocol.md:566-567 ("then governs").
+  - Reverting the hunk was KILLED ("the boot sequence verifies the pin…"). The residual is Finding 1.
+- R1 reviewer ASK 3 (moved-sentence test freezes wording): **FIX VERIFIED**. As scoped, B01 owed only a comment. It has the comment (protocol-contract.test.cjs:107-110) and a failure-message hint. Telling B03 to insert rather than reword, or recording its fence extension, is still the orchestrator's job.
+- Hunter F1 (trial-merge head unguarded): **FIX VERIFIED**. The excerpt now spans the whole unit, from "a conflict →" through "(skip only if n/a)", and matches protocol.md:615-619. m4 (`git commit-tree … -m trial` → "merge the branch for real") was KILLED.
+- Hunter F2 (nonce-free pasted prompt): **FIX VERIFIED**. Both the :793 needle and the REWORDED excerpt carry "with no nonce line". m5 was KILLED by two tests.
+- Hunter F3 (boot step 4 unpinned): **FIX VERIFIED**. There is a verbatim PINNED entry, with its planted-sentence control. m1 ("now governs" → "never governs") was KILLED.
+- Hunter F4 (README carrier held by single words): **FIX VERIFIED**. There is a verbatim PINNED entry from `- **Rollout boundary.**` to `## Install`, with PINNED.length raised to 7. m2 was KILLED.
+
+**Hunk mapping.** Every hunk maps to an R1 item, so there is no scope creep:
+- The batch file: `polish:` lines only (exempt).
+- SKILL.md: ASK 2.
+- protocol-contract.test.cjs: the comment and message are ASK 3; the two REWORDED entries are F1 and F2.
+- tool-wiring.test.cjs: the Mode-continue assertions are ASK 2, `baseFamily` is ASK 1/F5, the PINNED entries and count are F3/F4, and the step-5 needle is F2.
+
+The SKILL.md hunk is a faithful prose fix. It moves the existing clause from step 2 into step 3 and adds "only on `SKILL MATCH`". No other behaviour changes, and no other document claims a pre-pin read (swept orchestrate/, README.md and CLAUDE.md). It is the same commit as its test.
+
+**Acceptance criteria.** The polish touches no production file other than SKILL.md, so AC1-AC8 stand as verified in R1. They are re-confirmed by the green suite. The SHA pins are untouched: the diff has no hunk near them.
+
+**Validation (wrapper, pinned copy)**
+- Plain run: `PASS tests 513/515, 2 skipped (23s)`, exit 0. The 2 skips are the expected Windows-only cases.
+- `FORCE_COLOR=1`: same result, exit 0.
+- `git diff --check`: clean, both for 95f8338..HEAD and for the batch range.
+- All 4 changed files are LF at both ends; none changed its line endings.
+- Logs: /tmp/claude-1000/-home-timetotilt-projects-orchestrate-skill/30346af3-7332-4e1a-b96e-3cbe367061c2/scratchpad/b01-rev2/validate-plain.log and validate-forcecolor.log. Mutation logs are mutations-1.log, mutations-2.log and mutations-3.log in the same directory.
+
+**Failing-on-base:** does not apply. This is a chore batch.
+
+**Mutations that still pass the re-pointed tests**
+- Finding 1 above.
+- The PINNED entries and the family binding: none short of editing their constants.
+
+**Not counted: an observation outside the fix diff.** protocol.md:620 "red → no merge" → "red → merge anyway" survives the full suite (513/0).
+- Why: the moved-sentence test matches the short unit "red → no merge" inside the SHA-pinned capped-verdict table.
+- The same mutation also survived at edd2f1e (510/0), so this is not a regression from B01.
+- A census with the test's own splitter finds only 4 multi-matched units: `red → no merge`, `not a round`, `7` and a table separator. `not a round` was still KILLED through its context.
+- The fix would be an occurrence-count check (occurrences in flat T plus flat P ≥ occurrences in flat base). That is a candidate for a later test-hardening item.
+
+**Not counted: upgrade path.** Under upgrade, the carriers never re-run the pin check, while SKILL.md takes up protocol.md "only on SKILL MATCH". After the pin line is rewritten, a re-run prints SKILL MATCH, so this costs one extra command and produces no wrong outcome.
+
+=== end of B01 R2 reviewer findings ===
