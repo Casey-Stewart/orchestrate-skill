@@ -980,3 +980,14 @@ condition holds, and the verdict is consumed as *ship with the residual*.
   reproducing the residual on the issued fixture `I-04` (`c1` appends ` // gitleaks:allow` to a
   code line; checked on the tip: `PROSE-ONLY 1 file(s)`, exit 0). The round-3 hunter's five
   test-only ASKs go to `BACKLOG.md` at close-out. Worktree `b04` removed.
+- Orchestrator error, fixed forward: the `ed0d921` commit inserted the BL-046 row with
+  JavaScript's `String.replace` and a STRING replacement; the row's text holds `` `$` ``, and
+  `` $` `` in a replacement string means "the text before the match", so the commit spliced a
+  second copy of BACKLOG.md's preamble and Open table in after the row (35 lines where one was
+  meant). Rebuilt from `ed0d921^:BACKLOG.md` by inserting the row by index, proved to differ from
+  that original by exactly the one intended line, committed on top (no history rewritten). The
+  same commit's PROGRESS edit used a function replacement and the batch-file step an append, and
+  this session's other scripted edits carried no `$` in a replacement string: BACKLOG.md was the
+  only casualty. Close-out distillation candidate: insert text by index or with a function
+  replacement, never a string replacement that can carry `$` — the substitution hazard
+  `tests/prompt.test.cjs`'s quoting fixture already guards for the renderer.
