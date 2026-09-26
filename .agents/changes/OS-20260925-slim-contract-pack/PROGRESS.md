@@ -59,6 +59,7 @@ Issue 001, 2026-09-26, build `f770be1` — `evidence/C1/inputs/issue-001/`, gene
 | 2026-09-26 | B04 | ship with the residual | "As long as the residual isn't a fundamentally breaking bug that sounds fine." |
 | 2026-09-26 | C1 | push authorized — `chore/slim-contract-pack-ledger` to `origin`, for the Windows step | "Yes push so I can test" |
 | 2026-09-26 | C1 | fail (issue 1) — Step 1 → B04 | User, pasting the Windows run of Step 1 (verbatim in LOG.md §C1 issue 1: Step 1 fail): the recipe threw "Node test suite failed" on one failing test, "✖ one line whatever a path holds, usage refused, --help documents the flags the published command uses (2017.9739ms)" (tests\prose-only-diff.test.cjs:587:1) — "error: Invalid path 'line / break.mjs'", "fatal: git update-index: --cacheinfo cannot add line / break.mjs", "128 !== 0"; `git diff --check` printed nothing. Step 2 not yet given. |
+| 2026-09-26 | B04 | fix-up scope: BL-046's minimal fix folded into `fix/B04-c1-followup` (its class fix stays in BACKLOG) | User, while the C1 fix-up was being prepared: "B04 also had the residual as well, if we are going to work on it, we should probably fix the residual as well?" |
 
 ## Item → batch coverage audit
 
