@@ -1275,3 +1275,23 @@ Wrote only scoped-spec.json and mutations.json under b04c1-hunt; the harness wro
 - Housekeeping: there is a stray clone at /tmp/mut-y4h9fL, dated 07:33. It predates my run, so it is not mine, and I left it alone. A run killed by a timeout does not clean up its clone.
 
 === end of B04 R4 test-hunter findings ===
+
+### B04 C1 fix-up — polish and integration
+
+- Polish (same fix-up implementer, nonce matched) @`168421b`: two `polish:` lines appended and ticked in B04's
+  batch file (7 added lines, none removed); `tests/prose-only-diff.test.cjs` only — the line-break fixture now
+  asserts on the domain (no raw `ls-files -z` entry and no work-tree name below U+0020, by code point) with a
+  live control (three names staged by `update-index -z --index-info` on stdin and written to the work tree:
+  the fixture's own, `lib/unit<U+001F>separator.mjs`, `<TAB>lead.mjs`; on Windows each write must throw), a
+  `plain name.mjs` twin at U+0020; the shim keeps only the `update-index` refusal C1 saw; the comment says
+  only what these prove, Git for Windows' `mktree` acceptance marked expected. `// skipcq` joins
+  DIRECTIVE_COMMENTS (pin 46 → 47) with a CLI row. The implementer's mutations: every fixture route (work tree
+  + `add --all`, `--index-info` on stdin, `add -- <name>`, the original `--cacheinfo`) and seven guard mutants
+  red; the skipcq narrowing red. Failing-on-base re-run with the regenerated shim: pre-repair 14/15 (the
+  laptop's failure), `168421b` 16/16.
+- Mechanical close: manual fence — `M` the batch file (ticked `polish:` lines only), `M prose-only-diff.mjs`
+  (afba68d, reviewed at R4), `M tests/prose-only-diff.test.cjs`; the polish commit itself touched only the
+  test file and the batch file → no production path → no re-review. Worktree validation `PASS tests 562/564,
+  2 skipped (23s)`.
+- Integrated: `git merge-tree --write-tree` clean (`10039bd`), `--no-ff` merge `c83ec7d`, tip `PASS tests
+  562/564, 2 skipped (23s)` → B04 🧪. Worktree `b04-c1` removed.
