@@ -209,11 +209,11 @@ scaffolding.md) → scaffold commit on
 
 1. Discovery → exactly one ACTIVE ledger (else ask).
 2. Read the ledger's OWN contract (`00-READBEFORE.md`; legacy names per protocol.md;
-   contract absent → protocol.md fills the gaps, ask before acting on ambiguity) — for a
-   pinned contract, beside its pinned skill directory's `references/protocol.md`, the
-   procedure its repo facts plug into.
+   contract absent → protocol.md fills the gaps, ask before acting on ambiguity).
 3. Boot (a pinned contract verifies its skill pin first) + reconcile + resume-time
-   validation per the contract's boot sequence, then run the pinned protocol.md's (or a
+   validation per the contract's boot sequence — a pinned contract takes up its pinned
+   skill directory's `references/protocol.md`, the procedure its repo facts plug into,
+   only on `SKILL MATCH` — then run the pinned protocol.md's (or a
    legacy contract's own) §Session
    algorithm: repairs (❌ / red tip) first as mini-batches → unanswered 🧪 checkpoint →
    open the next wave (cut branches + worktrees, spawn ALL of the wave's implementers

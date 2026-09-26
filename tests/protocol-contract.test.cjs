@@ -104,6 +104,10 @@ test('Recovery and capped-verdict tables live once, in protocol.md, under their 
 // passage REWORDED names. RETIRED holds the two statements the move itself superseded, each
 // with the successor that must exist. Content, not absence: a sentence dropped from both
 // files is reported by name, and so is a map entry that no longer maps anything.
+// FOR A LATER BATCH EDITING protocol.md: this freezes the wording of every moved sentence.
+// Inserting a sentence beside one needs nothing here. Rewording one reddens this test until
+// its new wording is named in REWORDED — so a batch that must reword a moved sentence needs
+// this file in its fence; one that cannot have it inserts instead.
 const SLIM_BASE = 'edd2f1e';
 const GENERIC = {
   INTEGRATION_BRANCH: ['the integration branch', '<integration>', '<integration-branch>'],
@@ -187,10 +191,12 @@ const REWORDED = [
     ['Log every reconciliation: one line in the PROGRESS Session log, detail in LOG.md']],
   ['Boot + reconcile + resume-time validation (above)', 'protocol',
     ['Boot + reconcile + resume-time validation (validation commands on the integration tip; red → step 2 first)']],
+  // The next two carry their WHOLE unit, head included: the trial merge and the nonce-free
+  // pasted prompt exist only in these sentences, and a tail-only excerpt left both unguarded.
   ['a conflict → STOP AND INVESTIGATE, as in the integration procedure), then git commit-tree', 'protocol',
-    ["a stale wt-trial from a crashed trial is removed first), run the ledger's per-worktree setup there (skip only if n/a)"]],
+    ["a conflict → STOP AND INVESTIGATE, as in the integration procedure), then git commit-tree <tree> -p <tip> -m trial, check that commit out in a temporary worktree (git worktree add <scratchpad>/wt-trial <commit>; a stale wt-trial from a crashed trial is removed first), run the ledger's per-worktree setup there (skip only if n/a)"]],
   ['When the renderer is unavailable or refuses (UNKNOWN …)', 'protocol',
-    ["the validation commands (the wrapper command and its recipe), the contract's conventions + prohibitions blocks, the report shape"]],
+    ['When the renderer is unavailable or refuses (UNKNOWN …), the manual procedure is a pasted prompt with no nonce line, and every such prompt must be SELF-CONTAINED: the spec text + codebase facts from the batch file, the exact file fence, acceptance criteria, the applicable guardrails, the validation commands (the wrapper command and its recipe), the contract\'s conventions + prohibitions blocks, the report shape, and "tick your checklist items in the batch file as you complete them']],
   ['SHIP with ASKs → polish pass', 'protocol',
     ['Polish pass: resume the same implementer with the pointer to its rendered polish prompt (the findings file by path)']],
   ['it appends - [ ] polish: <ask> items', 'protocol', ['it appends - [ ] polish: items to its checklist, does them, commits']],
@@ -264,7 +270,7 @@ test('every sentence the slimmed template dropped is carried by protocol.md', ()
   const claims = unit => [...REWORDED, ...RETIRED].filter(entry => unit.startsWith(entry[0]));
   const unmapped = lost.filter(unit => claims(unit).length !== 1);
   assert.deepEqual(unmapped, [], 'sentences the template lost that protocol.md does not carry — carry each in protocol.md, '
-    + 'or name its rewording in REWORDED: ' + unmapped.join(' || '));
+    + 'or name its rewording in REWORDED (inserting beside a moved sentence needs no entry): ' + unmapped.join(' || '));
   // No entry maps nothing, and none maps a sentence that is carried verbatim anyway.
   for (const [prefix] of [...REWORDED, ...RETIRED]) {
     assert.equal(lost.filter(unit => unit.startsWith(prefix)).length, 1, 'a map entry must claim exactly one lost sentence: ' + prefix);
