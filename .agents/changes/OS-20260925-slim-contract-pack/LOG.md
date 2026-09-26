@@ -620,3 +620,166 @@ Checked, and live controls through the same harness and scoped spec:
 - Not counted: prose-only-diff.mjs:229 (a rawChanges throw) and :273 (uncaughtException). No real git output reaches either branch.
 
 === end of B04 R1 test-hunter findings ===
+
+### B04 — gate, round 2
+
+- Fix round (same implementer, nonce matched) @`18b6c86`: tool + `tests/prose-only-diff.test.cjs`
+  + `tests/tool-wiring.test.cjs`; `PASS tests 559/561, 2 skipped` plain and under
+  `FORCE_COLOR=1`; the implementer's 19 finding mutations and round 0's 30 all killed.
+- 6a `check-fence.mjs`: PASS, integration `8d6e96f`, batch `18b6c86`, violations [],
+  unknowns [].
+- 6c round-2 reviewer (fresh, default tier) FIX FIRST, P0=1 P1=1 ASK=1 — every R1 finding FIX
+  VERIFIED (F1–F4, hunter 1–8), then F5 P0: `break`, `continue`, `debugger` (and a label after
+  `break`/`continue`) are read as plain names, so after ASI a regex opening the next line is read
+  as division and `\/\//` as a line comment — `out.push` → `out.unshift` or deleting
+  ` && out.push(line)` after `if (!line) continue` prints `PROSE-ONLY 1 file(s)`, exit 0,
+  through the published CLI on real commits; the new GRAMMAR test pins the gap. F6 P1: the
+  directive shapes are still a sample — `// Stryker disable next-line all` → `// Stryker disable
+  all`, `// nosemgrep: <rule>` → `// nosemgrep`, `// lgtm[js/xss]` → `// lgtm` read `PROSE-ONLY`,
+  widening a mutation or security-scanner suppression unreviewed. F7 ASK: the new
+  "CODE/UNKNOWN read as prose-only" family is capitals-only and misses "without … re-review".
+  Over-rejection of prose shaped like a directive judged acceptable (fail-closed → review).
+- Round-2 test-hunter (fresh, default tier) FINDINGS 7, all test-only ASKs: directive
+  alternatives sampled one spelling each (m5b/m5c/m6); blank-line and trailing-whitespace rules;
+  LS/PS terminators and non-ASCII spaces; POLISH_REVERSALS misses the orchestrator route, a
+  whole-diff PROSE-ONLY exemption and an out-of-fence residual filed low; the paren stack proven
+  at depth one; two REFUSALS exits unreached; the BL-042 test checks the title exists, not that
+  it is the right test.
+- Second `FIX FIRST` → `⛔ green, residual finding open (P0)` (validations green; F5 open), left
+  out of integration. W3 has no other member, so the session STOPs for the user's verdict —
+  fix again / ship with the residual / drop — before the C1 close-out. Worktree `b04` kept.
+
+### B04 R2 reviewer findings
+FIX FIRST
+
+F5. orchestrate/tools/prose-only-diff.mjs:56 (OPERAND_KEYWORDS) and :61-69 (expressionStarts). The defect is frozen by tests/prose-only-diff.test.cjs:210-214 (GRAMMAR, new in 18b6c86, which says it is "written here from the grammar"). It violates AC1, the feature's "fails closed on any doubt inside a … regex", and two guardrails: "a defect fixed in the reported instance and left in its sibling" (this is F1's class) and "a test that pins the defect".
+  The cause: `break`, `continue` and `debugger`, and a label after `break`/`continue`, are read as plain names. So a `/` that opens the next line is treated as division with certainty. In fact ASI ends the statement there, and on the same line a `/` would be a syntax error, so the `/` opens a regular expression. `\/\//` is then read as the start of a line comment that swallows the rest of the line.
+  Scenario, run through the published CLI on real commits (b04-rev2/repos/new-continue-asi). `lib/links.mjs` is written without semicolons: `if (!line) continue` followed by `/^https?:\/\//.test(line) && out.push(line)`.
+  - `out.push` changed to `out.unshift` prints `PROSE-ONLY 1 file(s)`, exit 0. At runtime the result goes from ["http://a","https://b"] to ["https://b","http://a"].
+  - Deleting ` && out.push(line)` also prints PROSE-ONLY. The runtime result becomes [].
+  - The same happens after `break` (2 becomes 4), after `break outer` (2 becomes 4) and after `debugger` (1 becomes -1).
+  - Live controls in the same harness read correctly: the same file with `continue;` gives CODE (exit 1), a plain code change gives CODE, and a comment change gives PROSE-ONLY.
+  Fix: add `break`, `continue` and `debugger` to OPERAND_KEYWORDS. The postfix test at :157 then correctly reads a following `++` as a prefix. Read a word right after a non-property `break`/`continue` (a label) as 'doubt'. Add all three to GRAMMAR.operand (the size becomes 16). Add a RULES pair per word, each with a twin, e.g. `if (s) continue\n/[//]a/.test(s);` with twin `x = continued\n/[//]a/.test(s);`, plus one pair for the label.
+  Class: P0
+
+F6. orchestrate/tools/prose-only-diff.mjs:40-43 (SHAPES). This violates AC2 ("a tool-directive … comment edit is never PROSE-ONLY"). It is the class of R1 F3, which is still a sample on one axis: `tool:verb` accepts five verbs, but the spaced `tool ignore next` shape accepts only `ignore`.
+  Scenario, run through the published CLI on commits:
+  - `// Stryker disable next-line all` changed to `// Stryker disable all` (StrykerJS's documented form, a test-tooling directive of the same kind as c8/istanbul) prints `PROSE-ONLY 1 file(s)`, exit 0. The change widens a one-line mutation exclusion to the whole file, with no review.
+  - `// Stryker restore all` changed to `// Stryker restore EqualityOperator` also prints PROSE-ONLY.
+  - The same class, list-shaped: `// nosemgrep: <rule>` changed to `// nosemgrep`, and `// lgtm[js/xss]` changed to `// lgtm`, both print PROSE-ONLY. Each widens a security-scanner suppression without review.
+  Fix: widen the spaced shape's verb to `(?:ignore|disable|enable|restore)` and its scope list to include `all`. Add `nosemgrep` and `lgtm`/`codeql` to DIRECTIVES, or add a `<word>[<rule-id>]` shape. Give each an owned SHAPE_COMMENTS/DIRECTIVE_COMMENTS entry and a prose near-miss.
+  Class: P1
+
+F7. tests/tool-wiring.test.cjs:1961-1963 (the new family 'a CODE or UNKNOWN verdict read as prose-only'). This hits the guardrails on positive-only prose and on a sweep that samples its rule. The family matches `PROSE-ONLY` only in capitals, and it matches `no … re-review` but not `without … re-review`. So the planted sentences "A classifier UNKNOWN is treated as prose-only." and "An UNKNOWN diff integrates without a re-review." are not reported (raw-regex probe b04-rev2/fam.cjs; a regex miss is a reader miss).
+  Fix: keep CODE/UNKNOWN case-sensitive, but make the `as PROSE-ONLY` alternative case-insensitive. Add `\bwithout\s+(?:a\s+)?(?:scoped\s+|fix-diff-only\s+)?re-review\b` and plant both sentences as must-report.
+  Class: ASK
+
+Round-1 findings, checked in the current diff:
+- F1 (P0, private names and spread): FIX VERIFIED. All three R1 scenarios (`this.#default`, `this?.#in`, `[...typeof /re/]`) now print CODE through the published CLI. Mutating each fix in a disposable export kills it (corpus, keyword and CLI tests). But see F5: the class remains in its sibling.
+- F2 (P1, `<` in doubt): FIX VERIFIED. Both R1 scenarios print `UNKNOWN …: a < where an expression may start (JSX?)`, exit 2. Mutating `!== false` back to `=== true` kills it.
+- F3 (P1, directive sample): FIX VERIFIED for its named cases. node:coverage, $FlowFixMe, tslint and NOSONAR edits print CODE, and removing the SHAPES family kills it. The residual is F6.
+- F4 (ASK, unreachable catch): FIX VERIFIED. `classifyRaw` is the function the CLI runs, and each unreadable record reaches the UNKNOWN line. A mutation of the catch to a PROSE-ONLY return kills it.
+- Hunter 1 (= F2): FIX VERIFIED. Hunter 2-4 and 6-8: FIX VERIFIED by reading. There are RULES pairs with twins for the escaped backtick, the escaped quote, prefix ++/-- after an operand keyword, a control `)` and file start. There is a `(base)` label case at :377-378, one AGAIN list that is a superset of both old lists, and families plus planted sentences and carrier arming for the classifier and comment rules.
+- Hunter 5: FIX VERIFIED as to the mechanism: a misspelt member now diverges from GRAMMAR. GRAMMAR itself pins the missing words (F5).
+
+Hunk mapping: the three round-2 files map to R1 findings, which in turn map to checklist items 1, 2 and 3-4 (the POLISH sweeps). There is no scope creep. The R1 mapping of the rest of the diff stands.
+Acceptance criteria:
+- AC1 fails (F5).
+- AC2 fails for the unlisted forms in F6; every named and listed directive holds.
+- AC3 and AC4 hold; the round-2 diff does not touch the docs.
+- AC5 holds. The round-2 hunks in tool-wiring are only at :1883-1989, the protocol.md hunks stop at :148, and the SHA pins are green.
+- AC6 holds: smoke step 3's grep prints nothing and exits 1.
+Validation (wrapper, from the worktree root):
+- Plain: `PASS tests 559/561, 2 skipped (23s)`, exit 0.
+- FORCE_COLOR=1: `PASS tests 559/561, 2 skipped (23s)`, exit 0.
+- The two skips are the expected Windows-only cases. `git diff --check` on the three-dot diff is clean.
+Mutation harness: each fix mutation ran on a fresh `git archive HEAD` export and aborts loudly when its anchor count is not 1. The no-op control SURVIVED and the live control was KILLED, so the harness can report both outcomes. These were single-file runs of tests/prose-only-diff.test.cjs, used as probes only; the gate verdict comes from the full-suite validation above.
+Implementer's over-rejection note, judged: `tool:verb` allows one space after `:`, so prose such as "// TODO: disable once …", "// Note: ignore …" and "// Re-enable the cache." is kept as a directive. In each case the result is CODE, which I reproduced: the fix-diff-only re-review runs, as it does today. One kept comment also switches the whole file to `lines` mode, so every comment-line insertion or deletion in that file then reads CODE. That costs extra reviews but is never a false PROSE-ONLY, so it is acceptable under fail-closed. No finding.
+Duty 5: n/a (feature batch). As a fix round, every R1 scenario now reads as intended through the CLI.
+Duty 6: the round-2 fix updated the tool's header comment and `--help` ("naming or shaped like a tool directive … node:coverage") in the same commit, 18b6c86. No other document names the directive families.
+Scratch (under b04-rev2): harness.mjs, scenarios.json, scenarios2.json, harness.out, harness2.out, mutate.sh, mut/*.log, fam.cjs, plain.log, forcecolor.log.
+
+=== end of B04 R2 reviewer findings ===
+### B04 R2 test-hunter findings
+FINDINGS 7
+
+**Scope and evidence**
+- **Scope:** the tests changed in `git diff chore/slim-contract-pack-ledger...HEAD` at 18b6c86 (check-fence, prose-only-diff, protocol-contract and tool-wiring), plus the code each one claims to cover.
+- **Harness:** mutate.mjs with the scoped spec `b04-hunt2/scoped-spec.json`, which runs those four files. There is no setup.json.
+- **Mutations and logs:** the exact find/replace strings are in `b04-hunt2/mutations.json` and `b04-hunt2/mutations2.json`. The logs are `b04-hunt2/run1.log` and `b04-hunt2/run2.log`.
+- **Controls:** both controls read `CONTROL PASS PASS tests 157/157 (7s)` with 0 skipped.
+- **Test names:** every SURVIVED run below names the same 157 tests as its control; the diff of the sorted names is empty. No count blind spot applies.
+- **Live controls:**
+  - `KILLED k1-live-control-eslint-dead`.
+  - `KILLED m5-shape-verbs-sampled`. The only thing that killed it was the `@ts-expect-error` four-family assertion at :267, which is why m5b keeps `expect-error`.
+
+**Verdict:** every mutation below is of correct code, and every fix is test-only. All seven are ASK; none is P1.
+
+**1. The comment-family corpus samples ONE spelling per pattern (acceptance criterion 2: a directive comment edit is never PROSE-ONLY)**
+- **Test:** tests/prose-only-diff.test.cjs:233-269, with RULES :38-41 and :50-52.
+- **Class:** a guard that SAMPLES the domain it claims to sweep. Each pattern owns an entry, but each alternative inside a pattern does not.
+- **m6** (prose-only-diff.mjs:20): the eslint pattern narrowed to `(?<![\w-])eslint-disable`. Result: `SURVIVED m6-eslint-narrowed`. Rewording `/* eslint quotes: ["error", "double"] */` to "single" then reads PROSE-ONLY. No shape, marker or tag catches it.
+- **m5b** (:41): the tool:verb alternation cut to `(?:disable|expect-error)`. Result: `SURVIVED m5b-shape-verbs-enable-ignore-nocheck-dropped`. `// cspell:ignore xyzzy` then reads as prose.
+- **m5c** (:42): the ignore alternation cut to `(?:next)`. Result: `SURVIVED m5c-ignore-shape-next-only`. `/* bun:coverage ignore start */` then reads as prose.
+- **Add:**
+  - An eslint inline-config comment to DIRECTIVE_COMMENTS.
+  - One SHAPE_COMMENTS entry per alternative (enable, ignore and nocheck; start through line).
+  - An assertion that each alternative parsed from `SHAPES[i][1].source` appears in an owned comment, so the list is read from the tool rather than written by hand.
+- **Route:** ASK.
+
+**2. The whitespace-in-code rule samples one shape (inner spaces)**
+- **Test:** tests/prose-only-diff.test.cjs:56-58. No source in the corpus holds a blank line or trailing whitespace.
+- **Class:** a guard that SAMPLES the domain.
+- **m4** (prose-only-diff.mjs:193): `if (!touched || text !== '')` changed to `if (text !== '')`. Result: `SURVIVED m4-blank-lines-dropped`. Changing ``const HELP = `usage\n\nflags`;`` to ``const HELP = `usage\nflags`;`` changes the template's value, but then reads PROSE-ONLY. The current code reads it as CODE.
+- **m9** (:192): the trailing-whitespace strip made unconditional (`if (touched) text`). Result: `SURVIVED m9-trailing-strip-always`. Trailing spaces after code that follows an inline block comment are then dropped, including a template's own trailing spaces.
+- **Add:** CODE rules for a blank line removed inside a template literal and for trailing whitespace changed after `f(/* a */ 1);`, each with a PROSE-ONLY twin.
+- **Route:** ASK.
+
+**3. Line ends and spaces are only exercised as LF, CRLF and the ASCII space**
+- **Test:** `crlf` at :156 and the loop at :168-179. The tool's actual domain is TERMINATOR (:51) and SPACE (:52).
+- **Class:** a guard that SAMPLES the domain.
+- **m1:** TERMINATOR cut to `/[\n\r]/`. Result: `SURVIVED m1-terminator-no-ls-ps`. Changing `// note<U+2028>process.exit(1);` to `exit(0)` then reads PROSE-ONLY. The code sits after the comment on the same visual line and is hidden from the check.
+- **m2:** SPACE cut to `/[\t\v\f ]/u`. Result: `SURVIVED m2-space-ascii-only`. In `x = typeof<U+00A0>/[//]a/.test(s);` the non-breaking space joins `typeof` into one word. `//]a/...` then becomes a comment, so changing a to b reads PROSE-ONLY.
+- **Add:** both cases as CODE rules with twins, and an LS/PS line-end variant alongside LF and CRLF in the RULES loop.
+- **Route:** ASK.
+
+**4. POLISH_REVERSALS misses the reversals this batch's new orchestrator writer invites**
+- **Test:** tests/tool-wiring.test.cjs:1946-1968 (the families) and :1969 (the sweep).
+- **Class:** a sweep built to catch reversals is blind to an edit that changes a rule's scope (here it widens it). Also positive-only assertions on prose.
+- **d1** (added to SKILL.md after "ASKs close as a polish pass."): "After a polish-phase FIX FIRST on prose, the orchestrator applies the reviewer's wording and runs one more scoped re-review." Result: `SURVIVED d1-second-try-via-orchestrator`. The families look for the implementer or a word from AGAIN. AGAIN has no "one more", so the orchestrator route and a phrasing without a count word both get through.
+- **d2** (added to README.md:51): "a PROSE-ONLY verdict exempts the whole polish diff from the scoped re-review". Result: `SURVIVED d2-prose-only-exempts-whole-diff`. Family 9 only covers CODE and UNKNOWN.
+- **d3** (added to SKILL.md): "A residual whose fix sits outside the batch's files is filed in the backlog as low." Result: `SURVIVED d3-out-of-fence-residual-low`. LESSER holds none of the backlog severities.
+- **Add:** one family per shape, each owning its specimen, and add all three sentences to the planted list.
+- **Route:** ASK.
+
+**5. The paren stack is only proven at depth one**
+- **Test:** RULES :32-37 and :89-91, and GRAMMAR :222. All use `if (ok)` with nothing nested.
+- **Class:** a branch no input reaches (recursion proven at depth one).
+- **m3** (prose-only-diff.mjs:149): `parens.pop()` changed to `parens.shift()`. Result: `SURVIVED m3-parens-fifo`. In `if (isReady(x)) /[//]a/.test(s);` the outer `)` picks up the inner call's non-control flag. The `/` then reads as division and `//]a/...` becomes a comment, so changing a to b reads PROSE-ONLY.
+- **Add:** a CODE rule `if (f(x)) /[//]a/` with the twin `g(f(x)) /[//]a/`.
+- **Route:** ASK.
+
+**6. REFUSALS pins each refusal reason, not each exit**
+- **Test:** tests/prose-only-diff.test.cjs:182-204. Its fixtures at :184 and :186 end at end-of-file, so those two exits are never reached.
+- **Class:** a branch no input reaches.
+- **m7** (:74): the string's line-break exit disabled. Result: `SURVIVED m7-string-newline-exit`. Changing `const s = 'a;\nb'; // x` to `// y` reads PROSE-ONLY instead of UNKNOWN.
+- **m8** (:83): the regular expression's line-terminator exit disabled. Result: `SURVIVED m8-regex-terminator-exit`. `const r = /a\n/; // x` behaves the same way.
+- **Risk:** low, because both inputs are invalid JavaScript.
+- **Add:** fixtures that close on a later line.
+- **Route:** ASK.
+
+**7. The BL-042 test checks that the title exists, not that the pointer is right**
+- **Test:** tests/tool-wiring.test.cjs:1426-1432.
+- **Class:** a close whose rationale points at documentation that does not contain the fact.
+- **b1:** the pointer's title changed to 'names are capped at ten, then counted (both sides of the cap)'. That is an unrelated test at tests/validate.test.cjs:682. Result: `SURVIVED b1-bl042-pointer-retargeted`. The Git-bash set-up is at :771-778 and is used by :789-791.
+- **Add:** an assertion that the named test's body, up to the next top-level `test(`, mentions `GIT_BASH` or `SHELLS`.
+- **Route:** ASK.
+
+**Checked with no finding (read only; R1's mutations were not re-run):**
+- check-fence's test of the ticked and unticked template items.
+- protocol-contract's RETIRED and NON_MARKDOWN checks.
+- the POLISH_RULES pins and their planted control.
+- REFUSALS and GRAMMAR set equality.
+- the CLI, git-level, precedence, UTF-8 and raw-reader tests.
+
+=== end of B04 R2 test-hunter findings ===
