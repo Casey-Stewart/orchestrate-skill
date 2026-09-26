@@ -234,6 +234,41 @@ test('every role renders exactly the oracle: each slot its own value, each role 
   assert.equal(listing(fx.out).length, ROLES.length);
 });
 
+// The contract template slimmed to repo facts (B01 of OS-20260925) must still feed the
+// unmodified renderer every line it parses, and the ledger built from it must still parse.
+test('the slimmed contract, every placeholder filled, renders every role and its fixture ledger parses', t => {
+  const fx = fixture(t);
+  const keys = [...new Set([...read('orchestrate/templates/00-READBEFORE.md').matchAll(/\{\{([A-Z0-9_]+)\}\}/g)].map(m => m[1]))];
+  assert.ok(keys.length > 20 && keys.includes('SKILL_SOURCE') && keys.includes('WORKTREE_SETUP'), 'the whole placeholder set: ' + keys.join(' '));
+  assert.doesNotMatch(fx.contract, /\{\{|\}\}/, 'every placeholder of the template is given a value');
+  for (const role of ROLES) {
+    const { text } = renderedMatches(fx, role, pick(fx.facts, ROLE_FACTS[role]), fx.expected);
+    if (role === 'implementer') {
+      // The Git model facts reach the prompt: the integration branch and the per-worktree setup.
+      assert.ok(text.includes(fx.expected['[INTEGRATION_BRANCH]']) && text.includes(fx.expected['[WORKTREE_SETUP]']));
+    }
+  }
+  // The fixture ledger, completed with the PROGRESS row the scaffolder writes, passes the real parse.
+  const progress = path.join(fx.ledger, 'PROGRESS.md');
+  const lines = fs.readFileSync(progress, 'utf8').split('\n');
+  const head = lines.findIndex(l => l.startsWith('| # | Batch | Branch |'));
+  assert.notEqual(head, -1, 'the PROGRESS batch table');
+  lines.splice(head + 2, 0, '| B01 | Render me | `feat/render-me` | 1 | — | ⬜ | 2026-09-26 | — |');
+  fs.writeFileSync(progress, lines.join('\n'));
+  const parse = spawnSync(process.execPath, [path.join(ROOT, 'orchestrate/tools/check-ledger.mjs'), 'parse', '--dir', fx.ledger],
+    { encoding: 'utf8', windowsHide: true, timeout: 60000 });
+  assert.ifError(parse.error);
+  assert.equal(parse.stdout, 'PARSE OK 1 batches\n', parse.stderr); assert.equal(parse.status, 0);
+  // Control: the one Git model line the renderer takes the integration branch from, reworded,
+  // and the render refuses — so the renders above rested on the slimmed contract's own lines.
+  const contractPath = path.join(fx.ledger, '00-READBEFORE.md'), filled = fs.readFileSync(contractPath, 'utf8');
+  const reworded = filled.replace('Integration branch: `' + fx.expected['[INTEGRATION_BRANCH]'] + '`', 'Integration: `' + fx.expected['[INTEGRATION_BRANCH]'] + '`');
+  assert.notEqual(reworded, filled, 'the control must reword the Git model line');
+  fs.writeFileSync(contractPath, reworded);
+  const refused = render(fx, 'implementer', pick(fx.facts, ROLE_FACTS.implementer));
+  assert.equal(refused.stdout, 'UNKNOWN the Git model integration branch: expected exactly one, found 0\n'); assert.equal(refused.status, 2);
+});
+
 test('the batch type becomes a conventional-commit type: feature renders feat, fix and chore pass through', async t => {
   const { COMMIT_TYPES } = await api();
   assert.deepEqual(COMMIT_TYPES, { feature: 'feat' });

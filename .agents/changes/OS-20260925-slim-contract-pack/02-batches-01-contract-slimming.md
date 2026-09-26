@@ -154,14 +154,21 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 
 ## Checklist
 
-- [ ] Slim `orchestrate/templates/00-READBEFORE.md` to the kept sections (notes 3, 4); move every sentence protocol.md lacks into protocol.md
-- [ ] `protocol.md`: single copy — precedence rule (note 7), recipe lines under `<skill-dir>` (note 4), both decision tables byte-unchanged
-- [ ] Registry and baking rule in `scaffolding.md` follow the template (notes 5, 6); `templates/PROGRESS.md`, `templates/01-plan.md` pointers fixed
-- [ ] `SKILL.md`, `execution-models.md`, `subagent-prompts.md`, `smoke-page.md`, `README.md`, `CLAUDE.md` passages rewritten (notes 4, 6, 7)
-- [ ] `tests/protocol-contract.test.cjs`: mirror assertions removed, SHA-256 pins kept, recipes still executed as published
-- [ ] Every other listed test updated to the slimmed template; each deleted assertion is replaced by one on the new home of the rule, not dropped
-- [ ] Pin-mismatch branch (note 7a): upgrade or restore, `{{SKILL_SOURCE}}` fact line and registry row
-- [ ] A test that fills the slimmed template (every placeholder given a value) and runs the real `prompt.mjs` for every role against it, plus `check-ledger.mjs parse` on a fixture ledger built from it
+- [x] Slim `orchestrate/templates/00-READBEFORE.md` to the kept sections (notes 3, 4); move every sentence protocol.md lacks into protocol.md
+- [x] `protocol.md`: single copy — precedence rule (note 7), recipe lines under `<skill-dir>` (note 4), both decision tables byte-unchanged
+- [x] Registry and baking rule in `scaffolding.md` follow the template (notes 5, 6); `templates/PROGRESS.md`, `templates/01-plan.md` pointers fixed
+- [x] `SKILL.md`, `execution-models.md`, `subagent-prompts.md`, `smoke-page.md`, `README.md`, `CLAUDE.md` passages rewritten (notes 4, 6, 7)
+- [x] `tests/protocol-contract.test.cjs`: mirror assertions removed, SHA-256 pins kept, recipes still executed as published
+- [x] Every other listed test updated to the slimmed template; each deleted assertion is replaced by one on the new home of the rule, not dropped
+- [x] Pin-mismatch branch (note 7a): upgrade or restore, `{{SKILL_SOURCE}}` fact line and registry row
+- [x] A test that fills the slimmed template (every placeholder given a value) and runs the real `prompt.mjs` for every role against it, plus `check-ledger.mjs parse` on a fixture ledger built from it
+- [x] polish: bind `PRE_PIN_CLAIMS` to the `OLD_CLAIMS` sources read from `git show edd2f1e:tests/tool-wiring.test.cjs`, so narrowing the old family reddens (R1 reviewer ASK 1, test-hunter F5)
+- [x] polish: `SKILL.md` Mode continue takes up the pinned `references/protocol.md` only after the pin check prints `SKILL MATCH` (R1 reviewer ASK 2)
+- [x] polish: the moved-sentence test says a later batch must insert beside a moved sentence, or carry this test file in its fence to reword one (R1 reviewer ASK 3)
+- [x] polish: the trial-merge `REWORDED` entry carries the unit's head (`git commit-tree … -m trial`) as well as its tail (test-hunter F1)
+- [x] polish: the protocol step-5 needle and its `REWORDED` entry carry "a pasted prompt with no nonce line" (test-hunter F2)
+- [x] polish: pin the template's boot step 4 (**Procedure**) verbatim in `PINNED` (test-hunter F3)
+- [x] polish: pin README's Rollout-boundary passage verbatim in `PINNED` (test-hunter F4)
 
 ## Acceptance criteria
 

@@ -9,7 +9,7 @@ branch was cut from — the "since" point for the first checkpoint's diff and fo
 (read on demand by heading, never at boot)
 **Smoke page**: — (current delivery: URL, ledger-relative HTML path, or `plain text`; update at each hand-over)
 **Rule**: statuses here are claims; **git is truth**. Reconcile against branches/commits
-before believing any row (§Recovery in the contract).
+before believing any row (§Recovery of the pinned skill directory's `references/protocol.md`).
 
 <!-- **State** is exactly one of: ACTIVE | AT-CHECKPOINT C<n> | USER-BLOCKED | COMPLETE.
      Update it in the same commit as every wave open, checkpoint close-out and

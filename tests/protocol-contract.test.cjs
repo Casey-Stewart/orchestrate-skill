@@ -61,20 +61,242 @@ function table(text, start) {
   return rows.join('\n');
 }
 
-test('Recovery and capped-verdict tables agree exactly after placeholder normalization', () => {
-  for (const heading of ['| Ledger says | Git shows | Verdict |', '| Subject | fix again | ship with the residual | drop |']) {
-    assert.equal(normalize(table(contract, heading)), normalize(table(protocol, heading)), heading);
-  }
-  // These are the approved starting decision tables, not regenerated expectations.
-  // Comparing both mirrors alone would miss a coordinated accidental rule change.
+// The contract template used to mirror these tables and the shipment passage, and a test
+// held the two copies equal. The copy is retired (B01 of OS-20260925): the procedure lives
+// once, in protocol.md, and each former mirror assertion is replaced by one on that home.
+const SHIPMENT_PASSAGE = "Resolve the integration branch's full local ref to `<integration-sha>`. Resolve `<shipment-sha>` from the recorded source: "
+  + '- `local`: `git rev-parse --verify <shipment-ref>^{commit}`. This needs no remote; an unpushed local merge counts under this policy. '
+  + '- `remote <name>`: read `git ls-remote --exit-code <name> <shipment-ref>` now and take the SHA of the exact matching ref. Verify that object '
+  + 'exists locally as a commit before testing ancestry. A cached `refs/remotes/...` value alone does not establish current upstream state. '
+  + 'A failed query, missing ref or missing object leaves shipment unknown; do not fetch or update remote metadata automatically. '
+  + 'Use these captured SHAs for the shipment test; exit 0 means contained, 1 means not contained, any other error means unknown. Different '
+  + 'local/remote tips do not matter when the recorded source is clear. Unknown shipment never flips rows or authorizes cleanup. Target '
+  + 'ambiguity blocks actions depending on that target; independent read-only discovery/status may continue. Record the source, ref and SHAs '
+  + 'with an inferred shipment. Existing merge/push permissions still apply.';
+test('Recovery and capped-verdict tables live once, in protocol.md, under their approved pins', () => {
+  // These are the approved starting decision tables, not regenerated expectations. The
+  // placeholder substitutions in `normalize` are no-ops on protocol.md, kept so the hashed
+  // input is exactly what it has always been.
   const expected = {
     '| Ledger says | Git shows | Verdict |': 'c3f5e598e853e6f3d3f0f5a7b98c10dd82e7d8e63b9ec47914c64c828323b4b1',
     '| Subject | fix again | ship with the residual | drop |': '326ff764e5a7821d148ab18e38b9aed33a4c0fd36baebe5463da02c83adb7346'
   };
   for (const [heading, hash] of Object.entries(expected)) assert.equal(createHash('sha256').update(normalize(table(protocol, heading))).digest('hex'), hash);
+  // One copy: protocol.md states each table once, and the template carries none of either.
+  for (const heading of Object.keys(expected)) {
+    assert.equal(protocol.split(heading).length - 1, 1, 'protocol.md must carry exactly one copy of ' + heading);
+    assert.ok(!contract.includes(heading), 'the contract template must carry no copy of ' + heading + ' — protocol.md is its only home');
+  }
+  // The shipment passage the template mirrored, pinned in its one home: its wording IS the
+  // captured-source semantics, so any edit to it is deliberate and visible here.
   const shipment = text => text.slice(text.indexOf("Resolve the integration branch's full local ref"), text.indexOf('For each PROGRESS row'))
-    .replace(/\{\{SHIPMENT_REF\}\}/g, '<shipment-ref>').replace(/\s+/g, ' ').trim();
-  assert.equal(shipment(contract), shipment(protocol), 'captured-source shipment semantics stay mirrored');
+    .replace(/\s+/g, ' ').trim();
+  assert.equal(shipment(protocol), SHIPMENT_PASSAGE, 'protocol.md: the captured-source shipment semantics changed');
+  assert.ok(!contract.includes("Resolve the integration branch's full local ref"), 'the contract template must not copy the shipment passage back');
+});
+
+// ===== B01: the template's copy of the procedure retired, nothing lost =============
+// The domain is the template AS IT STOOD before the slimming — a permanent historical blob,
+// read like BATCH_BASE below — never a hand-written list of what moved. Every sentence, list
+// item, table row and fenced line of it must still be carried: by the slimmed template, by
+// protocol.md verbatim (the template's placeholders read as protocol.md's generic spellings),
+// or — where protocol.md already stated the same rule in its own words — by the protocol.md
+// passage REWORDED names. RETIRED holds the two statements the move itself superseded, each
+// with the successor that must exist. Content, not absence: a sentence dropped from both
+// files is reported by name, and so is a map entry that no longer maps anything.
+// FOR A LATER BATCH EDITING protocol.md: this freezes the wording of every moved sentence.
+// Inserting a sentence beside one needs nothing here. Rewording one reddens this test until
+// its new wording is named in REWORDED — so a batch that must reword a moved sentence needs
+// this file in its fence; one that cannot have it inserts instead.
+const SLIM_BASE = 'edd2f1e';
+const GENERIC = {
+  INTEGRATION_BRANCH: ['the integration branch', '<integration>', '<integration-branch>'],
+  BACKLOG_FILE: ['the backlog file', 'backlog'],
+  LEDGER_DIR: ['<ledger-dir>'], SKILL_DIR: ['<skill-dir>'],
+  WORKTREE_SETUP: ["the ledger's per-worktree setup"],
+  GUARDRAILS_REF: ['the project guardrails doc'],
+  SHIPMENT_REF: ['<shipment-ref>'],
+  EVIDENCE_TOOL: ['"<skill-dir>/tools/git-evidence.mjs"'], FENCE_TOOL: ['"<skill-dir>/tools/check-fence.mjs"'],
+};
+// Links read as their text, emphasis and code ticks dropped, "protocol.md §X" read as "§X":
+// a kept sentence whose pointer now names protocol.md is the same sentence.
+const flat = text => text.replace(/\[([^\]\n]+)\]\([^)\s]+\)/g, '$1').replace(/[`*]/g, '').replace(/protocol\.md §/g, '§')
+  .replace(/\s+/g, ' ').trim();
+const unitOf = text => flat(text).replace(/^(?:- |\d+\. )/, '').replace(/[.;:,]$/, '').trim();
+// Sentences split at `.`/`;` outside code spans; a list item, a bold field line, a table
+// row and a fenced line each start their own unit; headings are structure, not content.
+function contractUnits(text) {
+  const out = [];
+  let fenced = false, paragraph = [];
+  const flush = () => {
+    if (!paragraph.length) return;
+    let current = '';
+    for (const token of paragraph.join('\n').split(/(`[^`\n]*`)/)) {
+      if (token.startsWith('`')) { current += token; continue; }
+      const parts = token.split(/(?<=[.;])\s+/);
+      current += parts.shift();
+      for (const part of parts) { out.push(current); current = part; }
+    }
+    out.push(current);
+    paragraph = [];
+  };
+  for (const line of text.split('\n')) {
+    if (line.startsWith('```')) { flush(); fenced = !fenced; continue; }
+    if (fenced || /^\s*\|/.test(line)) { flush(); out.push(line); continue; }
+    if (/^#{1,6} /.test(line) || !line.trim()) { flush(); continue; }
+    if (/^\s*(?:[-*]|\d+\.) /.test(line) || line.startsWith('**')) flush();
+    paragraph.push(line);
+  }
+  flush();
+  return out.map(unitOf).filter(Boolean);
+}
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const genericPattern = unit => new RegExp(unit.split(/(\{\{[A-Z0-9_]+\}\})/).map(part => {
+  const m = /^\{\{([A-Z0-9_]+)\}\}$/.exec(part);
+  return !m ? escapeRe(part) : GENERIC[m[1]] ? '(?:' + GENERIC[m[1]].map(escapeRe).join('|') + ')' : '(?!)';
+}).join(''));
+// [the lost unit's opening, where its content now lives, the excerpt(s) that carry it].
+const REWORDED = [
+  ['Everything needed to drive this change lives in this ledger directory', 'template',
+    ['Everything needed to drive this change lives in this ledger directory ({{LEDGER_DIR}}) and that pinned directory — assume no other context survives between sessions']],
+  ['Reconcile (§Recovery below)', 'template', ['Reconcile (§Recovery) before believing any PROGRESS row']],
+  ['Verdict on line 1: SHIP (no P0/P1', 'protocol', ['Line-1 verdict: SHIP (no P0/P1; may carry ASKs)']],
+  ['may carry ASKs) · FIX FIRST', 'protocol',
+    ['FIX FIRST (P0 or P1 with a concrete failure scenario) / NEEDS A CLOSER LOOK (names what would confirm it); line 2 NONCE <nonce>']],
+  ['Finding classes: P0', 'protocol', ['P0 — wrong behavior / violated criterion or guardrail, concrete scenario. Blocking']],
+  ['P1 — should fix', 'protocol', ['P1 — should fix, concrete scenario, needs a production change. Blocking']],
+  ['ASK — in-fence', 'protocol',
+    ["ASK — in-fence, about the batch's OWN artifacts (its new tests' strength, smoke-step prose, comments, a doc sweep it owns), no production behavior change. Rides under SHIP as a list"]],
+  ['closes as a polish pass)', 'protocol', ['Rides under SHIP as a list. Polish pass:']],
+  ['Intermediate checkpoints exist only', 'protocol', ['one after each wave carrying a hands-on batch']],
+  ['the final checkpoint is mandatory', 'protocol', ['plus one mandatory final checkpoint covering everything since the last']],
+  ['Use the newest committed smoke-.html in this ledger', 'protocol',
+    ["Use the newest committed smoke-.html in the ledger as the page's format and delivery base (or the session's own template), update it for this checkpoint, and commit it as smoke-<Cn>.html"]],
+  ['Include the gate essentials in text', 'protocol', ['Include the step-0 build-identity gate essentials in text with every page hand-over']],
+  ['If a page was prepared', 'protocol', ["Keep a prepared page's committed audit copy even when delivering text"]],
+  ['Use the locked default and shipment fields above', 'protocol',
+    ["Use the ledger's recorded default and shipment target, never the current branch, init.defaultBranch, or a guessed main/master"]],
+  ['Missing, contradictory or renamed targets are AMBIGUOUS', 'protocol',
+    ['Missing, contradictory or renamed targets require a recorded correction, never silent substitution or contract rewriting']],
+  ['git rev-parse --verify <branch> # exists?', 'protocol', ['branch exists? (git rev-parse --verify)']],
+  ['git merge-base --is-ancestor <branch> {{INTEGRATION_BRANCH}}', 'protocol', ['integrated? (git merge-base --is-ancestor <branch> <integration>)']],
+  ['git merge-base --is-ancestor <integration-sha> <shipment-sha>', 'protocol',
+    ['shipped? (git merge-base --is-ancestor <integration-sha> <shipment-sha> only after source resolution above)']],
+  ['git log {{INTEGRATION_BRANCH}}..<branch> --oneline', 'protocol', ['commits ahead (git log <integration>..<branch> --oneline)']],
+  ['git worktree list && git status --porcelain', 'protocol',
+    ['dirty trees (git status --porcelain in the main checkout AND each worktree from git worktree list)']],
+  ['git show <branch>:./{{LEDGER_DIR}}/02-batches-NN-<slug>.md', 'protocol',
+    ['the checklist state inside the batch file on that branch (git show <branch>:./<path>, from the root)']],
+  ['Log every reconciliation in the PROGRESS Session log (one line)', 'protocol',
+    ['Log every reconciliation: one line in the PROGRESS Session log, detail in LOG.md']],
+  ['Boot + reconcile + resume-time validation (above)', 'protocol',
+    ['Boot + reconcile + resume-time validation (validation commands on the integration tip; red → step 2 first)']],
+  // The next two carry their WHOLE unit, head included: the trial merge and the nonce-free
+  // pasted prompt exist only in these sentences, and a tail-only excerpt left both unguarded.
+  ['a conflict → STOP AND INVESTIGATE, as in the integration procedure), then git commit-tree', 'protocol',
+    ["a conflict → STOP AND INVESTIGATE, as in the integration procedure), then git commit-tree <tree> -p <tip> -m trial, check that commit out in a temporary worktree (git worktree add <scratchpad>/wt-trial <commit>; a stale wt-trial from a crashed trial is removed first), run the ledger's per-worktree setup there (skip only if n/a)"]],
+  ['When the renderer is unavailable or refuses (UNKNOWN …)', 'protocol',
+    ['When the renderer is unavailable or refuses (UNKNOWN …), the manual procedure is a pasted prompt with no nonce line, and every such prompt must be SELF-CONTAINED: the spec text + codebase facts from the batch file, the exact file fence, acceptance criteria, the applicable guardrails, the validation commands (the wrapper command and its recipe), the contract\'s conventions + prohibitions blocks, the report shape, and "tick your checklist items in the batch file as you complete them']],
+  ['SHIP with ASKs → polish pass', 'protocol',
+    ['Polish pass: resume the same implementer with the pointer to its rendered polish prompt (the findings file by path)']],
+  ['it appends - [ ] polish: <ask> items', 'protocol', ['it appends - [ ] polish: items to its checklist, does them, commits']],
+  ['closes mechanically (6a + validations', 'protocol', ['closes mechanically (fence check + validations']],
+  ['polish commits touch only test/doc/prose paths — a production file touched → a fix-diff-only', 'protocol',
+    ['polish commits touch only test/doc/prose paths — a production file touched → fix-diff-only re-review by a fresh reviewer)']],
+  ['an R-line after the SHIP … asks= line is polish-phase and never counts toward the cap — nor', 'protocol',
+    ['an R-line after the SHIP … asks= line is polish-phase and never counts toward the cap). SHIP → the close completes',
+      'nor does a FIX FIRST a scoped re-review returns: its bound is the polish-discard rule above, not the cap']],
+  ['its FIX FIRST → resume the implementer to revert', 'protocol',
+    ['FIX FIRST → resume the implementer to revert the offending production hunks or redo the polish within test/doc/prose (an ASK never licenses a production behavior change), then a fresh scoped re-review of the new diff']],
+  ['a SECOND polish-phase FIX FIRST discards the polish — write', 'protocol',
+    ["A SECOND polish-phase FIX FIRST discards the polish: write polish discarded: @<sha> (the pre-polish SHIP tip) into the row's Notes first — the marker §Recovery keys on, and the recorded authorization"]],
+  ['it is the recorded authorization), then ONE revert commit', 'protocol',
+    ['then ONE revert commit spanning @<sha>..HEAD (never a reset — no history rewriting']],
+  ['polish never turns a batch ⛔', 'protocol', ['Polish never turns a batch ⛔']],
+  ['FIX FIRST → resume the SAME implementer', 'protocol',
+    ['resume the SAME implementer with the pointer to its rendered fix-round prompt (the findings file by path, after the LOG append — §Session algorithm step 6); a fresh re-review verifies the fixes and scans only the fix diff']],
+  ['the SECOND FIX FIRST sets ⛔ defective', 'protocol',
+    ['The SECOND FIX FIRST: ⛔ defective (finding open, not green) or ⛔ green, residual finding open (<severity>)',
+      "Both stay out of integration; once the wave's other members are gated and integrated the session stops instead of opening the next wave, quotes the open finding WITH its failure scenario, and names three verdicts for the user: fix again / ship with the residual / drop"]],
+  // The old step 8 told the proofer to read each block's text out of the page file; the
+  // rendered-DOM rule lives in smoke-page.md, which the carrying passage points at.
+  ['If the checkpoint table places a checkpoint here: per-checkpoint close-out', 'protocol',
+    ["If the checkpoint table places a checkpoint here: per-checkpoint close-out (a ⛔ member's steps are omitted from the page and appended on re-issue if it later ships)",
+      'then proof the published artifact (§Two distinct close-outs)',
+      "proof the published artifact per smoke-page.md — after the page is built and before the STOP, every embedded command run out of the built page's own bytes"]],
+  ['a command re-authored on its way into the page is unverified', 'protocol',
+    ['a command re-authored on its way into the page is unverified, and the pre-smoke that ran before the page existed does not cover it',
+      "commit → STOP, delivering the checkpoint's COMBINED smoke script per §Smoke checkpoints"]],
+  ['Known design gates belong at the FRONT of the plan', 'protocol',
+    ['User gates are front-loaded: design/UX approvals the plan can foresee are resolved at planning time']],
+  ['a partially done fold-in is edited in place there with a pointer to this ledger', 'protocol',
+    ['a partially done fold-in is edited in place there with a pointer to the ledger']],
+  ['Distill: any NEW bug class', 'protocol',
+    ['any NEW bug class this change uncovered → ONE-LINE guardrail bullet in the project guardrails doc naming the class and pointing at the test or mechanism doc that enforces it (prefer adding the test in this close-out)']],
+  ['propose deleting the merged branches and moving this ledger', 'protocol',
+    ['propose deleting the merged branches and moving the ledger to .agents/archive/ (git mv)']],
+];
+// [the superseded unit's opening, why, where its successor lives, the successor].
+const RETIRED = [
+  ["continue only on the user's explicit words, recorded verbatim in the session log — an upgrade",
+    'the mismatch branch is upgrade or restore now; the manual procedures it fell back on live in the pinned directory',
+    'template', ['a restore (the pinned directory rebuilt byte-for-byte from the Skill source line above, then this pin check re-run, continuing only on SKILL MATCH)']],
+  ['At scaffold time bake the resolved helper paths into this contract',
+    'the helpers run from the pinned directory, never from a baked path',
+    'protocol', ['<skill-dir> is the contract\'s pinned skill directory', 'node "<skill-dir>/tools/git-evidence.mjs" discovery --repo <repo>']],
+];
+function lostUnits(base, carriers) {
+  const T = flat(carriers.template), P = flat(carriers.protocol);
+  return contractUnits(base).filter(unit => !T.includes(unit) && !genericPattern(unit).test(P));
+}
+test('every sentence the slimmed template dropped is carried by protocol.md', () => {
+  const blob = spawnSync('git', ['-C', ROOT, 'show', SLIM_BASE + ':orchestrate/templates/00-READBEFORE.md'], { encoding: 'utf8', windowsHide: true });
+  assert.ifError(blob.error); assert.equal(blob.status, 0, 'the pre-slimming template at ' + SLIM_BASE + ' must be readable: ' + blob.stderr);
+  const base = blob.stdout.replace(/\r\n/g, '\n');
+  // The sections note 3 moved: in the base, gone from the template, present in protocol.md.
+  const MOVED = ['### Read-only evidence tools', '### §Fence changes', '### Complete checkpoint inputs', '## §Recovery', '## §Session algorithm',
+    '**Manual read-only fallback.**', '**Verdict intake.**', '**Delivery.**', '**Verdicts are four**'];
+  for (const marker of MOVED) {
+    assert.ok(base.includes(marker), SLIM_BASE + ' must be the template that still carried ' + marker);
+    assert.ok(!contract.includes(marker), 'the slimmed template must no longer carry ' + marker);
+    assert.ok(protocol.includes(marker), 'protocol.md must be the home of ' + marker);
+  }
+  assert.ok(base.includes('## Change-complete close-out') && !contract.includes('## Change-complete close-out'),
+    'the change-complete close-out procedure must leave the template');
+  assert.ok(contract.length * 2 <= base.length, 'the template must shrink by at least half: ' + contract.length + ' of ' + base.length);
+  const units = contractUnits(base);
+  assert.ok(new Set(units).size > 300, 'the base template must yield its whole sentence domain, got ' + units.length);
+  const lost = lostUnits(base, { template: contract, protocol });
+  const claims = unit => [...REWORDED, ...RETIRED].filter(entry => unit.startsWith(entry[0]));
+  const unmapped = lost.filter(unit => claims(unit).length !== 1);
+  assert.deepEqual(unmapped, [], 'sentences the template lost that protocol.md does not carry — carry each in protocol.md, '
+    + 'or name its rewording in REWORDED (inserting beside a moved sentence needs no entry): ' + unmapped.join(' || '));
+  // No entry maps nothing, and none maps a sentence that is carried verbatim anyway.
+  for (const [prefix] of [...REWORDED, ...RETIRED]) {
+    assert.equal(lost.filter(unit => unit.startsWith(prefix)).length, 1, 'a map entry must claim exactly one lost sentence: ' + prefix);
+  }
+  const P = flat(protocol), T = flat(contract);
+  for (const [prefix, where, excerpts] of REWORDED) {
+    for (const excerpt of excerpts) {
+      assert.ok((where === 'protocol' ? P : T).includes(flat(excerpt)), prefix + ': its carrier is gone from ' + where + ' — "' + excerpt + '"');
+    }
+  }
+  for (const [prefix, why, where, successors] of RETIRED) {
+    for (const successor of successors) {
+      assert.ok((where === 'protocol' ? P : T).includes(flat(successor)), prefix + ' (' + why + '): its successor is gone from ' + where + ' — "' + successor + '"');
+    }
+  }
+  // Live controls, through the same classifier: a sentence no document carries is reported,
+  // and so is a moved sentence protocol.md has lost one word of.
+  const planted = 'Every planted rule here is carried by no document at all.';
+  assert.deepEqual(lostUnits(base + '\n\n' + planted + '\n', { template: contract, protocol }).filter(u => !lost.includes(u)),
+    [unitOf(planted)], 'a planted sentence must be reported as lost');
+  const moved = 'A pre-verified label is invalidated for any step whose covered files a later repair touched';
+  assert.ok(P.includes(moved), 'the control sentence must be one protocol.md carries');
+  const damaged = protocol.replace(/whose\s+covered files a later\s+repair touched/, 'whose covered files a later change touched');
+  assert.notEqual(damaged, protocol, 'the control must damage protocol.md');
+  assert.ok(lostUnits(base, { template: contract, protocol: damaged }).some(u => u.startsWith(moved)),
+    'a moved sentence protocol.md no longer carries word for word must be reported');
 });
 
 test('template placeholders and registry match in both directions', () => {
@@ -84,19 +306,26 @@ test('template placeholders and registry match in both directions', () => {
   const listed = rows.map(l => l.match(/\{\{([A-Z_]+)\}\}/)[1]);
   assert.equal(new Set(listed).size, listed.length);
   assert.deepEqual([...used].sort(), listed.sort());
+  // The helper-path placeholders retired with the template's copy of the helper section: the
+  // recipes run from the pinned directory. Swept bare as well as braced, over the whole skill.
+  for (const retired of ['EVIDENCE_TOOL', 'FENCE_TOOL']) assert.ok(!listed.includes(retired), retired + ' still has a registry row');
+  const swept = shippedSkillFiles();
+  assert.ok(swept.includes('orchestrate/references/scaffolding.md') && swept.includes('orchestrate/templates/00-READBEFORE.md'));
+  for (const file of swept) assert.doesNotMatch(read(file), /EVIDENCE_TOOL|FENCE_TOOL/, file + ': names a retired helper-path placeholder');
 });
 
-// The helper-section mirror below proves only that the two documents AGREE: it is green when
-// both name a command and green when neither does. Pin the command in each document separately,
-// and inside the rule itself, so naming it elsewhere in the document cannot satisfy this.
+// The manual fallback lives once, in protocol.md (the template's copy retired with B01), so
+// the rule is pinned there and the template is held to carrying no second copy. Pin the
+// command inside the rule itself, so naming it elsewhere in the document cannot satisfy this.
 // Pin the whole clause, like the decision tables and the self-check clause below: matching
 // only /git check-attr filter/ is equally satisfied by "never run git check-attr filter",
 // the exact opposite of what the probe does. The imperative IS this sentence's content, so
 // freezing its wording is deliberate; the pin stops at the clause, leaving the rest free.
 test('the manual read-only fallback names git check-attr filter in the resolved-filter rule', () => {
   const rule = 'Before status, run git check-attr filter on the paths status inspects:';
-  for (const [label, text] of [['orchestrate/references/protocol.md', protocol],
-    ['orchestrate/templates/00-READBEFORE.md', contract]]) {
+  assert.ok(!contract.includes('**Manual read-only fallback.**') && !contract.includes('git check-attr'),
+    'orchestrate/templates/00-READBEFORE.md: the manual fallback lives in protocol.md only');
+  for (const [label, text] of [['orchestrate/references/protocol.md', protocol]]) {
     const from = text.indexOf('**Manual read-only fallback.**'), to = text.indexOf('## Git model');
     assert.ok(from !== -1 && to > from, label + ': the manual read-only fallback must precede the Git model heading');
     const fallback = text.slice(from, to);
@@ -114,18 +343,26 @@ test('the manual read-only fallback names git check-attr filter in the resolved-
   }
 });
 
-test('generated contract bakes helper grammar, outcomes, fallback and full input responsibility', () => {
-  const helperSection = text => text.slice(text.indexOf('### Read-only evidence tools'), text.indexOf('## Git model'));
-  assert.equal(helperSection(contract).replaceAll('{{EVIDENCE_TOOL}}', 'orchestrate/tools/git-evidence.mjs')
-    .replaceAll('{{FENCE_TOOL}}', 'orchestrate/tools/check-fence.mjs'), helperSection(protocol));
-  const inputSection = text => text.slice(text.indexOf('### Complete checkpoint inputs'), text.indexOf('## Smoke checkpoints'));
-  assert.equal(inputSection(contract), inputSection(protocol));
+test('protocol.md carries helper grammar, outcomes, fallback and full input responsibility; the contract none of it', () => {
+  // The two sections the template mirrored now live once, in protocol.md, ahead of the
+  // headings that bounded them; each required term is asserted INSIDE its own section.
+  const section = (text, from, to) => { const i = text.indexOf(from), j = text.indexOf(to, i);
+    assert.ok(i !== -1 && j > i, 'protocol.md: ' + from + ' must precede ' + to); return text.slice(i, j); };
+  const helper = section(protocol, '### Read-only evidence tools', '## Git model');
+  const inputs = section(protocol, '### Complete checkpoint inputs', '## Smoke checkpoints');
+  for (const heading of ['### Read-only evidence tools', '### Complete checkpoint inputs']) {
+    assert.ok(!contract.includes(heading), 'the contract template must carry no copy of ' + heading);
+  }
   for (const needed of ['complete/partial/unknown', 'contained/not-contained/unknown', 'VIOLATION (1)', 'UNKNOWN (2)',
     'both arrays', 'committed integration plan', 'never the candidate', 'exact comma-separated backtick paths',
-    'Manual read-only fallback', 'ALL local/remote-tracking', 'git show ref:./path', 'only the selected ledger',
-    'does not', 'immutable', 'inputHistory', 'EVERY', 'inputRoot', 'raw SHA-256', 'working-copy', 'reset',
+    'Manual read-only fallback', 'ALL local/remote-tracking', 'git show ref:./path', 'only the selected ledger']) {
+    assert.ok(helper.includes(needed), 'protocol.md §Read-only evidence tools must carry: ' + needed);
+  }
+  // The one term of the old list that belonged to neither section (the shipment passage says it).
+  assert.ok(protocol.includes('does not'), 'protocol.md must carry: does not');
+  for (const needed of ['immutable', 'inputHistory', 'EVERY', 'inputRoot', 'raw SHA-256', 'working-copy', 'reset',
     'private-data', 'credential', 'external-access', 'independently validate', 'never workbook semantics']) {
-    assert.ok(contract.includes(needed), 'generated contract must bake: ' + needed);
+    assert.ok(inputs.includes(needed), 'protocol.md §Complete checkpoint inputs must carry: ' + needed);
   }
   for (const file of ['orchestrate/SKILL.md', 'orchestrate/references/scaffolding.md', 'orchestrate/references/execution-models.md',
     'orchestrate/references/subagent-prompts.md', 'orchestrate/references/smoke-page.md']) {
@@ -137,9 +374,11 @@ test('generated contract bakes helper grammar, outcomes, fallback and full input
   }
   assert.match(read('orchestrate/references/subagent-prompts.md'), /ACTUAL INPUTS: \[INPUT ROOT, STABLE-ID REGISTRY/);
   assert.match(read('orchestrate/SKILL.md'), /Existing\nledgers keep their frozen contract/);
-  assert.ok(contract.indexOf('**6a Fence check') < contract.indexOf('**6b Failing-on-base'));
-  assert.ok(contract.indexOf('**6b Failing-on-base') < contract.indexOf('**6c Reviewer'));
-  assert.match(contract.slice(contract.indexOf('**6a Fence check'), contract.indexOf('**6b Failing-on-base')), /read-only helper.*\n\s+or its manual fallback/);
+  const gate = section(protocol, '## §Session algorithm', '## Two distinct close-outs');
+  assert.ok(gate.indexOf('**6a Fence check') !== -1 && gate.indexOf('**6a Fence check') < gate.indexOf('**6b Failing-on-base'));
+  assert.ok(gate.indexOf('**6b Failing-on-base') < gate.indexOf('**6c Reviewer'));
+  assert.match(gate.slice(gate.indexOf('**6a Fence check'), gate.indexOf('**6b Failing-on-base')), /read-only helper.*\n\s+or its manual fallback/);
+  assert.ok(!contract.includes('**6a Fence check'), 'the gate steps live in protocol.md only');
 });
 
 test('reusable artifacts contain no local Python installation default, while frozen ledger retains its environment fact', () => {
@@ -256,8 +495,7 @@ test('published helper recipes execute actual CLIs and generated batch grammar p
       template + ' at ' + BATCH_BASE + ' must fail on the missing example row, not on some other diagnostic');
   }
   repo.write(ledger + '/00-READBEFORE.md', contract.replace(/\{\{([A-Z_]+)\}\}/g, (_, key) => ({
-    INTEGRATION_BRANCH: 'codex/docs-ledger', EVIDENCE_TOOL: path.join(ROOT, 'orchestrate/tools/git-evidence.mjs'),
-    FENCE_TOOL: path.join(ROOT, 'orchestrate/tools/check-fence.mjs') }[key] || 'example')));
+    INTEGRATION_BRANCH: 'codex/docs-ledger' }[key] || 'example')));
   const source = repo.commit('rendered scaffold');
   const remote = repo.remote(); repo.git('push', 'origin', source + ':refs/heads/main');
   const wt = path.join(repo.root, 'batch'); repo.git('worktree', 'add', '-b', 'codex/docs-b01', wt, source);
@@ -265,10 +503,15 @@ test('published helper recipes execute actual CLIs and generated batch grammar p
   candidate.write(batchFile, rendered.replace('- [ ] Implement example.', '- [x] Implement example.'));
   const tip = candidate.commit('implementation');
   const before = repo.snapshot(), candidateBefore = candidate.snapshot();
-  const recipes = protocol.split('\n').filter(l => l.startsWith('node orchestrate/tools/'));
+  // The recipes as published: `node "<skill-dir>/tools/<tool>.mjs" …`, `<skill-dir>` being the
+  // contract's pinned skill directory, which for this checkout is its own `orchestrate/`.
+  const recipes = protocol.split('\n').filter(l => l.startsWith('node "<skill-dir>/tools/'));
   assert.equal(recipes.length, 7);
+  assert.ok(!/^node\s+["']?orchestrate[\\/]tools[\\/]/m.test(protocol), 'no recipe may name the clone-relative tools path');
   for (const line of recipes) {
-    const tokens = line.split(' '), script = path.join(ROOT, tokens[1]);
+    const argv = [...line.matchAll(/"([^"]*)"|(\S+)/g)].map(m => m[1] ?? m[2]);
+    assert.equal(argv[0], 'node'); assert.match(argv[1], /^<skill-dir>\/tools\/[a-z-]+\.mjs$/, line);
+    const tokens = argv, script = path.join(ROOT, 'orchestrate', argv[1].slice('<skill-dir>/'.length));
     const args = tokens.slice(2).map((value, i, list) => {
       if (!value.startsWith('<')) return value;
       const flag = list[i - 1];
@@ -885,11 +1128,14 @@ test('every document stating the checkpoint close-out also invokes the post-rend
   // Written independently of the pattern, so that weakening the marker and dropping a
   // member in one edit still reddens. Membership, not set equality: a SIXTH carrier is
   // allowed and simply has to satisfy the property below.
+  // Four since B01 of OS-20260925: the contract template's copy of the close-out moved to
+  // protocol.md, which is wired below, and the template now states none (asserted next).
   const STATED_IN = ['orchestrate/SKILL.md', 'orchestrate/references/execution-models.md',
-    'orchestrate/references/protocol.md', 'orchestrate/references/smoke-page.md',
-    'orchestrate/templates/00-READBEFORE.md'];
-  assert.equal(STATED_IN.length, 5,
-    'five shipped documents state the close-out sequence; this list may not shrink to a sample');
+    'orchestrate/references/protocol.md', 'orchestrate/references/smoke-page.md'];
+  assert.equal(STATED_IN.length, 4,
+    'four shipped documents state the close-out sequence; this list may not shrink to a sample');
+  assert.ok(!carriers.includes('orchestrate/templates/00-READBEFORE.md'),
+    'the contract template states the close-out again: it is protocol.md\'s, and a copy here must be wired or removed');
   assert.equal(new Set(STATED_IN).size, STATED_IN.length, 'no document may be listed twice to pad that size');
   for (const file of STATED_IN) {
     assert.ok(carriers.includes(file),
@@ -911,11 +1157,11 @@ test('every document stating the checkpoint close-out also invokes the post-rend
   // Not entailed by anything above, and the hole that dropping the three arithmetic
   // assertions here would otherwise leave: an exemption SWAPPED rather than added keeps
   // the bound at two and every count intact while halving what the property covers. These
-  // two were wired deliberately and may never be excused. (The dropped assertions —
+  // were wired deliberately and may never be excused. (The dropped assertions —
   // `carriers.length >= STATED_IN.length`, `wired.length === carriers.length -
   // KNOWN_UNWIRED.length` and `wired.length >= 3` — were each entailed by the membership
   // loop above, so none could ever be the first to go red.)
-  const MUST_STAY_WIRED = ['orchestrate/references/protocol.md', 'orchestrate/templates/00-READBEFORE.md'];
+  const MUST_STAY_WIRED = ['orchestrate/references/protocol.md'];
   for (const file of MUST_STAY_WIRED) {
     assert.ok(wired.includes(file),
       file + ': this batch wired it, and it has been excused or reclassified rather than fixed');

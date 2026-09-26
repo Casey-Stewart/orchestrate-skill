@@ -91,6 +91,9 @@ test('a filled pin line round-trips through the real check-ledger.mjs, from a di
   const lines = template.split('\n');
   assert.deepEqual(pinLines(template), ['**Skill**: `{{SKILL_DIR}}` · sha256 `{{SKILL_SHA256}}`']);
   assert.equal(lines[lines.findIndex(l => l.startsWith('**Skill**')) - 1], '**Change**: {{CHANGE_ID}}');
+  // The restore route's fact sits directly under the pin; the real parser below must not read
+  // it as a second pin line, which the MATCH on this filled template proves.
+  assert.equal(lines[lines.findIndex(l => l.startsWith('**Skill**')) + 1], '**Skill source**: {{SKILL_SOURCE}}');
 
   const hex = skillHex(skillDir, repo.cwd, env);
   const contractPath = path.join(repo.cwd, ...LEDGER_DIR.split('/'), '00-READBEFORE.md');
@@ -187,17 +190,20 @@ test('the boot sequence verifies the pin before reconcile, and a mismatch stops 
   const order = text => {
     const steps = stepsOf(text);
     const at = needle => steps.findIndex(s => s.text.includes(needle));
-    return { steps, pin: at('/tools/check-ledger.mjs" skill --contract'), reconcile: at('**Reconcile**'),
+    return { steps, pin: at('/tools/check-ledger.mjs" skill --contract'), procedure: at('**Procedure**'), reconcile: at('**Reconcile**'),
       validation: at('**Resume-time validation**'), worktree: at('git worktree list') };
   };
-  const { steps, pin, reconcile, validation, worktree } = order(template);
+  const { steps, pin, procedure, reconcile, validation, worktree } = order(template);
   assert.deepEqual(steps.map(s => s.n), steps.map((_, i) => i + 1), 'boot steps are numbered consecutively');
-  assert.ok(pin !== -1 && reconcile !== -1 && validation !== -1 && worktree !== -1);
+  assert.ok(pin !== -1 && procedure !== -1 && reconcile !== -1 && validation !== -1 && worktree !== -1);
   assert.ok(worktree < pin, 'the pin check runs from the integration worktree, so after the step that establishes it');
-  assert.ok(pin < reconcile && reconcile < validation, 'the pin check runs before reconcile and before validation');
+  assert.ok(pin < procedure && procedure < reconcile && reconcile < validation,
+    'the pin check runs first, then the pinned protocol.md is taken up, then reconcile per its §Recovery, then validation');
+  assert.ok(steps[procedure].text.includes('protocol.md') && steps[reconcile].text.includes('protocol.md §Recovery'),
+    'the procedure is the pinned protocol.md, and reconcile follows its §Recovery');
   assert.ok(steps[validation].text.includes('run the validation wrapper'), 'resume-time validation runs the wrapper');
   // Control: the same reader on a template with the pin step moved after reconcile.
-  const swapped = template.replace(/(\n3\. \*\*Skill pin\*\*[\s\S]*?)(\n4\. \*\*Reconcile\*\*[^\n]*)/, '$2$1');
+  const swapped = template.replace(/(\n3\. \*\*Skill pin\*\*[\s\S]*?)(\n4\. \*\*Procedure\*\*[\s\S]*?\n5\. \*\*Reconcile\*\*[^\n]*)/, '$2$1');
   assert.notEqual(swapped, template, 'the control must move the pin step');
   const moved = order(swapped); assert.ok(moved.pin > moved.reconcile, 'the order reader must see a moved pin step');
   const step = steps[pin].text;
@@ -211,8 +217,14 @@ test('the boot sequence verifies the pin before reconcile, and a mismatch stops 
   assert.match(protocolStep, /`SKILL MATCH` continues; anything but `SKILL MATCH` \(including a tool that does not run\) STOPs and asks/);
   // Ordering in protocol.md by position, not by inclusion: nothing may place reconcile ahead of the pin check.
   assert.ok(protocolStep.indexOf('verifies it FIRST, before reconcile') < protocolStep.indexOf('SKILL MATCH'));
-  // Mode continue in SKILL.md names the pin check at boot.
-  assert.ok(collapse(read('orchestrate/SKILL.md')).includes('3. Boot (a pinned contract verifies its skill pin first) + reconcile'));
+  // Mode continue in SKILL.md names the pin check at boot, and takes up the pinned protocol.md
+  // only after it: a procedure read before the check could be a changed one still in context
+  // after a mismatch is restored (R1 ASK 2).
+  const cont = collapse(section(read('orchestrate/SKILL.md'), '## Mode: continue', '## Mode: status'));
+  const pinAt = cont.indexOf('3. Boot (a pinned contract verifies its skill pin first) + reconcile');
+  assert.ok(pinAt !== -1, 'SKILL.md Mode continue must name the pin check at boot');
+  assert.ok(cont.indexOf('references/protocol.md') > pinAt, 'SKILL.md Mode continue must not take up the pinned protocol.md before the pin check');
+  assert.ok(cont.slice(pinAt).includes('only on `SKILL MATCH`'), 'the pinned protocol.md is taken up only on SKILL MATCH');
 });
 
 const BACKGROUND_RULE = "Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task "
@@ -239,9 +251,11 @@ test('the validation section routes every run through validate.mjs, the recipe k
     assert.equal(quiet.length, 1, file + ': exactly one clause may name the quiet form — ' + quiet.join(' || '));
     assert.match(quiet[0], /\bmanual procedure\b/, file + ': the quiet form is only the manual procedure');
   }
-  // The spawn-prompt list hands implementers the wrapper, not a bare quiet-form run.
-  const spawn = collapse(section(template, '\n5. Spawn ALL', '\n6. Gate PER BATCH'));
+  // The spawn-prompt list hands implementers the wrapper, not a bare quiet-form run. It lives
+  // in protocol.md's step 5 since the template's copy of the procedure retired.
+  const spawn = collapse(section(read('orchestrate/references/protocol.md'), '\n5. Spawn ALL', '\n6. Gate PER BATCH'));
   assert.ok(spawn.includes('validation commands (the wrapper command and its recipe)'));
+  assert.ok(!template.includes('\n5. Spawn ALL'), 'the spawn step lives in protocol.md only');
 });
 
 // ===== A ledger filled from the real templates =====================================
@@ -342,6 +356,10 @@ test('SKILL.md discovery resolves from the skill directory, from any repository'
 });
 
 // ===== The pinned-skill rule, in all five places that stated the closed system ======
+// Since B01 of OS-20260925 the rule has three halves: the ledger references only its pinned
+// directory; its procedure is that directory's `references/protocol.md`, frozen by the hash,
+// which also holds every tool step's manual procedure; a session drives the ledger from the
+// ledger plus that directory.
 const PASSAGES = [
   ['README.md', '- **Ledgers are closed systems.**', '- **Statuses are claims'],
   ['README.md', '- **Rollout boundary.**', '## Install'],
@@ -351,19 +369,52 @@ const PASSAGES = [
 ];
 const RULE = [
   'references ONLY its pinned skill directory, by absolute path and hash',
+  "its procedure is that directory's `references/protocol.md`, frozen by the hash",
+  'every step a tool performs also has its manual procedure there',
   'changed skill stops the ledger at its next boot and asks, and never silently changes how it runs',
 ];
-const OLD_CLAIMS = [
-  /\bnever\s+references?\s+(?:this|the)\s+skill\b/i,
-  /\bnever\s+generate\s+a\s+ledger\s+that\s+references\s+(?:this|the)\s+skill\b/i,
-  /\b(?:must not|does not|doesn't|cannot)\s+reference\s+(?:this|the)\s+skill\b/i,
-  /\bnever\s+referenced\b[^.]*\bskill\b/i,
-  /\bchanges nothing about (?:ledgers|a ledger) already scaffolded\b/i,
-  /\bwith or without this skill\s*—/i,
+// The pre-pin claims (commit 5c24ece), kept as their exact sources: the family below must stay
+// a superset of them. They are bound to the family AS IT STOOD before B01, read from git the way
+// protocol-contract.test.cjs reads the pre-slimming template: narrowing an entry here would
+// otherwise narrow both sides of a superset check built from this list alone.
+const FAMILY_BASE = 'edd2f1e';
+function baseFamily() {
+  const blob = spawnSync('git', ['-C', ROOT, 'show', FAMILY_BASE + ':tests/tool-wiring.test.cjs'], { encoding: 'utf8', windowsHide: true });
+  assert.ifError(blob.error); assert.equal(blob.status, 0, 'the old-claim family at ' + FAMILY_BASE + ' must be readable: ' + blob.stderr);
+  const text = blob.stdout.replace(/\r\n/g, '\n'), start = text.indexOf('const OLD_CLAIMS = [\n'), end = text.indexOf('\n];', start);
+  assert.ok(start !== -1 && end > start, FAMILY_BASE + ': no OLD_CLAIMS literal to read');
+  return text.slice(start, end).split('\n').slice(1).map(line => {
+    const m = /^\s*\/(.+)\/([a-z]*),$/.exec(line);
+    assert.ok(m, FAMILY_BASE + ': an OLD_CLAIMS line that is not one regex literal — ' + line);
+    return { source: m[1], flags: m[2] };
+  });
+}
+const PRE_PIN_CLAIMS = [
+  String.raw`\bnever\s+references?\s+(?:this|the)\s+skill\b`,
+  String.raw`\bnever\s+generate\s+a\s+ledger\s+that\s+references\s+(?:this|the)\s+skill\b`,
+  String.raw`\b(?:must not|does not|doesn't|cannot)\s+reference\s+(?:this|the)\s+skill\b`,
+  String.raw`\bnever\s+referenced\b[^.]*\bskill\b`,
+  String.raw`\bchanges nothing about (?:ledgers|a ledger) already scaffolded\b`,
+  String.raw`\bwith or without this skill\s*—`,
 ];
-// The five passages' own wording before the pinned-skill rule (commit 5c24ece), verbatim with
-// whitespace collapsed, plus one invented variant — every one must be caught, and every
-// pattern must catch at least one, so no pattern is padding and no old passage slips through.
+const OLD_CLAIMS = [
+  ...PRE_PIN_CLAIMS.map(source => new RegExp(source, 'i')),
+  // The copied-procedure claims B01 retired: the ledger alone suffices, its manual procedures
+  // are baked, it stays drivable without the skill, or the contract carries the procedure.
+  /\bby reading the ledger alone\b/i,
+  /\bbaked manual (?:procedures?|fallback)\b/i,
+  /\bdrivable without (?:it|this skill|the skill)\b/i,
+  /\b(?:session|one) (?:that has never seen|without) (?:this|the) skill\b/i,
+  /\bexplained inside the ledger['’]s own files\b/i,
+  /\bthe contract['’]s (?:§\s*)?(?:Recovery|Session algorithm|Fence changes|manual (?:procedures?|(?:read-only )?fallback))\b/i,
+  /\b(?:Recovery|Session algorithm|Fence changes) in the contract\b/i,
+  /\bcontract:? (?:boot(?: sequence)?|the boot), roles\b/i,
+  /\bbake[sd]?\b[^.;]{0,80}\b(?:manual fallback|helper paths)\b[^.;]{0,80}\binto\b[^.;]{0,30}\bcontracts?\b/i,
+  /\bmirror each other\b/i,
+];
+// The passages' own wording before each rule, verbatim with whitespace collapsed, plus
+// invented variants — every one must be caught, and every pattern must catch at least one,
+// so no pattern is padding and no old passage slips through.
 const OLD_SPECIMENS = [
   'A ledger never references this skill, so it stays drivable without it.',
   "A ledger's own contract outranks the skill, so a new skill version changes nothing about ledgers already scaffolded; it reaches a repo through the next `/orchestrate new`.",
@@ -371,6 +422,16 @@ const OLD_SPECIMENS = [
   'A session without this skill can drive the change by reading the ledger alone — that property is the point; never generate a ledger that references this skill.',
   'Interview answers are written INTO the generated `00-READBEFORE.md` — never referenced back to this skill.',
   'A ledger must not reference this skill.',
+  // Retired by B01, each the wording of a passage at edd2f1e.
+  'A ledger references ONLY its pinned skill directory, by absolute path and hash, and every step a tool performs also has a baked manual procedure (the recipe block for validation, the pasted-prompt list for spawning, the fence\'s manual fallback).',
+  "It references ONLY its pinned skill directory, by absolute path and hash, and stays drivable without it through its baked manual procedures, so a new skill version never rewrites a ledger already scaffolded.",
+  "each ledger must be drivable by a session that has never seen this skill — or has a changed one: State line, LOG.md, `NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are all explained inside the ledger's own files.",
+  'Reconcile against branches/commits before believing any row (§Recovery in the contract).',
+  "reconcile every row that is not ✅/👤/⛔ (dropped) against git per the contract's §Recovery table",
+  "Existing ledgers keep their frozen rules; unsupported helper shapes use the contract's manual read-only fallback.",
+  '| `00-READBEFORE.md` | The contract: boot sequence, roles/gates/tiers, git model, fence changes, checkpoints, validations, recovery, session algorithm |',
+  'Bake resolved EVIDENCE_TOOL and FENCE_TOOL paths plus the full manual fallback, three outcomes, captured-ref authority and supported grammar into new contracts.',
+  '`protocol.md` and the contract template mirror each other, pinned by `tests/protocol-contract.test.cjs`.',
 ];
 test('the five closed-system passages state the pinned-skill rule, and no document keeps the old claim', () => {
   assert.equal(PASSAGES.length, 5);
@@ -378,23 +439,61 @@ test('the five closed-system passages state the pinned-skill rule, and no docume
   for (const [file, from, to] of PASSAGES) {
     const passage = collapse(section(read(file), from, to));
     for (const phrase of RULE) assert.ok(passage.includes(phrase), file + ' (' + from + '): must state "' + phrase + '"');
-    assert.match(passage, /\bbaked manual procedures?\b/, file + ' (' + from + '): must name the baked manual procedures');
-    assert.match(passage, /\bdriv(?:e|able)\b/, file + ' (' + from + '): must say the ledger stays drivable');
+    assert.match(passage, /\bdriv(?:e|es|able)\b[^.;]*\bfrom the ledger plus its pinned directory\b/,
+      file + ' (' + from + '): must say a session drives the ledger from the ledger plus its pinned directory');
   }
+  // A superset of the family it replaced: every source the edd2f1e family held is still a
+  // member, verbatim and with its flags, and PRE_PIN_CLAIMS is exactly that family.
+  const family = baseFamily();
+  assert.equal(family.length, 6, FAMILY_BASE + ' held six old-claim patterns');
+  assert.deepEqual(family.map(f => f.source), PRE_PIN_CLAIMS, 'PRE_PIN_CLAIMS must be the family this sweep replaced, unnarrowed');
+  for (const { source, flags } of family) {
+    const old = new RegExp(source, flags);
+    assert.ok(OLD_CLAIMS.some(p => p.source === old.source && p.flags === old.flags), 'the old-claim family lost: /' + source + '/' + flags);
+  }
+  assert.ok(OLD_CLAIMS.length > PRE_PIN_CLAIMS.length);
   for (const specimen of OLD_SPECIMENS) assert.ok(OLD_CLAIMS.some(p => p.test(specimen)), 'no old-claim pattern catches: ' + specimen);
   for (const pattern of OLD_CLAIMS) assert.ok(OLD_SPECIMENS.some(s => pattern.test(s)), 'old-claim pattern catches no specimen: ' + pattern);
-  const files = documents();
+  // CLAUDE.md states the repository's own convention for these files, so it is swept too.
+  const files = [...documents(), 'CLAUDE.md'];
   assert.ok(files.length > 10 && files.includes('orchestrate/templates/00-READBEFORE.md'));
   for (const file of files) {
     const text = collapse(read(file));
-    for (const pattern of OLD_CLAIMS) assert.doesNotMatch(text, pattern, file + ': still carries a pre-pin closed-system claim');
+    for (const pattern of OLD_CLAIMS) assert.doesNotMatch(text, pattern, file + ': still carries a pre-pin or copied-procedure claim');
   }
 });
 
-// ===== No repo-relative tool path outside the mirrored evidence section ===============
+// ===== The pin-mismatch branch: upgrade on recorded words, or restore and re-check =====
+// The contract's manual procedures used to be the fallback on a mismatch; two of the three now
+// live in exactly the directory a mismatch says changed. Every carrier states the new branch.
+const MISMATCH_CARRIERS = [
+  [TEMPLATE, '3. **Skill pin**', '\n4. **Procedure**'],
+  ['orchestrate/references/protocol.md', '1. Boot + reconcile', '\n2. Repairs first'],
+  ['README.md', '- **Rollout boundary.**', '## Install'],
+];
+test('on a pin mismatch every carrier offers the same two ways on and none falls back on the contract\'s procedures', () => {
+  assert.equal(MISMATCH_CARRIERS.length, 3);
+  for (const [file, from, to] of MISMATCH_CARRIERS) {
+    const passage = collapse(section(read(file), from, to));
+    for (const [what, pattern] of [['the user\'s recorded words', /\bwords\b/], ['an upgrade', /\bupgrade\b/i], ['a restore', /\brestore\b/i],
+      ['the Skill source line', /`\*\*Skill source\*\*` line/], ['a byte-for-byte rebuild', /\bbyte-for-byte\b/],
+      ['the pin re-checked', /\bpin(?: check)? (?:re-run|re-checked)\b/]]) {
+      assert.match(passage, pattern, file + ' (' + from + '): the mismatch branch must name ' + what);
+    }
+    assert.doesNotMatch(passage, /manual procedures\b|§Session algorithm step 5|manual fence fallback/i,
+      file + ' (' + from + '): the mismatch branch must not fall back on procedures that live in the pinned directory');
+  }
+  // The restore route needs the fact it rebuilds from: one line, in the template and the registry.
+  assert.equal(template.split('\n').filter(l => l.startsWith('**Skill source**: ')).length, 1);
+  assert.ok(registryRow('SKILL_SOURCE').includes('byte-for-byte'), 'the {{SKILL_SOURCE}} row says what a restore does with it');
+});
+
+// ===== No repo-relative tool path, anywhere ===========================================
+// protocol.md's evidence section used to be exempt: it mirrored the template, whose helper
+// paths were baked at scaffold time, and ran `node orchestrate/tools/…`. Since B01 of
+// OS-20260925 its recipes run from `"<skill-dir>/tools/…"` and nothing is exempt.
 const REPO_RELATIVE = /\bnode\s+["']?(?:\.[\/\\])?orchestrate[\/\\]tools[\/\\]/g;
-const MIRRORED = /### Read-only evidence tools\n[\s\S]*?(?=\n## )/;
-const outsideMirror = text => text.replace(MIRRORED, '');
+const EVIDENCE_SECTION = /### Read-only evidence tools\n[\s\S]*?(?=\n## )/;
 // Structural: every occurrence of `tools/<name>` or `tools\<name>`, for every tool the skill
 // ships (bound to the directory listing, not a hand list of spellings), must be the tail of a
 // quoted placeholder directory — `"{{X}}/tools/<name>"`, `"<x>/tools/<name>"` or, inside a
@@ -410,9 +509,11 @@ function toolPathFaults(text, names) {
   }
   return faults;
 }
-// smoke-page.md (outside this batch's fence) runs `node tools/build-smoke-page.mjs …`,
-// relative to the skill directory. Declared, bounded, and allowed only to shrink.
-const KNOWN_TOOL_PATH_FAULTS = { 'orchestrate/references/smoke-page.md': 2 };
+// smoke-page.md ran `node tools/build-smoke-page.mjs …`, relative to the skill directory,
+// and was declared here with its two faults; B01 of OS-20260925 retired both (BL-028's doc
+// half). The list stays, held EMPTY, so a new fault is a visible decision rather than a
+// quietly re-added exemption.
+const KNOWN_TOOL_PATH_FAULTS = {};
 test('every shipped command naming a skill tool quotes a placeholder directory, both slash directions', () => {
   const names = toolNames();
   assert.ok(names.includes('check-ledger.mjs') && names.includes('validate.mjs') && names.length >= 7, 'bound to the real tools listing');
@@ -423,31 +524,46 @@ test('every shipped command naming a skill tool quotes a placeholder directory, 
     assert.equal(toolPathFaults(bad, names).length, 1, 'must be caught: ' + bad);
   }
   assert.deepEqual(toolPathFaults('`node "{{SKILL_DIR}}/tools/validate.mjs" --spec x` `node "<skill-dir>/tools/git-evidence.mjs" discovery` `node "[SKILL_DIR]/tools/validate.mjs" --spec x`', names), []);
-  assert.ok(Object.values(KNOWN_TOOL_PATH_FAULTS).reduce((a, b) => a + b, 0) <= 2, 'a known fault may be retired, never added');
+  assert.deepEqual(KNOWN_TOOL_PATH_FAULTS, {}, 'every known tool-path fault is retired; none may be added back');
   let seen = 0;
   for (const file of documents().filter(f => f.endsWith('.md'))) {
-    const text = outsideMirror(read(file));
+    const text = read(file);
     seen += [...text.matchAll(/tools[\\/][a-z-]+\.mjs/g)].length;
     const faults = toolPathFaults(text, names);
     assert.ok(faults.length <= (KNOWN_TOOL_PATH_FAULTS[file] || 0), file + ': a tool command without a quoted placeholder directory — ' + faults.join(' || '));
   }
   assert.ok(seen >= 6, 'the sweep must see the published tool commands');
 });
-test('no shipped Markdown runs node orchestrate/tools/ outside the mirrored evidence section', () => {
+test('no shipped Markdown runs node orchestrate/tools/, and the evidence recipes run from <skill-dir>', () => {
   const protocol = read('orchestrate/references/protocol.md');
-  const exempt = (MIRRORED.exec(protocol) || [''])[0];
-  assert.ok((exempt.match(REPO_RELATIVE) || []).length > 0, 'the exemption must cover live recipes, or it exempts nothing');
-  // Planted controls: one outside the section is caught (either slash direction), one inside it is exempt.
+  // The formerly exempt section holds live recipes, every one in the pinned-directory form.
+  const evidence = (EVIDENCE_SECTION.exec(protocol) || [''])[0];
+  const recipes = evidence.split('\n').filter(l => l.startsWith('node '));
+  assert.ok(recipes.length > 0 && recipes.every(l => l.startsWith('node "<skill-dir>/tools/')),
+    'protocol.md §Read-only evidence tools must publish its recipes as node "<skill-dir>/tools/<tool>.mjs": ' + recipes.join(' || '));
+  assert.deepEqual(toolPathFaults(evidence, toolNames()), [], 'each evidence recipe quotes its placeholder directory');
+  // Planted controls: caught anywhere, either slash direction, the evidence section included.
   const skillMd = read('orchestrate/SKILL.md');
-  assert.ok((outsideMirror(skillMd + '\nRun `node orchestrate/tools/check-ledger.mjs parse`.\n').match(REPO_RELATIVE) || []).length === 1);
-  assert.ok((outsideMirror(skillMd + '\nRun `node orchestrate\\tools\\check-ledger.mjs parse`.\n').match(REPO_RELATIVE) || []).length === 1);
+  assert.ok(((skillMd + '\nRun `node orchestrate/tools/check-ledger.mjs parse`.\n').match(REPO_RELATIVE) || []).length === 1);
+  assert.ok(((skillMd + '\nRun `node orchestrate\\tools\\check-ledger.mjs parse`.\n').match(REPO_RELATIVE) || []).length === 1);
   const planted = protocol.replace('### Read-only evidence tools\n', '### Read-only evidence tools\nnode orchestrate/tools/x.mjs\n');
   assert.notEqual(planted, protocol);
-  assert.equal((outsideMirror(planted).match(REPO_RELATIVE) || []).length, 0);
+  assert.equal((planted.match(REPO_RELATIVE) || []).length, 1, 'the evidence section is no longer exempt');
+  // Every tool a ledger's procedure runs is run from the ledger's pinned directory: in the two
+  // documents that publish those invocations, each one reads node "<skill-dir>/tools/<tool>.mjs".
+  const INVOCATION = /\bnode\s+("?)([^\s"`]*?)tools[\\/]([a-z-]+\.mjs)/g;
+  assert.equal([...'node "<skill-dir>/tools/a.mjs" x; node tools/b.mjs; node "<SKILL_DIR>/tools/c.mjs"'.matchAll(INVOCATION)]
+    .filter(m => m[1] + m[2] !== '"<skill-dir>/').length, 2, 'the invocation reader must see both other spellings');
+  for (const file of ['orchestrate/references/protocol.md', 'orchestrate/references/smoke-page.md']) {
+    const found = [...read(file).matchAll(INVOCATION)];
+    assert.ok(found.length > 0, file + ': publishes tool invocations');
+    assert.deepEqual(found.filter(m => m[1] + m[2] !== '"<skill-dir>/').map(m => m[0]), [],
+      file + ': every tool invocation must read node "<skill-dir>/tools/<tool>.mjs"');
+  }
   const markdown = shipped().filter(f => f.endsWith('.md'));
   assert.ok(markdown.includes('orchestrate/SKILL.md') && markdown.length > 8, 'the sweep walks every shipped Markdown file');
   for (const file of markdown) {
-    assert.deepEqual(outsideMirror(read(file)).match(REPO_RELATIVE), null, file + ': runs a tool by a path only this repository resolves');
+    assert.deepEqual(read(file).match(REPO_RELATIVE), null, file + ': runs a tool by a path only this repository resolves');
   }
 });
 
@@ -557,16 +673,22 @@ test('no shipped passage tells a reader to pipe, tail or detach validation, or t
 // narrowed or reworded sentence inside them goes red. Rewording one on purpose means
 // updating its constant here — that is the intent, as with the pinned implementer paragraph.
 const PINNED = [
-  [TEMPLATE, '3. **Skill pin**', '\n4. **Reconcile**',
-    "3. **Skill pin**, before anything is reconciled: from the integration worktree root run `node \"{{SKILL_DIR}}/tools/check-ledger.mjs\" skill --contract {{LEDGER_DIR}}/00-READBEFORE.md`. `SKILL MATCH` → continue. Anything but `SKILL MATCH` (including `SKILL MISMATCH`, `UNKNOWN` and a tool that does not run) → STOP and ask; continue only on the user's explicit words, recorded verbatim in the session log — an upgrade (the `**Skill**` line above rewritten to the new directory and hash in the commit that records those words) or this contract's manual procedures (the recipe under §Validation commands, the prompt list in §Session algorithm step 5, the manual fence fallback) for the rest of the change."],
+  [TEMPLATE, '3. **Skill pin**', '\n4. **Procedure**',
+    "3. **Skill pin**, before anything is reconciled: from the integration worktree root run `node \"{{SKILL_DIR}}/tools/check-ledger.mjs\" skill --contract {{LEDGER_DIR}}/00-READBEFORE.md`. `SKILL MATCH` → continue. Anything but `SKILL MATCH` (including `SKILL MISMATCH`, `UNKNOWN` and a tool that does not run) → STOP and ask; continue only on the user's explicit words, recorded verbatim in the session log, which pick one of two ways on — an upgrade (the `**Skill**` line above rewritten to the new directory and hash in the commit that records those words, the change continuing under the new directory's protocol.md) or a restore (the pinned directory rebuilt byte-for-byte from the `**Skill source**` line above, then this pin check re-run, continuing only on `SKILL MATCH`). The recipe under §Validation commands stays in this contract, so validation never depends on the pinned directory."],
+  // The step that takes up the pinned procedure, held by more than its position.
+  [TEMPLATE, '4. **Procedure**', '\n5. **Reconcile**',
+    "4. **Procedure**: protocol.md, hashed with the rest of the pinned directory, now governs what this contract leaves unstated — role duties, severity and round accounting, §Fence changes, §Recovery, §Session algorithm and both close-outs. Load it beside this contract."],
+  // The README carrier of the pin-mismatch branch, held like the template's and protocol.md's.
+  ['README.md', '- **Rollout boundary.**', '## Install',
+    "- **Rollout boundary.** A ledger's own contract outranks the skill through its repo facts. It references ONLY its pinned skill directory, by absolute path and hash; its procedure is that directory's `references/protocol.md`, frozen by the hash, and every step a tool performs also has its manual procedure there, so a session drives it from the ledger plus its pinned directory and a new skill version never rewrites a ledger already scaffolded: a changed skill stops the ledger at its next boot and asks, and never silently changes how it runs. Your recorded words then pick one of two ways on: upgrade — the pin rewritten to the new version, the ledger continuing under its `protocol.md` — or restore — the pinned directory rebuilt byte-for-byte from the contract's `**Skill source**` line and the pin re-checked. A new version reaches a repo through the next `/orchestrate new`, or through such an upgrade."],
   [TEMPLATE, 'All must pass before a batch may integrate', '\n## Version + changelog',
     "All must pass before a batch may integrate (`🟢`). Every run goes through the validation wrapper, from the worktree root: ```text node \"{{SKILL_DIR}}/tools/validate.mjs\" --spec {{LEDGER_DIR}}/validate.json --log \"<session scratchpad>/<label>.log\" ``` `validate.json` is the machine form of the block above, written at scaffold time. The wrapper's one line (`PASS …`, `FAIL … — log: <path>` or `UNKNOWN …`) is the result and its exit code (0/1/2) is the real one; the log is read only when the line is not PASS, and failing test NAMES are taken from it so failing sets compare by name against any allowlist. Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task whose completion reports the one line and the exit code, and never read the log before it exits. The block above stays the human-readable recipe and is the manual procedure when the wrapper is unavailable, run in its QUIET form (a totals line plus failing test NAMES; full output only on a non-zero exit). If the block above says `none`, there is no `validate.json` and the checkpoint smoke tests carry ALL verification — state that explicitly when handing over. Mutation runner (optional, a sweep scoped to a batch's changed files): {{MUTATION_RUNNER}}. The skill's `mutate.mjs` is a different tool: the test hunter proves with it only the mutations it chooses itself, each on a disposable clone of the batch's commit."],
   ['orchestrate/references/protocol.md', '1. Boot + reconcile', '\n2. Repairs first',
-    "1. Boot + reconcile + resume-time validation (validation commands on the integration tip; red → step 2 first). A contract carrying a `**Skill**` pin line verifies it FIRST, before reconcile: `node \"<skill-dir>/tools/check-ledger.mjs\" skill --contract <ledger-dir>/00-READBEFORE.md` from the integration worktree root — `SKILL MATCH` continues; anything but `SKILL MATCH` (including a tool that does not run) STOPs and asks, continuing only on the user's explicit words recorded verbatim in the session log (an upgrade: the pin line rewritten in the commit that records them; or the contract's manual procedures). Such a contract runs every validation — resume-time and tip validation alike — through `node \"<skill-dir>/tools/validate.mjs\" --spec <ledger-dir>/validate.json --log <file>`: its one line is the result, its exit code the real one, and the log is read only when the line is not PASS. Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task whose completion reports the one line and the exit code, and never read the log before it exits. Without a pin line, or when the wrapper is unavailable, the manual procedure is the validation commands in their quiet form."],
+    "1. Boot + reconcile + resume-time validation (validation commands on the integration tip; red → step 2 first). A contract carrying a `**Skill**` pin line verifies it FIRST, before reconcile: `node \"<skill-dir>/tools/check-ledger.mjs\" skill --contract <ledger-dir>/00-READBEFORE.md` from the integration worktree root — `SKILL MATCH` continues; anything but `SKILL MATCH` (including a tool that does not run) STOPs and asks, continuing only on the user's explicit words recorded verbatim in the session log, which pick one of two ways on: an upgrade (the pin line rewritten to the new directory and hash in the commit that records them, the change continuing under the new directory's copy of this file) or a restore (the pinned directory rebuilt byte-for-byte from the contract's `**Skill source**` line, then the pin check re-run, continuing only on `SKILL MATCH`); the contract's validation recipe never depends on the pinned directory. The pinned directory's copy of this file then governs the session beside the contract. Such a contract runs every validation — resume-time and tip validation alike — through `node \"<skill-dir>/tools/validate.mjs\" --spec <ledger-dir>/validate.json --log <file>`: its one line is the result, its exit code the real one, and the log is read only when the line is not PASS. Never pipe or tail it; when it may outlast the runtime's command timeout, run it as a background task whose completion reports the one line and the exit code, and never read the log before it exits. Without a pin line, or when the wrapper is unavailable, the manual procedure is the validation commands in their quiet form."],
   ['orchestrate/references/scaffolding.md', 'Also write `validate.json`', '\n   Keep the generated',
     "Also write `validate.json` into the ledger directory, the spec `validate.mjs --help` describes: one step per confirmed validation command; a multi-line recipe block becomes ONE `shell` step whose `script` is the block's text (a PowerShell block: prefer `pwsh`; use `powershell` only where `pwsh` is absent — its log carries CLIXML noise); `parser` names the runner the command invokes (`node`, `jest`, `pytest` — without `-q`, whose summary it cannot read — `cargo`, else `none`). Run it once at the base through the contract's validation wrapper and record its line in LOG.md as the ledger's validation baseline. When the validation commands are `none`, write no `validate.json` (an empty `steps` array is invalid) and say so in LOG.md. When `{{WORKTREE_SETUP}}` is not `n/a`, also write `setup.json`, a `validate.mjs` spec holding the setup command(s), so a disposable checkout can be set up exactly like a worktree."],
   ['orchestrate/references/scaffolding.md', '## Baking rule', undefined,
-    "## Baking rule Interview answers are written INTO the generated `00-READBEFORE.md` — never left as a pointer into this skill's reference docs. A ledger references ONLY its pinned skill directory, by absolute path and hash, and every step a tool performs also has a baked manual procedure (the recipe block for validation, the pasted-prompt list for spawning, the fence's manual fallback); a changed skill stops the ledger at its next boot and asks, and never silently changes how it runs. The skill's references exist for the skill's benefit; each ledger must be drivable by a session that has never seen this skill — or has a changed one: State line, LOG.md, `NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are all explained inside the ledger's own files."],
+    "## Baking rule Interview answers are written INTO the generated `00-READBEFORE.md` — never left as a pointer into this skill's reference docs. A ledger references ONLY its pinned skill directory, by absolute path and hash; its procedure is that directory's `references/protocol.md`, frozen by the hash, and every step a tool performs also has its manual procedure there; a changed skill stops the ledger at its next boot and asks, and never silently changes how it runs. The contract carries repo facts only, never a copy of that procedure; the recipe block for validation stays in it. Each ledger must be drivable by a session from the ledger plus its pinned directory: State line, LOG.md, `NEEDS_FENCE`, ASK, tiers, runners, evidence, fold-ins and their ids are explained between the ledger's own files and that directory's `references/protocol.md`."],
 ];
 const PINNED_ROWS = {
   SKILL_DIR: "| `{{SKILL_DIR}}` | template (READBEFORE) | the absolute path of the directory holding the skill's `SKILL.md` (the base directory the skill loader reports), forward slashes, stored RAW between the pin line's backticks — never quoted there; every command that uses it quotes it. Never relative or `~`: the pin check reads it from the working directory |",
@@ -582,7 +704,7 @@ test('the load-bearing passages and registry rows match their pinned text exactl
     const planted = text.replace(from, from + ' Skip it when in a hurry.');
     assert.notEqual(pinned(planted, from, to), expected);
   }
-  assert.equal(PINNED.length, 5, 'five passages are pinned; the list may not shrink to a sample');
+  assert.equal(PINNED.length, 7, 'seven passages are pinned; the list may not shrink to a sample');
   for (const [key, row] of Object.entries(PINNED_ROWS)) assert.equal(registryRow(key), row, '{{' + key + '}} registry row changed');
 });
 
@@ -648,7 +770,8 @@ test('§Spawning rules renders with prompt.mjs and points with ONE fixed message
   const pointer = pointerOf(rules);
   assert.doesNotMatch(pointer, /nonce|\[NONCE\]|[0-9a-f]{12}/i, 'the pointer never holds the nonce');
   for (const needed of ['<prompt file>', 'last line', 'line 2']) assert.ok(pointer.includes(needed), 'the pointer says: ' + needed);
-  assert.equal(pointerOf(section(template, '\n5. Spawn ALL', '\n6. Gate PER BATCH')), pointer, 'the template spawns with the same bytes');
+  assert.equal(pointerOf(section(read('orchestrate/references/protocol.md'), '\n5. Spawn ALL', '\n6. Gate PER BATCH')), pointer,
+    'protocol.md\'s step 5 spawns with the same bytes');
   for (const needed of ['The nonce stays with the orchestrator and never enters the pointer.',
     'A report whose line 2 is not `NONCE <the nonce>` is treated as no report: the agent did not read its instructions to the end.',
     'The QA runner, artifact proofer, pre-flight, convergence and fix-up skeletons are always filled and pasted and carry NO nonce',
@@ -661,22 +784,22 @@ test('§Spawning rules renders with prompt.mjs and points with ONE fixed message
   assert.ok(help.stdout.startsWith('prompt.mjs --ledger <ledger-dir> --role <role> --batch <Bnn> --facts <facts.json> --out <dir>'));
 });
 
-test('template step 5 renders, then points, and keeps its self-contained list as the manual procedure', () => {
-  const spawn = collapse(section(template, '\n5. Spawn ALL', '\n6. Gate PER BATCH'));
-  assert.ok(spawn.includes('`node "{{SKILL_DIR}}/tools/prompt.mjs" --ledger {{LEDGER_DIR}} --role implementer --batch <Bnn> --facts <facts.json> --out "<session scratchpad>/prompts"`'));
-  const manual = spawn.indexOf('When the renderer is unavailable or refuses (`UNKNOWN …`), the manual procedure is a pasted prompt');
+// The template's step 5 moved into protocol.md whole (B01 of OS-20260925); each assertion that
+// read it there now reads its one home, and the template is held to carrying no copy.
+test('protocol.md step 5 renders, then points, and keeps its self-contained list as the manual procedure', () => {
+  const protocol = read('orchestrate/references/protocol.md');
+  const spawn = collapse(section(protocol, '\n5. Spawn ALL', '\n6. Gate PER BATCH'));
+  assert.ok(spawn.includes('`node "<skill-dir>/tools/prompt.mjs" --ledger <ledger-dir> --role implementer --batch <Bnn> --facts <facts.json> --out "<session scratchpad>/prompts"`'));
+  const manual = spawn.indexOf('When the renderer is unavailable or refuses (`UNKNOWN …`), the manual procedure is a pasted prompt with no nonce line');
   const list = spawn.indexOf('every such prompt must be SELF-CONTAINED:');
   assert.ok(manual !== -1 && list > manual, 'the self-contained list is the manual procedure');
   for (const item of ['the spec text + codebase facts from the batch file', 'the exact file fence', 'acceptance criteria', 'the applicable guardrails',
-    'validation commands (the wrapper command and its recipe)', 'the conventions + prohibitions blocks above', 'report shape',
+    'validation commands (the wrapper command and its recipe)', "the contract's conventions + prohibitions blocks", 'report shape',
     'tick your checklist items in the batch file as you complete them']) {
     assert.ok(spawn.slice(list).includes(item), 'the manual list keeps: ' + item);
   }
-  assert.ok(collapse(section(template, '\n6. Gate PER BATCH', '- **6a')).includes('or with the wrong nonce'), 'the gate treats a wrong nonce as no report');
-  const protocol = read('orchestrate/references/protocol.md');
-  const step5 = collapse(section(protocol, '\n5. Spawn ALL', '\n6. Gate per batch'));
-  assert.ok(step5.includes('When the renderer is unavailable or refuses, the manual procedure is a pasted prompt with no nonce line; pasted prompts are SELF-CONTAINED'));
-  assert.ok(collapse(section(protocol, '\n6. Gate per batch', '6a fence check')).includes('or with the wrong nonce'));
+  assert.ok(collapse(section(protocol, '\n6. Gate PER BATCH', '- **6a')).includes('or with the wrong nonce'), 'the gate treats a wrong nonce as no report');
+  for (const step of ['\n5. Spawn ALL', '\n6. Gate PER BATCH', '- **6a']) assert.ok(!template.includes(step), 'the template carries no copy of ' + step.trim());
 });
 
 // Every findings file reaches LOG.md, byte for byte, BEFORE its path is handed on: in each
@@ -797,7 +920,8 @@ test('the LOG append precedes forwarding wherever forwarding is stated', () => {
     assert.deepEqual(forwardFaults(text), [], file + ': findings forwarded without the LOG append first');
     if (/findings/i.test(text)) forwards += [...text.matchAll(/\bforward(?:s|ed|ing)?\b/gi)].length;
   }
-  for (const file of [TEMPLATE, 'orchestrate/references/protocol.md', PROMPTS]) {
+  // The template's statement of the append moved to protocol.md with the rest of its procedure.
+  for (const file of ['orchestrate/references/protocol.md', PROMPTS]) {
     const text = collapse(LOG_PLACEHOLDERS(read(file)));
     assert.ok(text.includes(APPEND) && /never re-typed through (?:its own|the orchestrator's) context/.test(text), file + ': states the byte-for-byte LOG append');
     assert.ok(/\bforward(?:s|ed|ing)?\b/.test(text), file + ': states the forwarding the append must precede');
@@ -1262,10 +1386,9 @@ test('recovery, respawn and later rounds work from rendered files and LOG.md, ne
   for (const file of [PROMPTS, TEMPLATE, 'orchestrate/references/protocol.md']) {
     assert.doesNotMatch(collapse(read(file)), /restores (?:the|its|a) (?:findings )?file's bytes|restores (?:its|the|those) bytes/, file + ': the recovery restores lines, never a byte claim');
   }
-  assert.ok(collapse(read(TEMPLATE)).includes('exits non-zero, writing nothing, unless its heading and marker line each occur exactly once, and only after a zero exit is that file forwarded'));
-  for (const file of [TEMPLATE, 'orchestrate/references/protocol.md']) {
-    assert.ok(collapse(read(file)).includes('a copy lost with the scratchpad is taken back out of the committed LOG.md, never re-typed'), file);
-  }
+  // Stated in protocol.md's step 6 since the template's copy retired.
+  assert.ok(collapse(read('orchestrate/references/protocol.md')).includes('exits non-zero, writing nothing, unless its heading and marker line each occur exactly once, and only after a zero exit is that file forwarded'));
+  assert.ok(collapse(read('orchestrate/references/protocol.md')).includes('a copy lost with the scratchpad is taken back out of the committed LOG.md, never re-typed'));
   // Two files are joined with a newline between them, so no heading is glued to a last line.
   assert.ok(rules.includes('their files are joined byte-for-byte, a newline between them, into one (`' + logCommands(PROMPTS).join + '`) and that path is forwarded.'));
   // A crashed implementer is respawned with its implementer prompt before the resume pointer.
@@ -1310,10 +1433,10 @@ test('the LOG.md append, recovery and join run as published: the exact bytes bac
     assert.ok(command, 'subagent-prompts.md publishes the ' + name + ' command, on one line');
     assert.ok(![...command].some(c => c === '\\' || c.codePointAt(0) < 32 || c.codePointAt(0) === 127), name + ': no backslash and no control character');
   }
-  // The template bakes the same append and recovery, protocol.md the same append: one command, three statements.
-  const template = logCommands(TEMPLATE), protocol = logCommands('orchestrate/references/protocol.md');
-  assert.equal(template.append, published.append); assert.equal(template.recover, published.recover);
-  assert.equal(protocol.append, published.append);
+  // protocol.md states the same append and recovery (the template's copy moved there): one command, two statements.
+  const protocol = logCommands('orchestrate/references/protocol.md');
+  assert.equal(protocol.append, published.append); assert.equal(protocol.recover, published.recover);
+  assert.deepEqual(logCommands(TEMPLATE), { append: undefined, recover: undefined, join: undefined }, 'the template states no LOG.md command');
   assert.ok(process.platform !== 'win32' || fs.existsSync(GIT_BASH), "Git for Windows' bash must be at " + GIT_BASH);
 
   const temp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'log round trip '));
@@ -1422,7 +1545,7 @@ test('the LOG.md append, recovery and join run as published: the exact bytes bac
 // or appends LOG.md, must be the append, the recovery or the join §Spawning rules publishes,
 // the template's placeholders read as the reference's. Counted per file, so a further copy,
 // even a right one, is a deliberate edit here.
-const LOG_COMMAND_COUNTS = { 'orchestrate/references/protocol.md': 1, 'orchestrate/references/subagent-prompts.md': 3, 'orchestrate/templates/00-READBEFORE.md': 2 };
+const LOG_COMMAND_COUNTS = { 'orchestrate/references/protocol.md': 2, 'orchestrate/references/subagent-prompts.md': 3 };
 // Code spans as Markdown reads them: a run of n backticks opens one and only a run of exactly n
 // closes it, inside one paragraph — so the preamble's ```` ```prompt:<name> ```` shifts no pairing.
 function codeSpans(paragraph) {

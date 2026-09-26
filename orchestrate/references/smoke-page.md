@@ -11,7 +11,8 @@ results as text" button whose paste is the verdict message.
 Format stability is the point: the user learns one sheet and reads every run the same
 way. The batch files' smoke steps remain canonical, the committed HTML records the
 hand-over, and the user's verdict belongs in PROGRESS. Publisher-specific commands
-below stay in this skill reference; never copy them into a generated ledger contract.
+below stay in this skill reference, which a ledger reaches through its pinned skill
+directory; never copy them into a generated ledger contract.
 
 ## Delivery across runtimes
 
@@ -79,10 +80,10 @@ error-message quotes.
 
 **Build it from a sidecar, not by hand.** Author the run's content as `smoke-<Cn>.json`
 beside the page — the fields above, plus `sections` in the template's schema — and fill
-the template mechanically (paths relative to the skill's own directory):
+the template mechanically (`<skill-dir>` is the contract's pinned skill directory):
 
 ```sh
-node tools/build-smoke-page.mjs <ledger>/smoke-c1.json <ledger>/smoke-c1.html
+node "<skill-dir>/tools/build-smoke-page.mjs" <ledger>/smoke-c1.json <ledger>/smoke-c1.html
 ```
 
 Commit the sidecar next to the page. Before editing a re-issue, save a temporary copy
@@ -90,7 +91,7 @@ of the **last issued** sidecar (or recover it from the commit that issued the cu
 page). Pass that unchanged snapshot when regenerating:
 
 ```sh
-node tools/build-smoke-page.mjs <ledger>/smoke-c1.json <ledger>/smoke-c1.html --previous <temp>/smoke-c1.previous.json
+node "<skill-dir>/tools/build-smoke-page.mjs" <ledger>/smoke-c1.json <ledger>/smoke-c1.html --previous <temp>/smoke-c1.previous.json
 ```
 
 The builder checks that all existing steps keep their numbers and page order, that
@@ -418,8 +419,8 @@ edit order between independently clocked devices.
 Write the filled page into the ledger as `smoke-<Cn>.html` and commit it in the
 per-checkpoint close-out commit (update it on corrections). It is the audit copy of
 what the user actually ran, and the republish base for any later session — including
-one without this skill, which can edit it directly and republish, or fall back to
-text.
+one that has not loaded this skill, which can edit it directly and republish, or fall
+back to text.
 
 ## Fallback
 
