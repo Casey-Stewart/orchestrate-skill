@@ -32,7 +32,7 @@ before believing any row (§Recovery in the contract).
 | # | Batch | Branch | Wave | Version | Status | Updated | Notes |
 |---|-------|--------|------|---------|--------|---------|-------|
 | B01 | Contract slimming: one copy of the procedure | `chore/contract-slimming` | 1 | — | 🔄 | 2026-09-25 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b01` |
-| B02 | Tool CLIs run through any symlinked path; git env scrubbed | `fix/cli-entry-symlink` | 1 | — | 🔄 | 2026-09-25 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b02` |
+| B02 | Tool CLIs run through any symlinked path; git env scrubbed | `fix/cli-entry-symlink` | 1 | — | 🔄 | 2026-09-26 | W1 open @40f8182; worktree `/home/timetotilt/worktrees/os925/b02`; implementer DONE @665549f (532/534, 2 skipped); fence PASS; 6b PROVEN (23 fail on base); R1 SHIP @665549f asks=4 (reviewer 2 ASK + hunter 3, one shared — LOG §B02 — gate, round 1) |
 | B03 | Conductor and agent budget rules | `feat/budget-rules` | 2 | — | ⬜ | 2026-09-25 | — |
 | B04 | Prose polish: comment-only classifier, prose ASKs, one strike | `feat/prose-polish` | 3 | — | ⬜ | 2026-09-25 | — |
 
