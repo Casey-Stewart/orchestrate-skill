@@ -231,8 +231,9 @@ export function proseOnlyDiff({ repo, base, head, ...options }) {
   let prose = 0, other = 0;
   for (const change of changes) {
     if (!JAVASCRIPT.test(change.path)) other++;
-    // Added, deleted, turned into a link, re-moded or not a regular file: never prose.
-    else if (change.status !== 'M' || change.from !== change.to || !REGULAR.test(change.from)) code.push(change.path);
+    // Never prose: a mode that changes (added from 000000, deleted to 000000, turned into a link
+    // or re-moded), or a path that is not a regular file on either side.
+    else if (change.from !== change.to || !REGULAR.test(change.from)) code.push(change.path);
     else {
       const [a, b] = [change.before, change.after].map(sha => blobText(repo, sha, options));
       const result = a.reason || b.reason ? { verdict: 'UNKNOWN', reason: `${a.reason || b.reason} (${a.reason ? 'base' : 'head'})` } : compareSources(a.text, b.text);
