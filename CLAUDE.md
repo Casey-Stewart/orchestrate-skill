@@ -53,19 +53,7 @@ diff against the ones its fence can actually violate.
 - **A guard that SAMPLES the domain it claims to sweep** — this repository's most productive
   class, caught only by gates that MUTATE a fix, never by ones that read it. Ask of any guard:
   **is its subject the domain or one sample of it, and does its control exercise the tight case
-  or the comfortable one?** Greppable shapes, no understanding of the code required:
-  - two literals partitioning one collection with nothing relating them — for every array
-    literal used as a loop domain, assert on the DOMAIN (size, set-equality, a count over
-    results), not its members;
-  - `new Set([...a, ...b]).size === a.length + b.length` — a uniqueness check, not a size check
-    (delete a member and both sides shrink);
-  - `indexOf` without a loop — only the FIRST occurrence is governed;
-  - a fixed ±N window per occurrence — occurrences closer than N share markers, and a
-    generously spaced arming control never exercises the overlap;
-  - a corpus whose every entry sits inside the pattern's own bound (derived from it, whatever
-    the comment says) — write it as prose first, pin its size and set, and require each pattern
-    to own an entry no other catches;
-  - an out-parameter passed inline as a fresh literal and never bound.
+  or the comfortable one?** Six greppable shapes are listed in `docs/guardrail-receipts.md`.
   On any rewrite of a guard, assert the new family is a superset of the old. Prefer binding a
   domain to the checkout over hand-writing it. *(BL-004 polish, BL-016 round 2)*
 - **A branch no input reaches.** Recursion proven at depth one; an error path no fixture
@@ -102,11 +90,9 @@ diff against the ones its fence can actually violate.
 - **A sweep built to catch reversals of a rule is blind to an edit that NARROWS its scope.**
   When a fix replaces prose with an enumeration, ask what the enumeration excludes that the
   old text allowed. *(BL-016 round 1)*
-- **A test that reads a child's raw output has a verdict that depends on the terminal.** Run from
-  a colour terminal, node's runner hands `FORCE_COLOR=1` to test files, and a child's reporter
-  lines arrive painted; strip ANSI before matching them, and run the suite under
-  `FORCE_COLOR=1` as well as plain — every agent run here writes to a file, never a TTY.
-  *(`tests/validate.test.cjs`, the forced-colour loop; OS-20260923 C1 issue 2)*
+- **A test that reads a child's raw output has a verdict that depends on the terminal.** Strip
+  ANSI before matching a child's reporter lines, and run the suite under `FORCE_COLOR=1` as well
+  as plain. *(`tests/validate.test.cjs`, the forced-colour loop; OS-20260923 C1 issue 2)*
 - **A fail-closed guard over an open domain that lists the unsafe members.** Every review round
   finds the next unlisted one. Place each member of a closed specification list, or name what is
   provably safe, and read the rest as doubt. *(OS-20260925 B04: three rounds, then BL-046;
@@ -152,9 +138,7 @@ diff against the ones its fence can actually violate.
   or it is self-fulfilling and its absence elsewhere means nothing; every mutation script must
   abort loudly when its anchor is absent, and say so in its report — "I mutated it and nothing
   reddened" is a claim to verify. Restore-by-checkout is only safe once the real edit is
-  committed. Write Markdown through the file tools or a single-quoted script — a double-quoted
-  shell string command-substitutes its backticks — and sweep the result for emptied code spans
-  (a doubled space where a name was) rather than rereading the line. *(BL-003 polish)*
+  committed; how to write Markdown safely is in `docs/guardrail-receipts.md`. *(BL-003 polish)*
 - **Text tools that transform what they write.** `String.replace`'s string form expands `` $` ``
   and `$&` (it spliced BACKLOG.md), and the Write and Edit tools decode a typed `\uXXXX`: insert
   text by index or a function replacement, build invisible characters with `String.fromCharCode`.

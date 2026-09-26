@@ -13,6 +13,22 @@ being pinned, not about whether the new pin can fail. A sweep grown from ten pat
 once lost a spelling while every visible signal said it grew. *(BL-004 polish, BL-016 round 2, and
 five more in `OS-20260921-backlog-closeout`)*
 
+Greppable shapes, no understanding of the code required (moved from `CLAUDE.md` at the
+`OS-20260925-slim-contract-pack` close-out):
+
+- two literals partitioning one collection with nothing relating them — for every array
+  literal used as a loop domain, assert on the DOMAIN (size, set-equality, a count over
+  results), not its members;
+- `new Set([...a, ...b]).size === a.length + b.length` — a uniqueness check, not a size check
+  (delete a member and both sides shrink);
+- `indexOf` without a loop — only the FIRST occurrence is governed;
+- a fixed ±N window per occurrence — occurrences closer than N share markers, and a
+  generously spaced arming control never exercises the overlap;
+- a corpus whose every entry sits inside the pattern's own bound (derived from it, whatever
+  the comment says) — write it as prose first, pin its size and set, and require each pattern
+  to own an entry no other catches;
+- an out-parameter passed inline as a fresh literal and never bound.
+
 ## A sweep blind to an edit that NARROWS a rule's scope
 
 A closed enumeration ("human ONLY when it needs a device, a GUI, held credentials, or a look-and-see
@@ -72,6 +88,11 @@ re-run; the proof did not. Later the same session, two more mutation scripts abo
 anchor guards, each of which would otherwise have been a false green. A canary once reported "no
 filter command was executed" over a fixture that contained nothing that could execute one.
 *(BL-003 polish)*
+
+Writing Markdown safely (moved from `CLAUDE.md` at the `OS-20260925-slim-contract-pack` close-out):
+write it through the file tools or a single-quoted script — a double-quoted shell string
+command-substitutes its backticks — and sweep the result for emptied code spans (a doubled space
+where a name was) rather than rereading the line.
 
 ## An issued input derived from the tree
 
