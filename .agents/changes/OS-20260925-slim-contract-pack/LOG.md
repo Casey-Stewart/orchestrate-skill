@@ -1086,3 +1086,32 @@ BL-046 sign-off) is not yet given. B04 → ❌, fix-up pending: `fix/B04-c1-foll
 
 - Fix-up: `fix/B04-c1-followup` cut @`e3af462` (worktree `/home/timetotilt/worktrees/os925/b04-c1`); implementer (default tier) spawned on a prompt filled by hand from the skill's fix-up skeleton: the failure report verbatim, B04's batch file, the diff since the Base SHA, B04's contract excerpts byte-for-byte from its rendered prompt, the probed facts (the refusal is Git for Windows' own; `mktree -z` accepts the name), and the failing-on-base shape this repair needs (a shim that refuses index paths holding a control character, as Git for Windows does).
 - Scope added before the spawn, by the user's words (verdict log, verbatim): BL-046's MINIMAL fix folds into the fix-up as its own commit — the three list edits and owned corpus cases the round-3 reviewer specified; the four named scenarios and I-04 must read CODE; the class fix (inverting the rule) stays in BACKLOG and out of scope, and the fix-up's reviewer is told the open-ended class remains the residual the user accepted at ship, so an unlisted vocabulary beyond the four named is not a new finding.
+
+### B04 C1 fix-up — gate
+
+- Implementer (default tier) DONE_WITH_CONCERNS: `e94f0c9` "fix: batch 04 repair — Git for Windows refuses
+  the line-break path at the index; the fixture commits it from tree objects" (test-only: c1 built from
+  `ls-tree -z` + `mktree -z` on stdin + `commit-tree`; off Windows the test puts an index-refusing shim git
+  first on the fixture's PATH, on win32 the real git refuses; live control; no skip) and `afba68d`
+  "fix: BL-046 — allow, allowlist and skip are directive verbs, skipcq a directive name, and _ a rule-id
+  separator" (plus `// checkov:skip=…` so the verb `skip` owns a real comment; near-misses `// allow one
+  retry`, `// skip the cache`); `PASS tests 562/564, 2 skipped` plain, under `FORCE_COLOR=1`, and with the
+  refusing git first on PATH. I-04 from an archive of `afba68d` reads `CODE lib/token.mjs`, exit 1; I-01
+  unchanged. Concerns: Git for Windows' `mktree` unverified here (the laptop re-run decides); the page's
+  Step 2 and B04's smoke step 4 now stale; `tests/check-fence.test.cjs:64-74` commits a control-character
+  path only off Windows without asserting the Windows refusal (sibling, left); the shim sees arguments
+  only; the class residual still open (`// ggignore`, `// sourcery skip: …`, `// coverity[overrun]`).
+- 6a: `check-fence.mjs` → UNKNOWN (authority: "Plan/PROGRESS branch linkage does not agree" — the fix-up
+  branch is not the plan's B04 branch); UNKNOWN never passes → the manual fallback: `git diff --name-status
+  -z -M 89f85eb...afba68d` = `M orchestrate/tools/prose-only-diff.mjs`, `M tests/prose-only-diff.test.cjs`,
+  both in B04's 15-path plan fence, no rename, no ledger path; worktree clean including untracked; `filter`
+  unspecified on both. PASS.
+- 6b (orchestrator, independent shim — a `/bin/sh` git that refuses `update-index`/`add` whose arguments
+  hold a control character, exit 128, and execs `/usr/bin/git` otherwise; live control refused): (A) the
+  pre-repair tip's `tests/prose-only-diff.test.cjs` — plain 15/15 pass; under the shim 14/15, the failure
+  `:587` "Fixture command failed … update-index --add --cacheinfo 100644,198b8f89…,line⏎break.mjs",
+  "Invalid path", `128 !== 0` — the laptop's failure, same blob; the repaired file under the shim 16/16.
+  PROVEN as an emulation. (B) `afba68d`'s test file on the pre-repair tree: 3 of 16 fail by AssertionError
+  — `:359` pinned list sizes, `:386` verb set equality, `:480` "gitleaks:allow appended (I-04)". PROVEN.
+- The fix-up's reviews continue B04's numbering (R4, R5) so each LOG heading stays unique; the fix-up cap
+  (two `FIX FIRST`) counts from R4. R4 reviewer and test-hunter spawned (default tier, the implementer's).
