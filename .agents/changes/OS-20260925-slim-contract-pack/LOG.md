@@ -808,3 +808,27 @@ and contextual keyword, written by hand in the test, is placed in exactly one of
 certain-start and doubt sets, asserted as a partition; directive comments are kept by structure as
 well as by name, each alternative owning a corpus comment; every R2 finding closed and every R1
 finding kept closed.
+
+- Fresh implementer (Fable 5.1), first report on the implementer prompt: DONE, nonce matched —
+  it found round 2's findings itself and landed `290a378` (break/continue/debugger into the
+  operand set, labels read as doubt, a nested regex class refused, a doubtful `++` refused,
+  directive shapes from pinned verb/scope lists, family 9 case-insensitive) and `677bc10` (BL-042
+  test, its own commit), `PASS tests 560/562, 2 skipped`. That was the instance route, not the
+  directed class fix; the read-only fence check at that point: PASS (integration `eeb1774`,
+  batch `677bc10`).
+- Resumed on the round-3 `fix-round` prompt (joined findings + direction): DONE, nonce matched —
+  `2cf7d9e`: one exported partition `KEYWORDS.start/.end/.doubt` over all 54 words (38
+  ReservedWords, 8 strict-mode, 8 contextual; sizes 16/11/27), written by hand in the test and
+  asserted as an exact partition, each word run through `/[//]a/` and `<b>//x</b>`; directive
+  comments kept by four structural shapes built from exported VERBS and SCOPES (`tool[:-]verb`,
+  `tool verb scope`, `word[rule-id]`, `NO[CFLQS][A-Z]+`), each alternative read off the tool's
+  own source and required to own a real comment, near-misses pinned. Replay on disposable
+  clones of HEAD: control 52/0, no-op SURVIVED, 56/56 prior-round and round-3 mutations KILLED.
+  `PASS tests 561/563, 2 skipped` plain and under `FORCE_COLOR=1`.
+- 6a `check-fence.mjs` on `2cf7d9e`: PASS (integration `eeb1774`, merge base `739c92b`),
+  violations [], unknowns []; the round touched only the tool and two test files.
+- Hazard seen twice in this batch: the Write and Edit tools decode a typed `\uXXXX` escape into
+  the raw character (round 0's implementer and this one); the repository's invisible-character
+  sweep caught it. Candidate guardrail at close-out.
+- Round-3 re-review spawned: a fresh reviewer (`reviewer-round2` role, round 3, Fable 5.1) over
+  `git diff 18b6c86..HEAD` with both rounds' findings, and a fresh test-hunter (Fable 5.1).
