@@ -317,7 +317,7 @@ const DIRECTIVE_COMMENTS = [
   '// prettier-ignore', '/* v8 ignore next */', '/* jshint esversion: 11 */', '/*jslint node:true, es6 */',
   '// biome-ignore lint/suspicious/noExplicitAny: legacy data', '// deno-lint-ignore no-explicit-any', '// deno-lint-ignore-file', '// oxlint-disable-next-line no-unused-vars',
   '/* webpackChunkName: "editor" */', '/* turbopackIgnore: true */', '/* node:coverage ignore next */', '/* node:coverage disable */',
-  '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props', '// LCOV_EXCL_LINE', '// deepcode ignore HardcodedSecret: a test fixture',
+  '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props', '// LCOV_EXCL_LINE', '// deepcode ignore HardcodedSecret: a test fixture', '// skipcq: JS-0002',
   '// Stryker disable next-line all', '// Stryker disable all', '// Stryker restore all', '// Stryker restore EqualityOperator',
   '// nosemgrep: javascript.lang.security.audit.path-traversal', '// nosemgrep', '// lgtm[js/xss]', '// lgtm', '// codeql[js/unused-local-variable]',
   '// cSpell:words xyzzy plugh', '// spell-checker: disable', '// noinspection JSUnusedGlobalSymbols', '// keep-sorted start', '// clang-format off', '// spotless:off',
@@ -327,7 +327,8 @@ const DIRECTIVE_COMMENTS = [
 const SHAPE_COMMENTS = ['/* stylelint-disable-next-line selector-max-id */', '/* stylelint-enable */', '// jscs:disable requireCamelCaseOrUpperCaseIdentifiers',
   '// sort-imports-ignore', '// deepscan-disable-line', '// svelte-ignore a11y-missing-attribute', '/* vite-ignore */', '// cppcheck-suppress unusedFunction',
   '/* jscpd:ignore-start */', '/* jscpd:ignore-end */', '/* bun:coverage ignore next */', '/* bun:coverage ignore start */', '/* bun:coverage ignore stop */',
-  '// NOSONAR: the pattern is vetted', '// NOLINT(readability-identifier-naming)', '// NOQA', '// NOCOMMIT'];
+  '// NOSONAR: the pattern is vetted', '// NOLINT(readability-identifier-naming)', '// NOQA', '// NOCOMMIT',
+  '// gitleaks:allow', '// pragma: allowlist secret', '// checkov:skip=CKV_AWS_18: the audit bucket keeps these logs', '// coverity[tainted_data]'];
 const MARKER_COMMENTS = ['//# sourceMappingURL=run.js.map', '/*! Licensed MIT; see LICENSE */', '/// <reference types="node" />', '/* global fetch, Response */',
   '/* exported main */', '/* globals describe, it */', '//@ sourceURL=eval-1.js'];
 const TAG_COMMENTS = ['/** @returns {number} the sum */', '/** Parses a flag list; see {@link parseFlags}. */', '/**\n * Old entry point.\n * @deprecated since 2.0\n */'];
@@ -347,18 +348,19 @@ const PROSE_COMMENTS = ['// Adds two numbers.', '// Mail the maintainers at team
   '// A path like a/b/c.', '// a c80 checksum', '// Blank lines are ignored.', '// A self-disabled switch.', '// Callers ignore next-gen flags.',
   '// Tests ignore all-caps names.', '// Tests suppress nothing here.', '// keep sorted by name', '// no inspection needed here', '// semgrep rules live in .semgrep/',
   '// the cspell dictionary is cspell.json', '// codeql-cli output goes to out/', '// spotless output', '// clang formats this file',
-  '// items[0] is the head.', '// values[key] are cached.', '// NOTE: keep this order.', '// NOT thread-safe.', '// NONE of the flags apply.', '// NORMAL exit.'];
+  '// items[0] is the head.', '// values[key] are cached.', '// NOTE: keep this order.', '// NOT thread-safe.', '// NONE of the flags apply.', '// NORMAL exit.',
+  '// allow one retry', '// skip the cache'];
 // The shapes' verbs and scopes, written here from the directives above, never read off the tool.
 const SHAPE_GRAMMAR = {
-  verbs: ['disable', 'enable', 'ignore', 'restore', 'suppress', 'expect-error', 'nocheck'],
+  verbs: ['disable', 'enable', 'ignore', 'restore', 'suppress', 'expect-error', 'nocheck', 'allow', 'allowlist', 'skip'],
   scopes: ['next-line', 'next', 'line', 'file', 'all', 'start', 'stop', 'end', 'if', 'else'],
 };
 const POOL = () => [...DIRECTIVE_COMMENTS, ...SHAPE_COMMENTS, ...MARKER_COMMENTS, ...TAG_COMMENTS, ...SHARED_COMMENTS.map(s => s[0])];
 test('each directive, and each comment family, owns a real comment; prose that only looks like one is prose', async () => {
   const { DIRECTIVES, SHAPES, keptBy } = await api;
-  assert.deepEqual([DIRECTIVES.length, SHAPES.length], [28, 4], 'the directive and shape lists are pinned by size');
+  assert.deepEqual([DIRECTIVES.length, SHAPES.length], [29, 4], 'the directive and shape lists are pinned by size');
   assert.deepEqual([DIRECTIVE_COMMENTS.length, SHAPE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, SHARED_COMMENTS.length, PROSE_COMMENTS.length],
-    [45, 17, 7, 3, 8, 28]);
+    [46, 21, 7, 3, 8, 30]);
   // The five the feature names are in the list, by name.
   for (const named of ['eslint', 'istanbul', 'c8', '@ts-', 'prettier']) assert.ok(DIRECTIVES.some(([name]) => name === named), named);
   for (const [name] of DIRECTIVES) {
@@ -384,7 +386,7 @@ const alternatives = pattern => [...pattern.source.matchAll(/\(\?:([^()]*)\)/g)]
 test('each verb and scope a shape accepts is the one written here, read off the shape itself, and ends a match on a real comment', async () => {
   const { SHAPES, VERBS, SCOPES } = await api;
   assert.deepEqual([VERBS, SCOPES], [SHAPE_GRAMMAR.verbs, SHAPE_GRAMMAR.scopes]);
-  assert.deepEqual([SHAPE_GRAMMAR.verbs.length, SHAPE_GRAMMAR.scopes.length], [7, 10], 'the lists written here, pinned by size');
+  assert.deepEqual([SHAPE_GRAMMAR.verbs.length, SHAPE_GRAMMAR.scopes.length], [10, 10], 'the lists written here, pinned by size');
   const [[, joined], [, spaced], [, bracketed], [, shouted]] = SHAPES;
   // Both list-built shapes carry every verb and scope as an alternative of their own source, and nothing else.
   const expected = [...SHAPE_GRAMMAR.verbs, ...SHAPE_GRAMMAR.scopes].sort();
@@ -470,6 +472,29 @@ test('a comment-only commit of both forms reads PROSE-ONLY and a one-character c
   assert.deepEqual(cli(repo, c0, c1), { status: 0, line: 'PROSE-ONLY 1 file(s)' });
   assert.deepEqual(cli(repo, c1, c2), { status: 1, line: 'CODE lib/sum.mjs' });
   assert.deepEqual(cli(repo, c0, c2), { status: 1, line: 'CODE lib/sum.mjs' });
+});
+
+// BL-046, its first scenario as C1's I-04 builds it: a directive appended to a code line, or its
+// rule id edited, reads CODE through the published CLI on real commits; the same edit made in
+// prose on the far side of each boundary reads PROSE-ONLY.
+test('an allow, allowlist, skip, skipcq or underscored rule-id directive appended or edited reads CODE through the published CLI; its prose near-miss reads PROSE-ONLY', t => {
+  const repo = makeRepo(t);
+  const LF = String.fromCharCode(10), text = (...lines) => lines.map(line => line + LF).join('');
+  const header = '// The name of the header the client sends its token in.', code = "export const TOKEN_HEADER = 'x-client-token';";
+  for (const [name, before, after, verdict] of [
+    ['gitleaks:allow appended (I-04)', text(header, code), text(header, code + ' // gitleaks:allow'), 'CODE'],
+    ['pragma: allowlist secret appended', text(header, code), text(header, code + ' // pragma: allowlist secret'), 'CODE'],
+    ['checkov:skip appended', text(header, code), text(header, code + ' // checkov:skip=CKV_AWS_18: the audit bucket keeps these logs'), 'CODE'],
+    ['a skipcq rule id edited', text(header, code + ' // skipcq: JS-0002'), text(header, code + ' // skipcq: JS-0003'), 'CODE'],
+    ['a coverity event edited', text('// coverity[tainted_data]', code), text('// coverity[tainted_data_return]', code), 'CODE'],
+    ['allow in prose appended', text(header, code), text(header, code + ' // allow one retry'), 'PROSE-ONLY'],
+    ['skip in prose appended', text(header, code), text(header, code + ' // skip the cache'), 'PROSE-ONLY'],
+    ['a bracketed index in prose edited', text('// values[key] are cached.', code), text('// values[key] are stale.', code), 'PROSE-ONLY'],
+  ]) {
+    repo.write('lib/token.mjs', before); const c0 = repo.commit(name + ': before');
+    repo.write('lib/token.mjs', after); const c1 = repo.commit(name + ': after');
+    assert.deepEqual(cli(repo, c0, c1), verdict === 'CODE' ? { status: 1, line: 'CODE lib/token.mjs' } : { status: 0, line: 'PROSE-ONLY 1 file(s)' }, name);
+  }
 });
 
 // The round-2 reviewer's scenario: semicolon-less code where a regular expression opens the line

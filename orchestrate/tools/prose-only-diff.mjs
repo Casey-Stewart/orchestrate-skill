@@ -35,6 +35,7 @@ export const DIRECTIVES = [
   ['$Flow', /\$Flow[A-Z]\w*/],
   ['LCOV_EXCL', /(?<![\w-])LCOV_EXCL_/],
   ['deepcode', /(?<![\w-])deepcode(?![\w-])/i],
+  ['skipcq', /(?<![\w-])skipcq(?![\w-])/i],
   ['Stryker', /(?<![\w-])stryker(?![\w-])/i],
   ['nosemgrep', /(?<![\w-])nosemgrep(?![\w-])/i],
   ['lgtm', /(?<![\w-])lgtm(?![\w-])/i],
@@ -54,13 +55,13 @@ export const DIRECTIVES = [
 // after a word (`lgtm[js/xss]`, `$FlowFixMe[incompatible-call]`); and a shouted NO-marker
 // (`NOSONAR`, `NOLINT`, `NOQA`, `NOCOMMIT`), whose second letter may not begin an English word
 // (NOT, NOTE, NOW, NONE, NORMAL stay prose).
-export const VERBS = ['disable', 'enable', 'ignore', 'restore', 'suppress', 'expect-error', 'nocheck'];
+export const VERBS = ['disable', 'enable', 'ignore', 'restore', 'suppress', 'expect-error', 'nocheck', 'allow', 'allowlist', 'skip'];
 export const SCOPES = ['next-line', 'next', 'line', 'file', 'all', 'start', 'stop', 'end', 'if', 'else'];
 const oneOf = words => '(?:' + words.join('|') + ')';
 export const SHAPES = [
   ['tool:verb', new RegExp('[A-Za-z][\\w@./]*[:-]\\s?' + oneOf(VERBS) + '(?:[:-]' + oneOf(SCOPES) + ')?(?!\\w)', 'i')],
   ['tool verb scope', new RegExp('[A-Za-z][\\w:.-]*\\s+' + oneOf(VERBS) + '\\s+' + oneOf(SCOPES) + '(?![\\w-])', 'i')],
-  ['word[rule-id]', /(?<![\w$-])[A-Za-z$]\w*\s?\[[A-Za-z][\w-]*[/.:-][\w/.:-]*\]/],
+  ['word[rule-id]', /(?<![\w$-])[A-Za-z$]\w*\s?\[[A-Za-z][\w-]*[/.:_-][\w/.:_-]*\]/],
   ['NO-marker', /(?<![\w-])NO[CFLQS][A-Z]+(?![\w-])/],
 ];
 const MARKER = /^\/[/*]\s*(?:[/!#@]|globals?(?![\w-])|exported(?![\w-]))/;
