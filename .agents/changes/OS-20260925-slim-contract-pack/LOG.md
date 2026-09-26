@@ -991,3 +991,36 @@ condition holds, and the verdict is consumed as *ship with the residual*.
   only casualty. Close-out distillation candidate: insert text by index or with a function
   replacement, never a string replacement that can carry `$` — the substitution hazard
   `tests/prompt.test.cjs`'s quoting fixture already guards for the renderer.
+
+## 2026-09-26 — C1 close-out
+
+- Inputs (issue 001, `f770be1`): `I-01`–`I-04` generated twice (byte-identical), independently
+  validated (`validation-001/independent-check.md`, 29 checks, exit 0; a truncated copy rejected),
+  committed under `evidence/C1/inputs/` (the repository `.gitattributes` pins every input path
+  `-text -eol -filter`; effective attributes checked unset). `I-04` is the BL-046 fixture the ship
+  verdict's human step needs. I-03's commit is unchanged by B04's merge: its template edit sits in
+  a comment the fill strips.
+- Tip validation at the build `f770be1`: `PASS tests 561/563, 2 skipped (24s)` (the issued bundles
+  trip no whole-checkout sweep).
+- QA runner (qa-runner, default tier; hand-filled skeleton, nonce matched): steps 3–14 PASS on
+  `f770be1`, evidence `evidence/C1/step-03.md` … `step-14.md`; inputs re-hashed after the run and
+  unchanged; every reset proven. Its notes, for the close-out residuals: `build-smoke-page.mjs` has
+  no `--help` (step 6 passes, identically through the link); step 10 is absence-only and cannot
+  tell the build from the base; `tests/protocol-contract.test.cjs:119` still maps the retired
+  `EVIDENCE_TOOL`/`FENCE_TOOL` names; the no-polling sentence stands word for word in two files
+  (B03's batch file asked for both).
+- Page: `smoke-c1.json` assembled (14 steps, 6 sections — the Windows run and the BL-046 sign-off
+  first as the hands-on work, then B01–B04), built by the pinned `build-smoke-page.mjs` (75395
+  bytes, every slot filled), read in full, published as a private Claude artifact with the `db`
+  store: https://claude.ai/artifact/YQnp8Pgc1ePNd64YGBsXKX (version 1). The standfirst's saving
+  sentence was corrected before the first publish (browser-local and the page's store).
+- Store check: `ArtifactData list os925-c1-steps` → no documents (reachable, empty).
+- Artifact proof (`evidence/C1/artifact-proof.md`): the rendered-DOM read COULD-NOT-RUN — no browser
+  here, and in the user's connected Chrome the hosted page renders in a cross-origin sandboxed
+  iframe that the extension's DOM, text and accessibility readers cannot enter (its URL redacted by
+  the extension, not recovered). Labelled substitute: blocks derived with Python's `html.parser`
+  from what the renderer receives — 18 blocks, none with a backslash or control character, the 12
+  agent blocks byte-identical to the QA runner's — and the 4 gate and 12 agent blocks run as those
+  bytes from a fresh clone at `f770be1`: 16/16 as each Pass states. One screenshot confirmed the
+  hosted page renders (tally pre-verified 12 · unmarked 2 · of 14).
+- Rows → 🧪; State AT-CHECKPOINT C1. The hand-over asks for the push the Windows step needs.

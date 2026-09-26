@@ -1,0 +1,342 @@
+{
+  "change": "Slim contract pack (OS-20260925)",
+  "checkpoint": 1,
+  "batches": "B01–B04",
+  "branch": "chore/slim-contract-pack-ledger",
+  "buildSha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+  "ckptKey": "os925-c1",
+  "suite": "563 tests: 561 pass, 0 fail, 2 skipped (the Windows-only pair) — pwsh recipe on the integration tip, Linux",
+  "standfirst": "14 steps in 6 sections. Steps 3–14 were pre-verified by the QA runner on the Linux workstation; Steps 1 and 2 are yours — the Windows laptop run, and your sign-off on the residual B04 shipped with. When you're done — or as soon as something fails — press <strong>Copy results as text</strong> and paste it into the chat. Your marks save in this browser, and to the page's own store on the hosted copy.",
+  "facts": [
+    {
+      "dt": "Version",
+      "dd": "none — this repository ships no version file; the build is identified by the SHA and the Step 0 containment check"
+    },
+    {
+      "dt": "Runs",
+      "dd": "12 steps pre-verified by the QA runner on this machine; 2 steps for you"
+    },
+    {
+      "dt": "Known residual",
+      "dd": "<code>BL-046</code> (P1, B04) — shipped by your verdict; Step 2 reproduces it"
+    }
+  ],
+  "gate": {
+    "intro": "Steps 3–14 were run by the QA runner on the Linux workstation; their evidence is linked on each step. On the checkout you verify from (and on the laptop before Step 1), create the scratch directory first (<code>mkdir -p ../c1-scratch</code> in bash; <code>New-Item -ItemType Directory -Force ../c1-scratch</code> in PowerShell), then run:",
+    "commands": [
+      "git branch --show-current",
+      "git merge-base --is-ancestor f770be16140a0e4719886e6475d7d0306ca43ac2 HEAD",
+      "git diff --name-only f770be16140a0e4719886e6475d7d0306ca43ac2..HEAD -- . \":(exclude).agents/\"",
+      "node orchestrate/tools/prose-only-diff.mjs --help"
+    ],
+    "checks": [
+      "The first command prints <code>chore/slim-contract-pack-ledger</code>.",
+      "The containment check exits 0 and the diff prints NOTHING: this checkout contains build <code>f770be1</code>, with no change outside the ledger since.",
+      "There is no version to read: this repository has no version file, so the build is identified by the containment check alone.",
+      "Canary: the last command prints the classifier's usage, starting <code>prose-only-diff.mjs --repo &lt;repo&gt; --base &lt;ref&gt; --head &lt;ref&gt;</code>, and exits 0. On the ledger base <code>edd2f1e</code> the file does not exist and node fails with <em>Cannot find module</em> — if it behaves that way, stop and say so: the checkout did not take."
+    ]
+  },
+  "inputs": [
+    {
+      "id": "I-01",
+      "path": "evidence/C1/inputs/issue-001/i01.bundle",
+      "sha256": "c8a0a533230356624fe18d96677151ba0de7754880764c1eba4c5e3118a7ad59",
+      "size": 1170,
+      "requirements": "A git bundle of a three-commit repository holding only invoice.mjs: c0 7427c9b63406e807c3ea648aa233a39a7d459ce8, c1 668364a99522c3fb8c69082bdee7ab38ffe36671 (a comment-only rewording in both the line and block comment forms), c2 710738e58b6311f5a6195bcbe9899f69c5fdd33d (return sum / 100 becomes sum / 10, one character); no tool-directive or JSDoc comment.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/independent-check.md",
+        "sha256": "ab17018f68cfd9f771569bfeb99b4f5689e39a109f334ea21cf2757049ce822f",
+        "size": 4425,
+        "command": "node .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001",
+        "exitCode": 0,
+        "result": "VALID: the bundle verifies and clones; exactly three commits c0, c1, c2 each holding only invoice.mjs; c0 to c1 changes comments only, both forms; c1 to c2 changes one code line by one character; no directive comment.",
+        "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; bash 5.3.9(1)-release"
+      },
+      "mode": "read-only",
+      "use": "Cloned by the steps that name it with git clone into ../c1-scratch/i01; the issued bundle is read in place, never modified.",
+      "reset": "Keep the issued file unchanged; delete the clone ../c1-scratch/i01."
+    },
+    {
+      "id": "I-02",
+      "path": "evidence/C1/inputs/issue-001/i02.bundle",
+      "sha256": "e5753798a755be364af5e2640976b8e45795bca75abf05b37848151311bb3de8",
+      "size": 425,
+      "requirements": "A git bundle of a one-commit decoy repository (commit 83f0eeee907c072fff7b848d95c1c0deab8a8740) holding only DECOY-REPOSITORY-zq7x.txt.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/independent-check.md",
+        "sha256": "ab17018f68cfd9f771569bfeb99b4f5689e39a109f334ea21cf2757049ce822f",
+        "size": 4425,
+        "command": "node .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001",
+        "exitCode": 0,
+        "result": "VALID: the bundle verifies and clones; one commit; the only path is DECOY-REPOSITORY-zq7x.txt.",
+        "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; bash 5.3.9(1)-release"
+      },
+      "mode": "read-only",
+      "use": "Cloned by the steps that name it with git clone into ../c1-scratch/decoy; the issued bundle is read in place, never modified.",
+      "reset": "Keep the issued file unchanged; delete the clone ../c1-scratch/decoy."
+    },
+    {
+      "id": "I-03",
+      "path": "evidence/C1/inputs/issue-001/i03.bundle",
+      "sha256": "b540f4febe1e4ee8a93f0e3a6497b83176f5621d44f4bf65873543a08a2c33cc",
+      "size": 10130,
+      "requirements": "A git bundle of a one-commit repository (commit 34254f5696044016a8fa784692f74f79a7f919c4) holding ledger .agents/changes/OS-20260101-fixture filled from this build's slimmed templates (six files; no {{ or <!-- outside code spans; the contract under 20000 bytes with a Skill source line; check-ledger parse prints PARSE OK 1 batches), facts.json holding exactly the implementer keys with paths relative to the checkout root (../c1-scratch/i03), and a CLAUDE.md with a Bug-class guardrails heading.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/independent-check.md",
+        "sha256": "ab17018f68cfd9f771569bfeb99b4f5689e39a109f334ea21cf2757049ce822f",
+        "size": 4425,
+        "command": "node .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001",
+        "exitCode": 0,
+        "result": "VALID: the bundle verifies and clones; the ledger holds exactly the six files, nothing unfilled outside code spans, the slimmed contract names the integration branch and setup, check-ledger parse prints PARSE OK 1 batches, facts.json and CLAUDE.md as required.",
+        "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; bash 5.3.9(1)-release"
+      },
+      "mode": "read-only",
+      "use": "Cloned by the steps that name it with git clone into ../c1-scratch/i03; the issued bundle is read in place, never modified.",
+      "reset": "Keep the issued file unchanged; delete the clone ../c1-scratch/i03."
+    },
+    {
+      "id": "I-04",
+      "path": "evidence/C1/inputs/issue-001/i04.bundle",
+      "sha256": "abe5894f6c23509ae80c58191c32f7beef68e9972befeafc05cf858f557c4efb",
+      "size": 780,
+      "requirements": "A git bundle of a two-commit repository holding only lib/token.mjs: c0 fec96e636ff0ed283a8e4f7732adcc27e458063a, c1 9977f52d70d6080afe1069f0e7a4417a1cc0b4e0 appending // gitleaks:allow to its one code line; no secret-shaped string.",
+      "validation": {
+        "path": "evidence/C1/inputs/validation-001/independent-check.md",
+        "sha256": "ab17018f68cfd9f771569bfeb99b4f5689e39a109f334ea21cf2757049ce822f",
+        "size": 4425,
+        "command": "node .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/validate-c1-inputs.mjs .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001",
+        "exitCode": 0,
+        "result": "VALID: the bundle verifies and clones; exactly two commits c0, c1 each holding only lib/token.mjs; c0 to c1 appends exactly // gitleaks:allow to the one code line; no secret-shaped string.",
+        "env": "Linux 7.0.0-31-generic; node v24.20.0; git version 2.53.0; bash 5.3.9(1)-release"
+      },
+      "mode": "read-only",
+      "use": "Cloned by the steps that name it with git clone into ../c1-scratch/i04; the issued bundle is read in place, never modified.",
+      "reset": "Keep the issued file unchanged; delete the clone ../c1-scratch/i04."
+    }
+  ],
+  "inputHistory": [],
+  "sections": [
+    {
+      "n": 1,
+      "title": "The suite on Windows (your laptop)",
+      "lede": "The change's planned human step: the README's PowerShell validation recipe on Windows. It runs the two Windows-only tests that skip on Linux, B02's junction and file-link cases in <code>tests/cli-entry.test.cjs</code>, and every other suite on a Windows checkout.",
+      "need": "The Windows laptop and a checkout of <code>chore/slim-contract-pack-ledger</code> at this build. The branch reaches the laptop only after you authorize pushing it to <code>origin</code> — asked in the hand-over message. Run Step 0 on the laptop first.",
+      "steps": [
+        {
+          "n": 1,
+          "revision": 1,
+          "do": "In PowerShell on the laptop, from the repository root with the branch checked out, run the contract's validation recipe:<pre><code>$testFiles = @(Get-ChildItem -LiteralPath tests -Filter *.test.cjs -File -Recurse | Sort-Object FullName | ForEach-Object FullName)\nif ($testFiles.Count -eq 0) { throw 'No Node test suites discovered' }\nnode --test --test-reporter=spec @testFiles\nif ($LASTEXITCODE -ne 0) { throw 'Node test suite failed' }\ngit diff --check\nif ($LASTEXITCODE -ne 0) { throw 'Git diff check failed' }</code></pre>",
+          "pass": "It finishes without throwing; the totals read <code>ℹ fail 0</code> and <code>ℹ skipped 0</code> (the Windows-only cases ran and passed), and <code>git diff --check</code> prints nothing.",
+          "aside": "Expect 563 tests, 563 pass, 0 fail, 0 skipped — the Linux run of this build reads <code>563 tests: 561 pass, 0 fail, 2 skipped (the Windows-only pair) — pwsh recipe on the integration tip, Linux</code>, the 2 skipped being the Windows-only pair. B02's file-link case asserts the Windows <code>EPERM</code> rather than skipping, and its refusal test asserts that Windows refuses a directory name holding a newline; both run here for the first time."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "The shipped residual — BL-046 (B04)",
+      "lede": "B04 shipped by your verdict with one open P1: the classifier's directive-comment recognition is a sample, so a directive it does not list, such as <code>// gitleaks:allow</code>, reads as prose, and a polish making that edit would skip the fix-diff-only re-review. Code cannot change under that verdict. The fix is filed as <code>BL-046</code>; this step reproduces the residual for your sign-off.",
+      "need": "A checkout of <code>chore/slim-contract-pack-ledger</code> at this build, bash or PowerShell, from the repository root, with <code>../c1-scratch</code> created in Step 0. The issued fixture <code>I-04</code> is committed in the branch: two commits, <code>c1</code> appending <code>// gitleaks:allow</code> to a code line.",
+      "steps": [
+        {
+          "n": 2,
+          "revision": 1,
+          "inputs": [
+            "I-04"
+          ],
+          "do": "<pre><code>git clone .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001/i04.bundle ../c1-scratch/i04\nnode orchestrate/tools/prose-only-diff.mjs --repo ../c1-scratch/i04 --base fec96e636ff0ed283a8e4f7732adcc27e458063a --head 9977f52d70d6080afe1069f0e7a4417a1cc0b4e0</code></pre>",
+          "pass": "The classifier prints <code>PROSE-ONLY 1 file(s)</code> and exits 0 — the residual, reproduced. <strong>Pass</strong> means you accept B04 shipping with it until <code>BL-046</code> lands; <strong>fail</strong> means you do not.",
+          "aside": "Observed on this build by the orchestrator: <code>PROSE-ONLY 1 file(s)</code>, exit 0. The exit code: <code>echo $?</code> in bash, <code>$LASTEXITCODE</code> in PowerShell. Reset: delete <code>../c1-scratch/i04</code>."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "One copy of the procedure — the slimmed contract (B01)",
+      "need": "Run every command in bash from the root of a checkout of <code>chore/slim-contract-pack-ledger</code> at this build, after Step 0 created <code>../c1-scratch</code>. Steps write only under <code>../c1-scratch</code>; issued inputs are committed in the branch and read in place, never modified.",
+      "steps": [
+        {
+          "n": 3,
+          "revision": 1,
+          "inputs": [
+            "I-03"
+          ],
+          "do": "Render an implementer prompt from the fixture ledger built from the slimmed templates, then look for the two Git-model facts in it:<pre><code>git clone .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001/i03.bundle ../c1-scratch/i03\nnode orchestrate/tools/prompt.mjs --ledger ../c1-scratch/i03/.agents/changes/OS-20260101-fixture --role implementer --batch B01 --facts ../c1-scratch/i03/facts.json --out ../c1-scratch/prompts\ngrep -oh -e \"chore/fixture-ledger\" -e \"npm ci --no-audit\" ../c1-scratch/prompts/*.md | sort -u</code></pre>",
+          "pass": "The render prints one line <code>PROMPT &lt;path&gt; NONCE &lt;nonce&gt;</code> and exits 0; the grep prints exactly two lines, <code>chore/fixture-ledger</code> (the integration branch) and <code>npm ci --no-audit</code> (the per-worktree setup).",
+          "aside": "Reset: <code>rm -rf ../c1-scratch/i03 ../c1-scratch/prompts</code>.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-03.md"
+          }
+        },
+        {
+          "n": 4,
+          "revision": 1,
+          "do": "Compare the contract template's size at the ledger base and at this build:<pre><code>git show edd2f1e:./orchestrate/templates/00-READBEFORE.md | wc -c\nwc -c &lt; orchestrate/templates/00-READBEFORE.md</code></pre>",
+          "pass": "The second number is at most half the first (the base reads 63095).",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-04.md"
+          }
+        },
+        {
+          "n": 5,
+          "revision": 1,
+          "do": "<pre><code>grep -rnE \"EVIDENCE_TOOL|FENCE_TOOL\" orchestrate/\necho $?</code></pre>",
+          "pass": "The grep prints nothing and the echo prints <code>1</code>.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-05.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Tool CLIs through any linked path; git environment scrubbed (B02)",
+      "need": "Run every command in bash from the root of a checkout of <code>chore/slim-contract-pack-ledger</code> at this build, after Step 0 created <code>../c1-scratch</code>. Steps write only under <code>../c1-scratch</code>; issued inputs are committed in the branch and read in place, never modified.",
+      "steps": [
+        {
+          "n": 6,
+          "revision": 1,
+          "do": "Link the skill directory beside the checkout and run every tool's <code>--help</code> through the real path and through the link, comparing output and exit code:<pre><code>ln -s \"$PWD/orchestrate\" ../c1-scratch/orch-link\nfor f in orchestrate/tools/*.mjs; do n=$(basename \"$f\"); a=$(node \"$f\" --help 2&gt;&amp;1; echo \"exit $?\"); b=$(node \"../c1-scratch/orch-link/tools/$n\" --help 2&gt;&amp;1; echo \"exit $?\"); if [ \"$a\" = \"$b\" ]; then echo \"SAME $n ${#a}\"; else echo \"DIFF $n\"; fi; done</code></pre>",
+          "pass": "One line per file in <code>orchestrate/tools/</code>, every one <code>SAME</code>. The nine CLIs (build-smoke-page, check-fence, check-ledger, git-evidence, mutate, prompt, prose-only-diff, run-at-ref, validate) show a length in the hundreds or thousands; the two libraries (ledger-parse, smoke-inputs) show <code>6</code>, their output being only <code>exit 0</code>.",
+          "aside": "On the ledger base every link run printed nothing and exited 0 — BL-028. Reset: <code>rm ../c1-scratch/orch-link</code>.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-06.md"
+          }
+        },
+        {
+          "n": 7,
+          "revision": 1,
+          "inputs": [
+            "I-02"
+          ],
+          "do": "Clone the decoy repository, show that plain git follows a <code>GIT_DIR</code> pointed at it, then run the evidence tool under the same <code>GIT_DIR</code>:<pre><code>git clone .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001/i02.bundle ../c1-scratch/decoy\nGIT_DIR=../c1-scratch/decoy/.git git ls-files\nGIT_DIR=../c1-scratch/decoy/.git node orchestrate/tools/git-evidence.mjs worktrees --repo . &gt; ../c1-scratch/decoy-evidence.json\necho $?\ngrep -c \"c1-scratch/decoy\" ../c1-scratch/decoy-evidence.json\ngrep -c \"$PWD\" ../c1-scratch/decoy-evidence.json</code></pre>",
+          "pass": "Plain git prints <code>DECOY-REPOSITORY-zq7x.txt</code> (the plant is live); the evidence run exits 0 (the echo prints <code>0</code>); the first grep prints <code>0</code> — the decoy's path appears nowhere in the evidence — and the second prints 1 or more: the evidence describes this checkout.",
+          "aside": "Reset: <code>rm -rf ../c1-scratch/decoy ../c1-scratch/decoy-evidence.json</code>.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-07.md"
+          }
+        },
+        {
+          "n": 8,
+          "revision": 1,
+          "do": "<pre><code>node orchestrate/tools/mutate.mjs --help | grep -c \"a counted step\"</code></pre>",
+          "pass": "Prints 1 or more, exit 0 (BL-041).",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-08.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "title": "Conductor and agent budget rules (B03)",
+      "need": "Run every command in bash from the root of a checkout of <code>chore/slim-contract-pack-ledger</code> at this build, after Step 0 created <code>../c1-scratch</code>. Steps write only under <code>../c1-scratch</code>; issued inputs are committed in the branch and read in place, never modified.",
+      "steps": [
+        {
+          "n": 9,
+          "revision": 1,
+          "do": "<pre><code>grep -rn \"ReadNotifications\" orchestrate/</code></pre>",
+          "pass": "At least one hit, and every hit is the no-polling rule: it names the tool only to forbid waiting on it.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-09.md"
+          }
+        },
+        {
+          "n": 10,
+          "revision": 1,
+          "do": "<pre><code>grep -nE \"^(effort|model):\" .claude/agents/*.md\necho $?</code></pre>",
+          "pass": "The grep prints nothing and the echo prints <code>1</code>: no agent definition sets an effort or a model.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-10.md"
+          }
+        },
+        {
+          "n": 11,
+          "revision": 1,
+          "do": "<pre><code>grep -n \"unlike the reviewer and the test hunter\" .claude/agents/qa-runner.md\necho $?</code></pre>",
+          "pass": "The grep prints nothing and the echo prints <code>1</code> (BL-034).",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-11.md"
+          }
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "title": "The prose-only polish classifier (B04)",
+      "need": "Run every command in bash from the root of a checkout of <code>chore/slim-contract-pack-ledger</code> at this build, after Step 0 created <code>../c1-scratch</code>. Steps write only under <code>../c1-scratch</code>; issued inputs are committed in the branch and read in place, never modified. Steps 12 and 13 share one clone of the issued fixture <code>I-01</code>: three commits, <code>c0</code> → <code>c1</code> (a comment-only rewording, both comment forms) → <code>c2</code> (a one-character code change in the same file).",
+      "order": "Step 12 creates the clone Step 13 reads.",
+      "steps": [
+        {
+          "n": 12,
+          "revision": 1,
+          "inputs": [
+            "I-01"
+          ],
+          "do": "<pre><code>git clone .agents/changes/OS-20260925-slim-contract-pack/evidence/C1/inputs/issue-001/i01.bundle ../c1-scratch/i01\nnode orchestrate/tools/prose-only-diff.mjs --repo ../c1-scratch/i01 --base 7427c9b63406e807c3ea648aa233a39a7d459ce8 --head 668364a99522c3fb8c69082bdee7ab38ffe36671\necho $?</code></pre>",
+          "pass": "Prints <code>PROSE-ONLY 1 file(s)</code>, and the echo prints <code>0</code>.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-12.md"
+          }
+        },
+        {
+          "n": 13,
+          "revision": 1,
+          "inputs": [
+            "I-01"
+          ],
+          "do": "<pre><code>node orchestrate/tools/prose-only-diff.mjs --repo ../c1-scratch/i01 --base 668364a99522c3fb8c69082bdee7ab38ffe36671 --head 710738e58b6311f5a6195bcbe9899f69c5fdd33d\necho $?</code></pre>",
+          "pass": "Prints <code>CODE invoice.mjs</code>, and the echo prints <code>1</code>.",
+          "aside": "Reset: <code>rm -rf ../c1-scratch/i01</code>.",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-13.md"
+          }
+        },
+        {
+          "n": 14,
+          "revision": 1,
+          "do": "<pre><code>grep -n \"validate.test.cjs:[0-9]\" tests/tool-wiring.test.cjs\necho $?</code></pre>",
+          "pass": "The grep prints nothing and the echo prints <code>1</code> (BL-042).",
+          "pre": {
+            "sha": "f770be16140a0e4719886e6475d7d0306ca43ac2",
+            "stepRevision": 1,
+            "env": "Linux 7.0.0-31-generic (x86_64); node v24.20.0; git 2.53.0; GNU bash 5.3.9",
+            "evidence": "evidence/C1/step-14.md"
+          }
+        }
+      ]
+    }
+  ]
+}
