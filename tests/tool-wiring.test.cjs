@@ -1935,13 +1935,17 @@ test('each prose-polish rule reads exactly as pinned in every carrier', () => {
 // The reversals, clause by clause through the undo sweep's negation-aware reader. Each family
 // owns a specimen no other catches; the planted prose below is written as a reversal would be.
 const POLISH_TRIES = String.raw`\b(?:polish(?:-phase)?|scoped re-review)\b`;
-// One list of the words that grant a second try, read before the polish and after its FIX FIRST alike.
-const AGAIN = String.raw`\b(?:second|2nd|another|two|again|twice|once more)\b`;
+// One list of the words that grant a second try, read before the polish and after its FIX FIRST
+// alike: a count word, or a re-run with no count at all.
+const AGAIN = String.raw`\b(?:second|2nd|another|two|again|twice|once more|one more|further|additional|extra|repeat(?:ed|s)?|re-?runs?|retr(?:y|ies|ied))\b`;
 const PLACE = String.raw`(?:\b(?:outside|beyond|past)\s+(?:the\s+|its\s+|this\s+)?(?:batch's\s+)?(?:fence|files?)\b|\bout-of-fence\b)`;
 const OUTSIDE = String.raw`(?:` + PLACE + String.raw`|\bNEEDS_FENCE\b)`;
 // NEEDS_FENCE is a route, and a list may name it beside ASK: only a verb between them makes one the other.
 const ROUTED = String.raw`\bNEEDS_FENCE\b[^.;:]*\b(?:is|are|becomes?|stays?|rides?\s+as|counts?\s+as|goes\s+as)\s+(?:an?\s+)?`;
-const LESSER = String.raw`\b(?:ASKs?|nits?|non-blocking|advisory)\b`;
+// A finding's lesser classes, and the backlog severities a residual could be filed under.
+const LESSER = String.raw`\b(?:ASKs?|nits?|non-blocking|advisory|low|medium|minor|cosmetic|trivial)\b`;
+// A word in any case, where a family matches its neighbours in one case only.
+const anyCase = word => word.replace(/[a-z]/gi, c => '[' + c.toUpperCase() + c.toLowerCase() + ']');
 const CONTRACT = String.raw`\b(?:channel payload|exported API|ARCHITECTURE|USER-GUIDE)\b`;
 const POLISH_REVERSALS = [
   ['a second polish-phase FIX FIRST', new RegExp(AGAIN + String.raw`[^.;:]*` + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b|`
@@ -1957,10 +1961,16 @@ const POLISH_REVERSALS = [
   ['the fence sets the class', /\bfence\b[^.;:]*\b(?:decides|sets|determines|picks|lowers)\s+(?:the\s+|its\s+)?(?:class|severity)\b/i, 'The fence decides the class of a finding'],
   ['contract prose as an ASK', new RegExp(String.raw`(?<=` + CONTRACT + String.raw`[^.;:]*)\b(?:is|are|stays?|becomes?|counts?\s+as|goes|go|rides?\s+as)\s+(?:an?\s+)?(?:ASKs?|nits?|non-blocking)\b|`
     + String.raw`\btreat\w*\b[^.;:]*` + CONTRACT + String.raw`[^.;:]*\bas\s+(?:an?\s+)?(?:ASKs?|nits?)\b`, 'i'), 'A wrong exported API comment is an ASK'],
-  // The classifier's rule: only PROSE-ONLY exempts. The verdict words are matched in capitals.
+  // The classifier's rule: only PROSE-ONLY exempts, and only the files it counts. The verdict
+  // words are matched in capitals; the prose-only a verdict is read as, in any case.
   ['a CODE or UNKNOWN verdict read as prose-only', new RegExp(String.raw`\b(?:CODE|UNKNOWN)\b[^.;:]*(?:\b[Ee]xempts?\b|\b[Ss]kips?\b|\b[Ss]pares?\b|`
-    + String.raw`\b(?:counts?|reads?|passes|treated)\s+as\s+(?:a\s+)?PROSE-ONLY\b|\bno\s+(?:scoped\s+|fix-diff-only\s+)?re-review\b)`),
+    + String.raw`\bas\s+(?:a\s+)?` + anyCase('prose-only') + String.raw`\b|\b(?:no|without)\s+(?:a\s+)?(?:scoped\s+|fix-diff-only\s+)?re-review\b)`),
     'A classifier UNKNOWN exempts the JavaScript files as PROSE-ONLY does'],
+  ['PROSE-ONLY exempting more than the files it counts', new RegExp(String.raw`\bPROSE-ONLY\b[^.;:]*\b(?:exempts?|spares?|skips?|clears?)\b[^.;:]*\b(?:whole|entire|all|every)\b|`
+    + String.raw`\b(?:whole|entire|all|every)\b[^.;:]*\b(?:exempt\w*|spared|skipped)\b[^.;:]*\bPROSE-ONLY\b`), 'A PROSE-ONLY verdict exempts the whole polish diff from the scoped re-review'],
+  // One strike, whoever fixes: no scoped re-review follows a polish-phase FIX FIRST.
+  ['a further scoped re-review after a polish-phase FIX FIRST', /\bFIX FIRST\b[^.;:]*\b(?:fresh|new|then an?|followed by an?)\s+scoped re-review\b/i,
+    'After a polish-phase FIX FIRST, then a fresh scoped re-review of the new diff'],
   // The implementer's comment rule: a comment never describes how its neighbour behaves.
   ['a comment that describes its neighbour', /\b(?:describ|explain|narrat|restat|summari[sz])\w*\s+how\s+(?:its|the|a|that|each)\s+neighbou?rs?\b/i,
     'A comment may describe how its neighbour behaves'],
@@ -1968,7 +1978,7 @@ const POLISH_REVERSALS = [
 const polishReversals = text => clauses(unticked(text)).flatMap(c => POLISH_REVERSALS.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
 test('no document reverses one strike, the classifier or comment rule, lets the fence lower a finding, or makes contract prose an ASK', () => {
   assert.equal(new Set(POLISH_REVERSALS.map(r => r[0])).size, POLISH_REVERSALS.length);
-  assert.equal(POLISH_REVERSALS.length, 10, 'ten families; one dropped would shrink the sweep to a sample');
+  assert.equal(POLISH_REVERSALS.length, 12, 'twelve families; one dropped would shrink the sweep to a sample');
   for (const [name, pattern, specimen] of POLISH_REVERSALS) {
     assert.deepEqual(POLISH_REVERSALS.filter(([, p]) => p.test(specimen)).map(r => r[0]), [name], name + ': its specimen must be caught by it alone');
     assert.equal(polishReversals(specimen + '.').length, 1, name + ': the clause reader must report the specimen');
@@ -1982,7 +1992,15 @@ test('no document reverses one strike, the classifier or comment rule, lets the 
     'USER-GUIDE claims ride as ASKs.', 'Treat ARCHITECTURE rows as ASKs.',
     // Round 1's survivors: a verdict other than PROSE-ONLY exempting, the comment rule reversed, a second pass granted.
     'A classifier UNKNOWN exempts the JavaScript files as PROSE-ONLY does.', 'A comment may describe how its neighbour behaves.',
-    'ASKs close as a polish pass, and a polish-phase FIX FIRST earns another polish pass.', 'A CODE verdict means no scoped re-review for those files.']) {
+    'ASKs close as a polish pass, and a polish-phase FIX FIRST earns another polish pass.', 'A CODE verdict means no scoped re-review for those files.',
+    // Round 2's survivors: a verdict read as prose-only in lower case or integrating without a
+    // re-review, a second try through the orchestrator with or without a count word, PROSE-ONLY
+    // stretched over the whole diff, and a residual filed lower for its fence.
+    'A classifier UNKNOWN is treated as prose-only.', 'An UNKNOWN diff integrates without a re-review.',
+    "After a polish-phase FIX FIRST on prose, the orchestrator applies the reviewer's wording and runs one more scoped re-review.",
+    'After a polish-phase FIX FIRST, the orchestrator applies the wording and reruns the scoped re-review.',
+    'After a polish-phase FIX FIRST the orchestrator applies the wording, then a fresh scoped re-review of the new diff.',
+    'a PROSE-ONLY verdict exempts the whole polish diff from the scoped re-review.', "A residual whose fix sits outside the batch's files is filed in the backlog as low."]) {
     assert.ok(polishReversals(planted).length >= 1, 'must be reported: ' + planted);
   }
   // The rules themselves, and their negations, are not reversals.

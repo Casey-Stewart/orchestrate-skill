@@ -24,22 +24,38 @@ export const DIRECTIVES = [
   ['prettier', /(?<![\w-])prettier/i],
   ['v8', /(?<![\w-])v8(?![\w-])/i],
   ['jshint', /(?<![\w-])jshint/i],
+  ['jslint', /(?<![\w-])jslint/i],
   ['biome', /(?<![\w-])biome/i],
   ['deno-lint', /(?<![\w-])deno-lint/i],
   ['oxlint', /(?<![\w-])oxlint/i],
   ['webpack', /(?<![\w-])webpack/i],
+  ['turbopack', /(?<![\w-])turbopack/i],
   ['node:coverage', /(?<![\w-])node:coverage(?![\w-])/i],
   ['tslint', /(?<![\w-])tslint/i],
   ['$Flow', /\$Flow[A-Z]\w*/],
   ['NOSONAR', /(?<![\w-])NOSONAR(?![\w-])/i],
+  ['Stryker', /(?<![\w-])stryker(?![\w-])/i],
+  ['nosemgrep', /(?<![\w-])nosemgrep(?![\w-])/i],
+  ['lgtm', /(?<![\w-])lgtm(?![\w-])/i],
+  ['codeql', /(?<![\w-])codeql(?![\w-])/i],
+  ['cspell', /(?<![\w-])(?:cspell|spell-?checker)\s?:/i],
+  ['noinspection', /(?<![\w-])noinspection(?![\w-])/i],
+  ['keep-sorted', /(?<![\w-])keep-sorted(?![\w-])/i],
+  ['clang-format', /(?<![\w-])clang-format(?![\w-])/i],
+  ['spotless', /(?<![\w-])spotless:/i],
   // ESLint's no-fallthrough reads this comment as the intent to fall through.
   ['falls through', /(?<![\w-])falls?\s?through(?![\w-])/i],
 ];
-// A tool joined to a directive verb (`cspell:disable`, `stylelint-disable-next-line`), or a tool
-// followed by `ignore next`, `ignore start` and the like (`bun:coverage ignore next`).
+// The verbs and scopes a directive is shaped from, whatever tool it names: a tool joined to a
+// verb (`cspell:disable`, `stylelint-disable-next-line`), or a tool, a verb and a scope set
+// apart (`bun:coverage ignore next`, `Stryker disable all`). Exported so the corpus pins them.
+export const JOINED_VERBS = ['disable', 'enable', 'ignore', 'expect-error', 'nocheck'];
+export const SPACED_VERBS = ['ignore', 'disable', 'restore'];
+export const SCOPES = ['next-line', 'next', 'start', 'stop', 'if', 'else', 'file', 'all'];
+const oneOf = words => '(?:' + words.join('|') + ')';
 export const SHAPES = [
-  ['tool:verb', /[A-Za-z][\w@./]*[:-]\s?(?:disable|enable|ignore|expect-error|nocheck)(?!\w)/i],
-  ['tool ignore next', /[A-Za-z][\w:.-]*\s+ignore\s+(?:next|start|stop|end|else|if|file|line)(?![\w-])/i],
+  ['tool:verb', new RegExp('[A-Za-z][\\w@./]*[:-]\\s?' + oneOf(JOINED_VERBS) + '(?!\\w)', 'i')],
+  ['tool verb scope', new RegExp('[A-Za-z][\\w:.-]*\\s+' + oneOf(SPACED_VERBS) + '\\s+' + oneOf(SCOPES) + '(?![\\w-])', 'i')],
 ];
 const MARKER = /^\/[/*]\s*(?:[/!#@]|globals?(?![\w-])|exported(?![\w-]))/;
 const TAG = /(?<![\w@.-])@[A-Za-z_$]/;
@@ -52,8 +68,10 @@ const TERMINATOR = /[\n\r\u2028\u2029]/;
 const SPACE = /[\t\v\f \u00a0\ufeff\p{Zs}]/u;
 const isTerminator = c => c !== undefined && TERMINATOR.test(c);
 const wordChar = c => c !== undefined && !TERMINATOR.test(c) && !SPACE.test(c) && (/[\w$\\]/.test(c) || c > '\u007f');
-// After these words a `/` opens a regular expression; after any other word it divides.
-export const OPERAND_KEYWORDS = new Set(['return', 'typeof', 'instanceof', 'in', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'extends', 'default']);
+// After these words a `/` opens a regular expression (after `break`, `continue` and `debugger`
+// the statement has ended, so one on the next line does too); after any other word it divides.
+export const OPERAND_KEYWORDS = new Set(['return', 'typeof', 'instanceof', 'in', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'extends', 'default',
+  'break', 'continue', 'debugger']);
 // A keyword or a plain name depending on context, so a `/` after one is in doubt.
 export const CONTEXTUAL = new Set(['of', 'yield', 'await']);
 export const CONTROL = new Set(['if', 'while', 'for', 'with']);
@@ -61,10 +79,10 @@ export const CONTROL = new Set(['if', 'while', 'for', 'with']);
 function expressionStarts(prev) {
   if (!prev) return true;
   if (prev.type === 'value') return false;
-  if (prev.type === 'word') return prev.property ? false : OPERAND_KEYWORDS.has(prev.text) ? true : CONTEXTUAL.has(prev.text) ? 'doubt' : false;
+  if (prev.type === 'word') return prev.property ? false : prev.label ? 'doubt' : OPERAND_KEYWORDS.has(prev.text) ? true : CONTEXTUAL.has(prev.text) ? 'doubt' : false;
   if (prev.text === ')') return prev.control;
   if (prev.text === ']' || prev.text === '.') return false;
-  if (prev.text === '++' || prev.text === '--') return !prev.postfix;
+  if (prev.text === '++' || prev.text === '--') return prev.postfix === 'doubt' ? 'doubt' : !prev.postfix;
   return prev.text === '}' ? 'doubt' : true;
 }
 function stringEnd(source, at) {
@@ -76,17 +94,29 @@ function stringEnd(source, at) {
   }
   return -1;
 }
-function regexEnd(source, at) {
-  let inClass = false;
+// Where the body closes under one reading of a `[` inside a class: a literal (no `v` flag) or a
+// nested class (`v`); -1 where no `/` closes it on its line.
+function regexBody(source, at, nesting) {
+  let depth = 0;
   for (let j = at + 1; j < source.length; j++) {
     const c = source[j];
     if (isTerminator(c)) return -1;
     if (c === '\\') { j++; if (j >= source.length || isTerminator(source[j])) return -1; }
-    else if (c === '[') inClass = true;
-    else if (c === ']') inClass = false;
-    else if (c === '/' && !inClass) { let end = j + 1; while (wordChar(source[end])) end++; return end; }
+    else if (c === '[') depth = nesting ? depth + 1 : 1;
+    else if (c === ']') depth = nesting ? Math.max(depth - 1, 0) : 0;
+    else if (c === '/' && !depth) return j + 1;
   }
   return -1;
+}
+// The flags that say which reading holds come after the end, so the end is certain only where
+// both readings agree: -2 where they differ, -1 where the literal reading finds none.
+function regexEnd(source, at) {
+  const close = regexBody(source, at, false);
+  if (close === -1) return -1;
+  if (close !== regexBody(source, at, true)) return -2;
+  let end = close;
+  while (wordChar(source[end])) end++;
+  return end;
 }
 
 // The comments of a JavaScript source, found by a tokenizer that tracks strings, template
@@ -129,6 +159,7 @@ export function scan(source) {
       if (starts) {
         const end = regexEnd(source, i);
         if (end === -1) return fail('an unterminated regular expression');
+        if (end === -2) return fail('a [ inside a regular expression class (a nested class under the v flag?)');
         token('value', c); i = end;
       } else { token('punct', c); i++; }
     } else if (c === '<' && source.startsWith('<!--', i)) return fail('an HTML-like comment <!--');
@@ -150,12 +181,18 @@ export function scan(source) {
     } else if (wordChar(c)) {
       let end = i + 1;
       while (end < n && wordChar(source[end])) end++;
-      // A name after `.`, `?.` or `#` (a private name) is never a keyword, however it is spelled.
-      token('word', source.slice(i, end), { property: prev?.text === '.' || prev?.text === '?.' || prev?.text === '#', after: prev?.text }); i = end;
+      // A name after `.`, `?.` or `#` (a private name) is never a keyword, however it is spelled;
+      // a name on the same line as the `break` or `continue` just before it is that statement's
+      // label (across a line break the statement has ended, and it starts the next).
+      const property = prev?.text === '.' || prev?.text === '?.' || prev?.text === '#';
+      const label = lineHasCode && prev?.type === 'word' && !prev.property && (prev.text === 'break' || prev.text === 'continue');
+      token('word', source.slice(i, end), { property, label, after: prev?.text }); i = end;
     } else if ((c === '+' || c === '-') && next === c) {
-      // Postfix when an operand ends the same line just before it; otherwise it prefixes what follows.
-      const operand = prev && (prev.type === 'value' || (prev.type === 'word' && (prev.property || !OPERAND_KEYWORDS.has(prev.text))) || prev.text === ']' || (prev.text === ')' && !prev.control));
-      token('punct', c + c, { postfix: Boolean(lineHasCode && operand) }); i += 2;
+      // Postfix when an operand ends the same line just before it; otherwise it prefixes what
+      // follows. After a keyword-or-name either may hold, so a `/` after it is in doubt.
+      const operand = !prev ? false : prev.type === 'value' || prev.text === ']' || (prev.text === ')' && !prev.control) ? true
+        : prev.type !== 'word' ? false : prev.property ? true : OPERAND_KEYWORDS.has(prev.text) ? false : CONTEXTUAL.has(prev.text) ? 'doubt' : true;
+      token('punct', c + c, { postfix: lineHasCode ? operand : false }); i += 2;
     }
     else if (c === '?' && next === '.' && !/[0-9]/.test(source[i + 2] ?? '')) { token('punct', '?.'); i += 2; }
     else if (source.startsWith('...', i)) { token('punct', '...'); i += 3; }
@@ -178,6 +215,9 @@ export function remainder(source, comments, lines) {
     while (end < source.length && !isTerminator(source[end])) end++;
     const eol = source.startsWith('\r\n', end) ? '\r\n' : source.slice(end, end + 1);
     let text = '', touched = false, lastCut = start;
+    while (k < removed.length && removed[k].end <= start) k++;
+    // An empty line inside a removed comment is the comment's, though the loop below never sees it.
+    if (start === end && removed[k] && removed[k].start < start) touched = true;
     for (let j = start; j < end;) {
       while (k < removed.length && removed[k].end <= j) k++;
       const c = removed[k];

@@ -17,6 +17,9 @@ const TOOL = path.join(ROOT, 'orchestrate', 'tools', 'prose-only-diff.mjs');
 const api = import(pathToFileURL(TOOL).href);
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g, '\n');
 const NUL = String.fromCharCode(0);
+// Built, never typed: a raw line separator or no-break space in this file is refused by the
+// invisible-character sweep, and an escape can be decoded into one on the way in.
+const LS = String.fromCharCode(0x2028), NBSP = String.fromCharCode(0xa0);
 
 // ---- The corpus, rule by rule: [rule, verdict, [before, after], twin [before, after]] ----------
 const RULES = [
@@ -128,9 +131,48 @@ const RULES = [
   ['a template literal left open is a parse that cannot finish', 'UNKNOWN',
     ['export const t = `open ${x}; // a\n', 'export const t = `open ${x}; // b\n'],
     ['export const t = `open ${x}`; // a\n', 'export const t = `open ${x}`; // b\n']],
+  // Written without semicolons: the statement ends at the line break, so the next line's `/`
+  // opens a regular expression, never divides.
+  ['a regular expression on the line after break opens there', 'CODE',
+    ['for (const s of xs) {\n  if (s.done) break\n  /^https?:\\/\\//.test(s.url) && out.push(s)\n}\n', 'for (const s of xs) {\n  if (s.done) break\n  /^https?:\\/\\//.test(s.url) && out.unshift(s)\n}\n'],
+    ['x = breaks\n/[//]a/.test(s);\n', 'x = breaks\n/[//]b/.test(s);\n']],
+  ['a regular expression on the line after continue opens there', 'CODE',
+    ['for (const s of xs) {\n  if (!s) continue\n  /^https?:\\/\\//.test(s) && out.push(s)\n}\n', 'for (const s of xs) {\n  if (!s) continue\n  /^https?:\\/\\//.test(s)\n}\n'],
+    ['x = continued\n/[//]a/.test(s);\n', 'x = continued\n/[//]b/.test(s);\n']],
+  ['a regular expression on the line after debugger opens there', 'CODE',
+    ['debugger\n/[//]a/.test(s);\n', 'debugger\n/[//]b/.test(s);\n'],
+    ['debug()\n/[//]a/.test(s);\n', 'debug()\n/[//]b/.test(s);\n']],
+  ['a comment shaped like a tool directive is code, whatever tool it names', 'CODE',
+    ['// Stryker disable next-line all\nreturn a + b;\n', '// Stryker disable all\nreturn a + b;\n'],
+    ['// Tests ignore next-gen flags.\nreturn a + b;\n', '// Tests ignore all-caps flags.\nreturn a + b;\n']],
+  ['a blank line inside a template literal is template text', 'CODE',
+    ['const HELP = `usage\n\nflags`;\n', 'const HELP = `usage\nflags`;\n'],
+    ['/* usage\n\nflags */\nconst HELP = 1;\n', '/* usage\nflags */\nconst HELP = 1;\n']],
+  ['trailing whitespace after code that follows an inline block comment is code', 'CODE',
+    ['f(/* a */ 1);  \n', 'f(/* a */ 1); \n'],
+    ['f(1); /* a */  \n', 'f(1); /* a */ \n']],
+  ['a line separator ends a line comment', 'CODE',
+    ['// note' + LS + 'process.exit(1);\n', '// note' + LS + 'process.exit(0);\n'],
+    ['// note process.exit(1);\n', '// note process.exit(0);\n']],
+  ['a non-ASCII space keeps two words apart', 'CODE',
+    ['x = typeof' + NBSP + '/[//]a/.test(s);\n', 'x = typeof' + NBSP + '/[//]b/.test(s);\n'],
+    ['x = typeof_/[//]a/.test(s);\n', 'x = typeof_/[//]b/.test(s);\n']],
+  ["a regular expression after a control statement's ) opens there whatever the ( held", 'CODE',
+    ['if (f(x)) /[//]a/.test(s);\n', 'if (f(x)) /[//]b/.test(s);\n'],
+    ['g(f(x)) /[//]a/.test(s);\n', 'g(f(x)) /[//]b/.test(s);\n']],
+  ['a / after the label of a break or continue is in doubt', 'UNKNOWN',
+    ['if (!s) continue outer\n/[/]/.test(s); // a\n', 'if (!s) continue outer\n/[/]/.test(s); // b\n'],
+    ['if (!s) continue\nouter\n/[/]/.test(s); // a\n', 'if (!s) continue\nouter\n/[/]/.test(s); // b\n']],
+  ['a ++ after a word that may be a keyword is in doubt', 'UNKNOWN',
+    ['x = yield ++/[/]/.lastIndex; // a\n', 'x = yield ++/[/]/.lastIndex; // b\n'],
+    ['x = yielded ++/[/]/.lastIndex; // a\n', 'x = yielded ++/[/]/.lastIndex; // b\n']],
+  // Under the v flag a `[` inside a class opens a nested one, and the flag comes after the end.
+  ['a [ inside a regular expression class may nest', 'UNKNOWN',
+    ['x = /[[a]/b//c]/v.test(s);\n', 'x = /[[a]/b//d]/v.test(s);\n'],
+    ['x = /[[a]--[b]]/v.test(s); // c\n', 'x = /[[a]--[b]]/v.test(s); // d\n']],
 ];
 // Pinned by hand, so a rule dropped from the corpus goes red here rather than shrinking every loop.
-const RULE_COUNTS = { CODE: 25, UNKNOWN: 10 };
+const RULE_COUNTS = { CODE: 34, UNKNOWN: 13 };
 // Edits a polish makes, and code the reader must not mistake for doubt: each must read PROSE-ONLY.
 const PROSE = [
   ['a line comment reworded', '// Adds two numbers.\nexport const add = (a, b) => a + b;\n', '// Adds two numbers together.\nexport const add = (a, b) => a + b;\n'],
@@ -153,7 +195,10 @@ const PROSE = [
   ['a comment beside a hashbang', '#!/usr/bin/env node\n// a\nrun();\n', '#!/usr/bin/env node\n// b\nrun();\n'],
   ['JSDoc-tagged comments untouched, prose beside them reworded', '/** @returns {number} */\n// a\nconst f = () => 1;\n', '/** @returns {number} */\n// b\nconst f = () => 1;\n'],
 ];
+// Every line end the reader knows: LF, CRLF, and the Unicode line separator.
 const crlf = text => text.replace(/\n/g, '\r\n');
+const ls = text => text.replace(/\n/g, LS);
+const LINE_ENDS = [text => text, crlf, ls];
 
 test('the corpus is the one written above: its size and its rules, pinned', () => {
   const names = RULES.map(r => r[0]);
@@ -165,25 +210,29 @@ test('the corpus is the one written above: its size and its rules, pinned', () =
   for (const [rule, , [a, b], [c, d]] of RULES) assert.ok(a !== b && c !== d && (a !== c || b !== d), rule);
 });
 
-test('every rule catches its case, and its twin, lacking only the trigger, reads PROSE-ONLY, LF and CRLF', async () => {
+test('every rule catches its case, and its twin, lacking only the trigger, reads PROSE-ONLY, under every line end', async () => {
   const { compareSources } = await api;
+  assert.equal(LINE_ENDS.length, 3);
   for (const [rule, verdict, [before, after], [twinBefore, twinAfter]] of RULES) {
-    for (const eol of [text => text, crlf]) {
+    for (const eol of LINE_ENDS) {
       assert.equal(compareSources(eol(before), eol(after)).verdict, verdict, rule);
       assert.equal(compareSources(eol(twinBefore), eol(twinAfter)).verdict, 'PROSE-ONLY', rule + ' (twin)');
     }
   }
   for (const [name, before, after] of PROSE) {
-    for (const eol of [text => text, crlf]) assert.deepEqual(compareSources(eol(before), eol(after)), { verdict: 'PROSE-ONLY' }, name);
+    for (const eol of LINE_ENDS) assert.deepEqual(compareSources(eol(before), eol(after)), { verdict: 'PROSE-ONLY' }, name);
   }
 });
 
 // Every way the reader refuses, read from the tool's own source, so a new refusal needs a fixture.
+// A string or a regular expression that closes on a later line is refused at its line break:
+// one that never closes would be refused at the end of the file whatever the line break did.
 const REFUSALS = [
   ['an unterminated block comment', 'x = 1; /* open\n', 'x = 1; /* shut */\n'],
-  ['an unterminated string', "const s = 'open;\n", "const s = 'shut';\n"],
+  ['an unterminated string', "const s = 'open;\nshut';\n", "const s = 'open shut';\n"],
   ['a / that may open a regular expression or divide', 'if (a) { b(); }\n/[/]/.test(c);\n', 'if (a) { b(); }\n;/[/]/.test(c);\n'],
-  ['an unterminated regular expression', 'const r = /[/;\n', 'const r = /[/]/;\n'],
+  ['an unterminated regular expression', 'const r = /open\nshut/;\n', 'const r = /open shut/;\n'],
+  ['a [ inside a regular expression class (a nested class under the v flag?)', 'const r = /[[a]/]/v;\n', 'const r = /[[a]]/v;\n'],
   ['an HTML-like comment <!--', 'x <!-- y\n', 'x < !-- y\n'],
   ['a < where an expression may start (JSX?)', 'return <div/>;\n', 'return a <div;\n'],
   ['an HTML-like comment -->', '--> y\n', 'x --> y\n'],
@@ -195,7 +244,7 @@ const REFUSALS = [
 test('each refusal of the reader has a fixture, and a twin one edit away that it reads', async () => {
   const { scan } = await api;
   const declared = [...fs.readFileSync(TOOL, 'utf8').matchAll(/\bfail\('([^']+)'\)/g)].map(m => m[1]).sort();
-  assert.ok(declared.length >= 10, 'the refusals were really read: ' + declared.join(' | '));
+  assert.ok(declared.length >= 12, 'the refusals were really read: ' + declared.join(' | '));
   assert.deepEqual(REFUSALS.map(r => r[0]).sort(), declared, 'every refusal the tool declares has a fixture here, and no other');
   for (const [reason, refused, read] of REFUSALS) {
     assert.deepEqual(scan(refused), { ok: false, reason }, reason);
@@ -208,14 +257,14 @@ test('each refusal of the reader has a fixture, and a twin one edit away that it
 // `/[//]a/` is a pattern only where an expression starts: after a plain name it divides, and
 // `//]a/` is a comment.
 const GRAMMAR = {
-  operand: ['case', 'default', 'delete', 'do', 'else', 'extends', 'in', 'instanceof', 'new', 'return', 'throw', 'typeof', 'void'],
+  operand: ['break', 'case', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'extends', 'in', 'instanceof', 'new', 'return', 'throw', 'typeof', 'void'],
   contextual: ['await', 'of', 'yield'],
   control: ['for', 'if', 'while', 'with'],
 };
 test('after each keyword a / opens a regular expression, after a keyword-or-name it is in doubt, after a name it divides', async () => {
   const { compareSources, OPERAND_KEYWORDS, CONTEXTUAL, CONTROL } = await api;
   assert.deepEqual([[...OPERAND_KEYWORDS].sort(), [...CONTEXTUAL].sort(), [...CONTROL].sort()], [GRAMMAR.operand, GRAMMAR.contextual, GRAMMAR.control]);
-  assert.deepEqual([GRAMMAR.operand.length, GRAMMAR.contextual.length, GRAMMAR.control.length], [13, 3, 4], 'the lists written here, pinned by size');
+  assert.deepEqual([GRAMMAR.operand.length, GRAMMAR.contextual.length, GRAMMAR.control.length], [16, 3, 4], 'the lists written here, pinned by size');
   const pair = lead => [lead + ' /[//]a/.test(s);\n', lead + ' /[//]b/.test(s);\n'];
   for (const word of GRAMMAR.operand) assert.equal(compareSources(...pair('x = ' + word)).verdict, 'CODE', word);
   for (const word of GRAMMAR.contextual) assert.equal(compareSources(...pair('x = ' + word)).verdict, 'UNKNOWN', word);
@@ -231,24 +280,50 @@ test('after each keyword a / opens a regular expression, after a keyword-or-name
 // lists owns one no other directive catches, each family owns one the other three miss, and prose
 // that only looks like a directive or a tag is left prose.
 const DIRECTIVE_COMMENTS = [
-  '// eslint-disable-next-line no-console -- the CLI prints its result', '/* istanbul ignore next: a platform guard */', '/* c8 ignore next 3 */',
-  '// @ts-expect-error: the legacy caller passes a string', '// prettier-ignore', '/* v8 ignore next */', '/* jshint esversion: 11 */',
+  '// eslint-disable-next-line no-console -- the CLI prints its result', '/* eslint quotes: ["error", "double"] */', '/* eslint-env node */',
+  '/* istanbul ignore next: a platform guard */', '/* istanbul ignore if */', '/* istanbul ignore else */', '/* istanbul ignore file */',
+  '/* c8 ignore next 3 */', '/* c8 ignore start */', '/* c8 ignore stop */', '// @ts-expect-error: the legacy caller passes a string', '// @ts-nocheck',
+  '// prettier-ignore', '/* v8 ignore next */', '/* jshint esversion: 11 */', '/*jslint node:true, es6 */',
   '// biome-ignore lint/suspicious/noExplicitAny: legacy data', '// deno-lint-ignore no-explicit-any', '// oxlint-disable-next-line no-unused-vars',
-  '/* webpackChunkName: "editor" */', '/* node:coverage ignore next */', '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props',
-  '// NOSONAR: the pattern is vetted', '// falls through to the default branch',
+  '/* webpackChunkName: "editor" */', '/* turbopackIgnore: true */', '/* node:coverage ignore next */', '/* node:coverage disable */',
+  '// tslint:disable-next-line:no-any', '// $FlowFixMe[incompatible-call] legacy props', '// NOSONAR: the pattern is vetted',
+  '// Stryker disable next-line all', '// Stryker disable all', '// Stryker restore all', '// Stryker restore EqualityOperator',
+  '// nosemgrep: javascript.lang.security.audit.path-traversal', '// nosemgrep', '// lgtm[js/xss]', '// lgtm', '// codeql[js/unused-local-variable]',
+  '// cSpell:words xyzzy plugh', '// spell-checker: disable', '// noinspection JSUnusedGlobalSymbols', '// keep-sorted start', '// clang-format off', '// spotless:off',
+  '// falls through to the default branch', '// fallthrough',
 ];
-const SHAPE_COMMENTS = ['// cspell:disable-next-line', '/* stylelint-disable-next-line selector-max-id */', '// jscs:disable requireCamelCaseOrUpperCaseIdentifiers',
-  '/* bun:coverage ignore next */'];
+// Kept by their shape alone: the tool each names is on no list.
+const SHAPE_COMMENTS = ['/* stylelint-disable-next-line selector-max-id */', '/* stylelint-enable */', '// jscs:disable requireCamelCaseOrUpperCaseIdentifiers',
+  '// sort-imports-ignore', '// deepscan-disable-line', '// svelte-ignore a11y-missing-attribute', '/* vite-ignore */',
+  '/* bun:coverage ignore next */', '/* bun:coverage ignore start */', '/* bun:coverage ignore stop */'];
 const MARKER_COMMENTS = ['//# sourceMappingURL=run.js.map', '/*! Licensed MIT; see LICENSE */', '/// <reference types="node" />', '/* global fetch, Response */',
   '/* exported main */', '/* globals describe, it */', '//@ sourceURL=eval-1.js'];
 const TAG_COMMENTS = ['/** @returns {number} the sum */', '/** Parses a flag list; see {@link parseFlags}. */', '/**\n * Old entry point.\n * @deprecated since 2.0\n */'];
+// Kept by several families at once, each pinned to exactly the families that keep it.
+const SHARED_COMMENTS = [
+  ['// @ts-expect-error: the legacy caller passes a string', ['directive', 'shape', 'marker', 'tag']],
+  ['// @ts-nocheck', ['directive', 'shape', 'marker', 'tag']],
+  ["// @glint-expect-error: the component's args are loose", ['shape', 'marker', 'tag']],
+  ['// @vite-ignore', ['shape', 'marker', 'tag']],
+  ['// Stryker disable next-line all', ['directive', 'shape']],
+  ['/* istanbul ignore else */', ['directive', 'shape']],
+];
 const PROSE_COMMENTS = ['// Adds two numbers.', '// Mail the maintainers at team@example.com.', '// polish discarded: @<sha> marks the reviewed tree.',
   '/* Falls back to the default when unset. */', '/** Adds two numbers. */', '// the abc8 codec', '// the v8-compat shim', '// istanbul-lib-coverage reads this',
-  '// A path like a/b/c.', '// a c80 checksum', '// Blank lines are ignored.', '// A self-disabled switch.', '// Callers ignore next-gen flags.'];
+  '// A path like a/b/c.', '// a c80 checksum', '// Blank lines are ignored.', '// A self-disabled switch.', '// Callers ignore next-gen flags.',
+  '// Tests ignore all-caps names.', '// keep sorted by name', '// no inspection needed here', '// semgrep rules live in .semgrep/',
+  '// the cspell dictionary is cspell.json', '// codeql-cli output goes to out/', '// spotless output', '// clang formats this file'];
+// The shapes' verbs and scopes, written here from the directives above, never read off the tool.
+const SHAPE_GRAMMAR = {
+  joined: ['disable', 'enable', 'ignore', 'expect-error', 'nocheck'],
+  spaced: ['ignore', 'disable', 'restore'],
+  scopes: ['next-line', 'next', 'start', 'stop', 'if', 'else', 'file', 'all'],
+};
 test('each directive, and each comment family, owns a real comment; prose that only looks like one is prose', async () => {
   const { DIRECTIVES, SHAPES, keptBy } = await api;
-  assert.deepEqual([DIRECTIVES.length, SHAPES.length], [16, 2], 'the directive and shape lists are pinned by size');
-  assert.deepEqual([DIRECTIVE_COMMENTS.length, SHAPE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, PROSE_COMMENTS.length], [16, 4, 7, 3, 13]);
+  assert.deepEqual([DIRECTIVES.length, SHAPES.length], [27, 2], 'the directive and shape lists are pinned by size');
+  assert.deepEqual([DIRECTIVE_COMMENTS.length, SHAPE_COMMENTS.length, MARKER_COMMENTS.length, TAG_COMMENTS.length, SHARED_COMMENTS.length, PROSE_COMMENTS.length],
+    [43, 10, 7, 3, 6, 21]);
   // The five the feature names are in the list, by name.
   for (const named of ['eslint', 'istanbul', 'c8', '@ts-', 'prettier']) assert.ok(DIRECTIVES.some(([name]) => name === named), named);
   for (const [name] of DIRECTIVES) {
@@ -264,8 +339,27 @@ test('each directive, and each comment family, owns a real comment; prose that o
   const alone = (list, family) => list.filter(c => keptBy(c).join() === family);
   assert.ok(alone(DIRECTIVE_COMMENTS, 'directive').length >= 1 && alone(SHAPE_COMMENTS, 'shape').length === SHAPE_COMMENTS.length
     && alone(MARKER_COMMENTS, 'marker').length === MARKER_COMMENTS.length && alone(TAG_COMMENTS, 'tag').length === TAG_COMMENTS.length, 'each family owns its comments');
-  assert.deepEqual(keptBy('// @ts-expect-error: the legacy caller passes a string'), ['directive', 'shape', 'marker', 'tag']);
+  for (const [comment, families] of SHARED_COMMENTS) assert.deepEqual(keptBy(comment), families, comment);
   for (const comment of PROSE_COMMENTS) assert.deepEqual(keptBy(comment), [], comment);
+});
+
+test('each verb and scope a shape accepts is the one written here, and ends a match on a real comment', async () => {
+  const { SHAPES, JOINED_VERBS, SPACED_VERBS, SCOPES } = await api;
+  assert.deepEqual([JOINED_VERBS, SPACED_VERBS, SCOPES], [SHAPE_GRAMMAR.joined, SHAPE_GRAMMAR.spaced, SHAPE_GRAMMAR.scopes]);
+  assert.deepEqual([SHAPE_GRAMMAR.joined.length, SHAPE_GRAMMAR.spaced.length, SHAPE_GRAMMAR.scopes.length], [5, 3, 8], 'the lists written here, pinned by size');
+  const pool = [...DIRECTIVE_COMMENTS, ...SHAPE_COMMENTS, ...MARKER_COMMENTS, ...TAG_COMMENTS, ...SHARED_COMMENTS.map(s => s[0])];
+  const [[, joined], [, spaced]] = SHAPES;
+  // What each shape matched, on every pool comment it matches: the joined shape ends in its verb,
+  // the spaced one in its verb and scope.
+  const joinedEnds = pool.map(c => joined.exec(c)).filter(Boolean).map(m => m[0].toLowerCase());
+  const spacedEnds = pool.map(c => spaced.exec(c)).filter(Boolean).map(m => /\s(\S+)\s+(\S+)$/.exec(m[0].toLowerCase()).slice(1));
+  assert.ok(joinedEnds.length >= 5 && spacedEnds.length >= 8, 'the shapes really match the pool');
+  for (const verb of SHAPE_GRAMMAR.joined) assert.ok(joinedEnds.some(end => end.endsWith(verb)), 'no pool comment matches the joined shape through ' + verb);
+  for (const verb of SHAPE_GRAMMAR.spaced) assert.ok(spacedEnds.some(([v]) => v === verb), 'no pool comment matches the spaced shape through ' + verb);
+  for (const scope of SHAPE_GRAMMAR.scopes) assert.ok(spacedEnds.some(([, s]) => s === scope), 'no pool comment matches the spaced shape through ' + scope);
+  // The other side: a word past the list is not a verb or scope, however it is placed.
+  assert.equal(joined.test('// cspell:words xyzzy'), false);
+  assert.equal(spaced.test('// Stryker disable EqualityOperator'), false);
 });
 
 // ---- The CLI as protocol.md publishes it, on real commits ------------------------------------
