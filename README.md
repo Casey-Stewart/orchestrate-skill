@@ -223,6 +223,7 @@ orchestrate/
     ├── prompt.mjs                  renders one per-batch sub-agent prompt from the ledger and a facts file, ending in the nonce its report echoes
     ├── mutate.mjs                  proves chosen mutations on a disposable clone: control first, then KILLED or SURVIVED each, restored byte for byte
     ├── run-at-ref.mjs              runs a validation spec on a disposable clone of any ref: one AT line, validate.mjs's exit code
+    ├── prose-only-diff.mjs         classifies a polish diff: PROSE-ONLY when only JavaScript comments changed, else CODE or UNKNOWN, one line
     └── build-smoke-page.mjs        validates inputs and fills the checkpoint sidecar/template
 ```
 

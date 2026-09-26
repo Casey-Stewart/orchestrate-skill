@@ -105,6 +105,10 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
 
 - **P0** — wrong behavior / violated criterion or guardrail, concrete scenario. Blocking.
 - **P1** — should fix, concrete scenario, needs a production change. Blocking.
+- Severity is about behaviour, never the fence: a violated criterion whose fix sits
+  outside the batch's files is still P0 or P1, and a residual keeps its severity wherever
+  its fix lies — the fence decides only the route (`NEEDS_FENCE` → §Fence changes, a
+  recorded extension), never the class.
 - **ASK** — in-fence, about the batch's OWN artifacts (its new tests' strength, smoke-step
   prose, comments, a doc sweep it owns), no production behavior change. Rides under
   `SHIP` as a list. Polish pass: resume the same implementer with the pointer to its
@@ -112,17 +116,32 @@ checkpoint is recorded (`escaped` counts every fail across re-runs).
   items to its checklist, does them, commits; closes mechanically (fence check +
   validations; polish commits touch only test/doc/prose paths — a production file touched
   → fix-diff-only re-review by a fresh reviewer). Never a round.
+  Prose that is a contract — channel payload docs, exported API comments, ARCHITECTURE
+  rows, USER-GUIDE claims — is never an ASK: wrong, it is P0 or P1, and `FIX FIRST`.
+  An ASK on other prose carries its replacement text, whose fact the reviewer verified
+  when it flagged the claim: the orchestrator applies that text itself, one edit on the
+  batch branch and no implementer resume, in a commit that also appends the ask to the
+  batch file as an already ticked `- [x] polish:` item in the form `02-batch.md` shows,
+  and one unticked `- [ ] polish:` item per ask it leaves to the polish pass, so a crash
+  before that pass meets a partial checklist in §Recovery; the polish pass takes those,
+  and none left means none runs.
+  Once the polish has landed, the orchestrator classifies its diff:
+  `node "<skill-dir>/tools/prose-only-diff.mjs" --repo <batch worktree> --base <pre-polish sha> --head <polish tip>`.
+  `PROSE-ONLY` exempts the JavaScript files it counts from the fix-diff-only re-review,
+  the other paths it counts keeping the path rule; `CODE` or `UNKNOWN` keeps the path
+  rule for the whole diff. §Recovery keeps the path rule even where the classifier would
+  have read the diff as prose-only — after a crash a production file → fix-diff-only
+  re-review — a deliberately conservative fallback.
   The scoped re-review's verdict is recorded like any other (`R<k> <verdict> @<sha>`,
   findings in LOG.md; an R-line after the `SHIP … asks=` line is polish-phase and never
-  counts toward the cap). `SHIP` → the close completes. `FIX FIRST` → resume the
-  implementer to revert the offending production hunks or redo the polish within
-  test/doc/prose (an ASK never licenses a production behavior change), then a fresh scoped
-  re-review of the new diff. A SECOND polish-phase `FIX FIRST` discards the polish: write
-  `polish discarded: @<sha>` (the pre-polish `SHIP` tip) into the row's Notes first — the
-  marker §Recovery keys on, and the recorded authorization — then ONE revert commit
-  spanning `@<sha>..HEAD` (never a reset — no history rewriting, the R-lines' SHAs stay
-  reachable; `git diff @<sha> HEAD` must come back empty), integrate that reviewed tree,
-  unclosed ASKs → backlog entries. Polish never turns a batch `⛔`.
+  counts toward the cap). `SHIP` → the close completes. One strike: a polish-phase
+  `FIX FIRST` discards the polish at once (an ASK never licenses a production behavior
+  change): write `polish discarded: @<sha>` (the pre-polish `SHIP` tip) into the row's
+  Notes first — the marker §Recovery keys on, and the recorded authorization — then ONE
+  revert commit spanning `@<sha>..HEAD` (never a reset — no history rewriting, the
+  R-lines' SHAs stay reachable; `git diff @<sha> HEAD` must come back empty), integrate
+  that reviewed tree, unclosed ASKs → backlog entries, each with its wording attached (a
+  prose ASK's replacement text). Polish never turns a batch `⛔`.
 - Only `FIX FIRST` rounds count toward the cap of two. Fence bounces, evidence resubmits,
   polish passes, scoped re-reviews and `NEEDS A CLOSER LOOK` checks never do — nor does a
   `FIX FIRST` a scoped re-review returns: its bound is the polish-discard rule above, not

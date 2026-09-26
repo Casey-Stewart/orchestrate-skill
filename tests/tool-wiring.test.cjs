@@ -1410,7 +1410,9 @@ test('recovery, respawn and later rounds work from rendered files and LOG.md, ne
 // each with exit 0. So the append, recovery and join commands are taken out of the documents
 // as published, only their placeholders filled, and run by Git for Windows' own bash: the
 // contract validates from PowerShell, whose PATH reaches WSL's launcher for `bash` and holds no
-// awk (tests/validate.test.cjs:611-623). Every outcome is judged on whole bytes.
+// awk (the Git for Windows bash set-up under which tests/validate.test.cjs runs its test
+// 'shell steps run the script as one argument and propagate its exit code'). Every outcome is
+// judged on whole bytes.
 const GIT_BASH = process.platform !== 'win32' ? 'bash'
   : path.resolve(spawnSync('git', ['--exec-path'], { encoding: 'utf8' }).stdout.trim(), '..', '..', '..', 'usr', 'bin', 'bash.exe');
 function bashEnv(env) {
@@ -1419,6 +1421,23 @@ function bashEnv(env) {
   for (const key of keys) delete out[key];
   return { ...out, PATH: [path.dirname(GIT_BASH), current].join(';') };
 }
+// [BL-042] The comment above names the validate.test.cjs test it leans on by its title, never
+// by a line range: the range it used to name went stale as that file grew.
+test('[BL-042] the Git-bash pointer names, by title, the tests/validate.test.cjs test that runs the shells', () => {
+  const source = read('tests/tool-wiring.test.cjs');
+  const named = /tests\/validate\.test\.cjs runs its test\n\/\/ '([^'\n]+)'/.exec(source);
+  assert.ok(named, 'the pointer names the test by its title');
+  // Each top-level test of that file with its body, up to the next: the named one must be the
+  // one that runs the shells, not merely a title that exists.
+  const tests = read('tests/validate.test.cjs').split(/^(?=test\()/m).filter(t => t.startsWith('test('));
+  const target = tests.filter(t => t.startsWith("test('" + named[1] + "'"));
+  assert.equal(target.length, 1, 'no test of that title in tests/validate.test.cjs: ' + named[1]);
+  const shells = /\b(?:GIT_BASH|SHELLS)\b/;
+  assert.match(target[0], shells, 'the named test does not run the shells: ' + named[1]);
+  // The check can fail: another test in that file does not run the shells.
+  assert.ok(tests.some(t => !shells.test(t)), 'a test that does not run the shells exists in tests/validate.test.cjs');
+  assert.doesNotMatch(source, new RegExp('validate' + '\\.test\\.cjs:' + '[0-9]'), 'a line-range pointer into tests/validate.test.cjs');
+});
 // The published text with its placeholders filled: every one of them, and nothing else.
 function filledCommand(command, values) {
   const tokens = [...new Set([...command.matchAll(/<[A-Za-z][A-Za-z -]*>/g)].map(m => m[0]))].sort();
@@ -1867,4 +1886,145 @@ test('the undo sweep, its reader and its domain are unweakened since ' + FAMILY_
     assert.ok(UNDO.some(([n, p, sp]) => n === name && p.source === pattern.source && p.flags === pattern.flags && sp === specimen),
       'UNDO lost or narrowed: ' + name);
   }
+});
+
+// ===== Prose polish (B04 of OS-20260925) =================================================
+// The rules B04 wrote, each pinned whole in every carrier (as PINNED and BUDGET are), and each
+// guarded by a sweep over every document for the reversal a later edit would write: a
+// polish-phase FIX FIRST discards the polish at once, never after a second try; only PROSE-ONLY
+// exempts files from the re-review; a comment never describes how its neighbour behaves; prose
+// that is a contract is never an ASK; and severity is about behaviour, never the fence (BL-044).
+const SEVERITY = "Severity is about behaviour, never the fence: a violated criterion whose fix sits outside the batch's files is still P0 or P1";
+const COMMENT_RULE = 'A comment states what the code beneath it does and why, and points at a neighbour by path and symbol; it never describes how the neighbour behaves.';
+const CLASSIFY = '`node "<skill-dir>/tools/prose-only-diff.mjs" --repo <batch worktree> --base <pre-polish sha> --head <polish tip>`';
+const ONE_STRIKE = 'One strike: a polish-phase `FIX FIRST` discards the polish at once (an ASK never licenses a production behavior change)';
+const POLISH_RULES = {
+  severityProtocol: ['orchestrate/references/protocol.md', '- Severity is about behaviour', '\n- **ASK**',
+    '- ' + SEVERITY + ', and a residual keeps its severity wherever its fix lies — the fence decides only the route (`NEEDS_FENCE` → §Fence changes, a recorded extension), never the class.'],
+  severitySkeleton: [PROMPTS, '  Severity is about behaviour', '\nSHIP = no P0/P1',
+    SEVERITY + ' — the fence decides only the route (NEEDS_FENCE), never the class. Prose that is a contract (channel payload docs, exported API comments, ARCHITECTURE rows, USER-GUIDE claims) is never an ASK: wrong, it is P0 or P1. An ASK on other prose carries its replacement text, whose fact you verified.'],
+  severityDefinition: ['.claude/agents/reviewer.md', 'Severity is about behaviour', '\n\nThe tool list',
+    SEVERITY + ' — the fence decides only the route (`NEEDS_FENCE`), never the class.'],
+  polishProtocol: ['orchestrate/references/protocol.md', '  Prose that is a contract', '\n- Only `FIX FIRST` rounds',
+    'Prose that is a contract — channel payload docs, exported API comments, ARCHITECTURE rows, USER-GUIDE claims — is never an ASK: wrong, it is P0 or P1, and `FIX FIRST`. '
+    + "An ASK on other prose carries its replacement text, whose fact the reviewer verified when it flagged the claim: the orchestrator applies that text itself, one edit on the batch branch and no implementer resume, in a commit that also appends the ask to the batch file as an already ticked `- [x] polish:` item in the form `02-batch.md` shows, and one unticked `- [ ] polish:` item per ask it leaves to the polish pass, so a crash before that pass meets a partial checklist in §Recovery; the polish pass takes those, and none left means none runs. "
+    + 'Once the polish has landed, the orchestrator classifies its diff: ' + CLASSIFY + '. '
+    + '`PROSE-ONLY` exempts the JavaScript files it counts from the fix-diff-only re-review, the other paths it counts keeping the path rule; `CODE` or `UNKNOWN` keeps the path rule for the whole diff. '
+    + '§Recovery keeps the path rule even where the classifier would have read the diff as prose-only — after a crash a production file → fix-diff-only re-review — a deliberately conservative fallback. '
+    + "The scoped re-review's verdict is recorded like any other (`R<k> <verdict> @<sha>`, findings in LOG.md; an R-line after the `SHIP … asks=` line is polish-phase and never counts toward the cap). `SHIP` → the close completes. "
+    + ONE_STRIKE + ": write `polish discarded: @<sha>` (the pre-polish `SHIP` tip) into the row's Notes first — the marker §Recovery keys on, and the recorded authorization — then ONE revert commit spanning `@<sha>..HEAD` (never a reset — no history rewriting, the R-lines' SHAs stay reachable; `git diff @<sha> HEAD` must come back empty), integrate that reviewed tree, unclosed ASKs → backlog entries, each with its wording attached (a prose ASK's replacement text). Polish never turns a batch `⛔`."],
+  scopedReReview: [PROMPTS, '**Scoped re-review**', '\n\nOnly `FIX FIRST` rounds',
+    '**Scoped re-review** (a polish commit touched a production file that `prose-only-diff.mjs` did not read as prose-only): a fresh reviewer given only `git diff [PRE_POLISH_SHA]..HEAD`, the ASK list, and duties 1, 2 and 4. Not a round. '
+    + "Its verdict is recorded like any other (`R<k> <verdict> @<sha>`) and never counts toward the cap. One strike: its `FIX FIRST` discards the polish at once — the orchestrator writes `polish discarded: @[PRE_POLISH_SHA]` into the row's Notes, reverts back to that reviewed tree in ONE commit (never a reset), and integrates it; unclosed ASKs → backlog, each with its wording attached."],
+  polishBlock: [PROMPTS, 'First append one `- [ ] polish: <ask>`', ' then do',
+    'First append one `- [ ] polish: <ask>` checklist line per ask your batch file does not list yet (an orchestrator that applied a prose ask listed every ask: those it applied ticked, yours unticked),'],
+  waveGate: ['orchestrate/references/execution-models.md', 'with ASKs → polish pass', '; `FIX FIRST` → round 1',
+    "with ASKs → polish pass (not a round; a prose ASK's replacement text the orchestrator applies itself, `prose-only-diff.mjs` classifies the polish diff, and a polish-phase `FIX FIRST` discards the polish at once — protocol.md §Severity and round accounting)"],
+  commentSkeleton: [PROMPTS, 'RULES: read a file before you edit it. A comment', ' Chain a command', 'RULES: read a file before you edit it. ' + COMMENT_RULE],
+  commentDefinition: ['.claude/agents/implementer.md', 'A comment states', '\n\nThe tool list', COMMENT_RULE],
+  batchTemplate: ['orchestrate/templates/02-batch.md', 'The orchestrator is the one other writer', ' An appended item',
+    "The orchestrator is the one other writer: the commit that applies a prose ASK's replacement text appends its item, already ticked, and an unticked item for each ask it leaves to the polish pass."],
+};
+test('each prose-polish rule reads exactly as pinned in every carrier', () => {
+  const pinned = (text, from, to) => collapse(section(text, from, to)).trim();
+  assert.equal(Object.keys(POLISH_RULES).length, 10, 'ten passages are pinned; the list may not shrink to a sample');
+  for (const [key, [file, from, to, expected]] of Object.entries(POLISH_RULES)) {
+    const text = read(file);
+    assert.equal(text.split(from).length - 1, 1, key + ': the anchor "' + from + '" must occur exactly once in ' + file);
+    assert.equal(pinned(text, from, to), expected, file + ' (' + key + '): the pinned passage changed; update POLISH_RULES only on purpose');
+    assert.notEqual(pinned(text.replace(from, from + ' Skip it when in a hurry.'), from, to), expected, key + ': a planted sentence must redden the pin');
+  }
+  // Each rule once per carrier, verbatim: a second, reworded copy elsewhere is a second rule.
+  for (const file of [PROMPTS, '.claude/agents/implementer.md']) assert.equal(collapse(read(file)).split(COMMENT_RULE).length - 1, 1, file + ': the comment rule once');
+  for (const file of ['orchestrate/references/protocol.md', PROMPTS, '.claude/agents/reviewer.md']) assert.equal(collapse(read(file)).split(SEVERITY).length - 1, 1, file + ': severity once');
+  assert.equal(collapse(read('orchestrate/references/protocol.md')).split(CLASSIFY).length - 1, 1, 'protocol.md publishes the classifier command once');
+});
+
+// The reversals, clause by clause through the undo sweep's negation-aware reader. Each family
+// owns a specimen no other catches; the planted prose below is written as a reversal would be.
+const POLISH_TRIES = String.raw`\b(?:polish(?:-phase)?|scoped re-review)\b`;
+// One list of the words that grant a second try, read before the polish and after its FIX FIRST
+// alike: a count word, or a re-run with no count at all.
+const AGAIN = String.raw`\b(?:second|2nd|another|two|again|twice|once more|one more|further|additional|extra|repeat(?:ed|s)?|re-?runs?|retr(?:y|ies|ied))\b`;
+const PLACE = String.raw`(?:\b(?:outside|beyond|past)\s+(?:the\s+|its\s+|this\s+)?(?:batch's\s+)?(?:fence|files?)\b|\bout-of-fence\b)`;
+const OUTSIDE = String.raw`(?:` + PLACE + String.raw`|\bNEEDS_FENCE\b)`;
+// NEEDS_FENCE is a route, and a list may name it beside ASK: only a verb between them makes one the other.
+const ROUTED = String.raw`\bNEEDS_FENCE\b[^.;:]*\b(?:is|are|becomes?|stays?|rides?\s+as|counts?\s+as|goes\s+as)\s+(?:an?\s+)?`;
+// A finding's lesser classes, and the backlog severities a residual could be filed under.
+const LESSER = String.raw`\b(?:ASKs?|nits?|non-blocking|advisory|low|medium|minor|cosmetic|trivial)\b`;
+// A word in any case, where a family matches its neighbours in one case only.
+const anyCase = word => word.replace(/[a-z]/gi, c => '[' + c.toUpperCase() + c.toLowerCase() + ']');
+const CONTRACT = String.raw`\b(?:channel payload|exported API|ARCHITECTURE|USER-GUIDE)\b`;
+const POLISH_REVERSALS = [
+  ['a second polish-phase FIX FIRST', new RegExp(AGAIN + String.raw`[^.;:]*` + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b|`
+    + POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b[^.;:]*` + AGAIN, 'i'), 'A SECOND polish-phase FIX FIRST discards the polish'],
+  ['the polish redone', /\bredo(?:es|ne|ing)?\b[^.;:]*\bpolish\b|\bpolish\b[^.;:]*\bredo(?:es|ne|ing)?\b/i, 'The implementer redoes the polish within test/doc/prose'],
+  ['the implementer sent back after a polish-phase FIX FIRST', new RegExp(POLISH_TRIES + String.raw`[^.;:]*\bFIX FIRST\b[^.;:]*\b(?:implementer|fix[- ]round)\b`, 'i'),
+    'After a polish-phase FIX FIRST the implementer reverts its production hunks'],
+  ['the offending hunks reverted', /\brevert\w*\s+(?:only\s+)?the\s+offending\b/i, 'Revert the offending production hunks and keep the rest of the polish'],
+  ['a fence location lowers a finding', new RegExp('(?<=' + PLACE + '[^.;:]*)' + LESSER + '|' + LESSER + '[^.;:]*' + PLACE + '|(?<=' + ROUTED + ')' + LESSER, 'i'),
+    "A violated criterion whose fix sits outside the batch's files is an ASK"],
+  ['a finding downgraded for its fence', new RegExp(String.raw`\b(?:downgrad|lower|demot|soften|reclass)\w*\b[^.;:]*(?:` + OUTSIDE + String.raw`|\bfence\b)`, 'i'),
+    'Downgrade the finding when its fix needs a file the fence does not hold'],
+  ['the fence sets the class', /\bfence\b[^.;:]*\b(?:decides|sets|determines|picks|lowers)\s+(?:the\s+|its\s+)?(?:class|severity)\b/i, 'The fence decides the class of a finding'],
+  ['contract prose as an ASK', new RegExp(String.raw`(?<=` + CONTRACT + String.raw`[^.;:]*)\b(?:is|are|stays?|becomes?|counts?\s+as|goes|go|rides?\s+as)\s+(?:an?\s+)?(?:ASKs?|nits?|non-blocking)\b|`
+    + String.raw`\btreat\w*\b[^.;:]*` + CONTRACT + String.raw`[^.;:]*\bas\s+(?:an?\s+)?(?:ASKs?|nits?)\b`, 'i'), 'A wrong exported API comment is an ASK'],
+  // The classifier's rule: only PROSE-ONLY exempts, and only the files it counts. The verdict
+  // words are matched in capitals; the prose-only a verdict is read as, in any case.
+  ['a CODE or UNKNOWN verdict read as prose-only', new RegExp(String.raw`\b(?:CODE|UNKNOWN)\b[^.;:]*(?:\b[Ee]xempts?\b|\b[Ss]kips?\b|\b[Ss]pares?\b|`
+    + String.raw`\bas\s+(?:a\s+)?` + anyCase('prose-only') + String.raw`\b|\b(?:no|without)\s+(?:a\s+)?(?:scoped\s+|fix-diff-only\s+)?re-review\b)`),
+    'A classifier UNKNOWN exempts the JavaScript files as PROSE-ONLY does'],
+  ['PROSE-ONLY exempting more than the files it counts', new RegExp(String.raw`\bPROSE-ONLY\b[^.;:]*\b(?:exempts?|spares?|skips?|clears?)\b[^.;:]*\b(?:whole|entire|all|every)\b|`
+    + String.raw`\b(?:whole|entire|all|every)\b[^.;:]*\b(?:exempt\w*|spared|skipped)\b[^.;:]*\bPROSE-ONLY\b`), 'A PROSE-ONLY verdict exempts the whole polish diff from the scoped re-review'],
+  // One strike, whoever fixes: no scoped re-review follows a polish-phase FIX FIRST.
+  ['a further scoped re-review after a polish-phase FIX FIRST', /\bFIX FIRST\b[^.;:]*\b(?:fresh|new|then an?|followed by an?)\s+scoped re-review\b/i,
+    'After a polish-phase FIX FIRST, then a fresh scoped re-review of the new diff'],
+  // The implementer's comment rule: a comment never describes how its neighbour behaves.
+  ['a comment that describes its neighbour', /\b(?:describ|explain|narrat|restat|summari[sz])\w*\s+how\s+(?:its|the|a|that|each)\s+neighbou?rs?\b/i,
+    'A comment may describe how its neighbour behaves'],
+];
+const polishReversals = text => clauses(unticked(text)).flatMap(c => POLISH_REVERSALS.filter(([, p]) => fires(p, c)).map(([name]) => name + ' — ' + c));
+test('no document reverses one strike, the classifier or comment rule, lets the fence lower a finding, or makes contract prose an ASK', () => {
+  assert.equal(new Set(POLISH_REVERSALS.map(r => r[0])).size, POLISH_REVERSALS.length);
+  assert.equal(POLISH_REVERSALS.length, 12, 'twelve families; one dropped would shrink the sweep to a sample');
+  for (const [name, pattern, specimen] of POLISH_REVERSALS) {
+    assert.deepEqual(POLISH_REVERSALS.filter(([, p]) => p.test(specimen)).map(r => r[0]), [name], name + ': its specimen must be caught by it alone');
+    assert.equal(polishReversals(specimen + '.').length, 1, name + ': the clause reader must report the specimen');
+  }
+  // The pre-B04 rule, as it stood, and reversals written as prose.
+  for (const planted of ['`FIX FIRST` → resume the implementer to revert the offending production hunks or redo the polish within test/doc/prose, then a fresh scoped re-review of the new diff.',
+    'A SECOND polish-phase `FIX FIRST` discards the polish.', 'After a polish-phase FIX FIRST, resume the implementer once more.',
+    'The polish is discarded only when the scoped re-review returns FIX FIRST twice.', 'A scoped re-review FIX FIRST sends the implementer back to fix the polish.',
+    'When the fix needs a file outside the fence, record the finding as an ASK.', 'An out-of-fence fix makes a criterion violation a nit.',
+    'Lower the severity of any finding routed to NEEDS_FENCE.', 'A finding sent down the NEEDS_FENCE route becomes an ASK.', 'The fence decides the severity of each finding.',
+    'USER-GUIDE claims ride as ASKs.', 'Treat ARCHITECTURE rows as ASKs.',
+    // Round 1's survivors: a verdict other than PROSE-ONLY exempting, the comment rule reversed, a second pass granted.
+    'A classifier UNKNOWN exempts the JavaScript files as PROSE-ONLY does.', 'A comment may describe how its neighbour behaves.',
+    'ASKs close as a polish pass, and a polish-phase FIX FIRST earns another polish pass.', 'A CODE verdict means no scoped re-review for those files.',
+    // Round 2's survivors: a verdict read as prose-only in lower case or integrating without a
+    // re-review, a second try through the orchestrator with or without a count word, PROSE-ONLY
+    // stretched over the whole diff, and a residual filed lower for its fence.
+    'A classifier UNKNOWN is treated as prose-only.', 'An UNKNOWN diff integrates without a re-review.',
+    "After a polish-phase FIX FIRST on prose, the orchestrator applies the reviewer's wording and runs one more scoped re-review.",
+    'After a polish-phase FIX FIRST, the orchestrator applies the wording and reruns the scoped re-review.',
+    'After a polish-phase FIX FIRST the orchestrator applies the wording, then a fresh scoped re-review of the new diff.',
+    'a PROSE-ONLY verdict exempts the whole polish diff from the scoped re-review.', "A residual whose fix sits outside the batch's files is filed in the backlog as low."]) {
+    assert.ok(polishReversals(planted).length >= 1, 'must be reported: ' + planted);
+  }
+  // The rules themselves, and their negations, are not reversals.
+  assert.deepEqual(polishReversals(Object.values(POLISH_RULES).map(entry => entry[3]).join(' ')
+    + ' Never lower a finding because its fix sits outside the fence. A NEEDS_FENCE finding is never an ASK.'), [], 'the rules are not their own reversals');
+  // Armed on real carriers: protocol.md with the old SECOND rule put back and with CODE or UNKNOWN
+  // exempting, reviewer.md with its severity rule reversed, implementer.md with its comment rule
+  // reversed. Each is reported once.
+  for (const [file, from, to] of [['orchestrate/references/protocol.md', ONE_STRIKE, 'A SECOND polish-phase `FIX FIRST` discards the polish'],
+    ['orchestrate/references/protocol.md', '`CODE` or `UNKNOWN` keeps the path rule for the whole diff', '`CODE` or `UNKNOWN` exempts them too'],
+    ['.claude/agents/reviewer.md', 'is still P0 or P1', 'is an ASK'], ['.claude/agents/implementer.md', 'it never describes how', 'it may describe how']]) {
+    const text = collapse(read(file)), reverted = text.replace(from, to);
+    assert.notEqual(reverted, text, file + ': the control must find its sentence');
+    assert.equal(polishReversals(reverted).length, 1, file + ': the reversal put back is reported');
+  }
+  const files = [...documents(), ...definitionListing()];
+  assert.ok(files.includes('orchestrate/references/protocol.md') && files.includes(PROMPTS) && files.includes('.claude/agents/reviewer.md') && files.includes('README.md'));
+  for (const file of files) assert.deepEqual(polishReversals(read(file)), [], file + ': reverses a prose-polish rule');
 });

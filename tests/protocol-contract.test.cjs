@@ -101,8 +101,8 @@ test('Recovery and capped-verdict tables live once, in protocol.md, under their 
 // item, table row and fenced line of it must still be carried: by the slimmed template, by
 // protocol.md verbatim (the template's placeholders read as protocol.md's generic spellings),
 // or — where protocol.md already stated the same rule in its own words — by the protocol.md
-// passage REWORDED names. RETIRED holds the two statements the move itself superseded, each
-// with the successor that must exist. Content, not absence: a sentence dropped from both
+// passage REWORDED names. RETIRED holds the statements superseded — two by the move itself, two
+// by B04's one-strike polish rule — each with the successor that must exist. Content, not absence: a sentence dropped from both
 // files is reported by name, and so is a map entry that no longer maps anything.
 // FOR A LATER BATCH EDITING protocol.md: this freezes the wording of every moved sentence.
 // Inserting a sentence beside one needs nothing here. Rewording one reddens this test until
@@ -206,10 +206,6 @@ const REWORDED = [
   ['an R-line after the SHIP … asks= line is polish-phase and never counts toward the cap — nor', 'protocol',
     ['an R-line after the SHIP … asks= line is polish-phase and never counts toward the cap). SHIP → the close completes',
       'nor does a FIX FIRST a scoped re-review returns: its bound is the polish-discard rule above, not the cap']],
-  ['its FIX FIRST → resume the implementer to revert', 'protocol',
-    ['FIX FIRST → resume the implementer to revert the offending production hunks or redo the polish within test/doc/prose (an ASK never licenses a production behavior change), then a fresh scoped re-review of the new diff']],
-  ['a SECOND polish-phase FIX FIRST discards the polish — write', 'protocol',
-    ["A SECOND polish-phase FIX FIRST discards the polish: write polish discarded: @<sha> (the pre-polish SHIP tip) into the row's Notes first — the marker §Recovery keys on, and the recorded authorization"]],
   ['it is the recorded authorization), then ONE revert commit', 'protocol',
     ['then ONE revert commit spanning @<sha>..HEAD (never a reset — no history rewriting']],
   ['polish never turns a batch ⛔', 'protocol', ['Polish never turns a batch ⛔']],
@@ -244,6 +240,14 @@ const RETIRED = [
   ['At scaffold time bake the resolved helper paths into this contract',
     'the helpers run from the pinned directory, never from a baked path',
     'protocol', ['<skill-dir> is the contract\'s pinned skill directory', 'node "<skill-dir>/tools/git-evidence.mjs" discovery --repo <repo>']],
+  // One strike (B04 of OS-20260925): a polish-phase FIX FIRST no longer resumes the implementer
+  // for a second scoped re-review; the first one discards the polish.
+  ['its FIX FIRST → resume the implementer to revert',
+    'one strike: a polish-phase FIX FIRST discards the polish instead of sending the implementer back',
+    'protocol', ['One strike: a polish-phase FIX FIRST discards the polish at once (an ASK never licenses a production behavior change)']],
+  ['a SECOND polish-phase FIX FIRST discards the polish — write',
+    'one strike: the first polish-phase FIX FIRST discards, not the second',
+    'protocol', ["write polish discarded: @<sha> (the pre-polish SHIP tip) into the row's Notes first — the marker §Recovery keys on, and the recorded authorization"]],
 ];
 function lostUnits(base, carriers) {
   const T = flat(carriers.template), P = flat(carriers.protocol);
@@ -632,8 +636,9 @@ test('the shipped-skill domain both rule sweeps use recurses and filters no file
     'orchestrate/tools/build-smoke-page.mjs', 'orchestrate/tools/check-fence.mjs',
     'orchestrate/tools/check-ledger.mjs', 'orchestrate/tools/git-evidence.mjs',
     'orchestrate/tools/ledger-parse.mjs', 'orchestrate/tools/mutate.mjs', 'orchestrate/tools/prompt.mjs',
-    'orchestrate/tools/run-at-ref.mjs', 'orchestrate/tools/smoke-inputs.mjs', 'orchestrate/tools/validate.mjs'];
-  assert.equal(NON_MARKDOWN.length, 11, 'the pinned non-Markdown domain must not shrink to a sample');
+    'orchestrate/tools/prose-only-diff.mjs', 'orchestrate/tools/run-at-ref.mjs', 'orchestrate/tools/smoke-inputs.mjs',
+    'orchestrate/tools/validate.mjs'];
+  assert.equal(NON_MARKDOWN.length, 12, 'the pinned non-Markdown domain must not shrink to a sample');
   assert.deepEqual(shipped.filter(file => !file.endsWith('.md')), NON_MARKDOWN,
     'the sweeps must reach every non-Markdown shipped file, not only *.md; add a new tool to this list deliberately');
   // Shape, never a pinned total: the skill grows. Only that it is bigger than either

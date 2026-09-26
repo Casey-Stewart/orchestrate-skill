@@ -24,11 +24,16 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
      marked `[<id>]` and get their own commit. Implementers tick these as they complete
      them (the reconcile table reads them) and append `- [ ] polish: <ask>` lines only
      when the orchestrator sends a polish pass. Nothing else in this file is theirs to
-     edit. An appended item may wrap; its header starts at column 0 and every
+     edit. The orchestrator is the one other writer: the commit that applies a prose
+     ASK's replacement text appends its item, already ticked, and an unticked item for
+     each ask it leaves to the polish pass. An appended item may wrap; its header
+     starts at column 0 and every
      continuation line is indented under it — an indented checkbox is a new item,
      not a continuation, and the fence rejects it — exactly as shown:
 - [ ] polish: Pin the boundary from both directions, so a later loosening of the
       grammar goes red instead of passing.
+- [x] polish: The comment above parseFlags says what it returns and names
+      check-fence.mjs as its caller, never how that caller behaves.
 -->
 
 ## Acceptance criteria

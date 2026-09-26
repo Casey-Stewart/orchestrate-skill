@@ -119,14 +119,14 @@ standalone tool the conductor runs, and the rules around it.
 
 ## Checklist
 
-- [ ] `orchestrate/tools/prose-only-diff.mjs` (read-only, one line, fails closed)
-- [ ] `tests/prose-only-diff.test.cjs`: prose-first corpus with owned cases, live control, CLI as published
-- [ ] Polish rules in `protocol.md`, `subagent-prompts.md`, `execution-models.md` (classifier, prose ASK text, one strike, contract prose)
-- [ ] Implementer comment rule in the skeleton and `.claude/agents/implementer.md`
-- [ ] [BL-044] severity-is-behaviour in `protocol.md` §Severity, the reviewer classes and `.claude/agents/reviewer.md`
-- [ ] Crash-safe prose ASK: the conductor's edit appends and ticks a `polish:` item; `02-batch.md` names the second writer; the conservative crash fallback stated
-- [ ] Registrations: `NON_MARKDOWN`, README tools tree
-- [ ] [BL-042] the test pointer names the test instead of a line range
+- [x] `orchestrate/tools/prose-only-diff.mjs` (read-only, one line, fails closed)
+- [x] `tests/prose-only-diff.test.cjs`: prose-first corpus with owned cases, live control, CLI as published
+- [x] Polish rules in `protocol.md`, `subagent-prompts.md`, `execution-models.md` (classifier, prose ASK text, one strike, contract prose)
+- [x] Implementer comment rule in the skeleton and `.claude/agents/implementer.md`
+- [x] [BL-044] severity-is-behaviour in `protocol.md` §Severity, the reviewer classes and `.claude/agents/reviewer.md`
+- [x] Crash-safe prose ASK: the conductor's edit appends and ticks a `polish:` item; `02-batch.md` names the second writer; the conservative crash fallback stated
+- [x] Registrations: `NON_MARKDOWN`, README tools tree
+- [x] [BL-042] the test pointer names the test instead of a line range
 
 ## Acceptance criteria
 
