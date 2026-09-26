@@ -1083,3 +1083,5 @@ such a name on any platform (`git mktree -z` accepts it here), so the property t
 real on Windows. Only one failing test was pasted; the totals were above the pasted tail. Step 2 (the
 BL-046 sign-off) is not yet given. B04 → ❌, fix-up pending: `fix/B04-c1-followup`; B01–B03 stay 🧪
 (not explicitly passed).
+
+- Fix-up: `fix/B04-c1-followup` cut @`e3af462` (worktree `/home/timetotilt/worktrees/os925/b04-c1`); implementer (default tier) spawned on a prompt filled by hand from the skill's fix-up skeleton: the failure report verbatim, B04's batch file, the diff since the Base SHA, B04's contract excerpts byte-for-byte from its rendered prompt, the probed facts (the refusal is Git for Windows' own; `mktree -z` accepts the name), and the failing-on-base shape this repair needs (a shim that refuses index paths holding a control character, as Git for Windows does).
