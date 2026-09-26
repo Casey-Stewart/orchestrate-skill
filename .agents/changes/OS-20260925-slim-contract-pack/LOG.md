@@ -1337,3 +1337,38 @@ BACKLOG).
   and run separately.
 - Rows stay 🧪; C1 row → 🧪 (issue 2); State AT-CHECKPOINT C1. The artifact is republished to the same URL
   and the branch pushed per the user's preauthorization (verdict log).
+
+## 2026-09-26 — C1 issue 2: pass
+
+The user's message, verbatim — two pasted blocks, the Step 1 totals of the README PowerShell recipe on the Windows
+laptop (build `c83ec7d`, branch tip `7baa10b`) and the process count asked for after it:
+
+```text
+ℹ tests 564
+ℹ suites 0
+ℹ pass 564
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 245295.1468
+```
+
+```text
+Count Name
+----- ----
+  101 svchost
+   36 chrome
+   21 msedgewebview2
+   13 claude
+   10 Code
+    9 dllhost
+    8 RuntimeBroker
+    7 WorkloadsSessionHost
+```
+
+Reading: Step 1 passes as its revision 2 states (564 tests, 0 fail, 0 skipped — the repaired fixture's Windows
+branch, B02's junction and file-link cases and the two Windows-only tests all ran); the hand-over said a pass closes
+the change out, and with steps 2–14 pre-verified on this build, C1 passes. No `git`, `conhost`, `sh` or `node` in
+the top eight after the run: the "40+ thousand" was volume, not survivors. The run took 245 s (earlier Windows runs
+of this suite, 13–20 minutes).
