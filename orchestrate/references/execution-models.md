@@ -114,7 +114,10 @@ batch or per wave by default.
    the integration branch; every path in plan fence ∪ recorded extensions ∪ own batch
    file) → failing-on-base for `fix` batches → ONE fresh read-only reviewer plus the
    contract's gate agents in parallel; don't wait for the wave's slowest batch. `SHIP`
-   with ASKs → polish pass (not a round); `FIX FIRST` → round 1 resumes the implementer;
+   with ASKs → polish pass (not a round; a prose ASK's replacement text the orchestrator
+   applies itself, `prose-only-diff.mjs` classifies the polish diff, and a polish-phase
+   `FIX FIRST` discards the polish at once — protocol.md §Severity and round
+   accounting); `FIX FIRST` → round 1 resumes the implementer;
    the second `FIX FIRST` → ⛔, and once the wave's other members are gated and
    integrated the session STOPs instead of opening the next wave; a user-authorized
    third round is a fresh implementer on the strong tier.
