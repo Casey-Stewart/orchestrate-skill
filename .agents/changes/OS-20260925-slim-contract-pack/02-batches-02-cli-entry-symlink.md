@@ -90,6 +90,10 @@ The fence: modify NOTHING else; need more? report `NEEDS_FENCE`.
 - [x] [BL-036] git child env scrubbed in `git-evidence.mjs` (shared with `mutate.mjs`), CLI test with a decoy `GIT_DIR`
 - [x] [BL-037] scrub inside `withDisposableCheckout`, API-level test
 - [x] [BL-041] the `--help` wording residuals and the sweep phrasings
+- [x] polish: `tests/cli-entry.test.cjs` — add the `-e` import with no trailing argument (no `process.argv[1]`), asserting a silent exit 0, so `isMain`'s `if (!entry) return false;` is reached (R1 reviewer 1, hunter 2)
+- [x] polish: `tests/git-contract.test.cjs` — the decoy "appears nowhere" check matches the JSON-escaped path, which on Windows is the only form stdout can hold (R1 reviewer 2)
+- [x] polish: `tests/mutate.test.cjs` — the BL-037 API test plants every name git lists, as the CLI test does, keeping the live `rev-parse HEAD` control on the GIT_DIR subset (R1 hunter 1)
+- [x] polish: `tests/cli-entry.test.cjs` — the refusal stays one line when the entry path holds a newline (off Windows; on Windows the platform is asserted, never skipped) (R1 hunter 3)
 
 ## Acceptance criteria
 

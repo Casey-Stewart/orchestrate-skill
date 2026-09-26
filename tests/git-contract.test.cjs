@@ -192,6 +192,10 @@ test('an inherited GIT_DIR or GIT_INDEX_FILE never points the git-evidence or ch
   const clean = Object.fromEntries(Object.entries(runs).map(([name, run]) => [name, run({})]));
   assert.deepEqual(Object.values(clean).map(r => r.status), [0, 0, 0], JSON.stringify(clean.fence.json));
   assert.equal(clean.fence.json.status, 'PASS');
+  // The decoy's path as JSON writes it (a Windows path's backslashes come out doubled): the only
+  // form in which stdout can hold it.
+  const needle = JSON.stringify(decoy.root).slice(1, -1);
+  assert.ok(JSON.stringify({ path: path.join(decoy.root, 'x') }).includes(needle), 'live control: the needle matches the path as JSON writes it');
   const gitOut = (env, args) => { const r = spawnSync('git', args, { cwd: repo.cwd, env: { ...repo.env, ...env }, encoding: 'utf8', windowsHide: true }); return [r.status, r.stdout]; };
   for (const [label, env, probe] of [
     ['GIT_DIR', { GIT_DIR: decoyGit }, ['for-each-ref', '--format=%(refname) %(objectname)']],
@@ -204,7 +208,7 @@ test('an inherited GIT_DIR or GIT_INDEX_FILE never points the git-evidence or ch
     for (const [name, run] of Object.entries(runs)) {
       const r = run(env);
       assert.deepEqual([r.status, r.json], [clean[name].status, clean[name].json], label + ': ' + name);
-      assert.ok(!r.stdout.includes(decoy.root), label + ': ' + name + ': the decoy appears nowhere');
+      assert.ok(!r.stdout.includes(needle), label + ': ' + name + ': the decoy appears nowhere');
     }
     // The exported API drops them from a caller's env the same way.
     assert.deepEqual((await api).discovery({ repo: repo.cwd, env: { ...repo.env, ...env } }), clean.discovery.json, label + ': the API');

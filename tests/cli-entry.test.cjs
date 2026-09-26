@@ -104,10 +104,22 @@ for (const name of GUARDED) {
     // It names the entry and the module (compared case-folded: a Windows drive letter may differ in case).
     const said = lines[0].toLowerCase();
     assert.ok(lines[0].startsWith(name + ': not run: ') && said.includes(own.toLowerCase()) && said.includes(path.join(TOOLS, name).toLowerCase()), lines[0]);
-    // The other side of the boundary: another file name, or an entry that names no file at all
-    // (node -e with an argument), is an import, and an import runs nothing and prints nothing.
+    // The other side of the boundary: another file name, an entry that names no file (node -e with
+    // an argument), or no entry at all (node -e alone) is an import, which runs and prints nothing.
     assert.deepEqual(run([other, '--help'], tmp), { status: 0, stdout: '', stderr: '' }, name + ' imported under another name');
     assert.deepEqual(run(['--input-type=module', '-e', `import ${JSON.stringify(url)};`, 'no-such-entry.mjs'], tmp), { status: 0, stdout: '', stderr: '' }, name + ' imported under an entry no file backs');
+    assert.deepEqual(run(['--input-type=module', '-e', `import ${JSON.stringify(url)};`], tmp), { status: 0, stdout: '', stderr: '' }, name + ' imported with no entry');
+    // The refusal stays one line whatever the entry's path holds. A newline is legal in a POSIX
+    // file name; Windows refuses one, which is asserted there rather than skipped.
+    const broken = path.join(tmp, 'line\nbreak');
+    let made = true;
+    try { fs.mkdirSync(broken); } catch (e) { assert.equal(process.platform, 'win32', 'a directory named with a newline failed off Windows: ' + e.code); made = false; }
+    if (made) {
+      fs.writeFileSync(path.join(broken, name), `import ${JSON.stringify(url)};\n`);
+      const odd = run([path.join(broken, name), '--help'], tmp), oddLines = plain(odd.stderr).split('\n');
+      assert.deepEqual([odd.status, odd.stdout, oddLines.slice(1)], [2, '', ['']], name + ': one line from a path holding a newline: ' + JSON.stringify(odd.stderr));
+      assert.ok(oddLines[0].startsWith(name + ': not run: ') && oddLines[0].includes('line?break'), oddLines[0]);
+    }
   });
 }
 

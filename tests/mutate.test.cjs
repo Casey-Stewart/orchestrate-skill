@@ -662,19 +662,26 @@ test("git's repository variables in the caller's environment — a GIT_DIR, a GI
 
 // The exported API drops them itself, for a caller that never scrubbed its process: the ref lookup
 // names the repository's commit and every validate step runs without them. The caller's
-// process.env keeps them. The decoy has one commit, so HEAD~1 names nothing there.
-test("a direct caller of withDisposableCheckout, mutate() or runAtRef() with a decoy GIT_DIR and GIT_INDEX_FILE gets lookups and validate steps that never see them, and keeps its own process.env", async t => {
+// process.env keeps them. The decoy has one commit, so HEAD~1 names nothing there. Every name git
+// lists is planted, not only the two git-evidence.mjs's probes drop themselves: the config ones
+// (malformed here, so any git that sees one fails) are this layer's alone to drop.
+test("a direct caller of withDisposableCheckout, mutate() or runAtRef() with every variable git lists planted — a decoy GIT_DIR and GIT_INDEX_FILE among them — gets lookups, a clone and validate steps that never see them, and keeps its own process.env", async t => {
   const fx = fixture(t), decoy = makeRepo(t), decoyGit = path.join(decoy.cwd, '.git');
-  const plant = { GIT_DIR: decoyGit, GIT_INDEX_FILE: path.join(decoyGit, 'index') };
   const names = gitListed(), spec = { steps: [...specOf().steps, whereStep(names)] };
+  const plant = Object.fromEntries(names.map(name => [name, 'planted']));
+  Object.assign(plant, { GIT_DIR: decoyGit, GIT_INDEX_FILE: path.join(decoyGit, 'index'), GIT_WORK_TREE: decoy.cwd, GIT_COMMON_DIR: decoyGit, GIT_OBJECT_DIRECTORY: path.join(decoyGit, 'objects') });
   const { withDisposableCheckout, mutate } = await api(), { runAtRef } = await atRefApi();
   const tmp = fs.mkdtempSync(path.join(fx.repo.root, 'tmp-')), before = state(fx.repo);
   const atLog = path.join(fx.work, 'api-at.log'), mutateLog = path.join(fx.work, 'api-mutate.log');
   await isolated(fx, () => withEnv(plant, async () => {
     const caller = { ...process.env };
-    // Live control: git in the caller's environment reads the decoy.
-    const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: fx.repo.cwd, encoding: 'utf8', windowsHide: true });
-    assert.deepEqual([head.status, head.stdout.trim()], [0, decoy.base], 'the plant is live');
+    // Live controls: git given the planted GIT_DIR alone reads the decoy, and git given every plant
+    // cannot run at all.
+    const only = keep => Object.fromEntries(Object.entries(process.env).filter(([key]) => keep.includes(key) || !names.includes(key.toUpperCase())));
+    const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: fx.repo.cwd, env: only(['GIT_DIR']), encoding: 'utf8', windowsHide: true });
+    assert.deepEqual([head.status, head.stdout.trim()], [0, decoy.base], 'the GIT_DIR plant is live');
+    const every = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: fx.repo.cwd, encoding: 'utf8', windowsHide: true });
+    assert.notEqual(every.status, 0, 'the config plants are live: ' + every.stdout);
     const seen = await withDisposableCheckout(fx.repo.cwd, 'HEAD~1', ({ sha, env }) => ({ sha, seen: Object.keys(env).filter(key => names.includes(key.toUpperCase())) }), { tmpRoot: tmp });
     assert.deepEqual(seen, { sha: fx.red, seen: [] }, 'the lookup names the repository\'s commit, and fn is handed none of them');
     assert.deepEqual(await runAtRef({ repo: fx.repo.cwd, ref: 'HEAD~1', validate: spec, logPath: atLog, tmpRoot: tmp }),
