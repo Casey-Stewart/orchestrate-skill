@@ -57,6 +57,7 @@ Issue 001, 2026-09-26, build `f770be1` — `evidence/C1/inputs/issue-001/`, gene
 |------|------------|---------|------------|
 | 2026-09-26 | B04 | fix again | "Yup, run it again. Fresh implementer, I moved this session up to max as well to help." |
 | 2026-09-26 | B04 | ship with the residual | "As long as the residual isn't a fundamentally breaking bug that sounds fine." |
+| 2026-09-26 | C1 | push authorized — `chore/slim-contract-pack-ledger` to `origin`, for the Windows step | "Yes push so I can test" |
 
 ## Item → batch coverage audit
 
