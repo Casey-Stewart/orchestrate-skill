@@ -127,6 +127,13 @@ standalone tool the conductor runs, and the rules around it.
 - [x] Crash-safe prose ASK: the conductor's edit appends and ticks a `polish:` item; `02-batch.md` names the second writer; the conservative crash fallback stated
 - [x] Registrations: `NON_MARKDOWN`, README tools tree
 - [x] [BL-042] the test pointer names the test instead of a line range
+- [x] polish: The line-break fixture asserts on the domain once c1 exists: no `git ls-files -z`
+      entry and no name under the work tree holds a code point below U+0020, with a live control
+      that reports names staged from stdin and written to the work tree; the shim keeps only the
+      update-index refusal C1 saw, and the comment says only what these prove, Git for Windows'
+      mktree acceptance marked expected, pending a Windows run.
+- [x] polish: A bare `// skipcq` joins DIRECTIVE_COMMENTS (its pin 46 → 47), and the BL-046 CLI
+      test gains the row `a bare skipcq appended` (CODE).
 
 ## Acceptance criteria
 
